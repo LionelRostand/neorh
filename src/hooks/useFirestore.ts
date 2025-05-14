@@ -10,7 +10,11 @@ import {
   deleteDoc, 
   query, 
   where, 
-  orderBy
+  orderBy,
+  DocumentData,
+  CollectionReference,
+  Query,
+  QueryConstraint
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "@/components/ui/use-toast";
@@ -19,12 +23,17 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
+  // Helper to get collection with correct typing
+  const getCollection = () => {
+    return collection(db, collectionName) as CollectionReference<T>;
+  };
+
   // Récupérer tous les documents d'une collection
   const getAll = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const querySnapshot = await getDocs(collection(db, collectionName));
+      const querySnapshot = await getDocs(getCollection());
       const data = querySnapshot.docs.map(doc => ({ 
         id: doc.id, 
         ...doc.data() 
@@ -77,7 +86,8 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
     setIsLoading(true);
     setError(null);
     try {
-      const docRef = await addDoc(collection(db, collectionName), data);
+      const collectionRef = getCollection();
+      const docRef = await addDoc(collectionRef, data as DocumentData);
       toast({
         title: "Succès",
         description: "Document ajouté avec succès",
@@ -103,7 +113,7 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
     setError(null);
     try {
       const docRef = doc(db, collectionName, id);
-      await updateDoc(docRef, data);
+      await updateDoc(docRef, data as DocumentData);
       toast({
         title: "Succès",
         description: "Document mis à jour avec succès",
@@ -157,22 +167,25 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
     setIsLoading(true);
     setError(null);
     try {
-      let q = collection(db, collectionName);
+      const collectionRef = getCollection();
       
-      // Application des filtres
-      if (filters.length > 0) {
-        const conditions = filters.map(filter => 
-          where(filter.field, filter.operator, filter.value)
-        );
-        
-        // Créez une requête avec tous les filtres
-        q = query(q, ...conditions);
-      }
+      // Création des contraintes de requête
+      const constraints: QueryConstraint[] = [];
       
-      // Application du tri si spécifié
+      // Ajout des filtres
+      filters.forEach(filter => {
+        constraints.push(where(filter.field, filter.operator, filter.value));
+      });
+      
+      // Ajout du tri si spécifié
       if (sortField) {
-        q = query(q, orderBy(sortField, sortDirection || "asc"));
+        constraints.push(orderBy(sortField, sortDirection || "asc"));
       }
+      
+      // Construction de la requête
+      const q = constraints.length > 0 
+        ? query(collectionRef, ...constraints)
+        : query(collectionRef);
       
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs.map(doc => ({ 
