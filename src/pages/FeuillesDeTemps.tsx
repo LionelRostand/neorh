@@ -18,7 +18,8 @@ const FeuillesDeTemps = () => {
   useEffect(() => {
     const fetchTimesheets = async () => {
       try {
-        const data = await timesheetCollection.getAll();
+        const result = await timesheetCollection.getAll();
+        const data = result.docs; // Extract docs array from QueryResult
         
         if (data.length === 0) {
           // Si aucune feuille de temps n'existe encore, utilisons des données fictives

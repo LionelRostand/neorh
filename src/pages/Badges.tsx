@@ -30,7 +30,8 @@ const Badges = () => {
   useEffect(() => {
     const fetchBadges = async () => {
       try {
-        const data = await badgesCollection.getAll();
+        const result = await badgesCollection.getAll();
+        const data = result.docs; // Extract docs array from QueryResult
         
         if (data.length === 0) {
           // Si aucun badge n'existe encore, utilisons des données fictives

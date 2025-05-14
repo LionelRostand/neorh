@@ -39,7 +39,7 @@ const Index = () => {
         
         // Calcul des statistiques de base (données fictives pour l'instant)
         setStats({
-          totalEmployees: employees.length || 126,
+          totalEmployees: employees.docs.length || 126,
           absencesThisMonth: 24,
           hoursWorked: 1845,
           averageSalary: 3256
