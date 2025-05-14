@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -137,7 +136,7 @@ const Sidebar = () => {
       isOpen ? "w-64" : "w-16"
     )}>
       <div className="p-4 flex justify-between items-center">
-        {isOpen && <h2 className="font-bold text-xl text-sidebar-foreground">HRPanel</h2>}
+        {isOpen && <h2 className="font-bold text-xl text-sidebar-foreground">NEORH</h2>}
         <button 
           onClick={() => setIsOpen(!isOpen)} 
           className="text-sidebar-foreground hover:bg-sidebar-accent rounded-md p-1"
