@@ -9,24 +9,37 @@ export const useEmployeeData = () => {
   const [error, setError] = useState<Error | null>(null);
   const [rawEmployees, setRawEmployees] = useState<any[]>([]);
   
-  // Utiliser le hook useCollection pour accéder à la collection hr_employees
-  const { getAll, isLoading: isFirestoreLoading, error: firestoreError } = useCollection();
+  // Utiliser le hook useCollection avec une collection spécifique
+  // pour éviter les changements de collection en boucle
+  const { getAll, isLoading: isFirestoreLoading, error: firestoreError } = useCollection<'hr_employees'>('hr_employees');
 
   useEffect(() => {
+    let isMounted = true;
+    
     const loadEmployeesFromFirestore = async () => {
       try {
         setIsLoading(true);
         const firestoreEmployees = await getAll();
-        setRawEmployees(firestoreEmployees);
-        setIsLoading(false);
+        
+        if (isMounted) {
+          setRawEmployees(firestoreEmployees);
+          setIsLoading(false);
+        }
       } catch (err) {
         console.error("Erreur lors du chargement des employés depuis Firestore:", err);
-        setError(err instanceof Error ? err : new Error('Une erreur est survenue'));
-        setIsLoading(false);
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error('Une erreur est survenue'));
+          setIsLoading(false);
+        }
       }
     };
 
     loadEmployeesFromFirestore();
+    
+    // Nettoyage pour éviter les mises à jour sur un composant démonté
+    return () => {
+      isMounted = false;
+    };
   }, [getAll]);
 
   // Transform firestore data to match the Employee type

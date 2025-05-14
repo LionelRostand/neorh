@@ -1,20 +1,15 @@
 
-import { useLocation } from 'react-router-dom';
 import { useFirestore } from '@/hooks/useFirestore';
-import { ROUTE_TO_COLLECTION_MAP, CollectionTypes } from '@/lib/constants';
+import { CollectionTypes } from '@/lib/constants';
 
 /**
- * Hook qui retourne la collection Firestore correspondant à la route actuelle
+ * Hook qui retourne la collection Firestore spécifiée
+ * @param collectionName Nom de la collection à utiliser (optionnel)
  */
-export function useCollection<T extends keyof CollectionTypes = any>() {
-  const location = useLocation();
-  const currentPath = location.pathname;
-  
-  // Obtenir le nom de la collection correspondant à la route actuelle
-  const collectionName = ROUTE_TO_COLLECTION_MAP[currentPath as keyof typeof ROUTE_TO_COLLECTION_MAP] || '';
-  
-  // Utiliser useFirestore avec la collection déterminée
-  const collection = useFirestore<CollectionTypes[T]>(collectionName);
+export function useCollection<T extends keyof CollectionTypes = any>(collectionName?: string) {
+  // Si un nom de collection est fourni, l'utiliser directement
+  // sinon utiliser une collection vide pour éviter les erreurs
+  const collection = useFirestore<CollectionTypes[T]>(collectionName || '');
   
   return {
     ...collection,

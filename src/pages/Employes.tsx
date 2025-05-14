@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import { 
   Card, 
   CardContent
@@ -19,26 +20,38 @@ const Employes = () => {
   const [activeTab, setActiveTab] = useState("liste");
   const { employees, isLoading, error, departmentStats, statusStats } = useEmployeeData();
   
-  if (error) {
-    toast({
-      title: "Erreur de chargement",
-      description: "Impossible de charger les données des employés depuis Firebase",
-      variant: "destructive"
-    });
-  }
+  // Afficher une erreur seulement si elle existe (éviter les toasts répétitifs)
+  React.useEffect(() => {
+    if (error) {
+      toast({
+        title: "Erreur de chargement",
+        description: "Impossible de charger les données des employés depuis Firebase",
+        variant: "destructive"
+      });
+    }
+  }, [error]);
 
-  // Calculer les statistiques pour les cartes
-  const totalEmployees = employees?.length || 0;
-  const activeEmployees = employees?.filter(emp => emp.status === 'active')?.length || 0;
-  const onLeaveEmployees = employees?.filter(emp => emp.status === 'onLeave')?.length || 0;
-  const inactiveEmployees = employees?.filter(emp => emp.status === 'inactive')?.length || 0;
+  // Calculer les statistiques pour les cartes avec useMemo pour éviter les calculs répétitifs
+  const employeeStats = useMemo(() => {
+    const totalEmployees = employees?.length || 0;
+    const activeEmployees = employees?.filter(emp => emp.status === 'active')?.length || 0;
+    const onLeaveEmployees = employees?.filter(emp => emp.status === 'onLeave')?.length || 0;
+    const inactiveEmployees = employees?.filter(emp => emp.status === 'inactive')?.length || 0;
+    
+    return {
+      totalEmployees,
+      activeEmployees,
+      onLeaveEmployees,
+      inactiveEmployees
+    };
+  }, [employees]);
 
   return (
     <div className="p-4 md:p-6">
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold">Gestion des Employés</h1>
         <p className="text-muted-foreground">
-          {isLoading ? "Chargement des données..." : `${totalEmployees} employés trouvés dans la base Firebase`}
+          {isLoading ? "Chargement des données..." : `${employeeStats.totalEmployees} employés trouvés dans la base Firebase`}
         </p>
       </div>
 
@@ -51,7 +64,7 @@ const Employes = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Total des employés</p>
-              <p className="text-3xl font-bold">{totalEmployees}</p>
+              <p className="text-3xl font-bold">{employeeStats.totalEmployees}</p>
             </div>
           </CardContent>
         </Card>
@@ -63,7 +76,7 @@ const Employes = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">En poste</p>
-              <p className="text-3xl font-bold">{activeEmployees}</p>
+              <p className="text-3xl font-bold">{employeeStats.activeEmployees}</p>
             </div>
           </CardContent>
         </Card>
@@ -75,7 +88,7 @@ const Employes = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">En congés</p>
-              <p className="text-3xl font-bold">{onLeaveEmployees}</p>
+              <p className="text-3xl font-bold">{employeeStats.onLeaveEmployees}</p>
             </div>
           </CardContent>
         </Card>
@@ -87,7 +100,7 @@ const Employes = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Inactifs</p>
-              <p className="text-3xl font-bold">{inactiveEmployees}</p>
+              <p className="text-3xl font-bold">{employeeStats.inactiveEmployees}</p>
             </div>
           </CardContent>
         </Card>
@@ -123,6 +136,7 @@ const Employes = () => {
               />
             </TabsContent>
             
+            {/* Autres onglets */}
             <TabsContent value="ajouter" className="m-0">
               <div className="text-center p-8">
                 <p>Le formulaire d'ajout d'employé sera implémenté ici</p>
