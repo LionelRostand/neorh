@@ -107,6 +107,13 @@ const Employes = () => {
       <Card className="mb-6">
         <CardContent className="p-0">
           <Tabs defaultValue="liste" value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-1 md:grid-cols-4 p-0">
+              <TabsTrigger value="liste">Liste</TabsTrigger>
+              <TabsTrigger value="ajouter">Ajouter</TabsTrigger>
+              <TabsTrigger value="import">Importer</TabsTrigger>
+              <TabsTrigger value="export">Exporter</TabsTrigger>
+            </TabsList>
+            
             <TabsContent value="liste" className="m-0">
               <EmployeesProfiles 
                 employees={employees} 

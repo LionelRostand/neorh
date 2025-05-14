@@ -1,47 +1,74 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Employee } from '@/types/employee';
-import { MockEmployee } from '@/data/mockEmployees';
-import { fetchEmployees } from '@/services/employeeService';
-import { transformEmployeesData } from '@/utils/employeeTransformUtils';
-import { calculateDepartmentStats, calculateStatusStats } from '@/utils/employeeStatsUtils';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { toast } from '@/components/ui/use-toast';
 
 export const useEmployeeData = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [rawEmployees, setRawEmployees] = useState<MockEmployee[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [departmentStats, setDepartmentStats] = useState<Record<string, number>>({});
+  const [statusStats, setStatusStats] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    const loadEmployees = async () => {
+    const fetchEmployees = async () => {
       try {
-        const data = await fetchEmployees();
-        setRawEmployees(data);
+        const employeesCollection = collection(db, 'hr_employees');
+        const employeesSnapshot = await getDocs(employeesCollection);
+        
+        const employeesData = employeesSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
+            position: data.position || '',
+            department: data.department || '',
+            email: data.email || '',
+            phone: data.phone || '',
+            photoUrl: data.photoUrl || '',
+            startDate: data.hireDate || '',
+            status: data.status || 'inactive'
+          } as Employee;
+        });
+        
+        setEmployees(employeesData);
+
+        // Calculate department statistics
+        const deptStats: Record<string, number> = {};
+        employeesData.forEach(emp => {
+          if (emp.department) {
+            deptStats[emp.department] = (deptStats[emp.department] || 0) + 1;
+          }
+        });
+        setDepartmentStats(deptStats);
+
+        // Calculate status statistics
+        const statStats: Record<string, number> = {};
+        employeesData.forEach(emp => {
+          if (emp.status) {
+            statStats[emp.status] = (statStats[emp.status] || 0) + 1;
+          }
+        });
+        setStatusStats(statStats);
+        
         setIsLoading(false);
       } catch (err) {
-        setError(err instanceof Error ? err : new Error('Une erreur est survenue'));
+        const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
+        setError(err instanceof Error ? err : new Error(errorMessage));
         setIsLoading(false);
+        
+        toast({
+          title: "Erreur de chargement",
+          description: `Impossible de charger les données des employés: ${errorMessage}`,
+          variant: "destructive"
+        });
       }
     };
 
-    loadEmployees();
+    fetchEmployees();
   }, []);
-
-  // Transform mock data to match the Employee type
-  const employees = useMemo(() => 
-    transformEmployeesData(rawEmployees), 
-    [rawEmployees]
-  );
-
-  // Calculate statistics
-  const departmentStats = useMemo(() => 
-    calculateDepartmentStats(rawEmployees),
-    [rawEmployees]
-  );
-
-  const statusStats = useMemo(() => 
-    calculateStatusStats(rawEmployees),
-    [rawEmployees]
-  );
 
   return {
     employees,
