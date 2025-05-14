@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   CardContent
@@ -13,13 +13,15 @@ import { Button } from '@/components/ui/button';
 const Employes = () => {
   const { employees, isLoading, error, departmentStats, statusStats } = useEmployeeData();
   
-  if (error) {
-    toast({
-      title: "Erreur de chargement",
-      description: "Impossible de charger les données des employés",
-      variant: "destructive"
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Erreur de chargement",
+        description: "Impossible de charger les données des employés",
+        variant: "destructive"
+      });
+    }
+  }, [error]);
 
   // Calculer les statistiques pour les cartes
   const totalEmployees = employees?.length || 0;
