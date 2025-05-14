@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { Employee } from '@/types/employee';
 import { useCollection } from '@/hooks/useCollection';
@@ -25,7 +24,7 @@ export const useEmployeeData = () => {
           department: emp.department,
           email: emp.email,
           phone: emp.phone || '',
-          photoUrl: emp.avatarUrl || '', // Making sure that this is correct per the Firestore data
+          photoUrl: emp.photoUrl || emp.avatarUrl || '', // Try photoUrl first, then fallback to avatarUrl if exists
           managerId: emp.managerId,
           startDate: emp.hireDate,
           status: emp.status
