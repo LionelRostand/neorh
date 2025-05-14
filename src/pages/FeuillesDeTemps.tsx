@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, FileText, Plus, Edit, Check, X } from "lucide-react";
 import { useCollection } from "@/hooks/useCollection";
 import { Timesheet } from "@/lib/constants";
+import TimesheetStatusCards from "@/components/timesheet/TimesheetStatusCards";
+import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
 
 const FeuillesDeTemps = () => {
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
@@ -60,6 +62,7 @@ const FeuillesDeTemps = () => {
         }
       } catch (error) {
         console.error("Erreur lors du chargement des feuilles de temps:", error);
+        showErrorToast("Impossible de charger les feuilles de temps");
       } finally {
         setLoading(false);
       }
@@ -70,6 +73,7 @@ const FeuillesDeTemps = () => {
 
   const handleAddTimesheet = () => {
     // Cette fonction sera implémentée plus tard
+    showSuccessToast("Cette fonctionnalité sera bientôt disponible");
   };
 
   const getStatusBadge = (status: string) => {
@@ -85,6 +89,14 @@ const FeuillesDeTemps = () => {
       default:
         return <Badge>Inconnu</Badge>;
     }
+  };
+
+  // Comptez les feuilles de temps par statut
+  const countByStatus = {
+    draft: timesheets.filter(t => t.status === 'draft').length,
+    submitted: timesheets.filter(t => t.status === 'submitted').length,
+    approved: timesheets.filter(t => t.status === 'approved').length,
+    rejected: timesheets.filter(t => t.status === 'rejected').length
   };
 
   return (
@@ -105,6 +117,13 @@ const FeuillesDeTemps = () => {
           </Button>
         </div>
       </div>
+
+      <TimesheetStatusCards 
+        drafts={countByStatus.draft}
+        submitted={countByStatus.submitted}
+        approved={countByStatus.approved}
+        rejected={countByStatus.rejected}
+      />
 
       <Card>
         <CardHeader>
