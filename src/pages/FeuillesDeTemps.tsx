@@ -55,7 +55,7 @@ const FeuillesDeTemps = () => {
             }
           ]);
         } else {
-          setTimesheets(data);
+          setTimesheets(data as Timesheet[]);
         }
       } catch (error) {
         console.error("Erreur lors du chargement des feuilles de temps:", error);

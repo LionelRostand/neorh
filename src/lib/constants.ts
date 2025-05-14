@@ -46,28 +46,29 @@ export const ROUTE_TO_COLLECTION_MAP = {
   '/parametres': FIREBASE_COLLECTIONS.HR.SETTINGS
 };
 
-// Types pour chaque collection
-export interface CollectionTypes {
-  [FIREBASE_COLLECTIONS.HR.ABSENCE_REQUESTS]: AbsenceRequest;
-  [FIREBASE_COLLECTIONS.HR.ALERTS]: Alert;
-  [FIREBASE_COLLECTIONS.HR.ATTENDANCE]: Attendance;
-  [FIREBASE_COLLECTIONS.HR.BADGES]: Badge;
-  [FIREBASE_COLLECTIONS.HR.CONTRACTS]: Contract;
-  [FIREBASE_COLLECTIONS.HR.DEPARTMENTS]: Department;
-  [FIREBASE_COLLECTIONS.HR.DOCUMENTS]: Document;
-  [FIREBASE_COLLECTIONS.HR.EMPLOYEES]: Employee;
-  [FIREBASE_COLLECTIONS.HR.EVALUATIONS]: Evaluation;
-  [FIREBASE_COLLECTIONS.HR.LEAVE_REQUESTS]: LeaveRequest;
-  [FIREBASE_COLLECTIONS.HR.LEAVES]: Leave;
-  [FIREBASE_COLLECTIONS.HR.MANAGERS]: Manager;
-  [FIREBASE_COLLECTIONS.HR.PAYSLIPS]: Payslip;
-  [FIREBASE_COLLECTIONS.HR.PERMISSIONS]: Permission;
-  [FIREBASE_COLLECTIONS.HR.RECRUITMENT]: Recruitment;
-  [FIREBASE_COLLECTIONS.HR.SALARIES]: Salary;
-  [FIREBASE_COLLECTIONS.HR.SETTINGS]: Setting;
-  [FIREBASE_COLLECTIONS.HR.TIMESHEET]: Timesheet;
-  [FIREBASE_COLLECTIONS.HR.TRAININGS]: Training;
-}
+// Types pour les collections
+// Utiliser un type pour éviter l'erreur de computed property
+export type CollectionTypes = {
+  'hr_absence_requests': AbsenceRequest;
+  'hr_alerts': Alert;
+  'hr_attendance': Attendance;
+  'hr_badges': Badge;
+  'hr_contracts': Contract;
+  'hr_departments': Department;
+  'hr_documents': Document;
+  'hr_employees': Employee;
+  'hr_evaluations': Evaluation;
+  'hr_leave_requests': LeaveRequest;
+  'hr_leaves': Leave;
+  'hr_managers': Manager;
+  'hr_payslips': Payslip;
+  'hr_permissions': Permission;
+  'hr_recruitment': Recruitment;
+  'hr_salaries': Salary;
+  'hr_settings': Setting;
+  'hr_timesheet': Timesheet;
+  'hr_trainings': Training;
+};
 
 // Interfaces pour les différents types de documents
 export interface Employee {
@@ -139,4 +140,3 @@ export interface Recruitment { id?: string; position: string; status: string; op
 export interface Salary { id?: string; employeeId: string; amount: number; effectiveDate: string; }
 export interface Setting { id?: string; key: string; value: string; }
 export interface Training { id?: string; title: string; description: string; startDate: string; endDate: string; }
-

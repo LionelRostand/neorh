@@ -6,7 +6,7 @@ import { ROUTE_TO_COLLECTION_MAP, CollectionTypes } from '@/lib/constants';
 /**
  * Hook qui retourne la collection Firestore correspondant à la route actuelle
  */
-export function useCollection<T extends keyof CollectionTypes = any>() {
+export function useCollection<T extends keyof CollectionTypes>() {
   const location = useLocation();
   const currentPath = location.pathname;
   
@@ -14,11 +14,10 @@ export function useCollection<T extends keyof CollectionTypes = any>() {
   const collectionName = ROUTE_TO_COLLECTION_MAP[currentPath as keyof typeof ROUTE_TO_COLLECTION_MAP] || '';
   
   // Utiliser useFirestore avec la collection déterminée
-  const collection = useFirestore<CollectionTypes[T]>(collectionName);
+  const collection = useFirestore<CollectionTypes[T]>(collectionName as any);
   
   return {
     ...collection,
     collectionName
   };
 }
-

@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { Badge as BadgeUI } from "@/components/ui/badge";
 import { Plus, FileText, Edit, Trash } from "lucide-react";
 import { useCollection } from "@/hooks/useCollection";
-import { Badge as BadgeType } from "@/lib/constants";
+import { Badge } from "@/lib/constants";
 
 // Types pour les badges
 interface BadgeData {
@@ -20,7 +21,7 @@ interface BadgeData {
 }
 
 const Badges = () => {
-  const [badges, setBadges] = useState<BadgeType[]>([]);
+  const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Utilisation de notre hook pour accéder à la collection des badges
@@ -66,7 +67,7 @@ const Badges = () => {
             }
           ]);
         } else {
-          setBadges(data);
+          setBadges(data as Badge[]);
         }
       } catch (error) {
         console.error("Erreur lors du chargement des badges:", error);
@@ -85,13 +86,13 @@ const Badges = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="bg-green-500">Actif</Badge>;
+        return <BadgeUI className="bg-green-500">Actif</BadgeUI>;
       case 'inactive':
-        return <Badge className="bg-gray-500">Inactif</Badge>;
+        return <BadgeUI className="bg-gray-500">Inactif</BadgeUI>;
       case 'lost':
-        return <Badge className="bg-red-500">Perdu</Badge>;
+        return <BadgeUI className="bg-red-500">Perdu</BadgeUI>;
       default:
-        return <Badge>Inconnu</Badge>;
+        return <BadgeUI>Inconnu</BadgeUI>;
     }
   };
 
