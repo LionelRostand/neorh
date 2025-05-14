@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Employes from "./pages/Employes";
 import Badges from "./pages/Badges";
 import Hierarchie from "./pages/Hierarchie";
+import FeuillesDeTemps from "./pages/FeuillesDeTemps";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/employes" element={<Layout><Employes /></Layout>} />
           <Route path="/badges" element={<Layout><Badges /></Layout>} />
           <Route path="/hierarchie" element={<Layout><Hierarchie /></Layout>} />
+          <Route path="/feuilles-de-temps" element={<Layout><FeuillesDeTemps /></Layout>} />
           {/* D'autres routes pour les sections RH seront ajoutées ici */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>

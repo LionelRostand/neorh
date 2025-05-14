@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus, FileText, Edit, Trash } from "lucide-react";
-import { useFirestore } from "@/hooks/useFirestore";
+import { useCollection } from "@/hooks/useCollection";
+import { Badge as BadgeType } from "@/lib/constants";
 
 // Types pour les badges
 interface BadgeData {
@@ -20,55 +20,59 @@ interface BadgeData {
 }
 
 const Badges = () => {
-  const [badges, setBadges] = useState<BadgeData[]>([]);
+  const [badges, setBadges] = useState<BadgeType[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Utilisation de notre hook pour accéder à la collection des badges
-  const badgesCollection = useFirestore<BadgeData>('badges');
+  const badgesCollection = useCollection<'hr_badges'>();
 
   useEffect(() => {
     const fetchBadges = async () => {
-      const data = await badgesCollection.getAll();
-      
-      if (data.length === 0) {
-        // Si aucun badge n'existe encore, utilisons des données fictives
-        setBadges([
-          {
-            id: "1",
-            number: "B2023-001",
-            employeeId: "1",
-            employeeName: "Thomas Dubois",
-            type: "Standard",
-            status: "active",
-            issueDate: "15/03/2021",
-            expiryDate: "15/03/2023"
-          },
-          {
-            id: "2",
-            number: "B2023-002",
-            employeeId: "2",
-            employeeName: "Sophie Martin",
-            type: "Admin",
-            status: "active",
-            issueDate: "02/05/2022",
-            expiryDate: "02/05/2024"
-          },
-          {
-            id: "3",
-            number: "B2023-003",
-            employeeId: "3",
-            employeeName: "Jean Bernard",
-            type: "Standard",
-            status: "inactive",
-            issueDate: "10/11/2019",
-            expiryDate: "10/11/2021"
-          }
-        ]);
-      } else {
-        setBadges(data);
+      try {
+        const data = await badgesCollection.getAll();
+        
+        if (data.length === 0) {
+          // Si aucun badge n'existe encore, utilisons des données fictives
+          setBadges([
+            {
+              id: "1",
+              number: "B2023-001",
+              employeeId: "1",
+              employeeName: "Thomas Dubois",
+              type: "Standard",
+              status: "active",
+              issueDate: "15/03/2021",
+              expiryDate: "15/03/2023"
+            },
+            {
+              id: "2",
+              number: "B2023-002",
+              employeeId: "2",
+              employeeName: "Sophie Martin",
+              type: "Admin",
+              status: "active",
+              issueDate: "02/05/2022",
+              expiryDate: "02/05/2024"
+            },
+            {
+              id: "3",
+              number: "B2023-003",
+              employeeId: "3",
+              employeeName: "Jean Bernard",
+              type: "Standard",
+              status: "inactive",
+              issueDate: "10/11/2019",
+              expiryDate: "10/11/2021"
+            }
+          ]);
+        } else {
+          setBadges(data);
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des badges:", error);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
 
     fetchBadges();
