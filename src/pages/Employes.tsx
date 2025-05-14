@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { 
   Card, 
   CardContent
@@ -20,39 +20,24 @@ const Employes = () => {
   const [activeTab, setActiveTab] = useState("liste");
   const { employees, isLoading, error, departmentStats, statusStats } = useEmployeeData();
   
-  // Afficher une erreur seulement si elle existe (éviter les toasts répétitifs)
-  React.useEffect(() => {
-    if (error) {
-      toast({
-        title: "Erreur de chargement",
-        description: "Impossible de charger les données des employés depuis Firebase",
-        variant: "destructive"
-      });
-    }
-  }, [error]);
+  if (error) {
+    toast({
+      title: "Erreur de chargement",
+      description: "Impossible de charger les données des employés",
+      variant: "destructive"
+    });
+  }
 
-  // Calculer les statistiques pour les cartes avec useMemo pour éviter les calculs répétitifs
-  const employeeStats = useMemo(() => {
-    const totalEmployees = employees?.length || 0;
-    const activeEmployees = employees?.filter(emp => emp.status === 'active')?.length || 0;
-    const onLeaveEmployees = employees?.filter(emp => emp.status === 'onLeave')?.length || 0;
-    const inactiveEmployees = employees?.filter(emp => emp.status === 'inactive')?.length || 0;
-    
-    return {
-      totalEmployees,
-      activeEmployees,
-      onLeaveEmployees,
-      inactiveEmployees
-    };
-  }, [employees]);
+  // Calculer les statistiques pour les cartes
+  const totalEmployees = employees?.length || 0;
+  const activeEmployees = employees?.filter(emp => emp.status === 'active')?.length || 0;
+  const onLeaveEmployees = employees?.filter(emp => emp.status === 'onLeave')?.length || 0;
+  const inactiveEmployees = employees?.filter(emp => emp.status === 'inactive')?.length || 0;
 
   return (
     <div className="p-4 md:p-6">
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold">Gestion des Employés</h1>
-        <p className="text-muted-foreground">
-          {isLoading ? "Chargement des données..." : `${employeeStats.totalEmployees} employés trouvés dans la base Firebase`}
-        </p>
       </div>
 
       {/* Cartes de statistiques */}
@@ -64,7 +49,7 @@ const Employes = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Total des employés</p>
-              <p className="text-3xl font-bold">{employeeStats.totalEmployees}</p>
+              <p className="text-3xl font-bold">{totalEmployees}</p>
             </div>
           </CardContent>
         </Card>
@@ -76,7 +61,7 @@ const Employes = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">En poste</p>
-              <p className="text-3xl font-bold">{employeeStats.activeEmployees}</p>
+              <p className="text-3xl font-bold">{activeEmployees}</p>
             </div>
           </CardContent>
         </Card>
@@ -88,7 +73,7 @@ const Employes = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">En congés</p>
-              <p className="text-3xl font-bold">{employeeStats.onLeaveEmployees}</p>
+              <p className="text-3xl font-bold">{onLeaveEmployees}</p>
             </div>
           </CardContent>
         </Card>
@@ -100,7 +85,7 @@ const Employes = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Inactifs</p>
-              <p className="text-3xl font-bold">{employeeStats.inactiveEmployees}</p>
+              <p className="text-3xl font-bold">{inactiveEmployees}</p>
             </div>
           </CardContent>
         </Card>
@@ -122,13 +107,6 @@ const Employes = () => {
       <Card className="mb-6">
         <CardContent className="p-0">
           <Tabs defaultValue="liste" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-4 p-0">
-              <TabsTrigger value="liste">Liste</TabsTrigger>
-              <TabsTrigger value="ajouter">Ajouter</TabsTrigger>
-              <TabsTrigger value="import">Importer</TabsTrigger>
-              <TabsTrigger value="export">Exporter</TabsTrigger>
-            </TabsList>
-            
             <TabsContent value="liste" className="m-0">
               <EmployeesProfiles 
                 employees={employees} 
@@ -136,7 +114,6 @@ const Employes = () => {
               />
             </TabsContent>
             
-            {/* Autres onglets */}
             <TabsContent value="ajouter" className="m-0">
               <div className="text-center p-8">
                 <p>Le formulaire d'ajout d'employé sera implémenté ici</p>
