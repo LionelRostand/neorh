@@ -1,8 +1,34 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from 'react';
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle,
+  CardDescription 
+} from "@/components/ui/card";
+import EmployeesProfiles from '@/components/employees/EmployeesProfiles';
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from "@/components/ui/tabs";
+import { toast } from "@/components/ui/use-toast";
+import { useEmployeeData } from '@/hooks/useEmployeeData';
 
 const Employes = () => {
+  const [activeTab, setActiveTab] = useState("liste");
+  const { employees, isLoading, error } = useEmployeeData();
+  
+  if (error) {
+    toast({
+      title: "Erreur de chargement",
+      description: "Impossible de charger les données des employés",
+      variant: "destructive"
+    });
+  }
+
   return (
     <div className="p-4 md:p-6">
       <div className="mb-6">
@@ -10,7 +36,7 @@ const Employes = () => {
         <p className="text-gray-500">Gestion complète des profils employés et de leurs informations</p>
       </div>
 
-      <Card>
+      <Card className="mb-6">
         <CardHeader>
           <CardTitle>Gestion des employés</CardTitle>
           <CardDescription>
@@ -18,7 +44,39 @@ const Employes = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p>Contenu à venir pour la gestion des employés.</p>
+          <Tabs defaultValue="liste" value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="liste">Liste des employés</TabsTrigger>
+              <TabsTrigger value="ajouter">Ajouter un employé</TabsTrigger>
+              <TabsTrigger value="import">Importer des données</TabsTrigger>
+              <TabsTrigger value="export">Exporter des données</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="liste">
+              <EmployeesProfiles 
+                employees={employees} 
+                isLoading={isLoading}
+              />
+            </TabsContent>
+            
+            <TabsContent value="ajouter">
+              <div className="text-center p-8">
+                <p>Le formulaire d'ajout d'employé sera implémenté ici</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="import">
+              <div className="text-center p-8">
+                <p>L'importation des données sera implémentée ici</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="export">
+              <div className="text-center p-8">
+                <p>L'exportation des données sera implémentée ici</p>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
