@@ -45,20 +45,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/components/ui/use-toast';
 import { useEmployeeActions } from '@/hooks/useEmployeeActions';
-
-// Types for our employee data
-interface Employee {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  department: string;
-  position: string;
-  status: 'active' | 'onLeave' | 'terminated';
-  hireDate: string;
-  avatarUrl?: string;
-}
+import { Employee } from '@/types/employee';
 
 interface EmployeesProfilesProps {
   employees: Employee[] | undefined;
@@ -68,7 +55,7 @@ interface EmployeesProfilesProps {
 const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoading }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortField, setSortField] = useState<keyof Employee>('lastName');
+  const [sortField, setSortField] = useState<keyof Employee>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const { deleteEmployee } = useEmployeeActions();
   
@@ -79,13 +66,17 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoad
     if (!employees) return [];
     
     return employees
-      .filter(employee => 
-        employee.firstName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        employee.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.position.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      .filter(employee => {
+        if (!searchTerm) return true;
+        
+        const search = searchTerm.toLowerCase();
+        return (
+          employee.name.toLowerCase().includes(search) ||
+          employee.email.toLowerCase().includes(search) ||
+          employee.department.toLowerCase().includes(search) ||
+          employee.position.toLowerCase().includes(search)
+        );
+      })
       .sort((a, b) => {
         if (a[sortField] < b[sortField]) return sortDirection === 'asc' ? -1 : 1;
         if (a[sortField] > b[sortField]) return sortDirection === 'asc' ? 1 : -1;
@@ -134,15 +125,20 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoad
         return <Badge className="bg-green-500 hover:bg-green-600">Actif</Badge>;
       case 'onLeave':
         return <Badge className="bg-amber-500 hover:bg-amber-600">En congé</Badge>;
-      case 'terminated':
+      case 'inactive':
         return <Badge className="bg-red-500 hover:bg-red-600">Inactif</Badge>;
       default:
         return <Badge>Inconnu</Badge>;
     }
   };
 
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   if (isLoading) {
@@ -188,9 +184,9 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoad
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[60px]">Photo</TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort('lastName')}>
+                  <TableHead className="cursor-pointer" onClick={() => handleSort('name')}>
                     Nom
-                    {sortField === 'lastName' && (
+                    {sortField === 'name' && (
                       <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
                   </TableHead>
@@ -207,9 +203,9 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoad
                     )}
                   </TableHead>
                   <TableHead className="hidden md:table-cell">Statut</TableHead>
-                  <TableHead className="hidden md:table-cell cursor-pointer" onClick={() => handleSort('hireDate')}>
+                  <TableHead className="hidden md:table-cell cursor-pointer" onClick={() => handleSort('startDate')}>
                     Date d'embauche
-                    {sortField === 'hireDate' && (
+                    {sortField === 'startDate' && (
                       <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}
                   </TableHead>
@@ -221,12 +217,12 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoad
                   <TableRow key={employee.id}>
                     <TableCell>
                       <Avatar>
-                        <AvatarImage src={employee.avatarUrl} />
-                        <AvatarFallback>{getInitials(employee.firstName, employee.lastName)}</AvatarFallback>
+                        <AvatarImage src={employee.photoUrl} />
+                        <AvatarFallback>{getInitials(employee.name)}</AvatarFallback>
                       </Avatar>
                     </TableCell>
                     <TableCell className="font-medium">
-                      {employee.firstName} {employee.lastName}
+                      {employee.name}
                       <div className="text-sm text-muted-foreground md:hidden">
                         {employee.position}
                       </div>
@@ -253,7 +249,7 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoad
                     <TableCell className="hidden md:table-cell">
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                        {employee.hireDate}
+                        {employee.startDate}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
