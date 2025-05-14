@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Clock, Calendar, LogIn, LogOut } from "lucide-react";
@@ -52,26 +51,28 @@ export const PresenceKiosk = () => {
 
   return (
     <div className="flex justify-center">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader className="bg-blue-500 text-white p-6">
-          <div className="space-y-1">
-            <h3 className="text-2xl font-bold tracking-tight">Borne de Présence</h3>
-            <p className="text-blue-100">Validation des entrées et sorties</p>
-          </div>
-          <div className="flex justify-end items-center gap-4 mt-2">
-            <div className="flex items-center gap-2">
+      <div className="w-full max-w-md overflow-hidden rounded-lg shadow-lg">
+        {/* En-tête bleu */}
+        <div className="bg-blue-500 text-white p-4">
+          <h3 className="text-xl font-bold">Borne de Présence</h3>
+          <p className="text-sm text-blue-100">Validation des entrées et sorties</p>
+          
+          <div className="flex justify-end items-center mt-2 gap-3">
+            <div className="flex items-center gap-1">
               <Clock className="h-5 w-5" />
-              <span className="text-lg">{formattedTime}</span>
+              <span>{formattedTime}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Calendar className="h-5 w-5" />
               <span>{formattedDate}</span>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          <div className="space-y-2">
-            <label htmlFor="badge-id" className="text-base">
+        </div>
+        
+        {/* Contenu */}
+        <div className="bg-white p-4 space-y-4">
+          <div>
+            <label htmlFor="badge-id" className="block text-gray-700 mb-2">
               Identifiant employé ou badge
             </label>
             <Input 
@@ -79,11 +80,10 @@ export const PresenceKiosk = () => {
               value={badgeId}
               onChange={(e) => setBadgeId(e.target.value)}
               placeholder="ID employé ou numéro de badge (ex: B-12345)"
-              className="text-base"
             />
           </div>
           
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <Button 
               className="flex-1 bg-green-600 hover:bg-green-700"
               onClick={handleEntry}
@@ -99,8 +99,8 @@ export const PresenceKiosk = () => {
               Sortie
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
