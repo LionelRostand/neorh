@@ -1,8 +1,8 @@
-
 import { useState, useEffect, useMemo } from 'react';
+import { Employee } from '@/types/employee';
 
-// Types
-interface Employee {
+// Mock data structure for demonstration
+interface MockEmployee {
   id: string;
   firstName: string;
   lastName: string;
@@ -16,7 +16,7 @@ interface Employee {
 }
 
 // Mock data for demonstration
-const MOCK_EMPLOYEES: Employee[] = [
+const MOCK_EMPLOYEES: MockEmployee[] = [
   {
     id: "1",
     firstName: "Thomas",
@@ -166,7 +166,7 @@ const MOCK_EMPLOYEES: Employee[] = [
 export const useEmployeeData = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [rawEmployees, setRawEmployees] = useState<MockEmployee[]>([]);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -179,7 +179,7 @@ export const useEmployeeData = () => {
         // const response = await fetch('/api/employees');
         // const data = await response.json();
         
-        setEmployees(MOCK_EMPLOYEES);
+        setRawEmployees(MOCK_EMPLOYEES);
         setIsLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Une erreur est survenue'));
@@ -190,27 +190,48 @@ export const useEmployeeData = () => {
     fetchEmployees();
   }, []);
 
+  // Transform mock data to match the Employee type
+  const employees = useMemo(() => {
+    return rawEmployees.map(emp => ({
+      id: emp.id,
+      name: `${emp.firstName} ${emp.lastName}`,
+      position: emp.position,
+      department: emp.department,
+      email: emp.email,
+      phone: emp.phone,
+      photoUrl: emp.avatarUrl,
+      // Set CEO for employee with ID 4 (Marie Petit, Director HR)
+      managerId: emp.id === '4' ? undefined : ['2', '4', '7', '11'].includes(emp.id) ? undefined : 
+                 ['1', '6', '10'].includes(emp.id) ? '2' :  // Dev team under Sophie
+                 ['3', '9', '12'].includes(emp.id) ? '7' :  // Marketing team under Philippe
+                 ['5', '8', '13'].includes(emp.id) ? '4',   // Support/Finance under Marie
+      startDate: emp.hireDate,
+      status: emp.status === 'active' ? 'active' : 
+              emp.status === 'onLeave' ? 'onLeave' : 'inactive'
+    })) as Employee[];
+  }, [rawEmployees]);
+
   const departmentStats = useMemo(() => {
-    if (!employees.length) return {};
+    if (!rawEmployees.length) return {};
     
-    return employees.reduce((acc, employee) => {
+    return rawEmployees.reduce((acc, employee) => {
       const dept = employee.department;
       if (!acc[dept]) acc[dept] = 0;
       acc[dept]++;
       return acc;
     }, {} as Record<string, number>);
-  }, [employees]);
+  }, [rawEmployees]);
 
   const statusStats = useMemo(() => {
-    if (!employees.length) return {};
+    if (!rawEmployees.length) return {};
     
-    return employees.reduce((acc, employee) => {
+    return rawEmployees.reduce((acc, employee) => {
       const status = employee.status;
       if (!acc[status]) acc[status] = 0;
       acc[status]++;
       return acc;
     }, {} as Record<string, number>);
-  }, [employees]);
+  }, [rawEmployees]);
 
   return {
     employees,

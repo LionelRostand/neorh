@@ -2,6 +2,7 @@
 import React from "react";
 import { useEmployeeData } from "@/hooks/useEmployeeData";
 import HierarchyNode from "./HierarchyNode";
+import { Employee } from "@/types/employee";
 
 const EmployeesHierarchy = () => {
   const { employees, isLoading, error } = useEmployeeData();
@@ -33,7 +34,7 @@ const EmployeesHierarchy = () => {
     );
   }
 
-  const ceo = employees.find(emp => emp.position === "CEO");
+  const ceo = employees.find(emp => emp.managerId === undefined);
 
   return (
     <div className="flex flex-col items-center overflow-auto">
