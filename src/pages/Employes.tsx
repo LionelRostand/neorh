@@ -2,10 +2,7 @@
 import React, { useState } from 'react';
 import { 
   Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle,
-  CardDescription 
+  CardContent
 } from "@/components/ui/card";
 import EmployeesProfiles from '@/components/employees/EmployeesProfiles';
 import { 
@@ -16,10 +13,12 @@ import {
 } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import { useEmployeeData } from '@/hooks/useEmployeeData';
+import { Package, Truck, CheckCircle, XCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const Employes = () => {
   const [activeTab, setActiveTab] = useState("liste");
-  const { employees, isLoading, error } = useEmployeeData();
+  const { employees, isLoading, error, departmentStats, statusStats } = useEmployeeData();
   
   if (error) {
     toast({
@@ -29,49 +28,105 @@ const Employes = () => {
     });
   }
 
+  // Calculer les statistiques pour les cartes
+  const totalEmployees = employees?.length || 0;
+  const activeEmployees = employees?.filter(emp => emp.status === 'active')?.length || 0;
+  const onLeaveEmployees = employees?.filter(emp => emp.status === 'onLeave')?.length || 0;
+  const inactiveEmployees = employees?.filter(emp => emp.status === 'inactive')?.length || 0;
+
   return (
     <div className="p-4 md:p-6">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold">Employés</h1>
-        <p className="text-gray-500">Gestion complète des profils employés et de leurs informations</p>
+        <h1 className="text-2xl md:text-3xl font-bold">Gestion des Employés</h1>
+      </div>
+
+      {/* Cartes de statistiques */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card className="border rounded-lg">
+          <CardContent className="p-6 flex items-center">
+            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+              <Package className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Total des employés</p>
+              <p className="text-3xl font-bold">{totalEmployees}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border rounded-lg">
+          <CardContent className="p-6 flex items-center">
+            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+              <Truck className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">En poste</p>
+              <p className="text-3xl font-bold">{activeEmployees}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border rounded-lg">
+          <CardContent className="p-6 flex items-center">
+            <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center mr-4">
+              <CheckCircle className="h-6 w-6 text-green-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">En congés</p>
+              <p className="text-3xl font-bold">{onLeaveEmployees}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border rounded-lg">
+          <CardContent className="p-6 flex items-center">
+            <div className="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center mr-4">
+              <XCircle className="h-6 w-6 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Inactifs</p>
+              <p className="text-3xl font-bold">{inactiveEmployees}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+        <h2 className="text-xl font-semibold">Liste des Employés</h2>
+        <div className="flex flex-col md:flex-row gap-2 mt-2 md:mt-0">
+          <Button variant="outline" className="flex items-center">
+            <span className="mr-2">Exporter / Importer</span>
+          </Button>
+          <Button className="bg-blue-600 hover:bg-blue-700">
+            <span className="mr-2">+</span>
+            Nouvel Employé
+          </Button>
+        </div>
       </div>
 
       <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Gestion des employés</CardTitle>
-          <CardDescription>
-            Cette section permet la gestion complète des profils employés avec leurs informations personnelles et professionnelles.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="liste" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="liste">Liste des employés</TabsTrigger>
-              <TabsTrigger value="ajouter">Ajouter un employé</TabsTrigger>
-              <TabsTrigger value="import">Importer des données</TabsTrigger>
-              <TabsTrigger value="export">Exporter des données</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="liste">
+        <CardContent className="p-0">
+          <Tabs defaultValue="liste" value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsContent value="liste" className="m-0">
               <EmployeesProfiles 
                 employees={employees} 
                 isLoading={isLoading}
               />
             </TabsContent>
             
-            <TabsContent value="ajouter">
+            <TabsContent value="ajouter" className="m-0">
               <div className="text-center p-8">
                 <p>Le formulaire d'ajout d'employé sera implémenté ici</p>
               </div>
             </TabsContent>
 
-            <TabsContent value="import">
+            <TabsContent value="import" className="m-0">
               <div className="text-center p-8">
                 <p>L'importation des données sera implémentée ici</p>
               </div>
             </TabsContent>
 
-            <TabsContent value="export">
+            <TabsContent value="export" className="m-0">
               <div className="text-center p-8">
                 <p>L'exportation des données sera implémentée ici</p>
               </div>

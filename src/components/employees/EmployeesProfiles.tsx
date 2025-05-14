@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import {
   Search,
@@ -52,7 +51,7 @@ interface EmployeesProfilesProps {
   isLoading: boolean;
 }
 
-const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoading }) => {
+const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees = [], isLoading }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState<keyof Employee>('name');
@@ -63,7 +62,7 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoad
   
   // Filter, sort, and paginate employees
   const filteredAndSortedEmployees = useMemo(() => {
-    if (!employees) return [];
+    if (!employees || employees.length === 0) return [];
     
     return employees
       .filter(employee => {
@@ -71,15 +70,18 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoad
         
         const search = searchTerm.toLowerCase();
         return (
-          employee.name.toLowerCase().includes(search) ||
-          employee.email.toLowerCase().includes(search) ||
-          employee.department.toLowerCase().includes(search) ||
-          employee.position.toLowerCase().includes(search)
+          (employee.name && employee.name.toLowerCase().includes(search)) ||
+          (employee.email && employee.email.toLowerCase().includes(search)) ||
+          (employee.department && employee.department.toLowerCase().includes(search)) ||
+          (employee.position && employee.position.toLowerCase().includes(search))
         );
       })
       .sort((a, b) => {
-        if (a[sortField] < b[sortField]) return sortDirection === 'asc' ? -1 : 1;
-        if (a[sortField] > b[sortField]) return sortDirection === 'asc' ? 1 : -1;
+        const valueA = a[sortField] || '';
+        const valueB = b[sortField] || '';
+        
+        if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
+        if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
         return 0;
       });
   }, [employees, searchTerm, sortField, sortDirection]);
@@ -146,7 +148,7 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoad
   }
 
   return (
-    <div>
+    <div className="p-4">
       <div className="flex flex-col md:flex-row gap-4 mb-4 justify-between">
         <div className="relative flex w-full md:w-72 items-center">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -162,14 +164,10 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoad
             <Filter className="mr-2 h-4 w-4" />
             Filtres
           </Button>
-          <Button size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            Nouvel employé
-          </Button>
         </div>
       </div>
 
-      {paginatedEmployees.length === 0 ? (
+      {filteredAndSortedEmployees.length === 0 ? (
         <div className="text-center py-10">
           <User className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-lg font-medium">Aucun employé trouvé</h3>
@@ -213,12 +211,15 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoad
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedEmployees.map((employee) => (
+                {filteredAndSortedEmployees.slice(
+                  (currentPage - 1) * PAGE_SIZE,
+                  currentPage * PAGE_SIZE
+                ).map((employee) => (
                   <TableRow key={employee.id}>
                     <TableCell>
                       <Avatar>
                         <AvatarImage src={employee.photoUrl} />
-                        <AvatarFallback>{getInitials(employee.name)}</AvatarFallback>
+                        <AvatarFallback>{getInitials(employee.name || '')}</AvatarFallback>
                       </Avatar>
                     </TableCell>
                     <TableCell className="font-medium">
@@ -299,7 +300,7 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoad
                   />
                 </PaginationItem>
                 
-                {Array.from({ length: totalPages }, (_, i) => (
+                {Array.from({ length: Math.ceil((filteredAndSortedEmployees.length || 0) / PAGE_SIZE) }, (_, i) => (
                   <PaginationItem key={i + 1}>
                     <PaginationLink 
                       isActive={currentPage === i + 1}
@@ -312,8 +313,8 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees, isLoad
                 
                 <PaginationItem>
                   <PaginationNext 
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil((filteredAndSortedEmployees.length || 0) / PAGE_SIZE)))}
+                    className={currentPage === Math.ceil((filteredAndSortedEmployees.length || 0) / PAGE_SIZE) ? "pointer-events-none opacity-50" : ""}
                   />
                 </PaginationItem>
               </PaginationContent>
