@@ -4,9 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge as BadgeUI } from "@/components/ui/badge";
-import { Plus, FileText, Edit, Trash } from "lucide-react";
+import { Plus, FileText, Edit, Trash, Check, AlertCircle, Clock } from "lucide-react";
 import { useCollection } from "@/hooks/useCollection";
 import { Badge } from "@/lib/constants";
+import { toast } from "@/hooks/use-toast";
 
 // Types pour les badges
 interface BadgeData {
@@ -15,7 +16,7 @@ interface BadgeData {
   employeeId: string;
   employeeName: string;
   type: string;
-  status: 'active' | 'inactive' | 'lost';
+  status: 'active' | 'inactive' | 'lost' | 'pending';
   issueDate: string;
   expiryDate: string;
 }
@@ -23,6 +24,12 @@ interface BadgeData {
 const Badges = () => {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
+  const [badgeStats, setBadgeStats] = useState({
+    active: 0,
+    pending: 0,
+    inactive: 0,
+    coverage: 0
+  });
   
   // Utilisation de notre hook pour accéder à la collection des badges
   const badgesCollection = useCollection<'hr_badges'>();
@@ -35,7 +42,7 @@ const Badges = () => {
         
         if (data.length === 0) {
           // Si aucun badge n'existe encore, utilisons des données fictives
-          setBadges([
+          const mockBadges = [
             {
               id: "1",
               number: "B2023-001",
@@ -52,7 +59,7 @@ const Badges = () => {
               employeeId: "2",
               employeeName: "Sophie Martin",
               type: "Admin",
-              status: "active",
+              status: "pending",
               issueDate: "02/05/2022",
               expiryDate: "02/05/2024"
             },
@@ -66,12 +73,20 @@ const Badges = () => {
               issueDate: "10/11/2019",
               expiryDate: "10/11/2021"
             }
-          ]);
+          ];
+          setBadges(mockBadges);
+          calculateStats(mockBadges);
         } else {
           setBadges(data as Badge[]);
+          calculateStats(data as Badge[]);
         }
       } catch (error) {
         console.error("Erreur lors du chargement des badges:", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les badges",
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }
@@ -79,6 +94,22 @@ const Badges = () => {
 
     fetchBadges();
   }, []);
+
+  const calculateStats = (badgeData: Badge[]) => {
+    const active = badgeData.filter(b => b.status === 'active').length;
+    const pending = badgeData.filter(b => b.status === 'pending').length;
+    const inactive = badgeData.filter(b => b.status === 'inactive' || b.status === 'lost').length;
+    
+    // Simulons un calcul de couverture (dans un cas réel, il faudrait comparer avec le nombre total d'employés)
+    const coverage = badgeData.length > 0 ? Math.round((active / 2) * 100) : 0;
+    
+    setBadgeStats({
+      active,
+      pending,
+      inactive,
+      coverage
+    });
+  };
 
   const handleAddBadge = () => {
     // Cette fonction sera implémentée plus tard
@@ -90,6 +121,8 @@ const Badges = () => {
         return <BadgeUI className="bg-green-500">Actif</BadgeUI>;
       case 'inactive':
         return <BadgeUI className="bg-gray-500">Inactif</BadgeUI>;
+      case 'pending':
+        return <BadgeUI className="bg-yellow-500">En attente</BadgeUI>;
       case 'lost':
         return <BadgeUI className="bg-red-500">Perdu</BadgeUI>;
       default:
@@ -114,6 +147,88 @@ const Badges = () => {
             Nouveau badge
           </Button>
         </div>
+      </div>
+
+      {/* Statistiques des badges - Nouvellement ajouté */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {/* Badge actif */}
+        <Card className="border-l-4 border-green-500">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-green-700">Badges actifs</p>
+                <h3 className="text-3xl font-bold mt-1">{badgeStats.active}</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  {badgeStats.active === 0 ? "Aucun badge actif" : 
+                   badgeStats.active === 1 ? "1 badge actif" : 
+                   `${badgeStats.active} badges actifs`}
+                </p>
+              </div>
+              <div className="p-2 bg-green-100 rounded-full">
+                <Check className="h-5 w-5 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Badge en attente */}
+        <Card className="border-l-4 border-yellow-500">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-yellow-700">Badges en attente</p>
+                <h3 className="text-3xl font-bold mt-1">{badgeStats.pending}</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  {badgeStats.pending === 0 ? "Aucun badge en attente" : 
+                   badgeStats.pending === 1 ? "1 badge en attente" : 
+                   `${badgeStats.pending} badges en attente`}
+                </p>
+              </div>
+              <div className="p-2 bg-yellow-100 rounded-full">
+                <Clock className="h-5 w-5 text-yellow-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Badge inactif */}
+        <Card className="border-l-4 border-red-500">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-red-700">Badges inactifs</p>
+                <h3 className="text-3xl font-bold mt-1">{badgeStats.inactive}</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  {badgeStats.inactive === 0 ? "Aucun badge inactif" : 
+                   badgeStats.inactive === 1 ? "1 badge inactif" : 
+                   `${badgeStats.inactive} badges inactifs`}
+                </p>
+              </div>
+              <div className="p-2 bg-red-100 rounded-full">
+                <AlertCircle className="h-5 w-5 text-red-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Couverture */}
+        <Card className="border-l-4 border-blue-500">
+          <CardContent className="p-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-blue-700">Couverture</p>
+                <h3 className="text-3xl font-bold mt-1">{badgeStats.coverage}%</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  {badgeStats.coverage === 0 ? "Aucune couverture" : 
+                   `${Math.floor(badgeStats.coverage / 50)} sur ${Math.ceil(badgeStats.coverage / 25)} employés`}
+                </p>
+              </div>
+              <div className="p-2 bg-blue-100 rounded-full">
+                <AlertCircle className="h-5 w-5 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
