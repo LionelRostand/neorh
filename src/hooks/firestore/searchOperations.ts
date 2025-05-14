@@ -1,66 +1,87 @@
 
-import { 
-  query, 
-  where, 
-  orderBy,
-  getDocs,
-  QueryConstraint
-} from "firebase/firestore";
-import { toast } from "@/components/ui/use-toast";
+import { collection, query, where, orderBy, startAt, endAt, getDocs, QueryConstraint, limit, DocumentData } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { QueryResult } from '@/types/firebase';
 
-// Search operations for Firestore
-export const createSearchOperations = <T extends Record<string, any>>(
-  setIsLoading: (loading: boolean) => void,
-  setError: (error: Error | null) => void,
-  getCollection: () => any
-) => {
-  // Recherche avec filtres
-  const search = async (
-    filters: Array<{ field: string; operator: "==" | "!=" | ">" | ">=" | "<" | "<="; value: any }>,
-    sortField?: string,
-    sortDirection?: "asc" | "desc"
-  ) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const collectionRef = getCollection();
+// Helper function for searching documents in a collection
+export const searchDocs_firestore = async <T>({
+  collectionName,
+  searchField,
+  searchTerm,
+  exactMatch = false,
+  caseSensitive = false,
+  orderByField,
+  orderByDirection = 'asc',
+  limitCount,
+  additionalQueryParams = []
+}: {
+  collectionName: string;
+  searchField: string;
+  searchTerm: string;
+  exactMatch?: boolean;
+  caseSensitive?: boolean;
+  orderByField?: string;
+  orderByDirection?: 'asc' | 'desc';
+  limitCount?: number;
+  additionalQueryParams?: { field: string; operator: any; value: any }[];
+}): Promise<QueryResult<T>> => {
+  try {
+    const collectionRef = collection(db, collectionName);
+    const constraints: QueryConstraint[] = [];
+    
+    // Handle additional query params
+    additionalQueryParams.forEach(param => {
+      constraints.push(where(param.field, param.operator, param.value));
+    });
+    
+    // For search functionality
+    if (searchTerm && searchField) {
+      // Use the field specified for searching
+      const fieldToOrderBy = orderByField || searchField;
+      constraints.push(orderBy(fieldToOrderBy));
       
-      // Création des contraintes de requête
-      const constraints: QueryConstraint[] = [];
-      
-      // Ajout des filtres
-      filters.forEach(filter => {
-        constraints.push(where(filter.field, filter.operator, filter.value));
-      });
-      
-      // Ajout du tri si spécifié
-      if (sortField) {
-        constraints.push(orderBy(sortField, sortDirection || "asc"));
+      if (exactMatch) {
+        // Exact match search
+        constraints.push(where(searchField, '==', searchTerm));
+      } else {
+        // Partial match search
+        const processedSearchTerm = caseSensitive ? searchTerm : searchTerm.toLowerCase();
+        const endSearchTerm = processedSearchTerm + '\uf8ff'; // Unicode character after all ASCII chars
+        
+        constraints.push(startAt(processedSearchTerm));
+        constraints.push(endAt(endSearchTerm));
       }
-      
-      // Construction de la requête
-      const q = constraints.length > 0 
-        ? query(collectionRef, ...constraints)
-        : query(collectionRef);
-      
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({ 
-        id: doc.id, 
-        ...doc.data() 
-      })) as (T & { id: string })[];
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error("Une erreur est survenue");
-      setError(error);
-      toast({
-        title: "Erreur",
-        description: `Erreur lors de la recherche: ${error.message}`,
-        variant: "destructive"
-      });
-      return [];
-    } finally {
-      setIsLoading(false);
+    } else if (orderByField) {
+      // If no search but ordering is required
+      constraints.push(orderBy(orderByField, orderByDirection));
     }
-  };
-
-  return { search };
+    
+    // Add limit if specified
+    if (limitCount) {
+      constraints.push(limit(limitCount));
+    }
+    
+    // Create and execute the query
+    const q = query(collectionRef, ...constraints);
+    const querySnapshot = await getDocs(q);
+    
+    // Process the results
+    const docs = querySnapshot.docs.map(doc => {
+      const data = doc.data() as DocumentData;
+      return {
+        id: doc.id,
+        ...data
+      } as T & { id: string };
+    });
+    
+    // Return the results
+    return {
+      docs,
+      lastDoc: querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : null,
+      count: querySnapshot.size
+    };
+  } catch (error) {
+    console.error('Error searching documents:', error);
+    throw error;
+  }
 };

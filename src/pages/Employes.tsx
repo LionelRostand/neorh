@@ -5,19 +5,12 @@ import {
   CardContent
 } from "@/components/ui/card";
 import EmployeesProfiles from '@/components/employees/EmployeesProfiles';
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import { useEmployeeData } from '@/hooks/useEmployeeData';
 import { Package, Truck, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Employes = () => {
-  const [activeTab, setActiveTab] = useState("liste");
   const { employees, isLoading, error, departmentStats, statusStats } = useEmployeeData();
   
   if (error) {
@@ -105,40 +98,11 @@ const Employes = () => {
       </div>
 
       <Card className="mb-6">
-        <CardContent className="p-0">
-          <Tabs defaultValue="liste" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-1 md:grid-cols-4 p-0">
-              <TabsTrigger value="liste">Liste</TabsTrigger>
-              <TabsTrigger value="ajouter">Ajouter</TabsTrigger>
-              <TabsTrigger value="import">Importer</TabsTrigger>
-              <TabsTrigger value="export">Exporter</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="liste" className="m-0">
-              <EmployeesProfiles 
-                employees={employees} 
-                isLoading={isLoading}
-              />
-            </TabsContent>
-            
-            <TabsContent value="ajouter" className="m-0">
-              <div className="text-center p-8">
-                <p>Le formulaire d'ajout d'employé sera implémenté ici</p>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="import" className="m-0">
-              <div className="text-center p-8">
-                <p>L'importation des données sera implémentée ici</p>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="export" className="m-0">
-              <div className="text-center p-8">
-                <p>L'exportation des données sera implémentée ici</p>
-              </div>
-            </TabsContent>
-          </Tabs>
+        <CardContent className="p-4">
+          <EmployeesProfiles 
+            employees={employees} 
+            isLoading={isLoading}
+          />
         </CardContent>
       </Card>
     </div>

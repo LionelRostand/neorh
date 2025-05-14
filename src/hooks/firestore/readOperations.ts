@@ -1,75 +1,96 @@
 
-import { 
-  getDocs, 
-  doc, 
-  getDoc,
-  DocumentData
-} from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { toast } from "@/components/ui/use-toast";
+import { collection, doc, getDoc, getDocs, query, where, orderBy, limit, startAfter, DocumentData, QueryConstraint, DocumentReference, Query, DocumentSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { QueryParams, QueryResult } from '@/types/firebase';
 
-// Read operations for Firestore
-export const createReadOperations = <T extends Record<string, any>>(
+// Helper function to get documents from a collection with optional query params
+export const getDocs_firestore = async <T>({
+  collectionName,
+  queryParams = [],
+  orderByField,
+  orderByDirection = 'asc',
+  limitCount,
+  startAfterDoc,
+}: {
+  collectionName: string;
+  queryParams?: QueryParams[];
+  orderByField?: string;
+  orderByDirection?: 'asc' | 'desc';
+  limitCount?: number;
+  startAfterDoc?: DocumentSnapshot;
+}): Promise<QueryResult<T>> => {
+  try {
+    const collectionRef = collection(db, collectionName);
+    
+    // Build query constraints
+    const constraints: QueryConstraint[] = [];
+    
+    // Add where clauses
+    queryParams.forEach(param => {
+      constraints.push(where(param.field, param.operator, param.value));
+    });
+    
+    // Add orderBy if specified
+    if (orderByField) {
+      constraints.push(orderBy(orderByField, orderByDirection));
+    }
+    
+    // Add limit if specified
+    if (limitCount) {
+      constraints.push(limit(limitCount));
+    }
+    
+    // Create the query
+    let q: Query = query(collectionRef, ...constraints);
+    
+    // Add startAfter if pagination is needed
+    if (startAfterDoc) {
+      q = query(q, startAfter(startAfterDoc));
+    }
+    
+    // Execute the query
+    const querySnapshot = await getDocs(q);
+    
+    // Process the results
+    const docs = querySnapshot.docs.map(doc => {
+      return {
+        id: doc.id,
+        ...doc.data()
+      } as T & { id: string };
+    });
+    
+    // Return the results and last document for pagination
+    return {
+      docs,
+      lastDoc: querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : null,
+      count: querySnapshot.size
+    };
+  } catch (error) {
+    console.error('Error getting documents:', error);
+    throw error;
+  }
+};
+
+// Helper function to get a single document by ID
+export const getDoc_firestore = async <T>(
   collectionName: string,
-  setIsLoading: (loading: boolean) => void,
-  setError: (error: Error | null) => void,
-  getCollection: () => any
-) => {
-  // Récupérer tous les documents d'une collection
-  const getAll = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const querySnapshot = await getDocs(getCollection());
-      const data = querySnapshot.docs.map(doc => ({ 
-        id: doc.id, 
-        ...doc.data() 
-      })) as (T & { id: string })[];
-      
-      return data;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error("Une erreur est survenue");
-      setError(error);
-      toast({
-        title: "Erreur",
-        description: `Impossible de récupérer les données: ${error.message}`,
-        variant: "destructive"
-      });
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Récupérer un document par son ID
-  const getById = async (id: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const docRef = doc(db, collectionName, id);
-      const docSnap = await getDoc(docRef);
-      
-      if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() } as T & { id: string };
-      } else {
-        return null;
-      }
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error("Une erreur est survenue");
-      setError(error);
-      toast({
-        title: "Erreur",
-        description: `Impossible de récupérer le document: ${error.message}`,
-        variant: "destructive"
-      });
+  docId: string
+): Promise<T & { id: string } | null> => {
+  try {
+    const docRef = doc(db, collectionName, docId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return {
+        id: docSnap.id,
+        ...docSnap.data()
+      } as T & { id: string };
+    } else {
+      console.log(`No document found with ID: ${docId}`);
       return null;
-    } finally {
-      setIsLoading(false);
     }
-  };
-
-  return {
-    getAll,
-    getById
-  };
+  } catch (error) {
+    console.error('Error getting document:', error);
+    throw error;
+  }
 };
