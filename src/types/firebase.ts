@@ -87,3 +87,24 @@ export interface Leave {
   approvedBy?: string;
   comment?: string;
 }
+
+// Types for Firestore query operations
+export interface QueryParams {
+  field: string;
+  operator: firebase.firestore.WhereFilterOp;
+  value: any;
+}
+
+export interface QueryResult<T> {
+  docs: Array<T & { id: string }>;
+  lastDoc: firebase.firestore.DocumentSnapshot | null;
+  count: number;
+}
+
+// FirebaseFirestore namespace for WhereFilterOp type
+declare namespace firebase {
+  namespace firestore {
+    type WhereFilterOp = '<' | '<=' | '==' | '!=' | '>=' | '>' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in';
+    interface DocumentSnapshot {}
+  }
+}

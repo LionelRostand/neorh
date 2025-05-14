@@ -94,3 +94,57 @@ export const getDoc_firestore = async <T>(
     throw error;
   }
 };
+
+// Create read operations for a collection
+export const createReadOperations = <T extends Record<string, any>>(
+  collectionName: string,
+  setIsLoading: (loading: boolean) => void,
+  setError: (error: Error | null) => void,
+  getCollection: () => any
+) => {
+  // Get all documents from the collection
+  const getAll = async (options: {
+    queryParams?: QueryParams[];
+    orderByField?: string;
+    orderByDirection?: 'asc' | 'desc';
+    limitCount?: number;
+    startAfterDoc?: DocumentSnapshot;
+  } = {}) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await getDocs_firestore<T>({
+        collectionName,
+        ...options
+      });
+      return result;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Une erreur est survenue");
+      setError(error);
+      return { docs: [], lastDoc: null, count: 0 };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Get a document by ID
+  const getById = async (id: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await getDoc_firestore<T>(collectionName, id);
+      return result;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Une erreur est survenue");
+      setError(error);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    getAll,
+    getById
+  };
+};

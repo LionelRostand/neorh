@@ -1,5 +1,5 @@
 
-import { collection, query, where, orderBy, startAt, endAt, getDocs, QueryConstraint, limit, DocumentData } from 'firebase/firestore';
+import { collection, query, where, orderBy, startAt, endAt, getDocs, QueryConstraint, limit, DocumentData, DocumentSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { QueryResult } from '@/types/firebase';
 
@@ -84,4 +84,48 @@ export const searchDocs_firestore = async <T>({
     console.error('Error searching documents:', error);
     throw error;
   }
+};
+
+// Create search operations for a collection
+export const createSearchOperations = <T extends Record<string, any>>(
+  setIsLoading: (loading: boolean) => void,
+  setError: (error: Error | null) => void,
+  getCollection: () => any
+) => {
+  // Search documents in the collection
+  const search = async (
+    searchField: string,
+    searchTerm: string,
+    options: {
+      exactMatch?: boolean;
+      caseSensitive?: boolean;
+      orderByField?: string;
+      orderByDirection?: 'asc' | 'desc';
+      limitCount?: number;
+      additionalQueryParams?: { field: string; operator: any; value: any }[];
+    } = {}
+  ) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const collectionName = getCollection().id;
+      const result = await searchDocs_firestore<T>({
+        collectionName,
+        searchField,
+        searchTerm,
+        ...options
+      });
+      return result;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Une erreur est survenue");
+      setError(error);
+      return { docs: [], lastDoc: null, count: 0 };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    search
+  };
 };
