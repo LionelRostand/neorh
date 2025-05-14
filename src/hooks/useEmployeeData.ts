@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { Employee } from '@/types/employee';
 
@@ -204,7 +205,8 @@ export const useEmployeeData = () => {
       managerId: emp.id === '4' ? undefined : ['2', '4', '7', '11'].includes(emp.id) ? undefined : 
                  ['1', '6', '10'].includes(emp.id) ? '2' :  // Dev team under Sophie
                  ['3', '9', '12'].includes(emp.id) ? '7' :  // Marketing team under Philippe
-                 ['5', '8', '13'].includes(emp.id) ? '4',   // Support/Finance under Marie
+                 ['5', '8', '13'].includes(emp.id) ? '4' :   // Support/Finance under Marie
+                 undefined,
       startDate: emp.hireDate,
       status: emp.status === 'active' ? 'active' : 
               emp.status === 'onLeave' ? 'onLeave' : 'inactive'
