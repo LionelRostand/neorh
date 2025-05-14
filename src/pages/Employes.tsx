@@ -11,7 +11,7 @@ import {
   TabsList, 
   TabsTrigger 
 } from "@/components/ui/tabs";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { useEmployeeData } from '@/hooks/useEmployeeData';
 import { Package, Truck, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -38,7 +38,6 @@ const Employes = () => {
     <div className="p-4 md:p-6">
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold">Gestion des Employés</h1>
-        <p className="text-gray-500 mt-2">Données chargées depuis Firebase - Collection hr_employees</p>
       </div>
 
       {/* Cartes de statistiques */}
