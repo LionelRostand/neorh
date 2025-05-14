@@ -50,7 +50,7 @@ export const PresenceKiosk = () => {
   };
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center items-center mt-8">
       <div className="w-full max-w-md overflow-hidden rounded-lg shadow-lg">
         {/* En-tête bleu */}
         <div className="bg-blue-500 text-white p-4">
