@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Card, 
@@ -23,7 +22,7 @@ const Employes = () => {
   if (error) {
     toast({
       title: "Erreur de chargement",
-      description: "Impossible de charger les données des employés",
+      description: "Impossible de charger les données des employés depuis Firebase",
       variant: "destructive"
     });
   }
@@ -38,6 +37,9 @@ const Employes = () => {
     <div className="p-4 md:p-6">
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold">Gestion des Employés</h1>
+        <p className="text-muted-foreground">
+          {isLoading ? "Chargement des données..." : `${totalEmployees} employés trouvés dans la base Firebase`}
+        </p>
       </div>
 
       {/* Cartes de statistiques */}
@@ -107,6 +109,13 @@ const Employes = () => {
       <Card className="mb-6">
         <CardContent className="p-0">
           <Tabs defaultValue="liste" value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-4 p-0">
+              <TabsTrigger value="liste">Liste</TabsTrigger>
+              <TabsTrigger value="ajouter">Ajouter</TabsTrigger>
+              <TabsTrigger value="import">Importer</TabsTrigger>
+              <TabsTrigger value="export">Exporter</TabsTrigger>
+            </TabsList>
+            
             <TabsContent value="liste" className="m-0">
               <EmployeesProfiles 
                 employees={employees} 
