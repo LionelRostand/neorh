@@ -4,7 +4,7 @@ import { useEmployeeData } from "@/hooks/useEmployeeData";
 import HierarchyNode from "./HierarchyNode";
 
 const EmployeesHierarchy = () => {
-  const { data: employees, isLoading, error } = useEmployeeData();
+  const { employees, isLoading, error } = useEmployeeData();
 
   if (isLoading) {
     return (
