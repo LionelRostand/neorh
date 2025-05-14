@@ -25,7 +25,7 @@ export const useEmployeeData = () => {
           department: emp.department,
           email: emp.email,
           phone: emp.phone || '',
-          photoUrl: emp.avatarUrl || '',
+          photoUrl: emp.avatarUrl || '', // Making sure that this is correct per the Firestore data
           managerId: emp.managerId,
           startDate: emp.hireDate,
           status: emp.status
