@@ -1,0 +1,89 @@
+
+// Types pour la collection 'employees'
+export interface Employee {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  department: string;
+  position: string;
+  status: 'active' | 'onLeave' | 'terminated';
+  hireDate: string;
+  avatarUrl?: string;
+  managerId?: string;
+}
+
+// Types pour la collection 'badges'
+export interface Badge {
+  id?: string;
+  number: string;
+  employeeId: string;
+  type: string;
+  status: 'active' | 'inactive' | 'lost';
+  issueDate: string;
+  expiryDate: string;
+}
+
+// Types pour la collection 'accessZones'
+export interface AccessZone {
+  id?: string;
+  name: string;
+  description: string;
+  securityLevel: number;
+  location: string;
+}
+
+// Types pour la collection 'accessRights'
+export interface AccessRight {
+  id?: string;
+  employeeId: string;
+  badgeId: string;
+  zoneId: string;
+  startDate: string;
+  endDate?: string;
+  accessLevel: number;
+}
+
+// Types pour la collection 'accessLogs'
+export interface AccessLog {
+  id?: string;
+  badgeId: string;
+  employeeId: string;
+  zoneId: string;
+  timestamp: string;
+  type: 'entry' | 'exit';
+  status: 'authorized' | 'denied';
+}
+
+// Types pour la collection 'departments'
+export interface Department {
+  id?: string;
+  name: string;
+  description: string;
+  managerId?: string;
+  budget?: number;
+  objectives?: string;
+}
+
+// Types pour la collection 'hierarchy'
+export interface Hierarchy {
+  id?: string;
+  employeeId: string;
+  managerId: string;
+  level: number;
+  startDate: string;
+  endDate?: string;
+}
+
+// Types pour la collection 'leaves'
+export interface Leave {
+  id?: string;
+  employeeId: string;
+  type: 'annual' | 'sick' | 'maternity' | 'paternity' | 'other';
+  startDate: string;
+  endDate: string;
+  status: 'pending' | 'approved' | 'rejected';
+  approvedBy?: string;
+  comment?: string;
+}
