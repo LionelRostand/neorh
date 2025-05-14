@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,17 +8,8 @@ import { useCollection } from "@/hooks/useCollection";
 import { Badge } from "@/lib/constants";
 import { toast } from "@/hooks/use-toast";
 
-// Types pour les badges
-interface BadgeData {
-  id?: string;
-  number: string;
-  employeeId: string;
-  employeeName: string;
-  type: string;
-  status: 'active' | 'inactive' | 'lost' | 'pending';
-  issueDate: string;
-  expiryDate: string;
-}
+// Types pour les badges - now using the same interface from constants.ts
+// This local interface is no longer needed as we're using the Badge from constants.ts
 
 const Badges = () => {
   const [badges, setBadges] = useState<Badge[]>([]);
@@ -42,14 +32,14 @@ const Badges = () => {
         
         if (data.length === 0) {
           // Si aucun badge n'existe encore, utilisons des données fictives
-          const mockBadges = [
+          const mockBadges: Badge[] = [
             {
               id: "1",
               number: "B2023-001",
               employeeId: "1",
               employeeName: "Thomas Dubois",
               type: "Standard",
-              status: "active",
+              status: "active" as "active",
               issueDate: "15/03/2021",
               expiryDate: "15/03/2023"
             },
@@ -59,7 +49,7 @@ const Badges = () => {
               employeeId: "2",
               employeeName: "Sophie Martin",
               type: "Admin",
-              status: "pending",
+              status: "pending" as "pending",
               issueDate: "02/05/2022",
               expiryDate: "02/05/2024"
             },
@@ -69,7 +59,7 @@ const Badges = () => {
               employeeId: "3",
               employeeName: "Jean Bernard",
               type: "Standard",
-              status: "inactive",
+              status: "inactive" as "inactive",
               issueDate: "10/11/2019",
               expiryDate: "10/11/2021"
             }

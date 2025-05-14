@@ -20,7 +20,7 @@ export interface Badge {
   number: string;
   employeeId: string;
   type: string;
-  status: 'active' | 'inactive' | 'lost';
+  status: 'active' | 'inactive' | 'lost' | 'pending';
   issueDate: string;
   expiryDate: string;
 }
