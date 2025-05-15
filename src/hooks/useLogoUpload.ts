@@ -35,20 +35,18 @@ export function useLogoUpload() {
       setLogoFile(file);
       setLogoPreview(URL.createObjectURL(file));
       
-      // Convertir le fichier en base64
+      // Convertir le fichier en base64 string (pas un ArrayBuffer)
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target && event.target.result) {
-          // Extraire la partie base64 de la chaîne data URL
-          const base64String = event.target.result as string;
-          setLogoBase64(base64String);
+          setLogoBase64(event.target.result as string);
         }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // Cette fonction renvoie maintenant les données au format base64
+  // Cette fonction renvoie maintenant les données au format base64 string
   const uploadLogo = async (): Promise<{ base64: string | null, type: string | null, name: string | null } | null> => {
     if (!logoFile || !logoBase64) return null;
     

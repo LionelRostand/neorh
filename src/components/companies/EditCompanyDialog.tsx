@@ -35,7 +35,9 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
     registrationDate: new Date().toISOString().split('T')[0]
   });
   
-  const { getById, update, isLoading } = useFirestore<CompanyFormValues>("hr_companies");
+  const { getById, update, isLoading } = useFirestore<CompanyFormValues & { 
+    logo?: { base64: string, type: string, name: string } 
+  }>("hr_companies");
   
   // Load company data
   useEffect(() => {
@@ -56,7 +58,7 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
               postalCode: company.postalCode || "",
               country: company.country || "",
               description: company.description || "",
-              logoUrl: company.logoUrl || "",
+              logoUrl: company.logoUrl || (company.logo?.base64 || ""),
               type: company.type || "client",
               status: company.status || "active",
               registrationDate: company.registrationDate || new Date().toISOString().split('T')[0]
@@ -82,7 +84,7 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
   const handleSubmit = async (data: CompanyFormValues, logoData: { base64: string | null, type: string | null, name: string | null } | null) => {
     try {
       // If there's a new logo file, we'll handle the upload in the form component
-      let updatedData = { ...data };
+      let updatedData: any = { ...data };
       
       // If we have new logo data in base64 format, add it to the update data
       if (logoData && logoData.base64) {

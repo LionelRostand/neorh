@@ -87,7 +87,7 @@ const CompanyForm = ({ onCancel, onSuccess }: CompanyFormProps) => {
       };
       
       // Ajouter les données du logo s'il existe
-      if (logoData) {
+      if (logoData && logoData.base64) {
         companyData.logo = {
           base64: logoData.base64,
           type: logoData.type,
