@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, File } from "lucide-react";
+import { Plus, Search, Edit, File, Check, Clock, AlertCircle, Info } from "lucide-react";
 import { useCollection } from "@/hooks/useCollection";
 import { toast } from "@/components/ui/use-toast";
 import ContractStatusCards from "@/components/contracts/ContractStatusCards";
