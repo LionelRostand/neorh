@@ -7,6 +7,7 @@ import EditEmployeeDialog from '../EditEmployeeDialog';
 import EmployeeDocuments from './EmployeeDocuments';
 import EmployeeLeaves from './EmployeeLeaves';
 import EmployeeEvaluations from './EmployeeEvaluations';
+import EmployeeSkills from './EmployeeSkills';
 
 interface PersonalInfoFieldProps {
   label: string;
@@ -96,11 +97,8 @@ export const DocumentsTab: React.FC<{ employee: Employee }> = ({ employee }) => 
   <EmployeeDocuments employee={employee} />
 );
 
-export const CompetencesTab: React.FC = () => (
-  <EmptyTab 
-    title="Compétences" 
-    message="Aucune compétence enregistrée pour cet employé." 
-  />
+export const CompetencesTab: React.FC<{ employee: Employee }> = ({ employee }) => (
+  <EmployeeSkills employee={employee} />
 );
 
 export const HorairesTab: React.FC = () => (
