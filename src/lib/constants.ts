@@ -9,6 +9,7 @@ export const ROUTE_TO_COLLECTION_MAP = {
   '/conges': 'hr_leaves',
   '/contrats': 'hr_contracts',
   '/documents': 'hr_documents',
+  '/formations': 'hr_trainings',
 };
 
 // Define the collection types to provide correct typing
@@ -21,6 +22,7 @@ export interface CollectionTypes {
   hr_leaves: any;
   hr_contracts: any;
   hr_documents: any;
+  hr_trainings: any;
 }
 
 export type Leave = {
@@ -82,4 +84,16 @@ export type Document = {
   uploadDate: string;
   expiryDate?: string;
   status: 'active' | 'archived' | 'pending';
+}
+
+export type Training = {
+  id?: string;
+  title: string;
+  description: string;
+  trainer: string;
+  department: string;
+  participants: number;
+  startDate: string;
+  endDate?: string;
+  status: 'planifiée' | 'complétée' | 'annulée';
 }
