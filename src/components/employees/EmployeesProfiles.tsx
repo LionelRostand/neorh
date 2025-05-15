@@ -11,6 +11,7 @@ import EmployeePagination from './EmployeePagination';
 import EmployeeTableSkeleton from './EmployeeTableSkeleton';
 import EditEmployeeDialog from './EditEmployeeDialog';
 import DeleteEmployeeConfirmDialog from './DeleteEmployeeConfirmDialog';
+import ViewEmployeeDialog from './ViewEmployeeDialog';
 
 interface EmployeesProfilesProps {
   employees: Employee[] | undefined;
@@ -26,6 +27,7 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
   const {
     searchTerm,
@@ -68,6 +70,20 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({
       });
     }
   };
+  
+  const handleView = (employeeId: string) => {
+    const employee = employees.find(emp => emp.id === employeeId);
+    if (employee) {
+      setSelectedEmployee(employee);
+      setIsViewDialogOpen(true);
+    } else {
+      toast({
+        title: "Erreur",
+        description: "Employé non trouvé",
+        variant: "destructive"
+      });
+    }
+  };
 
   const handleSuccess = () => {
     if (onRefresh) {
@@ -99,6 +115,7 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({
             handleSort={handleSort}
             handleEdit={handleEdit}
             handleDelete={handleDelete}
+            handleView={handleView}
           />
           
           <EmployeePagination 
@@ -109,7 +126,7 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({
         </>
       )}
 
-      {/* Dialogs for Edit and Delete */}
+      {/* Dialogs for Edit, Delete and View */}
       <EditEmployeeDialog 
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
@@ -122,6 +139,12 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({
         onOpenChange={setIsDeleteDialogOpen}
         employee={selectedEmployee}
         onSuccess={handleSuccess}
+      />
+      
+      <ViewEmployeeDialog
+        open={isViewDialogOpen}
+        onOpenChange={setIsViewDialogOpen}
+        employee={selectedEmployee}
       />
     </div>
   );

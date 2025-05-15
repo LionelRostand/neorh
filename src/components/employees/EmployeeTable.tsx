@@ -8,7 +8,8 @@ import {
   Mail,
   Phone,
   Building2,
-  Calendar
+  Calendar,
+  Eye
 } from 'lucide-react';
 import { 
   DropdownMenu, 
@@ -41,6 +42,7 @@ interface EmployeeTableProps {
   handleSort: (field: keyof Employee) => void;
   handleEdit: (employeeId: string) => void;
   handleDelete: (employeeId: string) => void;
+  handleView: (employeeId: string) => void;
 }
 
 const EmployeeTable: React.FC<EmployeeTableProps> = ({
@@ -51,7 +53,8 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
   sortDirection,
   handleSort,
   handleEdit,
-  handleDelete
+  handleDelete,
+  handleView
 }) => {
   const getStatusBadge = (status: Employee['status']) => {
     switch (status) {
@@ -160,6 +163,10 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleView(employee.id)}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      Voir
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleEdit(employee.id)}>
                       <Edit className="mr-2 h-4 w-4" />
                       Modifier
