@@ -2,7 +2,29 @@
 import { useState, useEffect } from 'react';
 import { useFirestore } from './firestore';
 import { toast } from '@/components/ui/use-toast';
+import { Employee } from '@/types/employee';
+import { useMemo } from 'react';
 
+// Create the useEmployeeStatusStats function for consistency with the .tsx version
+export const useEmployeeStatusStats = (employees: Employee[] | undefined = []) => {
+  const stats = useMemo(() => {
+    const totalEmployees = employees?.length || 0;
+    const activeEmployees = employees?.filter(emp => emp.status === 'active')?.length || 0;
+    const onLeaveEmployees = employees?.filter(emp => emp.status === 'onLeave')?.length || 0;
+    const inactiveEmployees = employees?.filter(emp => emp.status === 'inactive')?.length || 0;
+
+    return {
+      totalEmployees,
+      activeEmployees,
+      onLeaveEmployees,
+      inactiveEmployees
+    };
+  }, [employees]);
+
+  return stats;
+};
+
+// Also export under the original name for backward compatibility
 export const useEmployeeStats = () => {
   const [employeeData, setEmployeeData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
