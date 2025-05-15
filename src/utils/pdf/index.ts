@@ -12,6 +12,7 @@ import {
   generateEvaluationsTab
 } from './tabGenerators';
 import type { PdfTab } from './types';
+import type { Evaluation } from '@/hooks/useEmployeeEvaluations';
 
 /**
  * Options pour la génération du PDF
@@ -19,6 +20,7 @@ import type { PdfTab } from './types';
 export interface PdfOptions {
   documents?: any[];
   leaves?: any[];
+  evaluations?: Evaluation[];
   // Autres options possibles à ajouter dans le futur
 }
 
@@ -55,7 +57,7 @@ export const generateEmployeePdf = (employee: Employee, activeTab: string, optio
       generateCongesTab(doc, startY, options?.leaves);
       break;
     case 'evaluations':
-      generateEvaluationsTab(doc, startY);
+      generateEvaluationsTab(doc, startY, options?.evaluations);
       break;
     default:
       generateInformationsTab(doc, employee, startY);

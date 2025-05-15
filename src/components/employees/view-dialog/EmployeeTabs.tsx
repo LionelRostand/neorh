@@ -58,7 +58,7 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
         </TabsContent>
         
         <TabsContent value="evaluations" className="p-6">
-          <EvaluationsTab />
+          <EvaluationsTab employee={employee} />
         </TabsContent>
       </ScrollArea>
     </Tabs>

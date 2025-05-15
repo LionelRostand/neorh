@@ -6,6 +6,7 @@ import { Pencil } from 'lucide-react';
 import EditEmployeeDialog from '../EditEmployeeDialog';
 import EmployeeDocuments from './EmployeeDocuments';
 import EmployeeLeaves from './EmployeeLeaves';
+import EmployeeEvaluations from './EmployeeEvaluations';
 
 interface PersonalInfoFieldProps {
   label: string;
@@ -113,9 +114,6 @@ export const CongesTab: React.FC<{ employee: Employee }> = ({ employee }) => (
   <EmployeeLeaves employee={employee} />
 );
 
-export const EvaluationsTab: React.FC = () => (
-  <EmptyTab 
-    title="Évaluations" 
-    message="Aucune évaluation disponible pour cet employé." 
-  />
+export const EvaluationsTab: React.FC<{ employee: Employee }> = ({ employee }) => (
+  <EmployeeEvaluations employee={employee} />
 );
