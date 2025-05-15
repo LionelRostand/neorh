@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { useFirestore } from "@/hooks/firestore";
-import { Shield } from "lucide-react";
+import { Shield, Eye, Pen, Check, Trash2 } from "lucide-react";
 
 type Permission = {
   id?: string;
@@ -15,6 +15,7 @@ type Permission = {
   canCreate: boolean;
   canEdit: boolean;
   canDelete: boolean;
+  employeeRole?: string;
 };
 
 const menuItems = [
@@ -44,13 +45,14 @@ const ParametresPermissions = () => {
       canView: true,
       canCreate: false,
       canEdit: false,
-      canDelete: false
+      canDelete: false,
+      employeeRole: "standard"
     }))
   );
   
   const { add, update } = useFirestore<Permission>('permissions');
-
-  const handlePermissionChange = (menuIndex: number, permissionType: keyof Omit<Permission, 'id' | 'menuName'>, value: boolean) => {
+  
+  const handlePermissionChange = (menuIndex: number, permissionType: keyof Omit<Permission, 'id' | 'menuName' | 'employeeRole'>, value: boolean) => {
     setPermissions(prev => {
       const newPermissions = [...prev];
       newPermissions[menuIndex] = {
@@ -105,10 +107,10 @@ const ParametresPermissions = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Shield className="h-5 w-5" /> 
-          Gestion des permissions
+          Gestion des permissions pour les employés
         </CardTitle>
         <CardDescription>
-          Définissez les droits d'accès aux différentes fonctionnalités pour les employés.
+          Définissez les droits d'accès aux différentes fonctionnalités pour les employés du module RH.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -117,10 +119,30 @@ const ParametresPermissions = () => {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[250px]">Menu</TableHead>
-                <TableHead className="text-center">Visualiser</TableHead>
-                <TableHead className="text-center">Créer</TableHead>
-                <TableHead className="text-center">Modifier</TableHead>
-                <TableHead className="text-center">Supprimer</TableHead>
+                <TableHead className="text-center">
+                  <div className="flex flex-col items-center">
+                    <Eye className="h-4 w-4 mb-1" />
+                    Visualiser
+                  </div>
+                </TableHead>
+                <TableHead className="text-center">
+                  <div className="flex flex-col items-center">
+                    <Check className="h-4 w-4 mb-1" />
+                    Créer
+                  </div>
+                </TableHead>
+                <TableHead className="text-center">
+                  <div className="flex flex-col items-center">
+                    <Pen className="h-4 w-4 mb-1" />
+                    Modifier
+                  </div>
+                </TableHead>
+                <TableHead className="text-center">
+                  <div className="flex flex-col items-center">
+                    <Trash2 className="h-4 w-4 mb-1" />
+                    Supprimer
+                  </div>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
