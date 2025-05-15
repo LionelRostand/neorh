@@ -6,24 +6,11 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Table, 
-  TableHeader, 
-  TableBody, 
-  TableHead, 
-  TableRow, 
-  TableCell 
-} from "@/components/ui/table";
-import { 
-  DownloadIcon, 
-  PlusIcon, 
-  SearchIcon, 
-  FileTextIcon, 
-  FilterIcon 
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { PlusIcon, SearchIcon, FilterIcon } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import EvaluationStatusCards from "@/components/evaluations/EvaluationStatusCards";
+import EvaluationTable from "@/components/evaluations/EvaluationTable";
 
 interface Evaluation {
   id: string;
@@ -36,19 +23,11 @@ interface Evaluation {
 
 const mockEvaluations: Evaluation[] = [
   {
-    id: "1",
+    id: "95d6215b-8b5c-4247-ad8c-6b8ce3313e7e",
     employee: "Lionel DJOSSA",
-    title: "TEST",
+    title: "DIRECTION GENERALE",
     date: "03 mai 2025",
-    evaluator: "Lionel DJOSSA",
-    status: "planifiée"
-  },
-  {
-    id: "2",
-    employee: "Employé inconnu",
-    title: "Évaluation",
-    date: "15 mai 2025",
-    evaluator: "Non assigné",
+    evaluator: "gérer par le PDG",
     status: "planifiée"
   }
 ];
@@ -64,13 +43,6 @@ const Evaluations = () => {
     });
   };
 
-  const handleExport = () => {
-    toast({
-      title: "Export des évaluations",
-      description: "Fonctionnalité à implémenter",
-    });
-  };
-
   const handleDelete = (id: string) => {
     toast({
       title: "Suppression",
@@ -78,64 +50,47 @@ const Evaluations = () => {
     });
   };
 
-  // Count evaluations by status
-  const planned = evaluations.filter(e => e.status === "planifiée").length;
-  const completed = evaluations.filter(e => e.status === "complétée").length;
-  const cancelled = evaluations.filter(e => e.status === "annulée").length;
+  const handleModify = (id: string) => {
+    toast({
+      title: "Modification",
+      description: `Modification de l'évaluation ${id}`,
+    });
+  };
 
-  const getStatusBadgeClass = (status: string) => {
-    switch(status) {
-      case "planifiée":
-        return "bg-emerald-600 hover:bg-emerald-700";
-      case "complétée":
-        return "bg-blue-600 hover:bg-blue-700";
-      case "annulée":
-        return "bg-red-600 hover:bg-red-700";
-      default:
-        return "bg-gray-600 hover:bg-gray-700";
-    }
-  }
+  const handleManage = (id: string) => {
+    toast({
+      title: "Gestion",
+      description: `Gestion de l'évaluation ${id}`,
+    });
+  };
+
+  // Count evaluations by status
+  const active = evaluations.filter(e => e.status === "planifiée").length;
+  const pending = evaluations.filter(e => e.status === "complétée").length;
+  const expired = evaluations.filter(e => e.status === "annulée").length;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Évaluations des employés</h1>
-        <div className="flex space-x-2">
-          <Button onClick={handleNewEvaluation} className="bg-emerald-600 hover:bg-emerald-700">
+        <h1 className="text-3xl font-bold">Gestion des évaluations</h1>
+        <div>
+          <Button onClick={handleNewEvaluation} className="bg-blue-600 hover:bg-blue-700">
             <PlusIcon className="mr-2 h-4 w-4" />
-            Nouvelle évaluation
-          </Button>
-          <Button variant="outline" onClick={handleExport}>
-            <DownloadIcon className="mr-2 h-4 w-4" />
-            Exporter
+            Nouveau
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border shadow-sm">
-          <CardContent className="p-6 flex flex-col items-center justify-center">
-            <span className="text-4xl font-bold">{planned}</span>
-            <span className="text-gray-500">Planifiées</span>
-          </CardContent>
-        </Card>
-        <Card className="border shadow-sm">
-          <CardContent className="p-6 flex flex-col items-center justify-center">
-            <span className="text-4xl font-bold">{completed}</span>
-            <span className="text-gray-500">Complétées</span>
-          </CardContent>
-        </Card>
-        <Card className="border shadow-sm">
-          <CardContent className="p-6 flex flex-col items-center justify-center">
-            <span className="text-4xl font-bold">{cancelled}</span>
-            <span className="text-gray-500">Annulées</span>
-          </CardContent>
-        </Card>
-      </div>
+      <EvaluationStatusCards 
+        active={active} 
+        pending={pending} 
+        expired={expired} 
+        coverage={100} 
+      />
 
       <Card className="border shadow-sm">
         <CardContent className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Évaluations</h2>
+          <h2 className="text-xl font-semibold mb-4">Liste des évaluations</h2>
           
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="relative flex-1">
@@ -170,50 +125,17 @@ const Evaluations = () => {
               </Select>
               
               <Button variant="outline" size="icon">
-                <FileTextIcon className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon">
                 <FilterIcon className="h-4 w-4" />
               </Button>
             </div>
           </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gray-50">
-                <TableHead className="font-medium">Employé</TableHead>
-                <TableHead className="font-medium">Titre</TableHead>
-                <TableHead className="font-medium">Date</TableHead>
-                <TableHead className="font-medium">Évaluateur</TableHead>
-                <TableHead className="font-medium">Statut</TableHead>
-                <TableHead className="text-right font-medium">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {evaluations.map((evaluation) => (
-                <TableRow key={evaluation.id}>
-                  <TableCell>{evaluation.employee}</TableCell>
-                  <TableCell>{evaluation.title}</TableCell>
-                  <TableCell>{evaluation.date}</TableCell>
-                  <TableCell>{evaluation.evaluator}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusBadgeClass(evaluation.status)}>
-                      Planifiée
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button 
-                      variant="ghost" 
-                      onClick={() => handleDelete(evaluation.id)}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                    >
-                      Supprimer
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <EvaluationTable 
+            evaluations={evaluations}
+            onDelete={handleDelete}
+            onModify={handleModify}
+            onManage={handleManage}
+          />
         </CardContent>
       </Card>
     </div>
