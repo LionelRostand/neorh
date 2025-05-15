@@ -58,22 +58,22 @@ const Departements = () => {
 
   const handleNewContract = () => {
     toast({
-      title: "Nouveau contrat",
-      description: "La création d'un nouveau contrat sera disponible prochainement."
+      title: "Nouveau département",
+      description: "La création d'un nouveau département sera disponible prochainement."
     });
   };
 
   const handleDetails = (contractId: string) => {
     toast({
-      title: "Détails du contrat",
-      description: `Affichage des détails du contrat ${contractId} à venir.`
+      title: "Détails du département",
+      description: `Affichage des détails du département ${contractId} à venir.`
     });
   };
 
   const handleEdit = (contractId: string) => {
     toast({
-      title: "Modifier le contrat",
-      description: `Modification du contrat ${contractId} à venir.`
+      title: "Modifier le département",
+      description: `Modification du département ${contractId} à venir.`
     });
   };
 
@@ -81,7 +81,7 @@ const Departements = () => {
     <div className="space-y-6">
       {/* Header with title and button */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Gestion des contrats</h1>
+        <h1 className="text-2xl font-bold">Gestion des départements</h1>
         <Button onClick={handleNewContract}>
           <Plus className="h-4 w-4 mr-2" />
           Nouveau
@@ -99,7 +99,7 @@ const Departements = () => {
       {/* Contracts table */}
       <div className="bg-white border rounded-lg overflow-hidden">
         <div className="p-4 border-b">
-          <h2 className="text-lg font-medium">Liste des contrats</h2>
+          <h2 className="text-lg font-medium">Liste des départements</h2>
         </div>
         
         <div className="overflow-x-auto">
