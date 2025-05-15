@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Employee } from '@/types/employee';
-import { generateEmployeePdf } from '@/utils/pdfExport';
+import { generateEmployeePdfWithDocuments } from '@/utils/pdfExport';
 import { toast } from '@/components/ui/use-toast';
 import EmployeeHeader from './view-dialog/EmployeeHeader';
 import EmployeeTabs from './view-dialog/EmployeeTabs';
@@ -24,9 +24,9 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
   
   if (!employee) return null;
   
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     try {
-      generateEmployeePdf(employee, activeTab);
+      await generateEmployeePdfWithDocuments(employee, activeTab);
       toast({
         title: "Exportation réussie",
         description: "Le document PDF a été généré avec succès",

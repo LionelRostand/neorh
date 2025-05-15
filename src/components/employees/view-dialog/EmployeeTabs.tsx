@@ -42,7 +42,7 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
         </TabsContent>
         
         <TabsContent value="documents" className="p-6">
-          <DocumentsTab />
+          <DocumentsTab employee={employee} />
         </TabsContent>
         
         <TabsContent value="competences" className="p-6">

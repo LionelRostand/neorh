@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { Employee } from '@/types/employee';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import EditEmployeeDialog from '../EditEmployeeDialog';
+import EmployeeDocuments from './EmployeeDocuments';
 
 interface PersonalInfoFieldProps {
   label: string;
@@ -88,11 +90,8 @@ export const EmptyTab: React.FC<EmptyTabProps> = ({ title, message }) => {
   );
 };
 
-export const DocumentsTab: React.FC = () => (
-  <EmptyTab 
-    title="Documents" 
-    message="Aucun document disponible pour cet employé." 
-  />
+export const DocumentsTab: React.FC<{ employee: Employee }> = ({ employee }) => (
+  <EmployeeDocuments employee={employee} />
 );
 
 export const CompetencesTab: React.FC = () => (
