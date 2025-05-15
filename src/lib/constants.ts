@@ -1,3 +1,4 @@
+
 // Define the mapping between routes and Firestore collections
 export const ROUTE_TO_COLLECTION_MAP = {
   '/employes': 'hr_employees',
@@ -28,3 +29,37 @@ export type Leave = {
   endDate: string;
   status: string;
 }
+
+export type Badge = {
+  id?: string;
+  number: string;
+  employeeId: string;
+  type: string;
+  status: 'active' | 'inactive' | 'lost' | 'pending';
+  issueDate: string;
+  expiryDate: string;
+}
+
+export type Timesheet = {
+  id?: string;
+  employeeId: string;
+  weekStartDate: string;
+  weekEndDate: string;
+  hours: number;
+  status: string;
+  submittedDate?: string;
+  approvedBy?: string;
+  approvalDate?: string;
+}
+
+export type Contract = {
+  id?: string;
+  employeeId: string;
+  employeeName?: string;
+  position?: string;
+  type: string;
+  startDate: string;
+  endDate?: string;
+  status: 'draft' | 'active' | 'expired' | 'pending';
+}
+

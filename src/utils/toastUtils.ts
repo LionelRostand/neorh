@@ -1,25 +1,24 @@
 
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 
-export const showSuccessToast = (message: string) => {
+export const showSuccessToast = (message: string, title = "Succès") => {
   toast({
-    title: "Succès",
+    title: title,
     description: message,
-    variant: "default",
   });
 };
 
-export const showErrorToast = (message: string) => {
+export const showErrorToast = (message: string, title = "Erreur") => {
   toast({
-    title: "Erreur",
-    description: message,
     variant: "destructive",
+    title: title,
+    description: message,
   });
 };
 
-export const showInfoToast = (message: string) => {
+export const showInfoToast = (message: string, title = "Information") => {
   toast({
-    title: "Information",
+    title: title,
     description: message,
   });
 };
