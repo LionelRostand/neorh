@@ -20,11 +20,31 @@ const DocumentFilter = ({
   return (
     <>
       <Tabs defaultValue={activeTab} className="w-full" onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 w-full max-w-md mb-6">
-          <TabsTrigger value="all" className="text-sm">Tous les documents</TabsTrigger>
-          <TabsTrigger value="contracts" className="text-sm">Contrats</TabsTrigger>
-          <TabsTrigger value="paystubs" className="text-sm">Fiches de paie</TabsTrigger>
-          <TabsTrigger value="certificates" className="text-sm">Certifications</TabsTrigger>
+        <TabsList className="border-b w-full rounded-none bg-transparent p-0 mb-6 flex gap-1">
+          <TabsTrigger 
+            value="all" 
+            className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-2 rounded-none text-sm font-medium transition-colors"
+          >
+            Tous les documents
+          </TabsTrigger>
+          <TabsTrigger 
+            value="contracts" 
+            className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-2 rounded-none text-sm font-medium transition-colors"
+          >
+            Contrats
+          </TabsTrigger>
+          <TabsTrigger 
+            value="paystubs" 
+            className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-2 rounded-none text-sm font-medium transition-colors"
+          >
+            Fiches de paie
+          </TabsTrigger>
+          <TabsTrigger 
+            value="certificates" 
+            className="border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-6 py-2 rounded-none text-sm font-medium transition-colors"
+          >
+            Certifications
+          </TabsTrigger>
         </TabsList>
       </Tabs>
       
