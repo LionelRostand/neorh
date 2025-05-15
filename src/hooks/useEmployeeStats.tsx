@@ -19,3 +19,6 @@ export const useEmployeeStatusStats = (employees: Employee[] | undefined = []) =
 
   return stats;
 };
+
+// Also provide the hook under the original name for backward compatibility
+export const useEmployeeStats = useEmployeeStatusStats;
