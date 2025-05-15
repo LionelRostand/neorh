@@ -15,6 +15,7 @@ import Conges from "./pages/Conges";
 import Contrats from "./pages/Contrats";
 import DocumentsRH from "./pages/DocumentsRH";
 import Departements from "./pages/Departements";
+import Evaluations from "./pages/Evaluations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/contrats" element={<Layout><Contrats /></Layout>} />
           <Route path="/documents" element={<Layout><DocumentsRH /></Layout>} />
           <Route path="/departements" element={<Layout><Departements /></Layout>} />
+          <Route path="/evaluations" element={<Layout><Evaluations /></Layout>} />
           {/* D'autres routes pour les sections RH seront ajoutées ici */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
