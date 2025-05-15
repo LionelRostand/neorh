@@ -15,7 +15,7 @@ const FeuillesDeTemps = () => {
   const [loading, setLoading] = useState(true);
   
   // Utilisation du hook useCollection pour accéder à la collection des feuilles de temps
-  const timesheetCollection = useCollection<'hr_timesheet'>();
+  const timesheetCollection = useCollection<'hr_timesheets'>();
 
   useEffect(() => {
     const fetchTimesheets = async () => {
@@ -32,6 +32,9 @@ const FeuillesDeTemps = () => {
               date: "2025-05-10",
               taskDescription: "Développement frontend",
               hoursWorked: 8,
+              weekStartDate: "2025-05-10",
+              weekEndDate: "2025-05-16",
+              hours: 40,
               status: "approved",
               submittedAt: "2025-05-10T18:00:00",
               approvedBy: "Manager1",
@@ -44,6 +47,9 @@ const FeuillesDeTemps = () => {
               projectId: "PROJ-001",
               taskDescription: "Réunion client",
               hoursWorked: 2,
+              weekStartDate: "2025-05-10",
+              weekEndDate: "2025-05-16",
+              hours: 35,
               status: "submitted",
               submittedAt: "2025-05-11T17:45:00"
             },
@@ -54,6 +60,9 @@ const FeuillesDeTemps = () => {
               projectId: "PROJ-002",
               taskDescription: "Tests d'intégration",
               hoursWorked: 6,
+              weekStartDate: "2025-05-10",
+              weekEndDate: "2025-05-16",
+              hours: 38,
               status: "draft"
             }
           ]);

@@ -34,6 +34,7 @@ export type Badge = {
   id?: string;
   number: string;
   employeeId: string;
+  employeeName?: string; // Added this property
   type: string;
   status: 'active' | 'inactive' | 'lost' | 'pending';
   issueDate: string;
@@ -43,11 +44,16 @@ export type Badge = {
 export type Timesheet = {
   id?: string;
   employeeId: string;
+  date?: string; // Added this property
+  projectId?: string; // Added this property
+  taskDescription?: string; // Added this property
+  hoursWorked?: number; // Added this property
   weekStartDate: string;
   weekEndDate: string;
   hours: number;
   status: string;
-  submittedDate?: string;
+  submittedAt?: string; // Added this property
+  approvedAt?: string; // Added this property
   approvedBy?: string;
   approvalDate?: string;
 }
@@ -62,4 +68,3 @@ export type Contract = {
   endDate?: string;
   status: 'draft' | 'active' | 'expired' | 'pending';
 }
-
