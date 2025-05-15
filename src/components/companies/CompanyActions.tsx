@@ -77,7 +77,6 @@ const CompanyActions = ({
         </Button>
       </div>
 
-      {/* Dialogs */}
       {isViewOpen && (
         <ViewCompanyDialog
           companyId={companyId}
