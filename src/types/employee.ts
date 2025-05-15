@@ -10,4 +10,8 @@ export interface Employee {
   managerId?: string;
   startDate: string;
   status: 'active' | 'inactive' | 'onLeave';
+  // Ajout de nouveaux champs optionnels pour plus d'informations
+  personalEmail?: string;
+  birthDate?: string;
+  address?: string;
 }
