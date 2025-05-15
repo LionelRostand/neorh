@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select';
 import { UseFormReturn } from 'react-hook-form';
 import { EmployeeFormValues } from './types';
-import { Company } from '@/hooks/useCompaniesData';
+import { Company } from '@/types/company';
 import { Department } from '@/hooks/useDepartmentsData';
 import { Employee } from '@/types/employee';
 
