@@ -27,12 +27,18 @@ import {
 import { cn } from '@/lib/utils';
 import { UseFormReturn } from 'react-hook-form';
 import { EmployeeEditFormValues } from './types';
+import { useDepartmentsData } from '@/hooks/useDepartmentsData';
+import { useManagersData } from '@/hooks/useManagersData';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface EditEmployeeStatusInfoProps {
   form: UseFormReturn<EmployeeEditFormValues>;
 }
 
 export function EditEmployeeStatusInfo({ form }: EditEmployeeStatusInfoProps) {
+  const { departments, isLoading: isDepartmentsLoading } = useDepartmentsData();
+  const { managers, isLoading: isManagersLoading } = useManagersData();
+
   return (
     <>
       <FormField
@@ -41,20 +47,24 @@ export function EditEmployeeStatusInfo({ form }: EditEmployeeStatusInfoProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Département</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez un département" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="marketing">Marketing</SelectItem>
-                <SelectItem value="it">IT</SelectItem>
-                <SelectItem value="finance">Finance</SelectItem>
-                <SelectItem value="rh">Ressources Humaines</SelectItem>
-                <SelectItem value="sales">Ventes</SelectItem>
-              </SelectContent>
-            </Select>
+            {isDepartmentsLoading ? (
+              <Skeleton className="h-10 w-full" />
+            ) : (
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez un département" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {departments.map((department) => (
+                    <SelectItem key={department.id} value={department.id}>
+                      {department.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <FormMessage />
           </FormItem>
         )}
@@ -131,18 +141,24 @@ export function EditEmployeeStatusInfo({ form }: EditEmployeeStatusInfoProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Responsable</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez un responsable" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="manager1">Jean Dupont</SelectItem>
-                <SelectItem value="manager2">Marie Martin</SelectItem>
-                <SelectItem value="manager3">Pierre Durand</SelectItem>
-              </SelectContent>
-            </Select>
+            {isManagersLoading ? (
+              <Skeleton className="h-10 w-full" />
+            ) : (
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez un responsable" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {managers.map((manager) => (
+                    <SelectItem key={manager.id} value={manager.id}>
+                      {manager.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <FormMessage />
           </FormItem>
         )}
