@@ -25,9 +25,10 @@ export const useEmployeeEvaluations = (employeeId: string) => {
     const fetchEmployeeEvaluations = async () => {
       setLoading(true);
       try {
-        const result = await search([
-          { field: 'employeeId', operator: '==', value: employeeId }
-        ]);
+        const result = await search('employeeId', employeeId, {
+          sortField: 'date',
+          sortDirection: 'desc'
+        });
         
         if (result.docs) {
           setEvaluations(result.docs);

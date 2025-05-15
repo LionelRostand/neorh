@@ -17,9 +17,10 @@ export const useEmployeeLeaves = (employeeId: string) => {
     const fetchEmployeeLeaves = async () => {
       setLoading(true);
       try {
-        const result = await search([
-          { field: 'employeeId', operator: '==', value: employeeId }
-        ]);
+        const result = await search('employeeId', employeeId, {
+          sortField: 'startDate',
+          sortDirection: 'desc'
+        });
         
         if (result.docs) {
           setLeaves(result.docs);
