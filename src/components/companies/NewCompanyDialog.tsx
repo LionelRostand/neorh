@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import CompanyForm from "./CompanyForm";
+import CompanyForm from "./form/CompanyForm";
 
 interface NewCompanyDialogProps {
   open: boolean;
