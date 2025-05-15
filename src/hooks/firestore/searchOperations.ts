@@ -108,7 +108,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
     setIsLoading(true);
     setError(null);
     try {
-      const collectionName = getCollection().id;
+      const collectionRef = getCollection();
       
       // Create a query with all necessary constraints
       const queryConstraints: QueryConstraint[] = [];
@@ -133,8 +133,8 @@ export const createSearchOperations = <T extends Record<string, any>>(
         queryConstraints.push(limit(options.limitCount));
       }
       
-      // Create and execute the query with all constraints
-      const q = query(getCollection(), ...queryConstraints);
+      // Create and execute the query with all constraints - Fixed spreading issue
+      const q = query(collectionRef, ...queryConstraints);
       const querySnapshot = await getDocs(q);
       
       // Process the results
