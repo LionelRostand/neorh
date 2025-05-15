@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Card, 
@@ -22,7 +21,7 @@ interface Company {
   registrationDate: string;
   status: string;
   logo?: {
-    binary: Uint8Array;
+    base64: string;
     type: string;
     name: string;
   };
@@ -45,18 +44,11 @@ const Entreprises = () => {
       const companiesData = snapshot.docs.map((doc) => {
         const data = doc.data();
         
-        // Traiter le logo binaire s'il existe
+        // Traiter le logo s'il existe
         let logoUrl = data.logoUrl;
-        if (data.logo && data.logo.binary) {
-          // Convertir le binaire en base64 pour l'affichage
-          const binary = data.logo.binary;
-          const bytes = new Uint8Array(binary);
-          let binaryString = '';
-          for (let i = 0; i < bytes.byteLength; i++) {
-            binaryString += String.fromCharCode(bytes[i]);
-          }
-          const base64 = btoa(binaryString);
-          logoUrl = `data:${data.logo.type};base64,${base64}`;
+        if (data.logo && data.logo.base64) {
+          // Le logo est déjà en base64, on peut l'utiliser directement
+          logoUrl = data.logo.base64;
         }
         
         return {

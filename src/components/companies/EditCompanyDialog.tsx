@@ -79,23 +79,31 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
   }, [companyId, open, getById]);
 
   // Updated the function signature to match what EditCompanyForm is passing
-  const handleSubmit = async (data: CompanyFormValues, logoData: { binary: ArrayBuffer | null, type: string | null, name: string | null } | null) => {
+  const handleSubmit = async (data: CompanyFormValues, logoData: { base64: string | null, type: string | null, name: string | null } | null) => {
     try {
       // If there's a new logo file, we'll handle the upload in the form component
       let updatedData = { ...data };
       
-      // Update the company in Firestore
+      // If we have new logo data in base64 format, add it to the update data
+      if (logoData && logoData.base64) {
+        updatedData.logo = {
+          base64: logoData.base64,
+          type: logoData.type,
+          name: logoData.name
+        };
+      }
+      
       await update(companyId, updatedData);
       
       toast({
         title: "Succès",
-        description: "L'entreprise a été mise à jour avec succès"
+        description: "Entreprise mise à jour avec succès"
       });
       
       if (onSuccess) onSuccess();
       onOpenChange(false);
     } catch (error) {
-      console.error("Erreur lors de la mise à jour de l'entreprise:", error);
+      console.error("Erreur lors de la mise à jour:", error);
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour l'entreprise",

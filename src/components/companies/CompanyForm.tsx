@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -78,7 +77,7 @@ const CompanyForm = ({ onCancel, onSuccess }: CompanyFormProps) => {
   const onSubmit = async (data: CompanyFormValues) => {
     setIsLoading(true);
     try {
-      // Récupérer les données binaires du logo si présent
+      // Récupérer les données du logo en base64
       const logoData = await uploadLogo();
       
       // Préparer les données pour Firestore
@@ -89,17 +88,14 @@ const CompanyForm = ({ onCancel, onSuccess }: CompanyFormProps) => {
       
       // Ajouter les données du logo s'il existe
       if (logoData) {
-        // Convertir ArrayBuffer en Uint8Array pour stockage Firestore
-        const uint8Array = new Uint8Array(logoData.binary);
-        
         companyData.logo = {
-          binary: uint8Array,
+          base64: logoData.base64,
           type: logoData.type,
           name: logoData.name
         };
       }
 
-      // Ajouter directement à Firestore sans utiliser useFirestore
+      // Ajouter à Firestore
       const docRef = await addDoc(collection(db, 'hr_companies'), companyData);
       
       toast({

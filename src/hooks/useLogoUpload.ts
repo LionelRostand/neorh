@@ -6,7 +6,7 @@ export function useLogoUpload() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [logoBinary, setLogoBinary] = useState<ArrayBuffer | null>(null);
+  const [logoBase64, setLogoBase64] = useState<string | null>(null);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -35,26 +35,27 @@ export function useLogoUpload() {
       setLogoFile(file);
       setLogoPreview(URL.createObjectURL(file));
       
-      // Lire le fichier en tant que ArrayBuffer pour le stockage binaire
+      // Convertir le fichier en base64
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target && event.target.result) {
-          setLogoBinary(event.target.result as ArrayBuffer);
+          // Extraire la partie base64 de la chaîne data URL
+          const base64String = event.target.result as string;
+          setLogoBase64(base64String);
         }
       };
-      reader.readAsArrayBuffer(file);
+      reader.readAsDataURL(file);
     }
   };
 
-  // Cette fonction n'utilise plus Firebase Storage
-  const uploadLogo = async (): Promise<{ binary: ArrayBuffer | null, type: string | null, name: string | null } | null> => {
-    if (!logoFile || !logoBinary) return null;
+  // Cette fonction renvoie maintenant les données au format base64
+  const uploadLogo = async (): Promise<{ base64: string | null, type: string | null, name: string | null } | null> => {
+    if (!logoFile || !logoBase64) return null;
     
     setIsUploading(true);
     try {
-      // Retourne directement les données binaires et le type MIME
       return {
-        binary: logoBinary,
+        base64: logoBase64,
         type: logoFile.type,
         name: logoFile.name
       };
@@ -73,7 +74,7 @@ export function useLogoUpload() {
 
   const resetLogo = () => {
     setLogoFile(null);
-    setLogoBinary(null);
+    setLogoBase64(null);
     if (logoPreview) {
       URL.revokeObjectURL(logoPreview);
     }

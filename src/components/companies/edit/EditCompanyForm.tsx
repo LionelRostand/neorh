@@ -42,7 +42,7 @@ interface EditCompanyFormProps {
   companyId: string;
   initialData: CompanyFormValues;
   isUpdating: boolean;
-  onSubmit: (data: CompanyFormValues, logoData: { binary: ArrayBuffer | null, type: string | null, name: string | null } | null) => Promise<void>;
+  onSubmit: (data: CompanyFormValues, logoData: { base64: string | null, type: string | null, name: string | null } | null) => Promise<void>;
   onCancel: () => void;
 }
 
