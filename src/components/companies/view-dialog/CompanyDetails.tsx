@@ -5,8 +5,9 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Avatar } from "@/components/ui/avatar";
 import { Company } from "@/types/company";
-import { Building, Globe, Mail, Phone, MapPin, Calendar } from "lucide-react";
+import { Building, Globe, Mail, Phone, MapPin, Calendar, Printer } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { exportCompanyToPdf } from "@/utils/company/pdfExport";
 
 interface CompanyDetailsProps {
   company: Company;
@@ -14,6 +15,10 @@ interface CompanyDetailsProps {
 }
 
 const CompanyDetails = ({ company, onClose }: CompanyDetailsProps) => {
+  const handlePrint = () => {
+    exportCompanyToPdf(company);
+  };
+
   return (
     <div className="grid gap-6">
       <div className="flex items-center justify-between">
@@ -119,7 +124,15 @@ const CompanyDetails = ({ company, onClose }: CompanyDetailsProps) => {
         </Card>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button 
+          variant="outline" 
+          onClick={handlePrint} 
+          className="flex items-center gap-2"
+        >
+          <Printer className="h-4 w-4" />
+          Imprimer
+        </Button>
         <Button variant="outline" onClick={onClose}>
           Fermer
         </Button>
