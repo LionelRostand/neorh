@@ -5,18 +5,18 @@ import {
   CardContent 
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Edit, File, Check, Clock, AlertCircle, Info } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useCollection } from "@/hooks/useCollection";
 import { toast } from "@/components/ui/use-toast";
-import ContractStatusCards from "@/components/contracts/ContractStatusCards";
 import { Contract } from "@/lib/constants";
-import { Badge } from "@/components/ui/badge";
+import ContractStatusCards from "@/components/contracts/ContractStatusCards";
+import ContractSearch from "@/components/contracts/ContractSearch";
+import ContractTable from "@/components/contracts/ContractTable";
 
 const Contrats = () => {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
   const { getAll, isLoading, error } = useCollection<'hr_contracts'>();
 
   useEffect(() => {
@@ -53,25 +53,12 @@ const Contrats = () => {
     }
   };
 
-  // Compter les contrats par statut
+  // Count contracts by status
   const countByStatus = {
     active: contracts.filter(c => c.status === 'active').length,
     pending: contracts.filter(c => c.status === 'pending').length,
     expired: contracts.filter(c => c.status === 'expired').length,
     total: contracts.length
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-100 text-green-800 border-green-300 hover:bg-green-200">Actif</Badge>;
-      case 'pending':
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-300 hover:bg-blue-200">À venir</Badge>;
-      case 'expired':
-        return <Badge className="bg-red-100 text-red-800 border-red-300 hover:bg-red-200">Expiré</Badge>;
-      default:
-        return <Badge>Inconnu</Badge>;
-    }
   };
 
   const handleNewContract = () => {
@@ -94,6 +81,13 @@ const Contrats = () => {
       description: `Modification du contrat ${id}`
     });
   };
+
+  // Filter contracts based on search term
+  const filteredContracts = contracts.filter(contract => 
+    contract.employeeName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    contract.position?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    contract.type?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -121,124 +115,17 @@ const Contrats = () => {
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-4">Liste des contrats</h2>
             
-            <div className="py-4">
-              <div className="relative w-full max-w-sm">
-                <Input 
-                  placeholder="Rechercher..." 
-                  className="pl-10"
-                />
-                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-gray-400" />
-                </div>
-              </div>
-            </div>
+            <ContractSearch 
+              value={searchTerm}
+              onChange={setSearchTerm}
+            />
 
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Employé</TableHead>
-                    <TableHead>Poste</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Début</TableHead>
-                    <TableHead>Fin</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center py-10">Chargement...</TableCell>
-                    </TableRow>
-                  ) : contracts.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center py-10">Aucun contrat trouvé</TableCell>
-                    </TableRow>
-                  ) : (
-                    contracts.map((contract) => (
-                      <TableRow key={contract.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
-                              {contract.employeeName?.charAt(0) || '?'}
-                            </div>
-                            <div className="font-medium">{contract.employeeName || 'Employé inconnu'}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{contract.position || 'Non spécifié'}</TableCell>
-                        <TableCell>{contract.type}</TableCell>
-                        <TableCell>{contract.startDate || '-'}</TableCell>
-                        <TableCell>{contract.endDate || '—'}</TableCell>
-                        <TableCell>{getStatusBadge(contract.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => handleDetails(contract.id || '')}>
-                              <File className="h-4 w-4 mr-1" /> Détails
-                            </Button>
-                            <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => handleEdit(contract.id || '')}>
-                              <Edit className="h-4 w-4 mr-1" /> Modifier
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-
-                  {/* Example row for demonstration when no contracts */}
-                  {contracts.length === 0 && !loading && (
-                    <>
-                      <TableRow>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">L</div>
-                            <div className="font-medium">Lionel DJOSSA</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>PDG</TableCell>
-                        <TableCell>CDI</TableCell>
-                        <TableCell>03/05/2025</TableCell>
-                        <TableCell>—</TableCell>
-                        <TableCell>{getStatusBadge('active')}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="outline" size="sm" className="h-8 px-2">
-                              <File className="h-4 w-4 mr-1" /> Détails
-                            </Button>
-                            <Button variant="outline" size="sm" className="h-8 px-2">
-                              <Edit className="h-4 w-4 mr-1" /> Modifier
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">?</div>
-                            <div className="font-medium">Employé inconnu</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>Non spécifié</TableCell>
-                        <TableCell>CDI</TableCell>
-                        <TableCell>—</TableCell>
-                        <TableCell>—</TableCell>
-                        <TableCell>{getStatusBadge('active')}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="outline" size="sm" className="h-8 px-2">
-                              <File className="h-4 w-4 mr-1" /> Détails
-                            </Button>
-                            <Button variant="outline" size="sm" className="h-8 px-2">
-                              <Edit className="h-4 w-4 mr-1" /> Modifier
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    </>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            <ContractTable 
+              contracts={filteredContracts}
+              loading={loading}
+              onDetails={handleDetails}
+              onEdit={handleEdit}
+            />
           </div>
         </CardContent>
       </Card>
