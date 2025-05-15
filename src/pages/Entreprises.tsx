@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { 
   Card, 
   CardContent 
@@ -12,21 +12,7 @@ import CompanySearch from "@/components/companies/CompanySearch";
 import CompanyTable from "@/components/companies/CompanyTable";
 import NewCompanyDialog from "@/components/companies/NewCompanyDialog";
 import { useFirestore } from "@/hooks/useFirestore";
-
-interface Company {
-  id?: string;
-  name: string;
-  industry: string;
-  type: string;
-  registrationDate: string;
-  status: string;
-  logo?: {
-    base64: string;
-    type: string;
-    name: string;
-  };
-  logoUrl?: string;
-}
+import { Company } from "@/types/company";
 
 const Entreprises = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -39,24 +25,29 @@ const Entreprises = () => {
   const fetchCompanies = useCallback(async () => {
     try {
       setLoading(true);
+      console.log("Fetching companies data");
       
       const result = await getAll();
       if (result && result.docs) {
         const companiesData = result.docs.map((company) => {
-          // Traiter le logo s'il existe
+          // Process logo if it exists
           let logoUrl = company.logoUrl;
           if (company.logo && company.logo.base64) {
-            // Le logo est déjà en base64, on peut l'utiliser directement
+            // Logo is already in base64, we can use it directly
             logoUrl = company.logo.base64;
           }
           
           return {
             ...company,
-            logoUrl: logoUrl
+            logoUrl: logoUrl,
+            // Ensure required fields have default values
+            name: company.name || 'Entreprise sans nom',
+            status: company.status || 'inactive'
           } as Company;
         });
         
         setCompanies(companiesData);
+        console.log(`Loaded ${companiesData.length} companies`);
       }
     } catch (error) {
       console.error("Error fetching companies:", error);
@@ -78,30 +69,21 @@ const Entreprises = () => {
     setIsNewCompanyDialogOpen(true);
   };
 
-  const handleDetails = (id: string) => {
-    // This is now handled by CompanyActions component
-    console.log(`Viewing details for company ${id}`);
-  };
-
-  const handleEdit = (id: string) => {
-    // This is now handled by CompanyActions component
-    console.log(`Editing company ${id}`);
-  };
-
   // Count companies by status
-  const countByStatus = {
+  const countByStatus = useMemo(() => ({
     active: companies.filter(c => c.status === 'active').length,
     pending: companies.filter(c => c.status === 'pending').length,
     inactive: companies.filter(c => c.status === 'inactive').length,
     total: companies.length
-  };
+  }), [companies]);
 
   // Filter companies based on search term
-  const filteredCompanies = companies.filter(company => 
-    company.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    company.industry?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    company.type?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCompanies = useMemo(() => 
+    companies.filter(company => 
+      company.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      company.industry?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      company.type?.toLowerCase().includes(searchTerm.toLowerCase())
+    ), [companies, searchTerm]);
 
   return (
     <div className="space-y-6">
@@ -138,8 +120,6 @@ const Entreprises = () => {
             <CompanyTable 
               companies={filteredCompanies}
               loading={loading || isLoading}
-              onDetails={handleDetails}
-              onEdit={handleEdit}
               onSuccess={fetchCompanies}
             />
           </div>

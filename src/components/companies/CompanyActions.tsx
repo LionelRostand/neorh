@@ -5,6 +5,7 @@ import { Eye, Edit, Trash2 } from "lucide-react";
 import ViewCompanyDialog from "./ViewCompanyDialog";
 import EditCompanyDialog from "./EditCompanyDialog";
 import DeleteCompanyDialog from "./DeleteCompanyDialog";
+import { toast } from "@/components/ui/use-toast";
 
 interface CompanyActionsProps {
   companyId: string;
@@ -28,6 +29,15 @@ const CompanyActions = ({
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const handleView = () => {
+    if (!companyId) {
+      toast({
+        title: "Erreur",
+        description: "ID d'entreprise manquant",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (onDetails) {
       onDetails(companyId);
     }
@@ -46,6 +56,12 @@ const CompanyActions = ({
       onDelete(companyId);
     }
     setIsDeleteOpen(true);
+  };
+
+  const handleActionSuccess = () => {
+    if (onSuccess) {
+      onSuccess();
+    }
   };
 
   return (
@@ -90,7 +106,7 @@ const CompanyActions = ({
           companyId={companyId}
           open={isEditOpen}
           onOpenChange={setIsEditOpen}
-          onSuccess={onSuccess}
+          onSuccess={handleActionSuccess}
         />
       )}
 
@@ -100,7 +116,7 @@ const CompanyActions = ({
           companyName={companyName}
           open={isDeleteOpen}
           onOpenChange={setIsDeleteOpen}
-          onSuccess={onSuccess}
+          onSuccess={handleActionSuccess}
         />
       )}
     </>

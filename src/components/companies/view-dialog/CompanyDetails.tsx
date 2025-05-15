@@ -8,6 +8,7 @@ import { Company } from "@/types/company";
 import { Building, Globe, Mail, Phone, MapPin, Calendar, Printer } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { exportCompanyToPdf } from "@/utils/company/pdfExport";
+import { toast } from "@/components/ui/use-toast";
 
 interface CompanyDetailsProps {
   company: Company;
@@ -16,17 +17,36 @@ interface CompanyDetailsProps {
 
 const CompanyDetails = ({ company, onClose }: CompanyDetailsProps) => {
   const handlePrint = () => {
-    exportCompanyToPdf(company);
+    try {
+      exportCompanyToPdf(company);
+      toast({
+        title: "Succès",
+        description: "Le PDF a été généré avec succès",
+      });
+    } catch (error) {
+      console.error("Erreur lors de l'export PDF:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de générer le PDF",
+        variant: "destructive"
+      });
+    }
   };
 
+  // Safety check for status
+  const status = company.status || 'inactive';
+  
   return (
     <div className="grid gap-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">{company.name}</h2>
-        <div className="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm font-medium">
-          {company.status === 'active' ? 'Actif' : 
-           company.status === 'pending' ? 'En attente' : 
-           company.status === 'inactive' ? 'Inactif' : 'Statut inconnu'}
+        <h2 className="text-2xl font-semibold">{company.name || 'Entreprise sans nom'}</h2>
+        <div className={`px-3 py-1 rounded-full text-sm font-medium
+          ${status === 'active' ? 'bg-green-100 text-green-700' : 
+            status === 'pending' ? 'bg-amber-100 text-amber-700' : 
+            'bg-gray-100 text-gray-700'}`}>
+          {status === 'active' ? 'Actif' : 
+           status === 'pending' ? 'En attente' : 
+           status === 'inactive' ? 'Inactif' : 'Statut inconnu'}
         </div>
       </div>
 
@@ -40,6 +60,10 @@ const CompanyDetails = ({ company, onClose }: CompanyDetailsProps) => {
                     src={company.logoUrl}
                     alt={`Logo ${company.name}`}
                     className="object-contain h-full w-full p-2"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/placeholder.svg';
+                      console.error("Failed to load company logo:", company.logoUrl);
+                    }}
                   />
                 </AspectRatio>
               </div>
@@ -111,9 +135,9 @@ const CompanyDetails = ({ company, onClose }: CompanyDetailsProps) => {
                 <MapPin className="h-4 w-4 mt-0.5 text-gray-500" />
                 <div>
                   {company.address && <p>{company.address}</p>}
-                  {company.city && company.postalCode && (
+                  {(company.city || company.postalCode) && (
                     <p>
-                      {company.postalCode} {company.city}
+                      {company.postalCode && `${company.postalCode} `}{company.city}
                     </p>
                   )}
                   {company.country && <p>{company.country}</p>}

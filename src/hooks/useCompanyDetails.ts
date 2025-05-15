@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useFirestore } from '@/hooks/useFirestore';
 import { Company } from '@/types/company';
 import { toast } from '@/components/ui/use-toast';
@@ -17,25 +17,36 @@ export const useCompanyDetails = (): UseCompanyDetailsResult => {
   const [error, setError] = useState<Error | null>(null);
   const { getById, isLoading } = useFirestore<Company>("hr_companies");
 
-  const resetState = () => {
+  const resetState = useCallback(() => {
     setCompany(null);
     setError(null);
-  };
+  }, []);
 
-  const fetchCompany = async (id: string) => {
-    if (!id) return;
+  const fetchCompany = useCallback(async (id: string) => {
+    if (!id) {
+      setError(new Error("ID d'entreprise non spécifié"));
+      return;
+    }
     
     try {
       const result = await getById(id);
+      
       if (result) {
-        setCompany(result);
+        // Make sure we have a proper company object with required fields
+        const processedCompany: Company = {
+          ...result,
+          status: result.status || 'inactive',
+          name: result.name || 'Entreprise sans nom'
+        };
+        
+        setCompany(processedCompany);
       } else {
+        setError(new Error("Entreprise non trouvée"));
         toast({
           title: "Erreur",
           description: "Impossible de trouver cette entreprise",
           variant: "destructive"
         });
-        setError(new Error("Entreprise non trouvée"));
       }
     } catch (err) {
       console.error("Erreur lors du chargement de l'entreprise:", err);
@@ -48,7 +59,7 @@ export const useCompanyDetails = (): UseCompanyDetailsResult => {
         variant: "destructive"
       });
     }
-  };
+  }, [getById]);
 
   return {
     company,

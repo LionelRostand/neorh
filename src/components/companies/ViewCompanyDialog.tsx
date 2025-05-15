@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useCompanyDetails } from "@/hooks/useCompanyDetails";
 import CompanyDetailsSkeleton from "./view-dialog/CompanyDetailsSkeleton";
@@ -15,19 +15,22 @@ interface ViewCompanyDialogProps {
 const ViewCompanyDialog = ({ companyId, open, onOpenChange }: ViewCompanyDialogProps) => {
   const { company, isLoading, error, fetchCompany, resetState } = useCompanyDetails();
 
-  const handleClose = () => {
+  // Memoize the handleClose to avoid recreating on each render
+  const handleClose = useCallback(() => {
     onOpenChange(false);
-  };
+  }, [onOpenChange]);
 
   useEffect(() => {
-    // Only fetch when dialog is open and we have an ID
+    // Only fetch when dialog is open and we have a valid ID
     if (open && companyId) {
+      console.log("Fetching company data for ID:", companyId);
       fetchCompany(companyId);
     }
     
     // Clean up state when dialog closes
     return () => {
       if (!open) {
+        console.log("Resetting company details state");
         resetState();
       }
     };
