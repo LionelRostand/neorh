@@ -1,0 +1,63 @@
+
+import jsPDF from 'jspdf';
+import { Employee } from '@/types/employee';
+import { setupDocument, addPageFooter } from './documentSetup';
+import { formatEmployeeStatus } from './statusFormatter';
+import { 
+  generateInformationsTab,
+  generateDocumentsTab,
+  generateCompetencesTab,
+  generateHorairesTab,
+  generateCongesTab,
+  generateEvaluationsTab
+} from './tabGenerators';
+import type { PdfTab } from './types';
+
+/**
+ * Génère un PDF pour les informations de l'employé
+ */
+export const generateEmployeePdf = (employee: Employee, activeTab: string) => {
+  // Initialisation du document PDF
+  const doc = new jsPDF();
+  
+  // Format employee status
+  const status = formatEmployeeStatus(employee);
+  
+  // Configure le document avec les informations de base
+  setupDocument(doc, 'Fiche Employé', employee.name || 'Sans nom', status.text, status.color);
+  
+  // Contenu en fonction de l'onglet actif
+  const startY = 85;
+  
+  switch (activeTab as PdfTab) {
+    case 'informations':
+      generateInformationsTab(doc, employee, startY);
+      break;
+    case 'documents':
+      generateDocumentsTab(doc, startY);
+      break;
+    case 'competences':
+      generateCompetencesTab(doc, startY);
+      break;
+    case 'horaires':
+      generateHorairesTab(doc, startY);
+      break;
+    case 'conges':
+      generateCongesTab(doc, startY);
+      break;
+    case 'evaluations':
+      generateEvaluationsTab(doc, startY);
+      break;
+    default:
+      generateInformationsTab(doc, employee, startY);
+  }
+  
+  // Ajoute les numéros de page
+  addPageFooter(doc);
+  
+  // Enregistrer le PDF
+  const fileName = `employee_${employee.id}_${activeTab}_${new Date().getTime()}.pdf`;
+  doc.save(fileName);
+};
+
+export * from './types';
