@@ -1,3 +1,4 @@
+
 // Define the mapping between routes and Firestore collections
 export const ROUTE_TO_COLLECTION_MAP = {
   '/employes': 'hr_employees',
@@ -7,7 +8,7 @@ export const ROUTE_TO_COLLECTION_MAP = {
   '/presences': 'hr_presence',
   '/conges': 'hr_leaves',
   '/contrats': 'hr_contracts',
-  '/documents': 'hr_documents', // Added this mapping
+  '/documents': 'hr_documents',
 };
 
 // Define the collection types to provide correct typing
@@ -19,7 +20,7 @@ export interface CollectionTypes {
   hr_presence: any;
   hr_leaves: any;
   hr_contracts: any;
-  hr_documents: any; // Added this type
+  hr_documents: any;
 }
 
 export type Leave = {
@@ -35,7 +36,7 @@ export type Badge = {
   id?: string;
   number: string;
   employeeId: string;
-  employeeName?: string; // Added this property
+  employeeName?: string;
   type: string;
   status: 'active' | 'inactive' | 'lost' | 'pending';
   issueDate: string;
