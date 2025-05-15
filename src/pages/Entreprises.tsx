@@ -10,7 +10,7 @@ import { toast } from "@/components/ui/use-toast";
 import CompanyStatusCards from "@/components/companies/CompanyStatusCards";
 import CompanySearch from "@/components/companies/CompanySearch";
 import CompanyTable from "@/components/companies/CompanyTable";
-import useFirestore from "@/hooks/firestore";
+import useFirestore from "@/hooks/useFirestore";
 
 interface Company {
   id?: string;
@@ -26,14 +26,19 @@ const Entreprises = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   
-  // Use the Firestore hook to fetch company data
-  const { getAll } = useFirestore<Company>("companies");
+  // Use the Firestore hook to fetch company data from hr_companies collection
+  const { getAll, isLoading, error } = useFirestore<Company>("hr_companies");
 
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const data = await getAll();
-        setCompanies(data || []);
+        const result = await getAll();
+        // Check if result exists and has docs property before setting state
+        if (result && result.docs) {
+          setCompanies(result.docs);
+        } else {
+          setCompanies([]);
+        }
         setLoading(false);
       } catch (error) {
         console.error("Error fetching companies:", error);
@@ -42,12 +47,23 @@ const Entreprises = () => {
           description: "Impossible de charger les données des entreprises",
           variant: "destructive"
         });
+        setCompanies([]);
         setLoading(false);
       }
     };
 
     fetchCompanies();
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les données des entreprises: " + error.message,
+        variant: "destructive"
+      });
+    }
+  }, [error]);
 
   const handleNewCompany = () => {
     toast({
@@ -119,7 +135,7 @@ const Entreprises = () => {
 
             <CompanyTable 
               companies={filteredCompanies}
-              loading={loading}
+              loading={isLoading || loading}
               onDetails={handleDetails}
               onEdit={handleEdit}
             />
