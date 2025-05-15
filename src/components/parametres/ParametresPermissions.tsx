@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/use-toast";
 import { useFirestore } from "@/hooks/firestore";
 import { Shield, Eye, Pen, Check, Trash2, UserCog } from "lucide-react";
+import { Employee } from "@/types/firebase";
 
 type Permission = {
   id?: string;
@@ -17,14 +18,6 @@ type Permission = {
   canEdit: boolean;
   canDelete: boolean;
   employeeId: string;
-};
-
-type Employee = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  position?: string;
 };
 
 const menuItems = [
@@ -61,12 +54,13 @@ const ParametresPermissions = () => {
     const loadEmployees = async () => {
       try {
         setIsLoading(true);
-        const employeesData = await employeesFirestore.getAll();
-        setEmployees(employeesData);
+        const employeesResult = await employeesFirestore.getAll();
+        // Fix error: Use docs property from QueryResult
+        setEmployees(employeesResult.docs);
         
         // Si des employés sont trouvés, sélectionner le premier par défaut
-        if (employeesData.length > 0) {
-          setSelectedEmployeeId(employeesData[0].id);
+        if (employeesResult.docs.length > 0) {
+          setSelectedEmployeeId(employeesResult.docs[0].id);
         }
       } catch (error) {
         console.error("Erreur lors du chargement des employés:", error);
@@ -90,15 +84,14 @@ const ParametresPermissions = () => {
     const loadPermissions = async () => {
       try {
         setIsLoading(true);
-        const permissionsData = await search({
-          field: "employeeId", 
-          operator: "==", 
-          value: selectedEmployeeId
+        // Fix error: Add correct parameters to search
+        const permissionsResult = await search("employeeId", selectedEmployeeId, {
+          exactMatch: true
         });
         
-        if (permissionsData.length > 0) {
-          // Si des permissions existent déjà pour cet employé
-          setPermissions(permissionsData);
+        if (permissionsResult.docs.length > 0) {
+          // Fix error: Use docs property from QueryResult
+          setPermissions(permissionsResult.docs);
         } else {
           // Créer des permissions par défaut pour le nouvel employé
           const defaultPermissions = menuItems.map(menu => ({
