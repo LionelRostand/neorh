@@ -7,11 +7,13 @@ import {
 import EmployeesProfiles from '@/components/employees/EmployeesProfiles';
 import { toast } from "@/components/ui/use-toast";
 import { useEmployeeData } from '@/hooks/useEmployeeData';
-import { Check, Clock, AlertCircle, Info } from 'lucide-react';
+import { Check, Clock, AlertCircle, Info, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AddEmployeeDialog } from '@/components/employees/AddEmployeeDialog';
 
 const Employes = () => {
-  const { employees, isLoading, error, departmentStats, statusStats } = useEmployeeData();
+  const { employees, isLoading, error, departmentStats, statusStats, refetch } = useEmployeeData();
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
   useEffect(() => {
     if (error) {
@@ -28,6 +30,10 @@ const Employes = () => {
   const activeEmployees = employees?.filter(emp => emp.status === 'active')?.length || 0;
   const onLeaveEmployees = employees?.filter(emp => emp.status === 'onLeave')?.length || 0;
   const inactiveEmployees = employees?.filter(emp => emp.status === 'inactive')?.length || 0;
+
+  const handleAddSuccess = () => {
+    refetch();
+  };
 
   return (
     <div className="p-4 md:p-6">
@@ -120,8 +126,11 @@ const Employes = () => {
           <Button variant="outline" className="flex items-center">
             <span className="mr-2">Exporter / Importer</span>
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <span className="mr-2">+</span>
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => setIsAddDialogOpen(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" />
             Nouvel Employé
           </Button>
         </div>
@@ -135,6 +144,13 @@ const Employes = () => {
           />
         </CardContent>
       </Card>
+
+      {/* Dialog pour ajouter un nouvel employé */}
+      <AddEmployeeDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onSuccess={handleAddSuccess}
+      />
     </div>
   );
 };
