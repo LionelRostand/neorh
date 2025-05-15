@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { File, Users, Calendar, Clock, Check, AlertCircle, Info } from "lucide-react";
+import { Check, Clock, AlertCircle, Info } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface ContractStatusCardProps {
