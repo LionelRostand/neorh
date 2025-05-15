@@ -42,7 +42,7 @@ interface EditCompanyFormProps {
   companyId: string;
   initialData: CompanyFormValues;
   isUpdating: boolean;
-  onSubmit: (data: CompanyFormValues, logoFile: File | null) => Promise<void>;
+  onSubmit: (data: CompanyFormValues, logoData: { binary: ArrayBuffer | null, type: string | null, name: string | null } | null) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -76,7 +76,8 @@ const EditCompanyForm = ({
   });
 
   const handleSubmit = async (data: CompanyFormValues) => {
-    await onSubmit(data, logoFile);
+    const logoData = await uploadLogo();
+    await onSubmit(data, logoData);
   };
 
   return (

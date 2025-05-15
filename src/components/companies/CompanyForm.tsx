@@ -16,9 +16,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Building, X } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import useFirestore from "@/hooks/useFirestore";
 import CompanyLogoUpload from "./CompanyLogoUpload";
 import { useLogoUpload } from "@/hooks/useLogoUpload";
+import { db } from "@/lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 // Schéma de validation pour le formulaire
 const companyFormSchema = z.object({
@@ -32,7 +33,6 @@ const companyFormSchema = z.object({
   postalCode: z.string().optional(),
   country: z.string().optional(),
   description: z.string().optional(),
-  logoUrl: z.string().optional(),
   type: z.string().default("client"),
   status: z.string().default("active"),
   registrationDate: z.string().default(() => new Date().toISOString().split('T')[0])
@@ -46,7 +46,7 @@ interface CompanyFormProps {
 }
 
 const CompanyForm = ({ onCancel, onSuccess }: CompanyFormProps) => {
-  const { add, isLoading } = useFirestore<CompanyFormValues>("hr_companies");
+  const [isLoading, setIsLoading] = React.useState(false);
   const { 
     logoFile, 
     logoPreview, 
@@ -69,7 +69,6 @@ const CompanyForm = ({ onCancel, onSuccess }: CompanyFormProps) => {
       postalCode: "",
       country: "",
       description: "",
-      logoUrl: "",
       type: "client",
       status: "active",
       registrationDate: new Date().toISOString().split('T')[0]
@@ -77,20 +76,37 @@ const CompanyForm = ({ onCancel, onSuccess }: CompanyFormProps) => {
   });
 
   const onSubmit = async (data: CompanyFormValues) => {
+    setIsLoading(true);
     try {
-      // Uploader le logo si présent
-      if (logoFile) {
-        const logoUrl = await uploadLogo();
-        if (logoUrl) {
-          data.logoUrl = logoUrl;
-        }
+      // Récupérer les données binaires du logo si présent
+      const logoData = await uploadLogo();
+      
+      // Préparer les données pour Firestore
+      const companyData: any = {
+        ...data,
+        createdAt: new Date(),
+      };
+      
+      // Ajouter les données du logo s'il existe
+      if (logoData) {
+        // Convertir ArrayBuffer en Uint8Array pour stockage Firestore
+        const uint8Array = new Uint8Array(logoData.binary);
+        
+        companyData.logo = {
+          binary: uint8Array,
+          type: logoData.type,
+          name: logoData.name
+        };
       }
 
-      await add(data);
+      // Ajouter directement à Firestore sans utiliser useFirestore
+      const docRef = await addDoc(collection(db, 'hr_companies'), companyData);
+      
       toast({
         title: "Succès",
         description: "L'entreprise a été créée avec succès"
       });
+      
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Erreur lors de la création de l'entreprise:", error);
@@ -99,6 +115,8 @@ const CompanyForm = ({ onCancel, onSuccess }: CompanyFormProps) => {
         description: "Impossible de créer l'entreprise",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

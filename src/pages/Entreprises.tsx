@@ -11,7 +11,8 @@ import CompanyStatusCards from "@/components/companies/CompanyStatusCards";
 import CompanySearch from "@/components/companies/CompanySearch";
 import CompanyTable from "@/components/companies/CompanyTable";
 import NewCompanyDialog from "@/components/companies/NewCompanyDialog";
-import useFirestore from "@/hooks/useFirestore";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, DocumentData } from "firebase/firestore";
 
 interface Company {
   id?: string;
@@ -20,6 +21,12 @@ interface Company {
   type: string;
   registrationDate: string;
   status: string;
+  logo?: {
+    binary: Uint8Array;
+    type: string;
+    name: string;
+  };
+  logoUrl?: string;
 }
 
 const Entreprises = () => {
@@ -28,19 +35,38 @@ const Entreprises = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isNewCompanyDialogOpen, setIsNewCompanyDialogOpen] = useState(false);
   
-  // Use the Firestore hook to fetch company data from hr_companies collection
-  const { getAll, isLoading, error } = useFirestore<Company>("hr_companies");
-
   const fetchCompanies = async () => {
     try {
-      const result = await getAll();
-      // Check if result exists and has docs property before setting state
-      if (result && result.docs) {
-        setCompanies(result.docs);
-      } else {
-        setCompanies([]);
-      }
-      setLoading(false);
+      setLoading(true);
+      
+      const companiesCollection = collection(db, "hr_companies");
+      const snapshot = await getDocs(companiesCollection);
+      
+      const companiesData = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        
+        // Traiter le logo binaire s'il existe
+        let logoUrl = data.logoUrl;
+        if (data.logo && data.logo.binary) {
+          // Convertir le binaire en base64 pour l'affichage
+          const binary = data.logo.binary;
+          const bytes = new Uint8Array(binary);
+          let binaryString = '';
+          for (let i = 0; i < bytes.byteLength; i++) {
+            binaryString += String.fromCharCode(bytes[i]);
+          }
+          const base64 = btoa(binaryString);
+          logoUrl = `data:${data.logo.type};base64,${base64}`;
+        }
+        
+        return {
+          id: doc.id,
+          ...data,
+          logoUrl: logoUrl
+        } as Company;
+      });
+      
+      setCompanies(companiesData);
     } catch (error) {
       console.error("Error fetching companies:", error);
       toast({
@@ -48,7 +74,7 @@ const Entreprises = () => {
         description: "Impossible de charger les données des entreprises",
         variant: "destructive"
       });
-      setCompanies([]);
+    } finally {
       setLoading(false);
     }
   };
@@ -56,16 +82,6 @@ const Entreprises = () => {
   useEffect(() => {
     fetchCompanies();
   }, []);
-
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les données des entreprises: " + error.message,
-        variant: "destructive"
-      });
-    }
-  }, [error]);
 
   const handleNewCompany = () => {
     setIsNewCompanyDialogOpen(true);
@@ -79,11 +95,6 @@ const Entreprises = () => {
   const handleEdit = (id: string) => {
     // This is now handled by CompanyActions component
     console.log(`Editing company ${id}`);
-  };
-
-  const handleDeleteSuccess = () => {
-    console.log("Company deleted successfully");
-    fetchCompanies();
   };
 
   // Count companies by status
@@ -135,7 +146,7 @@ const Entreprises = () => {
 
             <CompanyTable 
               companies={filteredCompanies}
-              loading={isLoading || loading}
+              loading={loading}
               onDetails={handleDetails}
               onEdit={handleEdit}
               onSuccess={fetchCompanies}
