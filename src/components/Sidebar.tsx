@@ -1,11 +1,10 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, Users, Key, Network, Clock, Calendar, FileText, Briefcase,
   FolderOpen, Building2, LineChart, Award, GraduationCap, Wallet, 
-  Users as UsersGroup, BarChart3, Bell, Settings
+  Users as UsersGroup, BarChart3, Settings
 } from "lucide-react";
 
 type NavItem = {
@@ -111,12 +110,6 @@ const navItems: NavItem[] = [
     href: "/rapports",
     icon: <BarChart3 className="h-5 w-5" />,
     description: "Génération d'analyses RH avec graphiques et tableaux personnalisables. Couvre divers indicateurs comme le turnover, l'absentéisme et les coûts salariaux avec export multiformat."
-  },
-  {
-    title: "Alertes",
-    href: "/alertes",
-    icon: <Bell className="h-5 w-5" />,
-    description: "Système de notifications pour événements RH importants comme fins de période d'essai, renouvellements de contrats ou anniversaires d'embauche."
   },
   {
     title: "Paramètres",
