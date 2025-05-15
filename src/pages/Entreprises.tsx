@@ -72,17 +72,18 @@ const Entreprises = () => {
   };
 
   const handleDetails = (id: string) => {
-    toast({
-      title: "Détails",
-      description: `Affichage des détails pour l'entreprise ${id}`
-    });
+    // This is now handled by CompanyActions component
+    console.log(`Viewing details for company ${id}`);
   };
 
   const handleEdit = (id: string) => {
-    toast({
-      title: "Modifier",
-      description: `Modification de l'entreprise ${id}`
-    });
+    // This is now handled by CompanyActions component
+    console.log(`Editing company ${id}`);
+  };
+
+  const handleDeleteSuccess = () => {
+    console.log("Company deleted successfully");
+    fetchCompanies();
   };
 
   // Count companies by status
@@ -137,6 +138,7 @@ const Entreprises = () => {
               loading={isLoading || loading}
               onDetails={handleDetails}
               onEdit={handleEdit}
+              onSuccess={fetchCompanies}
             />
           </div>
         </CardContent>

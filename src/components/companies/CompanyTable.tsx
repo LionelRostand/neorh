@@ -19,9 +19,10 @@ interface CompanyTableProps {
   loading: boolean;
   onDetails: (id: string) => void;
   onEdit: (id: string) => void;
+  onSuccess?: () => void;
 }
 
-const CompanyTable = ({ companies, loading, onDetails, onEdit }: CompanyTableProps) => {
+const CompanyTable = ({ companies, loading, onDetails, onEdit, onSuccess }: CompanyTableProps) => {
   const renderTableContent = () => {
     if (loading) {
       return (
@@ -68,8 +69,10 @@ const CompanyTable = ({ companies, loading, onDetails, onEdit }: CompanyTablePro
         <TableCell className="text-right">
           <CompanyActions 
             companyId={company.id || ''} 
+            companyName={company.name || 'Entreprise inconnue'}
             onDetails={onDetails}
             onEdit={onEdit}
+            onSuccess={onSuccess}
           />
         </TableCell>
       </TableRow>
