@@ -110,8 +110,11 @@ export const createSearchOperations = <T extends Record<string, any>>(
     try {
       const collectionName = getCollection().id;
       
-      // Create a query with where clause
-      const queryConstraints = [where(field, '==', value)];
+      // Create a query with all necessary constraints
+      const queryConstraints: QueryConstraint[] = [];
+      
+      // Add field filter constraint
+      queryConstraints.push(where(field, '==', value));
       
       // Add additional query params if provided
       if (options.additionalQueryParams) {
@@ -130,7 +133,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
         queryConstraints.push(limit(options.limitCount));
       }
       
-      // Create and execute the query
+      // Create and execute the query with all constraints
       const q = query(getCollection(), ...queryConstraints);
       const querySnapshot = await getDocs(q);
       
