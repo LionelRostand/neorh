@@ -10,6 +10,7 @@ export interface Company {
   industry?: string;
   type?: string;
   status?: string;
+  logoUrl?: string;
 }
 
 export const useCompaniesData = () => {

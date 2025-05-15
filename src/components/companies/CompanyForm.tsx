@@ -17,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Building, X } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import useFirestore from "@/hooks/useFirestore";
+import CompanyLogoUpload from "./CompanyLogoUpload";
+import { useLogoUpload } from "@/hooks/useLogoUpload";
 
 // Schéma de validation pour le formulaire
 const companyFormSchema = z.object({
@@ -30,6 +32,7 @@ const companyFormSchema = z.object({
   postalCode: z.string().optional(),
   country: z.string().optional(),
   description: z.string().optional(),
+  logoUrl: z.string().optional(),
   type: z.string().default("client"),
   status: z.string().default("active"),
   registrationDate: z.string().default(() => new Date().toISOString().split('T')[0])
@@ -44,6 +47,14 @@ interface CompanyFormProps {
 
 const CompanyForm = ({ onCancel, onSuccess }: CompanyFormProps) => {
   const { add, isLoading } = useFirestore<CompanyFormValues>("hr_companies");
+  const { 
+    logoFile, 
+    logoPreview, 
+    isUploading, 
+    handleLogoChange, 
+    uploadLogo,
+    resetLogo
+  } = useLogoUpload();
   
   const form = useForm<CompanyFormValues>({
     resolver: zodResolver(companyFormSchema),
@@ -58,6 +69,7 @@ const CompanyForm = ({ onCancel, onSuccess }: CompanyFormProps) => {
       postalCode: "",
       country: "",
       description: "",
+      logoUrl: "",
       type: "client",
       status: "active",
       registrationDate: new Date().toISOString().split('T')[0]
@@ -66,6 +78,14 @@ const CompanyForm = ({ onCancel, onSuccess }: CompanyFormProps) => {
 
   const onSubmit = async (data: CompanyFormValues) => {
     try {
+      // Uploader le logo si présent
+      if (logoFile) {
+        const logoUrl = await uploadLogo();
+        if (logoUrl) {
+          data.logoUrl = logoUrl;
+        }
+      }
+
       await add(data);
       toast({
         title: "Succès",
@@ -91,19 +111,31 @@ const CompanyForm = ({ onCancel, onSuccess }: CompanyFormProps) => {
       
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom de l'entreprise *</FormLabel>
-                <FormControl>
-                  <Input placeholder="Nom de l'entreprise" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="w-full md:w-2/3">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nom de l'entreprise *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nom de l'entreprise" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="w-full md:w-1/3">
+              <FormLabel>Logo de l'entreprise</FormLabel>
+              <CompanyLogoUpload 
+                logoPreview={logoPreview}
+                onLogoChange={handleLogoChange}
+                onReset={resetLogo}
+              />
+            </div>
+          </div>
           
           <FormField
             control={form.control}
@@ -252,7 +284,7 @@ const CompanyForm = ({ onCancel, onSuccess }: CompanyFormProps) => {
             <Button 
               type="submit" 
               className="bg-emerald-600 hover:bg-emerald-700"
-              disabled={isLoading}
+              disabled={isLoading || isUploading}
             >
               <Building className="h-4 w-4 mr-2" /> Créer l'entreprise
             </Button>
