@@ -11,9 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Employee } from '@/types/employee';
-import { Calendar, Building2, Mail, Phone, Edit, X, FileText } from 'lucide-react';
+import { FileText, Mail, Phone, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { generateEmployeePdf } from '@/utils/pdfExport';
+import { toast } from '@/components/ui/use-toast';
 
 interface ViewEmployeeDialogProps {
   open: boolean;
@@ -51,6 +53,23 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
       .toUpperCase()
       .slice(0, 2);
   };
+  
+  const handleExportPDF = () => {
+    try {
+      generateEmployeePdf(employee, activeTab);
+      toast({
+        title: "Exportation réussie",
+        description: "Le document PDF a été généré avec succès",
+      });
+    } catch (error) {
+      console.error("Erreur lors de l'exportation PDF:", error);
+      toast({
+        title: "Erreur d'exportation",
+        description: "Impossible de générer le document PDF",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -71,11 +90,7 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
               <X className="h-4 w-4 mr-2" />
               Fermer
             </Button>
-            <Button variant="outline">
-              <Edit className="h-4 w-4 mr-2" />
-              Modifier
-            </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleExportPDF}>
               <FileText className="h-4 w-4 mr-2" />
               Exporter PDF
             </Button>
@@ -96,7 +111,7 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
             <div className="flex justify-between mb-4">
               <h3 className="text-xl font-semibold">Informations de l'employé</h3>
               <Button variant="outline" size="sm">
-                <Edit className="h-4 w-4 mr-2" />
+                <FileText className="h-4 w-4 mr-2" />
                 Modifier
               </Button>
             </div>
