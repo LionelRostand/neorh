@@ -11,6 +11,7 @@ import Badges from "./pages/Badges";
 import Hierarchie from "./pages/Hierarchie";
 import FeuillesDeTemps from "./pages/FeuillesDeTemps";
 import Presences from "./pages/Presences";
+import Conges from "./pages/Conges";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/hierarchie" element={<Layout><Hierarchie /></Layout>} />
           <Route path="/feuilles-de-temps" element={<Layout><FeuillesDeTemps /></Layout>} />
           <Route path="/presences" element={<Layout><Presences /></Layout>} />
+          <Route path="/conges" element={<Layout><Conges /></Layout>} />
           {/* D'autres routes pour les sections RH seront ajoutées ici */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
