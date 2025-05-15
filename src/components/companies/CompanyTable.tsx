@@ -3,6 +3,7 @@ import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import CompanyStatusBadge from "./CompanyStatusBadge";
 import CompanyActions from "./CompanyActions";
+import { Loader2 } from "lucide-react";
 
 interface Company {
   id?: string;
@@ -21,8 +22,62 @@ interface CompanyTableProps {
 }
 
 const CompanyTable = ({ companies, loading, onDetails, onEdit }: CompanyTableProps) => {
+  const renderTableContent = () => {
+    if (loading) {
+      return (
+        <TableRow>
+          <TableCell colSpan={6} className="h-24 text-center">
+            <div className="flex justify-center items-center">
+              <Loader2 className="h-6 w-6 animate-spin mr-2" />
+              <span>Chargement des données...</span>
+            </div>
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    if (companies.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={6} className="h-24 text-center">
+            <div className="flex flex-col items-center justify-center">
+              <p className="text-muted-foreground">Aucune entreprise trouvée</p>
+              <p className="text-sm text-muted-foreground">Ajoutez une nouvelle entreprise ou modifiez vos critères de recherche</p>
+            </div>
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    return companies.map((company) => (
+      <TableRow key={company.id || Math.random().toString()}>
+        <TableCell>
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
+              {company.name?.charAt(0) || '?'}
+            </div>
+            <div className="font-medium">{company.name || 'Entreprise inconnue'}</div>
+          </div>
+        </TableCell>
+        <TableCell>{company.industry || 'Non spécifié'}</TableCell>
+        <TableCell>{company.type || 'Non spécifié'}</TableCell>
+        <TableCell>{company.registrationDate || '-'}</TableCell>
+        <TableCell>
+          <CompanyStatusBadge status={company.status} />
+        </TableCell>
+        <TableCell className="text-right">
+          <CompanyActions 
+            companyId={company.id || ''} 
+            onDetails={onDetails}
+            onEdit={onEdit}
+          />
+        </TableCell>
+      </TableRow>
+    ));
+  };
+
   return (
-    <div className="overflow-x-auto">
+    <div className="border rounded-md">
       <Table>
         <TableHeader>
           <TableRow>
@@ -35,89 +90,7 @@ const CompanyTable = ({ companies, loading, onDetails, onEdit }: CompanyTablePro
           </TableRow>
         </TableHeader>
         <TableBody>
-          {loading ? (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center py-10">Chargement...</TableCell>
-            </TableRow>
-          ) : companies.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center py-10">Aucune entreprise trouvée</TableCell>
-            </TableRow>
-          ) : (
-            companies.map((company) => (
-              <TableRow key={company.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
-                      {company.name?.charAt(0) || '?'}
-                    </div>
-                    <div className="font-medium">{company.name || 'Entreprise inconnue'}</div>
-                  </div>
-                </TableCell>
-                <TableCell>{company.industry || 'Non spécifié'}</TableCell>
-                <TableCell>{company.type}</TableCell>
-                <TableCell>{company.registrationDate || '-'}</TableCell>
-                <TableCell>
-                  <CompanyStatusBadge status={company.status} />
-                </TableCell>
-                <TableCell className="text-right">
-                  <CompanyActions 
-                    companyId={company.id || ''} 
-                    onDetails={onDetails}
-                    onEdit={onEdit}
-                  />
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-
-          {/* Example rows for demonstration when no companies */}
-          {companies.length === 0 && !loading && (
-            <>
-              <TableRow>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">N</div>
-                    <div className="font-medium">NEORH</div>
-                  </div>
-                </TableCell>
-                <TableCell>Informatique</TableCell>
-                <TableCell>SARL</TableCell>
-                <TableCell>03/05/2025</TableCell>
-                <TableCell>
-                  <CompanyStatusBadge status="active" />
-                </TableCell>
-                <TableCell className="text-right">
-                  <CompanyActions 
-                    companyId="example1" 
-                    onDetails={onDetails}
-                    onEdit={onEdit}
-                  />
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">?</div>
-                    <div className="font-medium">Entreprise inconnue</div>
-                  </div>
-                </TableCell>
-                <TableCell>Non spécifié</TableCell>
-                <TableCell>SAS</TableCell>
-                <TableCell>—</TableCell>
-                <TableCell>
-                  <CompanyStatusBadge status="pending" />
-                </TableCell>
-                <TableCell className="text-right">
-                  <CompanyActions 
-                    companyId="example2" 
-                    onDetails={onDetails}
-                    onEdit={onEdit}
-                  />
-                </TableCell>
-              </TableRow>
-            </>
-          )}
+          {renderTableContent()}
         </TableBody>
       </Table>
     </div>

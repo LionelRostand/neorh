@@ -15,7 +15,7 @@ const CompanyActions = ({ companyId, onDetails, onEdit }: CompanyActionsProps) =
       <Button 
         variant="outline" 
         size="sm" 
-        className="h-8 px-2" 
+        className="h-8 px-2 border-gray-200 hover:bg-gray-50 hover:text-gray-900" 
         onClick={() => onDetails(companyId)}
       >
         <File className="h-4 w-4 mr-1" /> Détails
@@ -23,7 +23,7 @@ const CompanyActions = ({ companyId, onDetails, onEdit }: CompanyActionsProps) =
       <Button 
         variant="outline" 
         size="sm" 
-        className="h-8 px-2" 
+        className="h-8 px-2 border-blue-200 hover:bg-blue-50 hover:text-blue-700" 
         onClick={() => onEdit(companyId)}
       >
         <Edit className="h-4 w-4 mr-1" /> Modifier
