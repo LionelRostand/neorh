@@ -9,6 +9,7 @@ interface HierarchyStatCardProps {
   textColor: string;
   bgColor: string;
   borderColor: string;
+  iconColor?: string; // Added iconColor property as optional
 }
 
 const HierarchyStatCard = ({
@@ -17,7 +18,8 @@ const HierarchyStatCard = ({
   icon,
   textColor = "text-blue-700",
   bgColor = "bg-blue-100",
-  borderColor = "border-blue-500"
+  borderColor = "border-blue-500",
+  iconColor // Added iconColor parameter
 }: HierarchyStatCardProps) => {
   return (
     <Card className={`border ${borderColor} rounded-lg`}>
@@ -33,7 +35,8 @@ const HierarchyStatCard = ({
             </p>
           </div>
           <div className={`p-2 rounded-full ${bgColor}`}>
-            {icon}
+            {/* Apply the iconColor class to the icon if provided */}
+            <div className={iconColor}>{icon}</div>
           </div>
         </div>
       </CardContent>

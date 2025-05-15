@@ -36,6 +36,8 @@ const Hierarchie = () => {
           value={8} 
           icon={<Network className="h-8 w-8" />} 
           bgColor="bg-blue-50"
+          textColor="text-blue-700"
+          borderColor="border-blue-500"
           iconColor="text-blue-500"
         />
         <HierarchyStatCard 
@@ -43,6 +45,8 @@ const Hierarchie = () => {
           value={12} 
           icon={<Network className="h-8 w-8" />} 
           bgColor="bg-indigo-50"
+          textColor="text-indigo-700"
+          borderColor="border-indigo-500"
           iconColor="text-indigo-500"
         />
         <HierarchyStatCard 
@@ -50,6 +54,8 @@ const Hierarchie = () => {
           value={68} 
           icon={<Network className="h-8 w-8" />} 
           bgColor="bg-green-50"
+          textColor="text-green-700"
+          borderColor="border-green-500"
           iconColor="text-green-500"
         />
         <HierarchyStatCard 
@@ -57,6 +63,8 @@ const Hierarchie = () => {
           value={4} 
           icon={<Network className="h-8 w-8" />} 
           bgColor="bg-yellow-50"
+          textColor="text-yellow-700"
+          borderColor="border-yellow-500"
           iconColor="text-yellow-500"
         />
       </div>
