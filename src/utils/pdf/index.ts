@@ -14,9 +14,17 @@ import {
 import type { PdfTab } from './types';
 
 /**
+ * Options pour la génération du PDF
+ */
+export interface PdfOptions {
+  documents?: any[];
+  // Autres options possibles à ajouter dans le futur
+}
+
+/**
  * Génère un PDF pour les informations de l'employé
  */
-export const generateEmployeePdf = (employee: Employee, activeTab: string) => {
+export const generateEmployeePdf = (employee: Employee, activeTab: string, options?: PdfOptions) => {
   // Initialisation du document PDF
   const doc = new jsPDF();
   
@@ -34,7 +42,7 @@ export const generateEmployeePdf = (employee: Employee, activeTab: string) => {
       generateInformationsTab(doc, employee, startY);
       break;
     case 'documents':
-      generateDocumentsTab(doc, startY);
+      generateDocumentsTab(doc, startY, options?.documents);
       break;
     case 'competences':
       generateCompetencesTab(doc, startY);

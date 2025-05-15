@@ -1,6 +1,6 @@
 
 // Re-export from the new modular structure
-import { generateEmployeePdf } from './pdf';
+import { generateEmployeePdf, PdfOptions } from './pdf';
 import { PdfTab } from './pdf/types';
 import { Employee } from '@/types/employee';
 import { Document } from '@/lib/constants';
