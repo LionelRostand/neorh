@@ -3,43 +3,70 @@
 import { generateEmployeePdf, PdfOptions } from './pdf';
 import { PdfTab } from './pdf/types';
 import { Employee } from '@/types/employee';
-import { Document } from '@/lib/constants';
+import { Document, Leave } from '@/lib/constants';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-// Fonction pour récupérer les documents d'un employé
-const getEmployeeDocuments = async (employeeId: string): Promise<Document[]> => {
+/**
+ * Récupère les documents liés à un employé
+ */
+const fetchEmployeeDocuments = async (employeeId: string): Promise<Document[]> => {
   try {
     const q = query(
       collection(db, 'hr_documents'),
       where('employeeId', '==', employeeId)
     );
     
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ 
+      id: doc.id, 
+      ...doc.data() 
     } as Document));
   } catch (error) {
-    console.error('Erreur lors de la récupération des documents:', error);
+    console.error('Error fetching employee documents:', error);
     return [];
   }
 };
 
-// Fonction étendue pour générer le PDF d'un employé avec ses documents
-export const generateEmployeePdfWithDocuments = async (
-  employee: Employee, 
-  activeTab: string
-): Promise<void> => {
-  // Si l'onglet est "documents", récupérer les documents de l'employé
-  let documents: Document[] | undefined;
-  
-  if (activeTab === 'documents' && employee.id) {
-    documents = await getEmployeeDocuments(employee.id);
+/**
+ * Récupère les congés liés à un employé
+ */
+const fetchEmployeeLeaves = async (employeeId: string): Promise<Leave[]> => {
+  try {
+    const q = query(
+      collection(db, 'hr_leaves'),
+      where('employeeId', '==', employeeId)
+    );
+    
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ 
+      id: doc.id, 
+      ...doc.data() 
+    } as Leave));
+  } catch (error) {
+    console.error('Error fetching employee leaves:', error);
+    return [];
   }
-  
-  // Générer le PDF avec ou sans documents
-  return generateEmployeePdf(employee, activeTab as PdfTab, { documents });
 };
 
-export { generateEmployeePdf };
+/**
+ * Génère un PDF pour l'employé avec ses documents si nécessaire
+ */
+export const generateEmployeePdfWithDocuments = async (employee: Employee, activeTab: string) => {
+  const options: PdfOptions = {};
+  
+  // Si on est sur l'onglet documents, récupérer les documents
+  if (activeTab === 'documents') {
+    const documents = await fetchEmployeeDocuments(employee.id);
+    options.documents = documents;
+  }
+  
+  // Si on est sur l'onglet congés, récupérer les congés
+  if (activeTab === 'conges') {
+    const leaves = await fetchEmployeeLeaves(employee.id);
+    options.leaves = leaves;
+  }
+  
+  // Générer le PDF avec les options appropriées
+  generateEmployeePdf(employee, activeTab, options);
+};

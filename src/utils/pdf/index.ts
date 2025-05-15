@@ -18,6 +18,7 @@ import type { PdfTab } from './types';
  */
 export interface PdfOptions {
   documents?: any[];
+  leaves?: any[];
   // Autres options possibles à ajouter dans le futur
 }
 
@@ -51,7 +52,7 @@ export const generateEmployeePdf = (employee: Employee, activeTab: string, optio
       generateHorairesTab(doc, startY);
       break;
     case 'conges':
-      generateCongesTab(doc, startY);
+      generateCongesTab(doc, startY, options?.leaves);
       break;
     case 'evaluations':
       generateEvaluationsTab(doc, startY);

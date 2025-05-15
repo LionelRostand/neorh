@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import EditEmployeeDialog from '../EditEmployeeDialog';
 import EmployeeDocuments from './EmployeeDocuments';
+import EmployeeLeaves from './EmployeeLeaves';
 
 interface PersonalInfoFieldProps {
   label: string;
@@ -108,11 +109,8 @@ export const HorairesTab: React.FC = () => (
   />
 );
 
-export const CongesTab: React.FC = () => (
-  <EmptyTab 
-    title="Congés" 
-    message="Aucun congé enregistré pour cet employé." 
-  />
+export const CongesTab: React.FC<{ employee: Employee }> = ({ employee }) => (
+  <EmployeeLeaves employee={employee} />
 );
 
 export const EvaluationsTab: React.FC = () => (
