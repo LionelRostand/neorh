@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { Document } from "@/lib/constants";
 import DocumentFilter from "@/components/documents/DocumentFilter";
 import DocumentList from "@/components/documents/DocumentList";
+import ContractStatusCards from "@/components/contracts/ContractStatusCards";
 
 const DocumentsRH = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -16,6 +17,14 @@ const DocumentsRH = () => {
   
   // Use the collection hook to access the documents collection
   const documentsCollection = useCollection<'hr_documents'>();
+
+  // Contract stats
+  const [contractStats, setContractStats] = useState({
+    total: 1,
+    active: 0,
+    pending: 0,
+    expired: 0
+  });
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -77,6 +86,14 @@ const DocumentsRH = () => {
           <Plus className="mr-2 h-4 w-4" /> Nouveau document
         </Button>
       </div>
+
+      {/* Contract Status Cards */}
+      <ContractStatusCards
+        total={contractStats.total}
+        active={contractStats.active}
+        pending={contractStats.pending}
+        expired={contractStats.expired}
+      />
 
       <div className="bg-white border rounded-lg p-4">
         <DocumentFilter 
