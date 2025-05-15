@@ -16,7 +16,7 @@ export function AddEmployeeDialog({
 }: AddEmployeeDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] p-0 max-h-[90vh] overflow-hidden">
         <EmployeeForm 
           onClose={() => onOpenChange(false)}
           onSuccess={onSuccess}
