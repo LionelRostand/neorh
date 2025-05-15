@@ -78,26 +78,32 @@ const CompanyActions = ({
       </div>
 
       {/* Dialogs */}
-      <ViewCompanyDialog
-        companyId={companyId}
-        open={isViewOpen}
-        onOpenChange={setIsViewOpen}
-      />
+      {isViewOpen && (
+        <ViewCompanyDialog
+          companyId={companyId}
+          open={isViewOpen}
+          onOpenChange={setIsViewOpen}
+        />
+      )}
 
-      <EditCompanyDialog
-        companyId={companyId}
-        open={isEditOpen}
-        onOpenChange={setIsEditOpen}
-        onSuccess={onSuccess}
-      />
+      {isEditOpen && (
+        <EditCompanyDialog
+          companyId={companyId}
+          open={isEditOpen}
+          onOpenChange={setIsEditOpen}
+          onSuccess={onSuccess}
+        />
+      )}
 
-      <DeleteCompanyDialog
-        companyId={companyId}
-        companyName={companyName}
-        open={isDeleteOpen}
-        onOpenChange={setIsDeleteOpen}
-        onSuccess={onSuccess}
-      />
+      {isDeleteOpen && (
+        <DeleteCompanyDialog
+          companyId={companyId}
+          companyName={companyName}
+          open={isDeleteOpen}
+          onOpenChange={setIsDeleteOpen}
+          onSuccess={onSuccess}
+        />
+      )}
     </>
   );
 };
