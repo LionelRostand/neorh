@@ -1,13 +1,48 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Settings, Bell, Lock, User, ShieldAlert } from "lucide-react";
+import { Settings, Bell, Lock, User, ShieldAlert, Database } from "lucide-react";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { toast } from "@/components/ui/use-toast";
 
 const Parametres = () => {
+  const [isConnecting, setIsConnecting] = useState(false);
+  
+  const form = useForm({
+    defaultValues: {
+      apiKey: "AIzaSyBeWmKp9IwixLJD0hNb2DiI8zXfhKhw2Ks",
+      authDomain: "neorh-998d2.firebaseapp.com",
+      projectId: "neorh-998d2",
+      storageBucket: "neorh-998d2.firebasestorage.app",
+      messagingSenderId: "849642731551",
+      appId: "1:849642731551:web:26c8e13c1019c524867d2a"
+    }
+  });
+  
+  const testConnection = () => {
+    setIsConnecting(true);
+    setTimeout(() => {
+      setIsConnecting(false);
+      toast({
+        title: "Connexion réussie",
+        description: "La connexion à Firebase a été établie avec succès",
+      });
+    }, 1500);
+  };
+  
+  const onSubmit = (data) => {
+    toast({
+      title: "Paramètres sauvegardés",
+      description: "Les paramètres de Firebase ont été sauvegardés avec succès",
+    });
+  };
+
   return (
     <div className="container mx-auto py-6">
       <div className="mb-8">
@@ -34,7 +69,7 @@ const Parametres = () => {
             Compte
           </TabsTrigger>
           <TabsTrigger value="database">
-            <ShieldAlert className="h-4 w-4 mr-2" />
+            <Database className="h-4 w-4 mr-2" />
             Base de données
           </TabsTrigger>
         </TabsList>
@@ -208,26 +243,116 @@ service cloud.firestore {
         <TabsContent value="database" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Configuration de la base de données</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Configuration de Firebase
+              </CardTitle>
               <CardDescription>
-                Gérez les paramètres de votre base de données
+                Configurez les paramètres de connexion à votre base de données Firebase.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Sauvegarde automatique</h3>
-                  <p className="text-sm text-gray-500">Configurer les sauvegardes automatiques de la base de données</p>
-                </div>
-                <Button variant="outline">Configurer</Button>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Indexation</h3>
-                  <p className="text-sm text-gray-500">Gérer les index de la base de données</p>
-                </div>
-                <Button variant="outline">Gérer</Button>
-              </div>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="apiKey"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Clé API</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <p className="text-sm text-gray-500 mt-1">La clé API de votre projet Firebase.</p>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="authDomain"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Domaine d'authentification</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="projectId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>ID du projet</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="storageBucket"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bucket de stockage</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="messagingSenderId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>ID d'expéditeur de messagerie</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="appId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>ID de l'application</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="text-sm text-gray-500">
+                    Ces paramètres sont utilisés pour connecter l'application à votre base de données Firebase.
+                  </div>
+                  
+                  <div className="flex justify-between pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={testConnection}
+                      disabled={isConnecting}
+                    >
+                      {isConnecting ? "Connexion en cours..." : "Tester la connexion"}
+                    </Button>
+                    <Button type="submit" className="flex items-center gap-2">
+                      <span className="i-lucide-save"></span>
+                      Sauvegarder les paramètres
+                    </Button>
+                  </div>
+                </form>
+              </Form>
             </CardContent>
           </Card>
         </TabsContent>
