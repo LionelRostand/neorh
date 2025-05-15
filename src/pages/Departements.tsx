@@ -1,79 +1,79 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, FileText, Eye, Edit } from "lucide-react";
+import { Plus, Pencil, Trash2, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import EmployeeAvatar from "@/components/common/EmployeeAvatar";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import ContractStatusCards from "@/components/contracts/ContractStatusCards";
 
-interface Contract {
+interface Department {
   id: string;
-  employeeId: string;
-  employeeName: string;
-  employeeAvatar?: string;
-  position: string;
-  type: string;
-  startDate: string;
-  endDate?: string;
-  status: 'draft' | 'active' | 'expired' | 'pending';
+  name: string;
+  description: string;
+  manager: string;
+  company: string;
+  employeesCount: number;
 }
 
 const Departements = () => {
   const { toast } = useToast();
-  const [contracts, setContracts] = useState<Contract[]>([]);
-  const [contractStats, setContractStats] = useState({
-    total: 2,
-    active: 2,
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [stats, setStats] = useState({
+    total: 1,
+    active: 1,
     pending: 0,
     expired: 0
   });
 
-  // Simuler le chargement des contrats
+  // Simuler le chargement des départements
   useEffect(() => {
-    // Simuler des données de contrats
-    const mockContracts: Contract[] = [
+    // Simuler des données de départements basées sur la capture d'écran
+    const mockDepartments: Department[] = [
       {
-        id: "1",
-        employeeId: "emp1",
-        employeeName: "Lionel DJOSSA",
-        position: "PDG",
-        type: "CDI",
-        startDate: "03/05/2025",
-        status: 'active'
-      },
-      {
-        id: "2",
-        employeeId: "emp2",
-        employeeName: "Employé inconnu",
-        position: "Non spécifié",
-        type: "CDI",
-        startDate: "",
-        status: 'active'
+        id: "95d6215b-8b5c-4247-ad8c-6bbce3313e7e",
+        name: "DIRECTION GENERALE",
+        description: "gérer par le PDG",
+        manager: "N/A",
+        company: "NEOTECH-CONSULTING",
+        employeesCount: 0
       }
     ];
 
-    setContracts(mockContracts);
+    setDepartments(mockDepartments);
   }, []);
 
-  const handleNewContract = () => {
+  const handleNewDepartment = () => {
     toast({
       title: "Nouveau département",
       description: "La création d'un nouveau département sera disponible prochainement."
     });
   };
 
-  const handleDetails = (contractId: string) => {
+  const handleEdit = (departmentId: string) => {
     toast({
-      title: "Détails du département",
-      description: `Affichage des détails du département ${contractId} à venir.`
+      title: "Modifier le département",
+      description: `Modification du département ${departmentId} à venir.`
     });
   };
 
-  const handleEdit = (contractId: string) => {
+  const handleDelete = (departmentId: string) => {
     toast({
-      title: "Modifier le département",
-      description: `Modification du département ${contractId} à venir.`
+      title: "Supprimer le département",
+      description: `Suppression du département ${departmentId} à venir.`
+    });
+  };
+
+  const handleManage = (departmentId: string) => {
+    toast({
+      title: "Gérer le département",
+      description: `Gestion des employés du département ${departmentId} à venir.`
     });
   };
 
@@ -82,108 +82,83 @@ const Departements = () => {
       {/* Header with title and button */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Gestion des départements</h1>
-        <Button onClick={handleNewContract}>
+        <Button onClick={handleNewDepartment}>
           <Plus className="h-4 w-4 mr-2" />
           Nouveau
         </Button>
       </div>
 
-      {/* Contract Status Cards */}
+      {/* Status Cards */}
       <ContractStatusCards
-        total={contractStats.total}
-        active={contractStats.active}
-        pending={contractStats.pending}
-        expired={contractStats.expired}
+        total={stats.total}
+        active={stats.active}
+        pending={stats.pending}
+        expired={stats.expired}
       />
 
-      {/* Contracts table */}
+      {/* Departments table */}
       <div className="bg-white border rounded-lg overflow-hidden">
         <div className="p-4 border-b">
           <h2 className="text-lg font-medium">Liste des départements</h2>
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Employé</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Poste</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Type</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Début</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Fin</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Statut</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {contracts.map((contract) => (
-                <tr key={contract.id}>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-8 w-8 flex-shrink-0 mr-3">
-                        <AspectRatio ratio={1/1} className="bg-gray-100 rounded-full overflow-hidden">
-                          <EmployeeAvatar 
-                            employeeId={contract.employeeId} 
-                            name={contract.employeeName}
-                            className="h-full w-full object-cover"
-                          />
-                        </AspectRatio>
-                      </div>
-                      <div className="text-sm font-medium text-gray-900">{contract.employeeName}</div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{contract.position}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{contract.type}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{contract.startDate}</td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{contract.endDate || "—"}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    {contract.status === 'active' && (
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        Actif
-                      </span>
-                    )}
-                    {contract.status === 'pending' && (
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                        À venir
-                      </span>
-                    )}
-                    {contract.status === 'expired' && (
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                        Expiré
-                      </span>
-                    )}
-                    {contract.status === 'draft' && (
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                        Brouillon
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Nom</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Manager</TableHead>
+                <TableHead>Entreprise</TableHead>
+                <TableHead>Employés</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {departments.map((department) => (
+                <TableRow key={department.id}>
+                  <TableCell className="font-mono text-xs">{department.id}</TableCell>
+                  <TableCell className="font-medium">{department.name}</TableCell>
+                  <TableCell>{department.description}</TableCell>
+                  <TableCell>{department.manager}</TableCell>
+                  <TableCell>{department.company}</TableCell>
+                  <TableCell>{department.employeesCount}</TableCell>
+                  <TableCell>
                     <div className="flex space-x-2">
                       <Button 
-                        variant="outline" 
+                        variant="outline"
                         size="sm" 
-                        onClick={() => handleDetails(contract.id)}
+                        onClick={() => handleEdit(department.id)}
                         className="flex items-center"
                       >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Détails
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => handleEdit(contract.id)}
-                        className="flex items-center"
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
+                        <Pencil className="h-4 w-4 mr-1" />
                         Modifier
                       </Button>
+                      <Button 
+                        variant="outline"
+                        size="sm" 
+                        onClick={() => handleDelete(department.id)}
+                        className="flex items-center"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Supprimer
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        size="sm" 
+                        onClick={() => handleManage(department.id)}
+                        className="flex items-center"
+                      >
+                        <Users className="h-4 w-4 mr-1" />
+                        Gérer
+                      </Button>
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>
