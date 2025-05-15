@@ -4,7 +4,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Building } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import useFirestore from "@/hooks/useFirestore";
-import EditCompanyForm, { CompanyFormValues } from "./edit/EditCompanyForm";
+import EditCompanyForm from "./edit/EditCompanyForm";
+import { CompanyFormValues } from "./form/types";
 import EditCompanyLoading from "./edit/EditCompanyLoading";
 import EditCompanyError from "./edit/EditCompanyError";
 

@@ -1,12 +1,10 @@
 
 import React from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { useLogoUpload } from "@/hooks/useLogoUpload";
-import { companyFormSchema } from "../form/types";
-import type { CompanyFormValues } from "../form/types";
+import { companyFormSchema, CompanyFormValues } from "../form/types";
 
 import BasicInfoSection from "./sections/BasicInfoSection";
 import ContactSection from "./sections/ContactSection";

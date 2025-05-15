@@ -15,7 +15,8 @@ export const companyFormSchema = z.object({
   description: z.string().optional(),
   type: z.string().default("client"),
   status: z.string().default("active"),
-  registrationDate: z.string().default(() => new Date().toISOString().split('T')[0])
+  registrationDate: z.string().default(() => new Date().toISOString().split('T')[0]),
+  logoUrl: z.string().optional()
 });
 
 export type CompanyFormValues = z.infer<typeof companyFormSchema>;
