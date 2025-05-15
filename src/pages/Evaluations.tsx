@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 interface Evaluation {
   id: string;
@@ -82,12 +83,25 @@ const Evaluations = () => {
   const completed = evaluations.filter(e => e.status === "complétée").length;
   const cancelled = evaluations.filter(e => e.status === "annulée").length;
 
+  const getStatusBadgeClass = (status: string) => {
+    switch(status) {
+      case "planifiée":
+        return "bg-emerald-600 hover:bg-emerald-700";
+      case "complétée":
+        return "bg-blue-600 hover:bg-blue-700";
+      case "annulée":
+        return "bg-red-600 hover:bg-red-700";
+      default:
+        return "bg-gray-600 hover:bg-gray-700";
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Évaluations des employés</h1>
         <div className="flex space-x-2">
-          <Button onClick={handleNewEvaluation} className="bg-green-600 hover:bg-green-700">
+          <Button onClick={handleNewEvaluation} className="bg-emerald-600 hover:bg-emerald-700">
             <PlusIcon className="mr-2 h-4 w-4" />
             Nouvelle évaluation
           </Button>
@@ -99,19 +113,19 @@ const Evaluations = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="border shadow-sm">
           <CardContent className="p-6 flex flex-col items-center justify-center">
             <span className="text-4xl font-bold">{planned}</span>
             <span className="text-gray-500">Planifiées</span>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border shadow-sm">
           <CardContent className="p-6 flex flex-col items-center justify-center">
             <span className="text-4xl font-bold">{completed}</span>
             <span className="text-gray-500">Complétées</span>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border shadow-sm">
           <CardContent className="p-6 flex flex-col items-center justify-center">
             <span className="text-4xl font-bold">{cancelled}</span>
             <span className="text-gray-500">Annulées</span>
@@ -119,7 +133,7 @@ const Evaluations = () => {
         </Card>
       </div>
 
-      <Card>
+      <Card className="border shadow-sm">
         <CardContent className="p-6">
           <h2 className="text-xl font-semibold mb-4">Évaluations</h2>
           
@@ -134,14 +148,27 @@ const Evaluations = () => {
               />
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" className="w-52">
-                Tous les employés
-                <FilterIcon className="ml-2 h-4 w-4" />
-              </Button>
-              <Button variant="outline" className="w-44">
-                Tous les statuts
-                <FilterIcon className="ml-2 h-4 w-4" />
-              </Button>
+              <Select>
+                <SelectTrigger className="w-52">
+                  <SelectValue placeholder="Tous les employés" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les employés</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select>
+                <SelectTrigger className="w-44">
+                  <SelectValue placeholder="Tous les statuts" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les statuts</SelectItem>
+                  <SelectItem value="planifiée">Planifiée</SelectItem>
+                  <SelectItem value="complétée">Complétée</SelectItem>
+                  <SelectItem value="annulée">Annulée</SelectItem>
+                </SelectContent>
+              </Select>
+              
               <Button variant="outline" size="icon">
                 <FileTextIcon className="h-4 w-4" />
               </Button>
@@ -153,13 +180,13 @@ const Evaluations = () => {
 
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Employé</TableHead>
-                <TableHead>Titre</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Évaluateur</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+              <TableRow className="bg-gray-50">
+                <TableHead className="font-medium">Employé</TableHead>
+                <TableHead className="font-medium">Titre</TableHead>
+                <TableHead className="font-medium">Date</TableHead>
+                <TableHead className="font-medium">Évaluateur</TableHead>
+                <TableHead className="font-medium">Statut</TableHead>
+                <TableHead className="text-right font-medium">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -170,7 +197,7 @@ const Evaluations = () => {
                   <TableCell>{evaluation.date}</TableCell>
                   <TableCell>{evaluation.evaluator}</TableCell>
                   <TableCell>
-                    <Badge className="bg-green-600 text-white">
+                    <Badge className={getStatusBadgeClass(evaluation.status)}>
                       Planifiée
                     </Badge>
                   </TableCell>
