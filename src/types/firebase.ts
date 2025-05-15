@@ -88,6 +88,20 @@ export interface Leave {
   comment?: string;
 }
 
+// Types pour la collection 'contracts'
+export interface Contract {
+  id?: string;
+  employeeId: string;
+  type: string;
+  startDate: string;
+  endDate?: string;
+  status: 'draft' | 'active' | 'expired' | 'terminated';
+  terms?: string;
+  salary?: number;
+  benefits?: string;
+  documents?: string[];
+}
+
 // Types for Firestore query operations
 export interface QueryParams {
   field: string;
