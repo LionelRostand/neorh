@@ -19,6 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "@/components/ui/use-toast";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import PayrollStatusCards from "@/components/payroll/PayrollStatusCards";
 import * as z from "zod";
 
 // Schema for the payslip form
@@ -35,6 +36,12 @@ type PayslipFormValues = z.infer<typeof payslipFormSchema>;
 
 const Salaires = () => {
   const [activeTab, setActiveTab] = useState<string>("nouvelle");
+
+  // Mock data for status cards
+  const active = 1;
+  const pending = 0;
+  const archived = 0;
+  const coverage = 85;
 
   const form = useForm<PayslipFormValues>({
     resolver: zodResolver(payslipFormSchema),
@@ -63,6 +70,13 @@ const Salaires = () => {
           Création et gestion des fiches de paie conformes au Code du travail français
         </p>
       </div>
+
+      <PayrollStatusCards
+        active={active}
+        pending={pending}
+        archived={archived}
+        coverage={coverage}
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList>
