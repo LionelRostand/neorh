@@ -40,6 +40,7 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/use-toast';
 import { Employee } from '@/types/employee';
+import { Employee as EmployeeType } from '@/types/employeeTypes';
 import { useEmployeeActions } from '@/hooks/useEmployeeActions';
 
 const employeeFormSchema = z.object({
@@ -91,7 +92,7 @@ export const EditEmployeeDialog: React.FC<EditEmployeeDialogProps> = ({
       phone: "",
       position: "",
       department: "",
-      status: 'active',
+      status: 'active' as const,
       photoUrl: "",
     },
   });
@@ -119,9 +120,17 @@ export const EditEmployeeDialog: React.FC<EditEmployeeDialogProps> = ({
     if (!employee?.id) return;
     
     try {
-      const updatedEmployeeData = {
-        ...data,
-        startDate: format(data.startDate, 'yyyy-MM-dd'),
+      // Convert to the expected EmployeeType format
+      const updatedEmployeeData: Partial<EmployeeType> = {
+        firstName: data.name.split(' ')[0] || '',
+        lastName: data.name.split(' ').slice(1).join(' ') || '',
+        email: data.email,
+        phone: data.phone || '',
+        position: data.position,
+        department: data.department,
+        status: data.status,
+        hireDate: format(data.startDate, 'yyyy-MM-dd'),
+        avatarUrl: data.photoUrl
       };
 
       const success = await updateEmployee(employee.id, updatedEmployeeData);

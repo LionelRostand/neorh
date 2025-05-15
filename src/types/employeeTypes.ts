@@ -8,7 +8,7 @@ export interface Employee {
   phone: string;
   department: string;
   position: string;
-  status: 'active' | 'onLeave' | 'terminated';
+  status: 'active' | 'inactive' | 'onLeave';
   hireDate: string;
   avatarUrl?: string;
 }
