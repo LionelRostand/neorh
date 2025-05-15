@@ -2,12 +2,13 @@
 import React from 'react';
 
 interface EmployeeAvatarProps {
+  employeeId?: string;
   name?: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
-const EmployeeAvatar = ({ name = 'Inconnu', size = 'md', className = '' }: EmployeeAvatarProps) => {
+const EmployeeAvatar = ({ name = 'Inconnu', size = 'md', className = '', employeeId }: EmployeeAvatarProps) => {
   const sizes = {
     sm: 'h-6 w-6 text-xs',
     md: 'h-8 w-8 text-sm',
