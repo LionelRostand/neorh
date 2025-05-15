@@ -33,6 +33,9 @@ import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/use-toast';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useCompaniesData } from '@/hooks/useCompaniesData';
+import { useDepartmentsData } from '@/hooks/useDepartmentsData';
+import { useManagersData } from '@/hooks/useManagersData';
 
 const employeeFormSchema = z.object({
   firstName: z.string().min(2, {
@@ -62,10 +65,10 @@ const employeeFormSchema = z.object({
   postalCode: z.string().min(5, {
     message: "Le code postal est requis",
   }),
-  department: z.string().min(2, {
+  department: z.string().min(1, {
     message: "Le département est requis",
   }),
-  company: z.string().min(2, {
+  company: z.string().min(1, {
     message: "L'entreprise est requise",
   }),
   position: z.string().min(2, {
@@ -88,6 +91,11 @@ export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  
+  // Récupérer les données des entreprises, départements et responsables
+  const { companies, isLoading: isLoadingCompanies } = useCompaniesData();
+  const { departments, isLoading: isLoadingDepartments } = useDepartmentsData();
+  const { managers, isLoading: isLoadingManagers } = useManagersData();
 
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),
@@ -174,7 +182,6 @@ export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
       };
 
       // Utiliser l'API Firestore pour ajouter l'employé
-      // Normalement nous aurions un service dédié, mais pour simplifier:
       const { db } = await import('@/lib/firebase');
       const { collection, addDoc } = await import('firebase/firestore');
       
@@ -422,9 +429,24 @@ export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Entreprise</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nom de l'entreprise" {...field} />
-                    </FormControl>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                      disabled={isLoadingCompanies}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez une entreprise" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {companies.map((company) => (
+                          <SelectItem key={company.id} value={company.id}>
+                            {company.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -450,18 +472,22 @@ export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Département</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                      disabled={isLoadingDepartments}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionnez un département" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="marketing">Marketing</SelectItem>
-                        <SelectItem value="it">IT</SelectItem>
-                        <SelectItem value="finance">Finance</SelectItem>
-                        <SelectItem value="rh">Ressources Humaines</SelectItem>
-                        <SelectItem value="sales">Ventes</SelectItem>
+                        {departments.map((dept) => (
+                          <SelectItem key={dept.id} value={dept.id}>
+                            {dept.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -489,16 +515,22 @@ export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Responsable</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                      disabled={isLoadingManagers}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionnez un responsable" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="manager1">Jean Dupont</SelectItem>
-                        <SelectItem value="manager2">Marie Martin</SelectItem>
-                        <SelectItem value="manager3">Pierre Durand</SelectItem>
+                        {managers.map((manager) => (
+                          <SelectItem key={manager.id} value={manager.id}>
+                            {manager.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -519,7 +551,7 @@ export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
             </Button>
             <Button 
               type="submit" 
-              disabled={isUploading}
+              disabled={isUploading || isLoadingCompanies || isLoadingDepartments || isLoadingManagers}
             >
               {isUploading ? "Enregistrement..." : "Enregistrer"}
             </Button>
