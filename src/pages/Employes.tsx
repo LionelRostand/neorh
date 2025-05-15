@@ -47,6 +47,7 @@ const Employes = () => {
           <EmployeesProfiles 
             employees={employees} 
             isLoading={isLoading}
+            onRefresh={refetch}
           />
         </CardContent>
       </Card>

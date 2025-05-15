@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { useEmployeeActions } from '@/hooks/useEmployeeActions';
 import { useEmployeeFilters } from '@/hooks/useEmployeeFilters';
@@ -9,14 +9,24 @@ import EmployeeTable from './EmployeeTable';
 import EmployeeEmptyState from './EmployeeEmptyState';
 import EmployeePagination from './EmployeePagination';
 import EmployeeTableSkeleton from './EmployeeTableSkeleton';
+import EditEmployeeDialog from './EditEmployeeDialog';
+import DeleteEmployeeConfirmDialog from './DeleteEmployeeConfirmDialog';
 
 interface EmployeesProfilesProps {
   employees: Employee[] | undefined;
   isLoading: boolean;
+  onRefresh?: () => void;
 }
 
-const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees = [], isLoading }) => {
-  const { deleteEmployee } = useEmployeeActions();
+const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ 
+  employees = [], 
+  isLoading,
+  onRefresh 
+}) => {
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
   const {
     searchTerm,
     setSearchTerm,
@@ -31,20 +41,38 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees = [], i
     handlePageChange
   } = useEmployeeFilters(employees);
 
-  const handleDelete = (employeeId: string) => {
-    deleteEmployee(employeeId);
-    toast({
-      title: "Employé supprimé",
-      description: "Le profil de l'employé a été supprimé avec succès."
-    });
+  const handleEdit = (employeeId: string) => {
+    const employee = employees.find(emp => emp.id === employeeId);
+    if (employee) {
+      setSelectedEmployee(employee);
+      setIsEditDialogOpen(true);
+    } else {
+      toast({
+        title: "Erreur",
+        description: "Employé non trouvé",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleEdit = (employeeId: string) => {
-    // Implementation for editing would be added here
-    toast({
-      title: "Modification",
-      description: `Édition de l'employé avec ID: ${employeeId}`
-    });
+  const handleDelete = (employeeId: string) => {
+    const employee = employees.find(emp => emp.id === employeeId);
+    if (employee) {
+      setSelectedEmployee(employee);
+      setIsDeleteDialogOpen(true);
+    } else {
+      toast({
+        title: "Erreur",
+        description: "Employé non trouvé",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSuccess = () => {
+    if (onRefresh) {
+      onRefresh();
+    }
   };
 
   if (isLoading) {
@@ -80,6 +108,21 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({ employees = [], i
           />
         </>
       )}
+
+      {/* Dialogs for Edit and Delete */}
+      <EditEmployeeDialog 
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        employee={selectedEmployee}
+        onSuccess={handleSuccess}
+      />
+
+      <DeleteEmployeeConfirmDialog 
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        employee={selectedEmployee}
+        onSuccess={handleSuccess}
+      />
     </div>
   );
 };
