@@ -15,4 +15,9 @@ export interface Company {
   logoUrl?: string;
   registrationDate?: string;
   status: string;
+  logo?: {
+    base64: string;
+    type: string;
+    name: string;
+  };
 }

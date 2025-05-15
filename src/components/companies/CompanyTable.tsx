@@ -4,21 +4,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import CompanyStatusBadge from "./CompanyStatusBadge";
 import CompanyActions from "./CompanyActions";
 import { Loader2 } from "lucide-react";
-
-interface Company {
-  id?: string;
-  name: string;
-  industry: string;
-  type: string;
-  registrationDate: string;
-  status: string;
-}
+import { Company } from "@/types/company";
 
 interface CompanyTableProps {
   companies: Company[];
   loading: boolean;
-  onDetails: (id: string) => void;
-  onEdit: (id: string) => void;
+  onDetails?: (id: string) => void;
+  onEdit?: (id: string) => void;
   onSuccess?: () => void;
 }
 

@@ -3,15 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from '@/components/ui/use-toast';
-
-export interface Company {
-  id: string;
-  name: string;
-  industry?: string;
-  type?: string;
-  status?: string;
-  logoUrl?: string;
-}
+import { Company } from '@/types/company';
 
 export const useCompaniesData = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -31,7 +23,9 @@ export const useCompaniesData = () => {
         name: doc.data().name || '',
         industry: doc.data().industry || '',
         type: doc.data().type || '',
-        status: doc.data().status || ''
+        status: doc.data().status || '',
+        logoUrl: doc.data().logoUrl || '',
+        // Additional fields can be added as needed
       }));
       
       setCompanies(companiesData);
