@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { useEmployeeActions } from '@/hooks/useEmployeeActions';
@@ -27,7 +26,7 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
 
   const {
     searchTerm,
@@ -75,7 +74,7 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({
     const employee = employees.find(emp => emp.id === employeeId);
     if (employee) {
       setSelectedEmployee(employee);
-      setIsViewDialogOpen(true);
+      setViewDialogOpen(true);
     } else {
       toast({
         title: "Erreur",
@@ -89,6 +88,13 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({
     if (onRefresh) {
       onRefresh();
     }
+  };
+
+  const handleViewClose = () => {
+    if (viewDialogOpen) {
+      onRefresh?.();
+    }
+    setViewDialogOpen(false);
   };
 
   if (isLoading) {
@@ -142,9 +148,10 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({
       />
       
       <ViewEmployeeDialog
-        open={isViewDialogOpen}
-        onOpenChange={setIsViewDialogOpen}
+        open={viewDialogOpen}
+        onOpenChange={handleViewClose}
         employee={selectedEmployee}
+        onRefresh={onRefresh}
       />
     </div>
   );

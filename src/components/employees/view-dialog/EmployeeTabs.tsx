@@ -16,9 +16,15 @@ interface EmployeeTabsProps {
   employee: Employee;
   activeTab: string;
   onTabChange: (value: string) => void;
+  onRefresh?: () => void;
 }
 
-const EmployeeTabs: React.FC<EmployeeTabsProps> = ({ employee, activeTab, onTabChange }) => {
+const EmployeeTabs: React.FC<EmployeeTabsProps> = ({ 
+  employee, 
+  activeTab, 
+  onTabChange,
+  onRefresh
+}) => {
   return (
     <Tabs defaultValue="informations" value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className="grid grid-cols-6 bg-gray-50 border-b">

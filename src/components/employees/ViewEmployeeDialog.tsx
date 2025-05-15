@@ -11,12 +11,14 @@ interface ViewEmployeeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   employee: Employee | null;
+  onRefresh?: () => void;
 }
 
 const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
   open,
   onOpenChange,
-  employee
+  employee,
+  onRefresh
 }) => {
   const [activeTab, setActiveTab] = useState("informations");
   
@@ -51,6 +53,7 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
           employee={employee}
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          onRefresh={onRefresh}
         />
       </DialogContent>
     </Dialog>

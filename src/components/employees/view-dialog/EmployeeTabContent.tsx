@@ -1,6 +1,8 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Employee } from '@/types/employee';
+import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
+import EditEmployeeDialog from '../EditEmployeeDialog';
 
 interface PersonalInfoFieldProps {
   label: string;
@@ -19,34 +21,56 @@ interface InformationTabProps {
 }
 
 export const InformationsTab: React.FC<InformationTabProps> = ({ employee }) => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   return (
-    <div className="grid md:grid-cols-2 gap-8">
-      <div>
-        <h4 className="text-lg font-medium mb-4">Informations personnelles</h4>
-        <div className="space-y-4">
-          <PersonalInfoField label="Nom" value={employee.name} />
-          <PersonalInfoField label="Email personnel" value={employee.email} />
-          <PersonalInfoField label="Email professionnel" value={undefined} />
-          <PersonalInfoField label="Téléphone" value={employee.phone} />
-          <PersonalInfoField label="Date de naissance" value={undefined} />
-        </div>
+    <>
+      <div className="flex justify-between items-start mb-6">
+        <h3 className="text-xl font-semibold">Informations personnelles</h3>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setIsEditDialogOpen(true)}
+          className="flex items-center gap-1"
+        >
+          <Pencil className="h-4 w-4" />
+          Modifier
+        </Button>
       </div>
       
-      <div>
-        <h4 className="text-lg font-medium mb-4">Informations professionnelles</h4>
-        <div className="space-y-4">
-          <PersonalInfoField label="Poste" value={employee.position} />
-          <PersonalInfoField label="Département" value={employee.department} />
-          <PersonalInfoField label="Date d'embauche" value={employee.startDate || '15 mai 2025'} />
-          <PersonalInfoField 
-            label="Statut" 
-            value={employee.status === 'active' ? 'Active' : 
-              employee.status === 'onLeave' ? 'En congé' : 
-              employee.status === 'inactive' ? 'Inactif' : 'Inconnu'} 
-          />
+      <div className="grid md:grid-cols-2 gap-8">
+        <div>
+          <div className="space-y-4">
+            <PersonalInfoField label="Nom" value={employee.name} />
+            <PersonalInfoField label="Email personnel" value={employee.email} />
+            <PersonalInfoField label="Email professionnel" value={undefined} />
+            <PersonalInfoField label="Téléphone" value={employee.phone} />
+            <PersonalInfoField label="Date de naissance" value={undefined} />
+          </div>
+        </div>
+        
+        <div>
+          <h4 className="text-lg font-medium mb-4">Informations professionnelles</h4>
+          <div className="space-y-4">
+            <PersonalInfoField label="Poste" value={employee.position} />
+            <PersonalInfoField label="Département" value={employee.department} />
+            <PersonalInfoField label="Date d'embauche" value={employee.startDate || '15 mai 2025'} />
+            <PersonalInfoField 
+              label="Statut" 
+              value={employee.status === 'active' ? 'Active' : 
+                employee.status === 'onLeave' ? 'En congé' : 
+                employee.status === 'inactive' ? 'Inactif' : 'Inconnu'} 
+            />
+          </div>
         </div>
       </div>
-    </div>
+
+      <EditEmployeeDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        employee={employee}
+      />
+    </>
   );
 };
 
