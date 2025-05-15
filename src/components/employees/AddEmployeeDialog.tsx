@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { EmployeeForm } from "./EmployeeForm";
+import { EmployeeForm } from "./form/EmployeeForm";
 
 interface AddEmployeeDialogProps {
   open: boolean;
