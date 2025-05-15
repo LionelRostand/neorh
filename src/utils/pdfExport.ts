@@ -98,7 +98,8 @@ export const generateEmployeePdf = (employee: Employee, activeTab: string) => {
   }
   
   // Pied de page
-  const pageCount = doc.internal.getNumberOfPages();
+  // Fix: Use the correct API to get the number of pages
+  const pageCount = (doc as any).internal.pages.length - 1;
   doc.setFontSize(8);
   for(let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
@@ -143,6 +144,7 @@ const generateInformationsTab = (doc: jsPDF, employee: Employee, startY: number)
   });
   
   // Informations professionnelles
+  // Fix: Use type assertion to access lastAutoTable
   const tableEndY = (doc as any).lastAutoTable.finalY + 15;
   
   doc.setFontSize(14);
