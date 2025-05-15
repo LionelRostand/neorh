@@ -19,6 +19,7 @@ import Evaluations from "./pages/Evaluations";
 import Formations from "./pages/Formations";
 import Salaires from "./pages/Salaires";
 import Recrutement from "./pages/Recrutement";
+import Entreprises from "./pages/Entreprises";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/formations" element={<Layout><Formations /></Layout>} />
           <Route path="/salaires" element={<Layout><Salaires /></Layout>} />
           <Route path="/recrutement" element={<Layout><Recrutement /></Layout>} />
+          <Route path="/entreprises" element={<Layout><Entreprises /></Layout>} />
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
       </BrowserRouter>
