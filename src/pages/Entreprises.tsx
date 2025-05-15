@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { 
   Card, 
   CardContent 
@@ -10,8 +11,7 @@ import CompanyStatusCards from "@/components/companies/CompanyStatusCards";
 import CompanySearch from "@/components/companies/CompanySearch";
 import CompanyTable from "@/components/companies/CompanyTable";
 import NewCompanyDialog from "@/components/companies/NewCompanyDialog";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, DocumentData } from "firebase/firestore";
+import { useFirestore } from "@/hooks/useFirestore";
 
 interface Company {
   id?: string;
@@ -34,31 +34,30 @@ const Entreprises = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isNewCompanyDialogOpen, setIsNewCompanyDialogOpen] = useState(false);
   
-  const fetchCompanies = async () => {
+  const { getAll, isLoading } = useFirestore<Company>("hr_companies");
+  
+  const fetchCompanies = useCallback(async () => {
     try {
       setLoading(true);
       
-      const companiesCollection = collection(db, "hr_companies");
-      const snapshot = await getDocs(companiesCollection);
-      
-      const companiesData = snapshot.docs.map((doc) => {
-        const data = doc.data();
+      const result = await getAll();
+      if (result && result.docs) {
+        const companiesData = result.docs.map((company) => {
+          // Traiter le logo s'il existe
+          let logoUrl = company.logoUrl;
+          if (company.logo && company.logo.base64) {
+            // Le logo est déjà en base64, on peut l'utiliser directement
+            logoUrl = company.logo.base64;
+          }
+          
+          return {
+            ...company,
+            logoUrl: logoUrl
+          } as Company;
+        });
         
-        // Traiter le logo s'il existe
-        let logoUrl = data.logoUrl;
-        if (data.logo && data.logo.base64) {
-          // Le logo est déjà en base64, on peut l'utiliser directement
-          logoUrl = data.logo.base64;
-        }
-        
-        return {
-          id: doc.id,
-          ...data,
-          logoUrl: logoUrl
-        } as Company;
-      });
-      
-      setCompanies(companiesData);
+        setCompanies(companiesData);
+      }
     } catch (error) {
       console.error("Error fetching companies:", error);
       toast({
@@ -69,11 +68,11 @@ const Entreprises = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getAll]);
 
   useEffect(() => {
     fetchCompanies();
-  }, []);
+  }, [fetchCompanies]);
 
   const handleNewCompany = () => {
     setIsNewCompanyDialogOpen(true);
@@ -138,7 +137,7 @@ const Entreprises = () => {
 
             <CompanyTable 
               companies={filteredCompanies}
-              loading={loading}
+              loading={loading || isLoading}
               onDetails={handleDetails}
               onEdit={handleEdit}
               onSuccess={fetchCompanies}

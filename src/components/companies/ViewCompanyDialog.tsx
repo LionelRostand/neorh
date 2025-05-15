@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useFirestore } from "@/hooks/useFirestore";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar } from "@/components/ui/avatar";
 import { Building, Globe, Mail, Phone, MapPin, Calendar, Loader2 } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { toast } from "@/components/ui/use-toast";
 
 interface Company {
   id?: string;
@@ -34,20 +35,44 @@ interface ViewCompanyDialogProps {
 }
 
 const ViewCompanyDialog = ({ companyId, open, onOpenChange }: ViewCompanyDialogProps) => {
-  const [company, setCompany] = React.useState<Company | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
   const { getById, isLoading, error } = useFirestore<Company>("hr_companies");
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchCompany = async () => {
       if (companyId && open) {
-        const result = await getById(companyId);
-        if (result) {
-          setCompany(result);
+        try {
+          const result = await getById(companyId);
+          if (result) {
+            setCompany(result);
+          } else {
+            toast({
+              title: "Erreur",
+              description: "Impossible de trouver cette entreprise",
+              variant: "destructive"
+            });
+          }
+        } catch (err) {
+          console.error("Erreur lors du chargement de l'entreprise:", err);
+          toast({
+            title: "Erreur de chargement",
+            description: "Impossible de charger les informations de l'entreprise",
+            variant: "destructive"
+          });
         }
       }
     };
 
-    fetchCompany();
+    if (open && companyId) {
+      fetchCompany();
+    }
+
+    return () => {
+      // Nettoyage à la fermeture
+      if (!open) {
+        setCompany(null);
+      }
+    };
   }, [companyId, open, getById]);
 
   if (isLoading) {
