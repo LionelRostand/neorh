@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -126,56 +127,68 @@ const Sidebar = () => {
 
   return (
     <div className={cn(
-      "h-screen fixed z-20 bg-sidebar text-sidebar-foreground transition-all duration-300",
+      "h-screen fixed z-20 bg-sidebar text-sidebar-foreground transition-all duration-300 flex flex-col justify-between",
       isOpen ? "w-64" : "w-16"
     )}>
-      <div className="p-4 flex justify-between items-center">
-        {isOpen && <h2 className="font-bold text-xl text-sidebar-foreground">NEORH</h2>}
-        <button 
-          onClick={() => setIsOpen(!isOpen)} 
-          className="text-sidebar-foreground hover:bg-sidebar-accent rounded-md p-1"
-        >
-          {isOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-          )}
-        </button>
-      </div>
+      <div>
+        <div className="p-4 flex justify-between items-center">
+          {isOpen && <h2 className="font-bold text-xl text-sidebar-foreground">NEORH</h2>}
+          <button 
+            onClick={() => setIsOpen(!isOpen)} 
+            className="text-sidebar-foreground hover:bg-sidebar-accent rounded-md p-1"
+          >
+            {isOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            )}
+          </button>
+        </div>
 
-      <nav className="mt-6 h-[calc(100vh-5rem)] overflow-y-auto">
-        <ul className="space-y-1 px-2">
-          {navItems.map((item) => (
-            <li key={item.href}>
-              <Link
-                to={item.href}
-                className={cn(
-                  "flex items-center p-2 rounded-md transition-colors relative",
-                  location.pathname === item.href
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        <nav className="mt-6 h-[calc(100vh-10rem)] overflow-y-auto">
+          <ul className="space-y-1 px-2">
+            {navItems.map((item) => (
+              <li key={item.href}>
+                <Link
+                  to={item.href}
+                  className={cn(
+                    "flex items-center p-2 rounded-md transition-colors relative",
+                    location.pathname === item.href
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  )}
+                  onMouseEnter={() => setHoveredItem(item.href)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                >
+                  <div className="min-w-6">{item.icon}</div>
+                  {isOpen && <span className="ml-2">{item.title}</span>}
+                </Link>
+                
+                {!isOpen && hoveredItem === item.href && (
+                  <div className="absolute left-16 bg-gray-800 text-white p-2 rounded-md z-50 w-80 shadow-lg">
+                    <p className="font-medium">{item.title}</p>
+                    <p className="text-sm text-gray-300">{item.description}</p>
+                  </div>
                 )}
-                onMouseEnter={() => setHoveredItem(item.href)}
-                onMouseLeave={() => setHoveredItem(null)}
-              >
-                <div className="min-w-6">{item.icon}</div>
-                {isOpen && <span className="ml-2">{item.title}</span>}
-              </Link>
-              
-              {!isOpen && hoveredItem === item.href && (
-                <div className="absolute left-16 bg-gray-800 text-white p-2 rounded-md z-50 w-80 shadow-lg">
-                  <p className="font-medium">{item.title}</p>
-                  <p className="text-sm text-gray-300">{item.description}</p>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </nav>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+      
+      {/* Footer avec le texte NEOTECH-CONSULTING 2025 */}
+      <div className={cn(
+        "p-4 text-center text-sidebar-foreground/90 border-t border-sidebar-border",
+        isOpen ? "" : "text-xs -rotate-90 whitespace-nowrap"
+      )}>
+        <p className={cn("font-medium", !isOpen && "mt-12")}>
+          NEOTECH-CONSULTING 2025
+        </p>
+      </div>
     </div>
   );
 };
