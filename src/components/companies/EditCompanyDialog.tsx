@@ -78,7 +78,8 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
     fetchCompany();
   }, [companyId, open, getById]);
 
-  const handleSubmit = async (data: CompanyFormValues, logoFile: File | null) => {
+  // Updated the function signature to match what EditCompanyForm is passing
+  const handleSubmit = async (data: CompanyFormValues, logoData: { binary: ArrayBuffer | null, type: string | null, name: string | null } | null) => {
     try {
       // If there's a new logo file, we'll handle the upload in the form component
       let updatedData = { ...data };
