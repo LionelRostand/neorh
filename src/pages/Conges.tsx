@@ -12,14 +12,14 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar, Filter, Plus, Check, X } from "lucide-react";
 import { useCollection } from "@/hooks/useCollection";
-import { Leave } from "@/types/firebase";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
 import LeaveStatusCards from "@/components/leaves/LeaveStatusCards";
+import { Leave } from "@/lib/constants"; // Import the Leave type from constants instead
 
 const Conges = () => {
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(true);
-  const { getAll, isLoading, error } = useCollection<'leaves'>();
+  const { getAll, isLoading, error } = useCollection<'hr_leaves'>(); // Use the correct collection key
 
   useEffect(() => {
     fetchLeaves();
@@ -30,7 +30,17 @@ const Conges = () => {
     try {
       const result = await getAll();
       if (result.docs) {
-        setLeaves(result.docs);
+        // Ensure we map the data to match the Leave type
+        const typedLeaves = result.docs.map(doc => ({
+          id: doc.id || '',
+          employeeId: doc.employeeId || '',
+          type: doc.type || '',
+          startDate: doc.startDate || '',
+          endDate: doc.endDate || '',
+          status: doc.status || ''
+        } as Leave));
+        
+        setLeaves(typedLeaves);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des congés:", error);
@@ -200,3 +210,4 @@ const Conges = () => {
 };
 
 export default Conges;
+
