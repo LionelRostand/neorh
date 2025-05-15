@@ -1,45 +1,56 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShieldAlert } from "lucide-react";
+import ParametresPermissions from "./ParametresPermissions";
 
 const ParametresSecurite = () => {
+  const [securityTab, setSecurityTab] = useState("rules");
+  
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Règles de sécurité Firestore</CardTitle>
+        <CardTitle>Sécurité</CardTitle>
         <CardDescription>
-          Ces règles définissent qui peut lire et écrire dans votre base de données Firestore.
+          Gérez les règles de sécurité et les permissions d'accès de votre application.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Alert variant="destructive" className="bg-red-50 border-red-200">
-          <AlertDescription className="flex items-start gap-2">
-            <ShieldAlert className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-            <span className="text-red-800">
-              <strong>ATTENTION:</strong> Ces règles sont configurées pour le développement uniquement et permettent un accès complet à la base de données. NE PAS UTILISER EN PRODUCTION.
-            </span>
-          </AlertDescription>
-        </Alert>
+        <Tabs value={securityTab} onValueChange={setSecurityTab} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="rules">Règles Firestore</TabsTrigger>
+            <TabsTrigger value="permissions">Permissions</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="rules" className="space-y-4">
+            <Alert variant="destructive" className="bg-red-50 border-red-200">
+              <AlertDescription className="flex items-start gap-2">
+                <ShieldAlert className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <span className="text-red-800">
+                  <strong>ATTENTION:</strong> Ces règles sont configurées pour le développement uniquement et permettent un accès complet à la base de données. NE PAS UTILISER EN PRODUCTION.
+                </span>
+              </AlertDescription>
+            </Alert>
 
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-3">Comment appliquer ces règles :</h3>
-          <ol className="list-decimal pl-6 space-y-2">
-            <li>Accédez à la console Firebase (https://console.firebase.google.com/)</li>
-            <li>Sélectionnez votre projet</li>
-            <li>Dans le menu de gauche, cliquez sur 'Firestore Database'</li>
-            <li>Cliquez sur l'onglet 'Rules'</li>
-            <li>Remplacez les règles existantes par celles fournies ci-dessous</li>
-            <li>Cliquez sur 'Publier'</li>
-          </ol>
-        </div>
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-3">Comment appliquer ces règles :</h3>
+              <ol className="list-decimal pl-6 space-y-2">
+                <li>Accédez à la console Firebase (https://console.firebase.google.com/)</li>
+                <li>Sélectionnez votre projet</li>
+                <li>Dans le menu de gauche, cliquez sur 'Firestore Database'</li>
+                <li>Cliquez sur l'onglet 'Rules'</li>
+                <li>Remplacez les règles existantes par celles fournies ci-dessous</li>
+                <li>Cliquez sur 'Publier'</li>
+              </ol>
+            </div>
 
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-3">Code des règles Firestore</h3>
-          <div className="p-4 bg-gray-100 rounded-md">
-            <pre className="text-sm overflow-x-auto whitespace-pre-wrap">
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-3">Code des règles Firestore</h3>
+              <div className="p-4 bg-gray-100 rounded-md">
+                <pre className="text-sm overflow-x-auto whitespace-pre-wrap">
 {`rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -48,20 +59,20 @@ service cloud.firestore {
     }
   }
 }`}
-            </pre>
-          </div>
-        </div>
+                </pre>
+              </div>
+            </div>
 
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-3">Règles de sécurité recommandées</h3>
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="production">
-              <AccordionTrigger className="text-md">
-                Règles pour la production
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="p-4 bg-gray-100 rounded-md mt-2">
-                  <pre className="text-sm overflow-x-auto whitespace-pre-wrap">
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-3">Règles de sécurité recommandées</h3>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="production">
+                  <AccordionTrigger className="text-md">
+                    Règles pour la production
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="p-4 bg-gray-100 rounded-md mt-2">
+                      <pre className="text-sm overflow-x-auto whitespace-pre-wrap">
 {`rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -81,12 +92,18 @@ service cloud.firestore {
     }
   }
 }`}
-                  </pre>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
+                      </pre>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="permissions">
+            <ParametresPermissions />
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
