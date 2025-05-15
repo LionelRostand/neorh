@@ -1,114 +1,53 @@
 
-import { collection, query, where, orderBy, startAt, endAt, getDocs, QueryConstraint, limit, DocumentData, DocumentSnapshot } from 'firebase/firestore';
+import { useState } from 'react';
+import { 
+  collection, 
+  getDocs, 
+  query, 
+  where,
+  orderBy,
+  limit,
+  startAfter,
+  DocumentData,
+  QuerySnapshot,
+  WhereFilterOp,
+  OrderByDirection,
+  QueryDocumentSnapshot,
+  QueryConstraint,
+  DocumentSnapshot
+} from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { QueryParams, QueryResult } from '@/types/firebase';
 
-// Helper function for searching documents in a collection
-export const searchDocs_firestore = async <T>({
-  collectionName,
-  searchField,
-  searchTerm,
-  exactMatch = false,
-  caseSensitive = false,
-  orderByField,
-  orderByDirection = 'asc',
-  limitCount,
-  additionalQueryParams = []
-}: {
-  collectionName: string;
-  searchField: string;
-  searchTerm: string;
+// Type for search options
+export interface SearchOptions {
   exactMatch?: boolean;
-  caseSensitive?: boolean;
-  orderByField?: string;
-  orderByDirection?: 'asc' | 'desc';
+  caseInsensitive?: boolean;
+  sortField?: string;
+  sortDirection?: OrderByDirection;
   limitCount?: number;
-  additionalQueryParams?: { field: string; operator: any; value: any }[];
-}): Promise<QueryResult<T>> => {
-  try {
-    const collectionRef = collection(db, collectionName);
-    const constraints: QueryConstraint[] = [];
-    
-    // Handle additional query params
-    additionalQueryParams.forEach(param => {
-      constraints.push(where(param.field, param.operator, param.value));
-    });
-    
-    // For search functionality
-    if (searchTerm && searchField) {
-      // Use the field specified for searching
-      const fieldToOrderBy = orderByField || searchField;
-      constraints.push(orderBy(fieldToOrderBy));
-      
-      if (exactMatch) {
-        // Exact match search
-        constraints.push(where(searchField, '==', searchTerm));
-      } else {
-        // Partial match search
-        const processedSearchTerm = caseSensitive ? searchTerm : searchTerm.toLowerCase();
-        const endSearchTerm = processedSearchTerm + '\uf8ff'; // Unicode character after all ASCII chars
-        
-        constraints.push(startAt(processedSearchTerm));
-        constraints.push(endAt(endSearchTerm));
-      }
-    } else if (orderByField) {
-      // If no search but ordering is required
-      constraints.push(orderBy(orderByField, orderByDirection));
-    }
-    
-    // Add limit if specified
-    if (limitCount) {
-      constraints.push(limit(limitCount));
-    }
-    
-    // Create and execute the query
-    const q = query(collectionRef, ...constraints);
-    const querySnapshot = await getDocs(q);
-    
-    // Process the results
-    const docs = querySnapshot.docs.map(doc => {
-      const data = doc.data() as DocumentData;
-      return {
-        id: doc.id,
-        ...data
-      } as T & { id: string };
-    });
-    
-    // Return the results
-    return {
-      docs,
-      lastDoc: querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : null,
-      count: querySnapshot.size
-    };
-  } catch (error) {
-    console.error('Error searching documents:', error);
-    throw error;
-  }
-};
+  startAfterDoc?: DocumentSnapshot;
+  additionalQueryParams?: QueryParams[];
+}
 
-// Create search operations for a collection
+// Create search operations with correct typing
 export const createSearchOperations = <T extends Record<string, any>>(
   setIsLoading: (loading: boolean) => void,
   setError: (error: Error | null) => void,
-  getCollection: () => any
+  getCollection: () => ReturnType<typeof collection>
 ) => {
-  // Search documents in the collection
+  
+  // Search function to find documents by field value
   const search = async (
     field: string,
     value: any,
-    options: {
-      exactMatch?: boolean;
-      caseSensitive?: boolean;
-      orderByField?: string;
-      orderByDirection?: 'asc' | 'desc';
-      limitCount?: number;
-      additionalQueryParams?: QueryParams[];
-    } = {}
-  ) => {
+    options: SearchOptions = {}
+  ): Promise<QueryResult<T>> => {
     setIsLoading(true);
     setError(null);
+    
     try {
-      const collectionRef = getCollection();
+      const collectionName = getCollection().id;
       
       // Create a query with all necessary constraints
       const queryConstraints: QueryConstraint[] = [];
@@ -119,25 +58,25 @@ export const createSearchOperations = <T extends Record<string, any>>(
       // Add additional query params if provided
       if (options.additionalQueryParams) {
         options.additionalQueryParams.forEach(param => {
-          queryConstraints.push(where(param.field, param.operator, param.value));
+          queryConstraints.push(where(param.field, param.operator as WhereFilterOp, param.value));
         });
       }
       
-      // Add ordering if specified
-      if (options.orderByField) {
-        queryConstraints.push(orderBy(options.orderByField, options.orderByDirection || 'asc'));
+      // Add sorting if provided
+      if (options.sortField) {
+        queryConstraints.push(orderBy(options.sortField, options.sortDirection || 'asc'));
       }
       
-      // Add limit if specified
+      // Add pagination if provided
       if (options.limitCount) {
         queryConstraints.push(limit(options.limitCount));
       }
       
-      // Create and execute the query with all constraints - Fixed spreading issue
-      const q = query(collectionRef, ...queryConstraints);
+      // Create and execute the query with all constraints
+      const q = query(getCollection(), ...queryConstraints);
       const querySnapshot = await getDocs(q);
       
-      // Process the results
+      // Transform the data with proper typing
       const docs = querySnapshot.docs.map(doc => {
         return {
           id: doc.id,
@@ -145,20 +84,32 @@ export const createSearchOperations = <T extends Record<string, any>>(
         } as T & { id: string };
       });
       
+      // Get the last document for pagination
+      const lastDoc = querySnapshot.docs.length > 0 
+        ? querySnapshot.docs[querySnapshot.docs.length - 1] 
+        : null;
+      
+      // Return the result with proper structure
       return {
         docs,
-        lastDoc: querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : null,
-        count: querySnapshot.size
+        lastDoc,
+        count: querySnapshot.docs.length
       };
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error("Une erreur est survenue");
-      setError(error);
-      return { docs: [], lastDoc: null, count: 0 };
+      
+    } catch (error) {
+      console.error(`Error searching documents in ${getCollection().id}:`, error);
+      setError(error instanceof Error ? error : new Error('An unknown error occurred during search'));
+      return {
+        docs: [],
+        lastDoc: null,
+        count: 0
+      };
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Return all search related functions
   return {
     search
   };
