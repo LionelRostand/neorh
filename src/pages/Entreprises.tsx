@@ -10,6 +10,7 @@ import { toast } from "@/components/ui/use-toast";
 import CompanyStatusCards from "@/components/companies/CompanyStatusCards";
 import CompanySearch from "@/components/companies/CompanySearch";
 import CompanyTable from "@/components/companies/CompanyTable";
+import NewCompanyDialog from "@/components/companies/NewCompanyDialog";
 import useFirestore from "@/hooks/useFirestore";
 
 interface Company {
@@ -25,33 +26,34 @@ const Entreprises = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isNewCompanyDialogOpen, setIsNewCompanyDialogOpen] = useState(false);
   
   // Use the Firestore hook to fetch company data from hr_companies collection
   const { getAll, isLoading, error } = useFirestore<Company>("hr_companies");
 
-  useEffect(() => {
-    const fetchCompanies = async () => {
-      try {
-        const result = await getAll();
-        // Check if result exists and has docs property before setting state
-        if (result && result.docs) {
-          setCompanies(result.docs);
-        } else {
-          setCompanies([]);
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching companies:", error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les données des entreprises",
-          variant: "destructive"
-        });
+  const fetchCompanies = async () => {
+    try {
+      const result = await getAll();
+      // Check if result exists and has docs property before setting state
+      if (result && result.docs) {
+        setCompanies(result.docs);
+      } else {
         setCompanies([]);
-        setLoading(false);
       }
-    };
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching companies:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les données des entreprises",
+        variant: "destructive"
+      });
+      setCompanies([]);
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchCompanies();
   }, []);
 
@@ -66,10 +68,7 @@ const Entreprises = () => {
   }, [error]);
 
   const handleNewCompany = () => {
-    toast({
-      title: "Information",
-      description: "Cette fonctionnalité sera bientôt disponible"
-    });
+    setIsNewCompanyDialogOpen(true);
   };
 
   const handleDetails = (id: string) => {
@@ -142,6 +141,12 @@ const Entreprises = () => {
           </div>
         </CardContent>
       </Card>
+      
+      <NewCompanyDialog 
+        open={isNewCompanyDialogOpen}
+        onOpenChange={setIsNewCompanyDialogOpen}
+        onSuccess={fetchCompanies}
+      />
     </div>
   );
 };
