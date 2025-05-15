@@ -1,29 +1,37 @@
 
 import React from 'react';
-import { Calendar } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Clock, Check, AlertCircle, Info } from "lucide-react";
 
 interface LeaveStatusCardProps {
   title: string;
   count: number;
-  bgColor: string;
+  icon: React.ReactNode;
   textColor: string;
-  iconColor: string;
-  borderColor?: string;
+  bgColor: string;
+  borderColor: string;
 }
 
-const LeaveStatusCard = ({ title, count, bgColor, textColor, iconColor, borderColor }: LeaveStatusCardProps) => {
+const LeaveStatusCard = ({ title, count, icon, textColor, bgColor, borderColor }: LeaveStatusCardProps) => {
   return (
-    <div className={`relative rounded-lg p-5 ${bgColor} ${borderColor ? 'border border-' + borderColor : ''}`}>
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className={`font-medium ${textColor}`}>{title}</h3>
-          <p className="text-4xl font-bold mt-2">{count}</p>
+    <Card className={`border ${borderColor} rounded-lg`}>
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <p className={`text-sm font-medium ${textColor}`}>{title}</p>
+            <h3 className="text-3xl font-bold mt-1">{count}</h3>
+            <p className="text-xs text-gray-500 mt-1">
+              {count === 0 ? `Aucun congé ${title.toLowerCase()}` : 
+               count === 1 ? `1 congé ${title.toLowerCase()}` : 
+               `${count} congés ${title.toLowerCase()}`}
+            </p>
+          </div>
+          <div className={`p-2 rounded-full ${bgColor}`}>
+            {icon}
+          </div>
         </div>
-        <div className={`${iconColor}`}>
-          <Calendar className="h-6 w-6" />
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -45,31 +53,34 @@ const LeaveStatusCards = ({
       <LeaveStatusCard 
         title="En attente" 
         count={pending} 
-        bgColor="bg-blue-50" 
-        textColor="text-blue-700" 
-        iconColor="text-blue-400" 
+        icon={<Clock className="h-5 w-5 text-yellow-600" />} 
+        textColor="text-yellow-700"
+        bgColor="bg-yellow-100" 
+        borderColor="border-yellow-500" 
       />
       <LeaveStatusCard 
         title="Approuvés" 
         count={approved} 
-        bgColor="bg-green-50" 
-        textColor="text-green-700" 
-        iconColor="text-green-400" 
+        icon={<Check className="h-5 w-5 text-green-600" />} 
+        textColor="text-green-700"
+        bgColor="bg-green-100" 
+        borderColor="border-green-500" 
       />
       <LeaveStatusCard 
         title="Refusés" 
         count={rejected} 
-        bgColor="bg-red-50" 
-        textColor="text-red-700" 
-        iconColor="text-red-400" 
+        icon={<AlertCircle className="h-5 w-5 text-red-600" />} 
+        textColor="text-red-700"
+        bgColor="bg-red-100" 
+        borderColor="border-red-500" 
       />
       <LeaveStatusCard 
         title="Total" 
         count={total} 
-        bgColor="bg-white" 
-        textColor="text-gray-700" 
-        iconColor="text-gray-400" 
-        borderColor="gray-200"
+        icon={<Info className="h-5 w-5 text-blue-600" />} 
+        textColor="text-blue-700"
+        bgColor="bg-blue-100" 
+        borderColor="border-blue-500" 
       />
     </div>
   );

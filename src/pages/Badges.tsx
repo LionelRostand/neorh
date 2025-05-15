@@ -3,13 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge as BadgeUI } from "@/components/ui/badge";
-import { Plus, FileText, Edit, Trash, Check, AlertCircle, Clock } from "lucide-react";
+import { Plus, FileText, Edit, Trash, Check, Clock, AlertCircle, Info } from "lucide-react";
 import { useCollection } from "@/hooks/useCollection";
 import { Badge } from "@/lib/constants";
 import { toast } from "@/hooks/use-toast";
-
-// Types pour les badges - now using the same interface from constants.ts
-// This local interface is no longer needed as we're using the Badge from constants.ts
 
 const Badges = () => {
   const [badges, setBadges] = useState<Badge[]>([]);
@@ -139,11 +136,10 @@ const Badges = () => {
         </div>
       </div>
 
-      {/* Statistiques des badges - Nouvellement ajouté */}
+      {/* Statistiques des badges avec le nouveau style */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Badge actif */}
-        <Card className="border-l-4 border-green-500">
-          <CardContent className="p-4">
+        <Card className="border border-green-500 rounded-lg">
+          <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-green-700">Badges actifs</p>
@@ -161,9 +157,8 @@ const Badges = () => {
           </CardContent>
         </Card>
 
-        {/* Badge en attente */}
-        <Card className="border-l-4 border-yellow-500">
-          <CardContent className="p-4">
+        <Card className="border border-yellow-500 rounded-lg">
+          <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-yellow-700">Badges en attente</p>
@@ -181,9 +176,8 @@ const Badges = () => {
           </CardContent>
         </Card>
 
-        {/* Badge inactif */}
-        <Card className="border-l-4 border-red-500">
-          <CardContent className="p-4">
+        <Card className="border border-red-500 rounded-lg">
+          <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-red-700">Badges inactifs</p>
@@ -201,9 +195,8 @@ const Badges = () => {
           </CardContent>
         </Card>
 
-        {/* Couverture */}
-        <Card className="border-l-4 border-blue-500">
-          <CardContent className="p-4">
+        <Card className="border border-blue-500 rounded-lg">
+          <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-blue-700">Couverture</p>
@@ -214,7 +207,7 @@ const Badges = () => {
                 </p>
               </div>
               <div className="p-2 bg-blue-100 rounded-full">
-                <AlertCircle className="h-5 w-5 text-blue-600" />
+                <Info className="h-5 w-5 text-blue-600" />
               </div>
             </div>
           </CardContent>

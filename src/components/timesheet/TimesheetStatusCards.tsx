@@ -1,26 +1,34 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, FileText, Check, X } from "lucide-react";
+import { Clock, FileText, Check, AlertCircle } from "lucide-react";
 
 interface StatusCardProps {
   title: string;
   count: number;
   icon: React.ReactNode;
+  textColor: string;
   bgColor: string;
-  iconColor: string;
+  borderColor: string;
 }
 
-const StatusCard = ({ title, count, icon, bgColor, iconColor }: StatusCardProps) => {
+const StatusCard = ({ title, count, icon, textColor, bgColor, borderColor }: StatusCardProps) => {
   return (
-    <Card className="border shadow-sm">
-      <CardContent className="flex items-center justify-between p-6">
-        <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="text-4xl font-bold">{count}</p>
-        </div>
-        <div className={`p-3 rounded-full ${bgColor} ${iconColor}`}>
-          {icon}
+    <Card className={`border ${borderColor} rounded-lg`}>
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <p className={`text-sm font-medium ${textColor}`}>{title}</p>
+            <h3 className="text-3xl font-bold mt-1">{count}</h3>
+            <p className="text-xs text-gray-500 mt-1">
+              {count === 0 ? `Aucun élément ${title.toLowerCase()}` : 
+              count === 1 ? `1 élément ${title.toLowerCase()}` : 
+              `${count} éléments ${title.toLowerCase()}`}
+            </p>
+          </div>
+          <div className={`p-2 rounded-full ${bgColor}`}>
+            {icon}
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -45,30 +53,34 @@ const TimesheetStatusCards = ({
       <StatusCard 
         title="En cours" 
         count={drafts} 
-        icon={<Clock className="h-6 w-6" />} 
+        icon={<Clock className="h-5 w-5 text-blue-600" />} 
+        textColor="text-blue-700"
         bgColor="bg-blue-100" 
-        iconColor="text-blue-500" 
+        borderColor="border-blue-500" 
       />
       <StatusCard 
         title="Soumis" 
         count={submitted} 
-        icon={<FileText className="h-6 w-6" />} 
+        icon={<FileText className="h-5 w-5 text-yellow-600" />} 
+        textColor="text-yellow-700"
         bgColor="bg-yellow-100" 
-        iconColor="text-yellow-500" 
+        borderColor="border-yellow-500" 
       />
       <StatusCard 
         title="Validés" 
         count={approved} 
-        icon={<Check className="h-6 w-6" />} 
+        icon={<Check className="h-5 w-5 text-green-600" />} 
+        textColor="text-green-700"
         bgColor="bg-green-100" 
-        iconColor="text-green-500" 
+        borderColor="border-green-500" 
       />
       <StatusCard 
         title="Rejetés" 
         count={rejected} 
-        icon={<X className="h-6 w-6" />} 
+        icon={<AlertCircle className="h-5 w-5 text-red-600" />} 
+        textColor="text-red-700"
         bgColor="bg-red-100" 
-        iconColor="text-red-500" 
+        borderColor="border-red-500" 
       />
     </div>
   );

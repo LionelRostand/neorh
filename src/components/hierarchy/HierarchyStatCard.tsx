@@ -6,26 +6,35 @@ interface HierarchyStatCardProps {
   title: string;
   value: number;
   icon: ReactNode;
-  bgColor?: string;
-  iconColor?: string;
+  textColor: string;
+  bgColor: string;
+  borderColor: string;
 }
 
 const HierarchyStatCard = ({
   title,
   value,
   icon,
-  bgColor = "bg-blue-50",
-  iconColor = "text-blue-500"
+  textColor = "text-blue-700",
+  bgColor = "bg-blue-100",
+  borderColor = "border-blue-500"
 }: HierarchyStatCardProps) => {
   return (
-    <Card className="border shadow-sm">
-      <CardContent className="flex items-center p-6">
-        <div className={`p-3 rounded-full ${bgColor} ${iconColor} mr-4`}>
-          {icon}
-        </div>
-        <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="text-3xl font-bold">{value}</p>
+    <Card className={`border ${borderColor} rounded-lg`}>
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <p className={`text-sm font-medium ${textColor}`}>{title}</p>
+            <h3 className="text-3xl font-bold mt-1">{value}</h3>
+            <p className="text-xs text-gray-500 mt-1">
+              {value === 0 ? `Aucun ${title.toLowerCase()}` : 
+               value === 1 ? `1 ${title.toLowerCase()}` : 
+               `${value} ${title.toLowerCase()}`}
+            </p>
+          </div>
+          <div className={`p-2 rounded-full ${bgColor}`}>
+            {icon}
+          </div>
         </div>
       </CardContent>
     </Card>
