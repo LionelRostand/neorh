@@ -1,13 +1,12 @@
 
 import React, { useState, useEffect } from "react";
 import { useCollection } from "@/hooks/useCollection";
-import { File, MoreHorizontal, Calendar, Search, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Document } from "@/lib/constants";
+import DocumentFilter from "@/components/documents/DocumentFilter";
+import DocumentList from "@/components/documents/DocumentList";
 
 const DocumentsRH = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -79,73 +78,16 @@ const DocumentsRH = () => {
         </Button>
       </div>
 
-      {/* Document Filter Tabs */}
       <div className="bg-white border rounded-lg p-4">
-        <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-4 w-full max-w-md mb-6">
-            <TabsTrigger value="all" className="text-sm">Tous les documents</TabsTrigger>
-            <TabsTrigger value="contracts" className="text-sm">Contrats</TabsTrigger>
-            <TabsTrigger value="paystubs" className="text-sm">Fiches de paie</TabsTrigger>
-            <TabsTrigger value="certificates" className="text-sm">Certifications</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        
-        {/* Search Bar */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Rechercher un document..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-
-        {/* Documents Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredDocuments.map((document) => (
-            <DocumentCard key={document.id} document={document} />
-          ))}
-          {filteredDocuments.length === 0 && (
-            <div className="col-span-full text-center py-10 text-gray-500">
-              Aucun document trouvé
-            </div>
-          )}
-        </div>
+        <DocumentFilter 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+        <DocumentList documents={filteredDocuments} />
       </div>
     </div>
-  );
-};
-
-interface DocumentCardProps {
-  document: Document;
-}
-
-const DocumentCard = ({ document }: DocumentCardProps) => {
-  return (
-    <Card className="overflow-hidden border">
-      <div className="p-4 flex flex-col">
-        <div className="flex justify-center items-center mb-4">
-          <File size={40} className="text-gray-400" />
-        </div>
-        <h3 className="font-medium text-center mb-1">{document.title}</h3>
-        <div className="text-center text-gray-500 text-sm">
-          {document.fileType === "application/pdf" ? (
-            <span className="inline-block bg-gray-100 px-2 py-1 rounded">APPLICATION/PDF</span>
-          ) : (
-            <span className="inline-block bg-gray-100 px-2 py-1 rounded">UNKNOWN</span>
-          )}
-        </div>
-      </div>
-      <div className="border-t flex justify-between items-center py-2 px-4">
-        <button className="text-gray-500 hover:text-gray-700">
-          <Calendar size={18} />
-        </button>
-        <button className="text-gray-500 hover:text-gray-700">
-          <MoreHorizontal size={18} />
-        </button>
-      </div>
-    </Card>
   );
 };
 
