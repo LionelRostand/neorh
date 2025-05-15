@@ -18,6 +18,7 @@ import Departements from "./pages/Departements";
 import Evaluations from "./pages/Evaluations";
 import Formations from "./pages/Formations";
 import Salaires from "./pages/Salaires";
+import Recrutement from "./pages/Recrutement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,7 +43,7 @@ const App = () => (
           <Route path="/evaluations" element={<Layout><Evaluations /></Layout>} />
           <Route path="/formations" element={<Layout><Formations /></Layout>} />
           <Route path="/salaires" element={<Layout><Salaires /></Layout>} />
-          {/* D'autres routes pour les sections RH seront ajoutées ici */}
+          <Route path="/recrutement" element={<Layout><Recrutement /></Layout>} />
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
       </BrowserRouter>
