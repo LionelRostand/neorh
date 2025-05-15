@@ -1,4 +1,3 @@
-
 // Define the mapping between routes and Firestore collections
 export const ROUTE_TO_COLLECTION_MAP = {
   '/employes': 'hr_employees',
@@ -8,6 +7,7 @@ export const ROUTE_TO_COLLECTION_MAP = {
   '/presences': 'hr_presence',
   '/conges': 'hr_leaves',
   '/contrats': 'hr_contracts',
+  '/documents': 'hr_documents', // Added this mapping
 };
 
 // Define the collection types to provide correct typing
@@ -19,6 +19,7 @@ export interface CollectionTypes {
   hr_presence: any;
   hr_leaves: any;
   hr_contracts: any;
+  hr_documents: any; // Added this type
 }
 
 export type Leave = {
@@ -44,16 +45,16 @@ export type Badge = {
 export type Timesheet = {
   id?: string;
   employeeId: string;
-  date?: string; // Added this property
-  projectId?: string; // Added this property
-  taskDescription?: string; // Added this property
-  hoursWorked?: number; // Added this property
+  date?: string; 
+  projectId?: string;
+  taskDescription?: string;
+  hoursWorked?: number;
   weekStartDate: string;
   weekEndDate: string;
   hours: number;
   status: string;
-  submittedAt?: string; // Added this property
-  approvedAt?: string; // Added this property
+  submittedAt?: string;
+  approvedAt?: string;
   approvedBy?: string;
   approvalDate?: string;
 }
@@ -67,4 +68,17 @@ export type Contract = {
   startDate: string;
   endDate?: string;
   status: 'draft' | 'active' | 'expired' | 'pending';
+}
+
+export type Document = {
+  id?: string;
+  title: string;
+  employeeId?: string;
+  employeeName?: string;
+  category: string;
+  fileUrl: string;
+  fileType: string;
+  uploadDate: string;
+  expiryDate?: string;
+  status: 'active' | 'archived' | 'pending';
 }

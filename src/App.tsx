@@ -13,6 +13,7 @@ import FeuillesDeTemps from "./pages/FeuillesDeTemps";
 import Presences from "./pages/Presences";
 import Conges from "./pages/Conges";
 import Contrats from "./pages/Contrats";
+import DocumentsRH from "./pages/DocumentsRH";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/presences" element={<Layout><Presences /></Layout>} />
           <Route path="/conges" element={<Layout><Conges /></Layout>} />
           <Route path="/contrats" element={<Layout><Contrats /></Layout>} />
+          <Route path="/documents" element={<Layout><DocumentsRH /></Layout>} />
           {/* D'autres routes pour les sections RH seront ajoutées ici */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
