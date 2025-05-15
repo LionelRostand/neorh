@@ -70,6 +70,7 @@ export function useLogoUpload() {
     isUploading,
     handleLogoChange,
     uploadLogo,
-    resetLogo
+    resetLogo,
+    setLogoPreview // Now exposing the setLogoPreview function
   };
 }
