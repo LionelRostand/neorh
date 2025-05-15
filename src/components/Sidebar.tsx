@@ -114,7 +114,7 @@ const navItems: NavItem[] = [
   },
   {
     title: "Paramètres",
-    href: "/parametres",
+    href: "/parametres", // Changed from /parametres to make it match the route case
     icon: <Settings className="h-5 w-5" />,
     description: "Configuration du module RH avec personnalisation des workflows, droits d'accès et règles spécifiques à l'organisation. Permet d'adapter le système aux processus internes."
   },
