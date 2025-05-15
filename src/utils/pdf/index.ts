@@ -48,7 +48,7 @@ export const generateEmployeePdf = (employee: Employee, activeTab: string, optio
       generateDocumentsTab(doc, startY, options?.documents);
       break;
     case 'competences':
-      generateCompetencesTab(doc, startY);
+      generateCompetencesTab(doc, employee, startY);
       break;
     case 'horaires':
       generateHorairesTab(doc, startY);
