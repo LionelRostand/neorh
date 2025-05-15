@@ -20,6 +20,7 @@ import Formations from "./pages/Formations";
 import Salaires from "./pages/Salaires";
 import Recrutement from "./pages/Recrutement";
 import Entreprises from "./pages/Entreprises";
+import Rapports from "./pages/Rapports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
           <Route path="/salaires" element={<Layout><Salaires /></Layout>} />
           <Route path="/recrutement" element={<Layout><Recrutement /></Layout>} />
           <Route path="/entreprises" element={<Layout><Entreprises /></Layout>} />
+          <Route path="/rapports" element={<Layout><Rapports /></Layout>} />
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
       </BrowserRouter>
