@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useFirestore } from '@/hooks/useFirestore';
 import { Company } from '@/types/company';
 import { toast } from '@/components/ui/use-toast';

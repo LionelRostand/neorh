@@ -31,7 +31,7 @@ const ViewCompanyDialog = ({ companyId, open, onOpenChange }: ViewCompanyDialogP
         resetState();
       }
     };
-  }, [open, companyId]);
+  }, [open, companyId, fetchCompany, resetState]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

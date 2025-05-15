@@ -19,7 +19,9 @@ const CompanyDetails = ({ company, onClose }: CompanyDetailsProps) => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold">{company.name}</h2>
         <div className="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm font-medium">
-          {company.status || "Statut inconnu"}
+          {company.status === 'active' ? 'Actif' : 
+           company.status === 'pending' ? 'En attente' : 
+           company.status === 'inactive' ? 'Inactif' : 'Statut inconnu'}
         </div>
       </div>
 
@@ -32,7 +34,7 @@ const CompanyDetails = ({ company, onClose }: CompanyDetailsProps) => {
                   <img
                     src={company.logoUrl}
                     alt={`Logo ${company.name}`}
-                    className="object-contain h-full w-full"
+                    className="object-contain h-full w-full p-2"
                   />
                 </AspectRatio>
               </div>
@@ -88,7 +90,7 @@ const CompanyDetails = ({ company, onClose }: CompanyDetailsProps) => {
                     href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
+                    className="text-blue-600 hover:underline truncate"
                   >
                     {company.website}
                   </a>
