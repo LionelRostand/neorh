@@ -15,31 +15,51 @@ export const useCompaniesData = () => {
     setError(null);
     
     try {
+      console.log("Récupération des données des entreprises...");
       const companiesCollection = collection(db, 'hr_companies');
       const companiesSnapshot = await getDocs(companiesCollection);
       
-      const companiesData = companiesSnapshot.docs.map(doc => ({
-        id: doc.id,
-        name: doc.data().name || '',
-        industry: doc.data().industry || '',
-        type: doc.data().type || '',
-        status: doc.data().status || '',
-        logoUrl: doc.data().logoUrl || '',
-        // Additional fields can be added as needed
-      }));
+      console.log(`Nombre d'entreprises trouvées: ${companiesSnapshot.docs.length}`);
       
+      const companiesData = companiesSnapshot.docs.map(doc => {
+        const data = doc.data();
+        console.log(`Données pour ${doc.id}:`, data);
+        
+        return {
+          id: doc.id,
+          name: data.name || '',
+          industry: data.industry || '',
+          type: data.type || '',
+          status: data.status || '',
+          logoUrl: data.logoUrl || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          website: data.website || '',
+          address: data.address || '',
+          city: data.city || '',
+          postalCode: data.postalCode || '',
+          country: data.country || '',
+          description: data.description || '',
+          registrationDate: data.registrationDate || '',
+          // Support pour l'ancien format de logo
+          logo: data.logo || undefined
+        } as Company;
+      });
+      
+      console.log(`Traitement terminé, ${companiesData.length} entreprises chargées`);
       setCompanies(companiesData);
-      setIsLoading(false);
     } catch (err) {
+      console.error("Erreur lors du chargement des entreprises:", err);
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
       setError(err instanceof Error ? err : new Error(errorMessage));
-      setIsLoading(false);
       
       toast({
         title: "Erreur de chargement",
         description: `Impossible de charger les données des entreprises: ${errorMessage}`,
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 

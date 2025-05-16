@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { 
   Card, 
   CardContent 
@@ -11,60 +11,14 @@ import CompanyStatusCards from "@/components/companies/CompanyStatusCards";
 import CompanySearch from "@/components/companies/CompanySearch";
 import CompanyTable from "@/components/companies/CompanyTable";
 import NewCompanyDialog from "@/components/companies/NewCompanyDialog";
-import { useFirestore } from "@/hooks/useFirestore";
-import { Company } from "@/types/company";
+import { useCompaniesData } from "@/hooks/useCompaniesData";
 
 const Entreprises = () => {
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isNewCompanyDialogOpen, setIsNewCompanyDialogOpen] = useState(false);
   
-  const { getAll, isLoading } = useFirestore<Company>("hr_companies");
+  const { companies, isLoading, error, refetch } = useCompaniesData();
   
-  const fetchCompanies = useCallback(async () => {
-    try {
-      setLoading(true);
-      console.log("Fetching companies data");
-      
-      const result = await getAll();
-      if (result && result.docs) {
-        const companiesData = result.docs.map((company) => {
-          // Process logo if it exists
-          let logoUrl = company.logoUrl;
-          if (company.logo && company.logo.base64) {
-            // Logo is already in base64, we can use it directly
-            logoUrl = company.logo.base64;
-          }
-          
-          return {
-            ...company,
-            logoUrl: logoUrl,
-            // Ensure required fields have default values
-            name: company.name || 'Entreprise sans nom',
-            status: company.status || 'inactive'
-          } as Company;
-        });
-        
-        setCompanies(companiesData);
-        console.log(`Loaded ${companiesData.length} companies`);
-      }
-    } catch (error) {
-      console.error("Error fetching companies:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les données des entreprises",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [getAll]);
-
-  useEffect(() => {
-    fetchCompanies();
-  }, [fetchCompanies]);
-
   const handleNewCompany = () => {
     setIsNewCompanyDialogOpen(true);
   };
@@ -84,6 +38,16 @@ const Entreprises = () => {
       company.industry?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       company.type?.toLowerCase().includes(searchTerm.toLowerCase())
     ), [companies, searchTerm]);
+
+  // Si une erreur se produit, afficher un message
+  if (error) {
+    console.error("Erreur lors du chargement des entreprises:", error);
+    toast({
+      title: "Erreur de chargement",
+      description: "Impossible de charger les données des entreprises",
+      variant: "destructive"
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -119,8 +83,8 @@ const Entreprises = () => {
 
             <CompanyTable 
               companies={filteredCompanies}
-              loading={loading || isLoading}
-              onSuccess={fetchCompanies}
+              loading={isLoading}
+              onSuccess={refetch}
             />
           </div>
         </CardContent>
@@ -129,7 +93,7 @@ const Entreprises = () => {
       <NewCompanyDialog 
         open={isNewCompanyDialogOpen}
         onOpenChange={setIsNewCompanyDialogOpen}
-        onSuccess={fetchCompanies}
+        onSuccess={refetch}
       />
     </div>
   );
