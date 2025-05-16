@@ -38,7 +38,7 @@ export const generateDocumentsTab = (doc: jsPDF, startY: number, documents?: Doc
   ];
   
   // Génération du tableau
-  const finalY = autoTable(doc, {
+  autoTable(doc, {
     startY: startY + 10,
     head: [headers.map(h => h.header)],
     body: tableData,
@@ -53,5 +53,9 @@ export const generateDocumentsTab = (doc: jsPDF, startY: number, documents?: Doc
     }
   });
   
-  return finalY.lastAutoTable.finalY + 10;
+  // Récupérer la position Y finale à partir du document lui-même
+  // @ts-ignore - Accessing a property that may not be typed correctly in the library
+  const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY : startY + 20;
+  
+  return finalY + 10;
 };
