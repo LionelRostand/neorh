@@ -45,6 +45,7 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
         comment: data.comment || '',
         managerId: managerId, // Ajouter le managerId si disponible
         createdAt: new Date().toISOString(),
+        daysAllocated: data.daysAllocated || 0 // Ajouter le nombre de jours alloués
       };
 
       await add(formattedData);

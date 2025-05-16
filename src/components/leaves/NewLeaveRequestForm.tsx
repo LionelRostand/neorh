@@ -9,12 +9,13 @@ import {
 import { Form } from "@/components/ui/form";
 import { LeaveFormValues } from "./form/types";
 import { EmployeeField } from "./form/EmployeeField";
-import { LeaveTypeField } from "./form/LeaveTypeField";
+import { LeaveTypeField, leaveTypes } from "./form/LeaveTypeField";
 import { DatePickerField } from "./form/DatePickerField";
 import { CommentField } from "./form/CommentField";
 import { LeaveFormActions } from "./form/LeaveFormActions";
 import { useLeaveFormSubmit } from "./form/useLeaveFormSubmit";
-import { useEffect } from "react";
+import { DaysAllocationField } from "./form/DaysAllocationField";
+import { useEffect, useState } from "react";
 
 interface NewLeaveRequestFormProps {
   open: boolean;
@@ -29,6 +30,9 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
   onSuccess,
   employeeId
 }) => {
+  const [selectedType, setSelectedType] = useState<string>("");
+  const [showDaysAllocation, setShowDaysAllocation] = useState<boolean>(false);
+
   const form = useForm<LeaveFormValues>({
     defaultValues: {
       employeeId: employeeId || "",
@@ -36,6 +40,7 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
       startDate: undefined,
       endDate: undefined,
       comment: "",
+      daysAllocated: 0,
     },
   });
 
@@ -46,6 +51,22 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
     }
   }, [employeeId, form]);
 
+  // Effet pour montrer/cacher le champ d'allocation selon le type
+  useEffect(() => {
+    // Vérifier si le type sélectionné nécessite une allocation
+    const shouldShowAllocation = ["paid", "rtt"].includes(selectedType);
+    setShowDaysAllocation(shouldShowAllocation);
+    
+    // Réinitialiser le nombre de jours si on ne montre plus le champ
+    if (!shouldShowAllocation) {
+      form.setValue("daysAllocated", 0);
+    }
+  }, [selectedType, form]);
+
+  const handleTypeChange = (type: string) => {
+    setSelectedType(type);
+  };
+
   const { handleSubmit, isSubmitting } = useLeaveFormSubmit(() => {
     form.reset();
     onClose();
@@ -54,6 +75,12 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
       onSuccess();
     }
   });
+
+  // Générer le libellé du champ d'allocation en fonction du type
+  const getAllocationLabel = () => {
+    const typeObj = leaveTypes.find(t => t.id === selectedType);
+    return `Nombre de jours de ${typeObj?.label || "congés"} à attribuer`;
+  };
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -65,7 +92,16 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             {!employeeId && <EmployeeField form={form} />}
-            <LeaveTypeField form={form} />
+            <LeaveTypeField form={form} onTypeChange={handleTypeChange} />
+            
+            {/* Champ d'allocation conditionnel */}
+            {showDaysAllocation && (
+              <DaysAllocationField 
+                form={form} 
+                label={getAllocationLabel()}
+              />
+            )}
+            
             <DatePickerField 
               form={form} 
               name="startDate" 

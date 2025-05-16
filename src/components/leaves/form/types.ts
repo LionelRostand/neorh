@@ -5,4 +5,5 @@ export interface LeaveFormValues {
   startDate: Date | undefined;
   endDate: Date | undefined;
   comment: string;
+  daysAllocated?: number;
 }

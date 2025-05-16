@@ -28,9 +28,10 @@ export const leaveTypes = [
 
 interface LeaveTypeFieldProps {
   form: UseFormReturn<LeaveFormValues>;
+  onTypeChange?: (type: string) => void;
 }
 
-export function LeaveTypeField({ form }: LeaveTypeFieldProps) {
+export function LeaveTypeField({ form, onTypeChange }: LeaveTypeFieldProps) {
   return (
     <FormField
       control={form.control}
@@ -38,7 +39,13 @@ export function LeaveTypeField({ form }: LeaveTypeFieldProps) {
       render={({ field }) => (
         <FormItem>
           <FormLabel>Type de congé</FormLabel>
-          <Select onValueChange={field.onChange} value={field.value}>
+          <Select 
+            onValueChange={(value) => {
+              field.onChange(value);
+              if (onTypeChange) onTypeChange(value);
+            }} 
+            value={field.value}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionnez un type de congé" />
