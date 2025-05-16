@@ -21,10 +21,20 @@ export const useEmployeeLeaves = (employeeId: string) => {
     setLoading(true);
     try {
       console.log("Fetching leaves for employee:", employeeId);
-      const result = await search('employeeId', employeeId, {
-        sortField: 'startDate',
-        sortDirection: 'desc'
-      });
+      // Si la recherche avec tri échoue, essayez sans tri
+      let result;
+      
+      try {
+        // Essayer d'abord avec le tri
+        result = await search('employeeId', employeeId, {
+          sortField: 'startDate',
+          sortDirection: 'desc'
+        });
+      } catch (sortError) {
+        console.warn("Failed to fetch leaves with sorting, trying without sorting:", sortError);
+        // Si le tri échoue (problème d'index), essayer sans tri
+        result = await search('employeeId', employeeId);
+      }
       
       console.log("Leaves result:", result);
       
@@ -48,9 +58,10 @@ export const useEmployeeLeaves = (employeeId: string) => {
     } catch (err) {
       console.error("Error fetching employee leaves:", err);
       setError(err instanceof Error ? err : new Error('Erreur inconnue'));
+      // Éviter d'afficher plusieurs toasts pour la même erreur
       toast({
         title: "Erreur",
-        description: "Impossible de charger les congés de l'employé",
+        description: "Impossible de charger les congés de l'employé. Vérifiez les index Firestore.",
         variant: "destructive"
       });
     } finally {

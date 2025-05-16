@@ -41,6 +41,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
         queryConstraints.push(orderBy(options.sortField, sortDirection));
       }
       
+      // Construire la requête correctement avec les contraintes individuelles
       const q = query(collectionRef, ...queryConstraints);
       const querySnapshot = await getDocs(q);
       
