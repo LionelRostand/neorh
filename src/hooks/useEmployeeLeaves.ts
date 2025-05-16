@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Leave } from '@/lib/constants';
 import { useFirestore } from './useFirestore';
@@ -110,9 +111,12 @@ export const useEmployeeLeaves = (employeeId: string) => {
           updatedAt: new Date().toISOString()
         };
         
+        // Fix the type issue here
         const newAllocationId = await addAllocation(defaultAllocation);
         if (newAllocationId !== null) {
-          setAllocation({ ...defaultAllocation, id: newAllocationId as string });
+          // Convert newAllocationId to string explicitly since it might be coming as an object
+          const allocationId = typeof newAllocationId === 'string' ? newAllocationId : String(newAllocationId);
+          setAllocation({ ...defaultAllocation, id: allocationId });
         }
       }
     } catch (err) {
