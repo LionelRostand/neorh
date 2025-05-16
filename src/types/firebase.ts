@@ -64,6 +64,7 @@ export interface Department {
   budget?: number;
   objectives?: string;
   color?: string;   // Added color property
+  companyId?: string; // Added company reference
 }
 
 // Types pour la collection 'hierarchy'

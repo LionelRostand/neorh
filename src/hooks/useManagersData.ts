@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from '@/components/ui/use-toast';
-import { Employee } from '@/types/employee';
+import { Employee } from '@/types/firebase';
 
 export const useManagersData = () => {
   const [managers, setManagers] = useState<Employee[]>([]);
@@ -15,37 +15,45 @@ export const useManagersData = () => {
     setError(null);
     
     try {
-      // Récupérer tous les employés actifs qui peuvent être des responsables
-      const managersQuery = query(
-        collection(db, 'hr_employees'),
-        where('status', '==', 'active')
-      );
-      const managersSnapshot = await getDocs(managersQuery);
+      console.log('Fetching managers from Firestore');
+      const employeesCollection = collection(db, 'hr_employees');
+      // Nous récupérons tous les employés pour l'instant, mais dans une version 
+      // future nous pourrions filtrer pour ne récupérer que les managers
+      const employeesSnapshot = await getDocs(employeesCollection);
       
-      const managersData = managersSnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
+      if (employeesSnapshot.empty) {
+        console.log('No managers found in Firestore');
+        setManagers([]);
+      } else {
+        const managersData = employeesSnapshot.docs.map(doc => ({
           id: doc.id,
-          name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
-          position: data.position || '',
-          department: data.department || '',
-          email: data.email || '',
-          status: data.status || 'inactive'
-        } as Employee;
-      });
-      
-      setManagers(managersData);
-      setIsLoading(false);
+          firstName: doc.data().firstName || '',
+          lastName: doc.data().lastName || '',
+          email: doc.data().email || '',
+          phone: doc.data().phone || '',
+          department: doc.data().department || '',
+          position: doc.data().position || '',
+          status: doc.data().status || 'active',
+          hireDate: doc.data().hireDate || '',
+          avatarUrl: doc.data().avatarUrl || '',
+          managerId: doc.data().managerId || ''
+        }));
+        
+        console.log(`Retrieved ${managersData.length} managers`, managersData);
+        setManagers(managersData);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
+      console.error('Error fetching managers:', errorMessage);
       setError(err instanceof Error ? err : new Error(errorMessage));
-      setIsLoading(false);
       
       toast({
         title: "Erreur de chargement",
-        description: `Impossible de charger les données des responsables: ${errorMessage}`,
+        description: `Impossible de charger les données des managers: ${errorMessage}`,
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -60,3 +68,5 @@ export const useManagersData = () => {
     refetch: fetchManagers
   };
 };
+
+export default useManagersData;
