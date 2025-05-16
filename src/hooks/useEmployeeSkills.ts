@@ -3,6 +3,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useFirestore } from './useFirestore';
 import { toast } from '@/components/ui/use-toast';
 import { Skill } from '@/types/skill';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export function useEmployeeSkills(employeeId: string) {
   const [skills, setSkills] = useState<Skill[]>([]);
@@ -10,44 +12,58 @@ export function useEmployeeSkills(employeeId: string) {
   const [error, setError] = useState<Error | null>(null);
   const isFetchingRef = useRef<boolean>(false);
 
-  const { search, add, update, remove } = useFirestore<Skill>('hr_skills');
+  const { add, update, remove } = useFirestore<Skill>('hr_skills');
 
   const fetchEmployeeSkills = useCallback(async () => {
-    // Utiliser une référence pour éviter des appels multiples simultanés
-    if (isFetchingRef.current) return;
+    // Si déjà en cours de récupération, ne pas exécuter à nouveau
+    if (isFetchingRef.current || !employeeId) return;
     
     try {
+      console.log(`Fetching skills for employee: ${employeeId}`);
       isFetchingRef.current = true;
       setLoading(true);
+      setError(null);
       
-      // Simplifier la requête pour éviter le problème d'index composite
-      const result = await search('employeeId', employeeId);
+      // Utiliser Firebase directement au lieu de useFirestore.search pour éviter les problèmes d'indexation
+      const skillsCollection = collection(db, 'hr_skills');
+      const q = query(skillsCollection, where('employeeId', '==', employeeId));
+      const snapshot = await getDocs(q);
       
-      if (result.docs) {
-        // Trier les résultats côté client pour éviter le besoin d'un index composite
-        const sortedSkills = [...result.docs].sort((a, b) => 
-          a.name.localeCompare(b.name)
+      if (!snapshot.empty) {
+        console.log(`Found ${snapshot.docs.length} skills for employee ${employeeId}`);
+        const loadedSkills: Skill[] = [];
+        
+        snapshot.forEach(doc => {
+          loadedSkills.push({
+            id: doc.id,
+            ...(doc.data() as Omit<Skill, 'id'>)
+          });
+        });
+        
+        // Trier les compétences par nom côté client
+        const sortedSkills = loadedSkills.sort((a, b) => 
+          (a.name || '').localeCompare(b.name || '')
         );
+        
         setSkills(sortedSkills);
       } else {
+        console.log(`No skills found for employee ${employeeId}`);
         setSkills([]);
       }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Une erreur est survenue'));
       console.error("Erreur lors du chargement des compétences:", err);
+      setError(err instanceof Error ? err : new Error('Une erreur est survenue'));
       // Éviter de montrer des toasts multiples en cas d'erreurs répétées
-      if (!isFetchingRef.current) {
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les compétences de l'employé",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les compétences de l'employé",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
       isFetchingRef.current = false;
     }
-  }, [employeeId, search]);
+  }, [employeeId]);
 
   const addSkill = useCallback(async (skill: Omit<Skill, 'id' | 'employeeId'>) => {
     try {
@@ -59,16 +75,18 @@ export function useEmployeeSkills(employeeId: string) {
       
       const resultId = await add(skillData);
       if (resultId) {
-        // Corriger le problème de typage en créant correctement la nouvelle compétence
+        // Créer correctement un nouvel objet Skill avec un ID typé comme string
         const newSkill: Skill = {
           ...skillData,
-          id: String(resultId) // Convertir explicitement en string
+          id: String(resultId)
         };
         
         setSkills(prevSkills => [...prevSkills, newSkill]);
         return resultId;
       }
+      return null;
     } catch (err) {
+      console.error("Erreur lors de l'ajout d'une compétence:", err);
       toast({
         title: "Erreur",
         description: "Impossible d'ajouter la compétence",
@@ -91,6 +109,7 @@ export function useEmployeeSkills(employeeId: string) {
       }
       return success;
     } catch (err) {
+      console.error("Erreur lors de la mise à jour d'une compétence:", err);
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour la compétence",
@@ -109,6 +128,7 @@ export function useEmployeeSkills(employeeId: string) {
       }
       return success;
     } catch (err) {
+      console.error("Erreur lors de la suppression d'une compétence:", err);
       toast({
         title: "Erreur",
         description: "Impossible de supprimer la compétence",
@@ -128,7 +148,6 @@ export function useEmployeeSkills(employeeId: string) {
     // Nettoyage lors du démontage du composant
     return () => {
       mounted = false;
-      isFetchingRef.current = false;
     };
   }, [fetchEmployeeSkills, employeeId]);
 
