@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Download, Building2, Users, Hierarchy } from "lucide-react";
+import { FileText, Download, Building2, Users, ChartBar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import EmployeesHierarchy from "@/components/hierarchy/EmployeesHierarchy";
 import DepartmentsHierarchy from "@/components/hierarchy/DepartmentsHierarchy";
@@ -55,7 +55,7 @@ const Hierarchie = () => {
         <HierarchyStatCard 
           title="Total des départements" 
           value={totalDepartments} 
-          icon={<Hierarchy className="h-5 w-5" />} 
+          icon={<ChartBar className="h-5 w-5" />} 
           bgColor="bg-blue-50"
           textColor="text-blue-700"
           borderColor="border-blue-100"
@@ -64,7 +64,7 @@ const Hierarchie = () => {
         <HierarchyStatCard 
           title="Responsables" 
           value={managerCount} 
-          icon={<Hierarchy className="h-5 w-5" />} 
+          icon={<ChartBar className="h-5 w-5" />} 
           bgColor="bg-indigo-50"
           textColor="text-indigo-700"
           borderColor="border-indigo-100"
@@ -73,7 +73,7 @@ const Hierarchie = () => {
         <HierarchyStatCard 
           title="Employés" 
           value={employeeCount} 
-          icon={<Hierarchy className="h-5 w-5" />} 
+          icon={<ChartBar className="h-5 w-5" />} 
           bgColor="bg-green-50"
           textColor="text-green-700"
           borderColor="border-green-100"
@@ -82,7 +82,7 @@ const Hierarchie = () => {
         <HierarchyStatCard 
           title="Postes vacants" 
           value={vacantPositions} 
-          icon={<Hierarchy className="h-5 w-5" />} 
+          icon={<ChartBar className="h-5 w-5" />} 
           bgColor="bg-yellow-50"
           textColor="text-yellow-700"
           borderColor="border-yellow-100"
