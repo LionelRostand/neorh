@@ -67,6 +67,14 @@ export function DaysAllocationField({
                 onChange={handleInputChange}
                 className="h-9 text-center w-16"
                 value={field.value || 0}
+                // Fix for the TypeScript error - ensure value is always a number or string
+                onBlur={() => {
+                  // Ensure value is a number on blur
+                  const value = field.value;
+                  if (typeof value === 'boolean' || value instanceof Date) {
+                    form.setValue(name as FieldPath<LeaveFormValues>, 0);
+                  }
+                }}
               />
             </FormControl>
             <Button
