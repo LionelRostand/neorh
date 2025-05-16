@@ -1,3 +1,4 @@
+
 import { LeaveAllocation } from "@/hooks/leaves";
 
 export interface LeaveAllocationManagerProps {
@@ -35,3 +36,5 @@ export interface ConfirmDialogProps {
   onConfirm: () => void;
   isSaving: boolean;
 }
+
+export { type AllocationFormValues } from "./hooks/useLeaveAllocationForm";
