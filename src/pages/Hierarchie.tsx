@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Network, FileText, Plus, Download } from "lucide-react";
+import { Network, FileText, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import EmployeesHierarchy from "@/components/hierarchy/EmployeesHierarchy";
 import HierarchyStatCard from "@/components/hierarchy/HierarchyStatCard";
@@ -33,13 +33,6 @@ const Hierarchie = () => {
     toast({
       title: "Fonctionnalité d'export/import",
       description: "Cette fonctionnalité sera disponible prochainement.",
-    });
-  };
-
-  const handleNewHierarchy = () => {
-    toast({
-      title: "Nouveau département",
-      description: "La création d'un nouveau département sera disponible prochainement.",
     });
   };
 
@@ -125,10 +118,6 @@ const Hierarchie = () => {
           <Button variant="outline" onClick={handleExportImport}>
             <FileText className="h-4 w-4 mr-2" />
             Exporter / Importer
-          </Button>
-          <Button onClick={handleNewHierarchy}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nouvelle Unité
           </Button>
         </div>
       </div>
