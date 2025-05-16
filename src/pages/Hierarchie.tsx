@@ -13,6 +13,7 @@ import { useEmployeeData } from "@/hooks/useEmployeeData";
 const Hierarchie = () => {
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [viewMode, setViewMode] = useState<"employees" | "departments">("employees");
+  const [showAssociatedDepts, setShowAssociatedDepts] = useState(false);
   const { toast } = useToast();
   const { departments, isLoading: isLoadingDepartments } = useDepartmentsData();
   const { employees } = useEmployeeData();
@@ -116,23 +117,35 @@ const Hierarchie = () => {
         <div className="flex items-center space-x-2">
           <h2 className="text-lg font-medium">Structure Hiérarchique</h2>
           {viewMode === "employees" && (
-            <Select 
-              value={selectedDepartment}
-              onValueChange={setSelectedDepartment}
-              disabled={isLoadingDepartments}
-            >
-              <SelectTrigger className="w-[250px]">
-                <SelectValue placeholder="Tous les départements" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les départements</SelectItem>
-                {departments && departments.map(dept => (
-                  <SelectItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <>
+              <Select 
+                value={selectedDepartment}
+                onValueChange={setSelectedDepartment}
+                disabled={isLoadingDepartments}
+              >
+                <SelectTrigger className="w-[250px]">
+                  <SelectValue placeholder="Tous les départements" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les départements</SelectItem>
+                  {departments && departments.map(dept => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowAssociatedDepts(!showAssociatedDepts)}
+                className={showAssociatedDepts ? "bg-indigo-50 text-indigo-700 border-indigo-300" : ""}
+              >
+                <Building2 className="h-4 w-4 mr-2" />
+                {showAssociatedDepts ? "Masquer départements" : "Montrer départements"}
+              </Button>
+            </>
           )}
         </div>
 
@@ -151,7 +164,10 @@ const Hierarchie = () => {
       {/* Hierarchy Chart */}
       <div className="border rounded-lg bg-white p-6 overflow-x-auto">
         {viewMode === "employees" ? (
-          <EmployeesHierarchy departmentFilter={selectedDepartment} />
+          <EmployeesHierarchy 
+            departmentFilter={selectedDepartment} 
+            showDepartments={showAssociatedDepts}
+          />
         ) : (
           <DepartmentsHierarchy />
         )}

@@ -6,9 +6,13 @@ import { Employee } from "@/types/employee";
 
 interface EmployeesHierarchyProps {
   departmentFilter?: string;
+  showDepartments?: boolean;
 }
 
-const EmployeesHierarchy: React.FC<EmployeesHierarchyProps> = ({ departmentFilter = "all" }) => {
+const EmployeesHierarchy: React.FC<EmployeesHierarchyProps> = ({ 
+  departmentFilter = "all",
+  showDepartments = false 
+}) => {
   const { employees, isLoading, error } = useEmployeeData();
 
   // Filter employees by department if necessary
@@ -77,7 +81,8 @@ const EmployeesHierarchy: React.FC<EmployeesHierarchyProps> = ({ departmentFilte
           <HierarchyNode 
             employee={rootEmployee} 
             employees={filteredEmployees} 
-            level={0} 
+            level={0}
+            showDepartments={showDepartments}
           />
         </div>
       ) : (
