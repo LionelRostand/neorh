@@ -1,12 +1,22 @@
 
-import React, { memo } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus, Minus, Calendar } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { AllocationCounterProps } from "./types";
+import React from 'react';
+import { Input } from '@/components/ui/input';
+import { Calendar, Calendar2 } from 'lucide-react';
 
-const AllocationCounter: React.FC<AllocationCounterProps> = memo(({
+interface AllocationCounterProps {
+  id: string;
+  value: number;
+  onChange: (value: number) => void;
+  isEditing: boolean;
+  label: string;
+  used: number;
+  total: number;
+  colorClass: string;
+  iconBgClass: string;
+  iconColorClass: string;
+}
+
+const AllocationCounter: React.FC<AllocationCounterProps> = ({
   id,
   value,
   onChange,
@@ -16,82 +26,66 @@ const AllocationCounter: React.FC<AllocationCounterProps> = memo(({
   total,
   colorClass,
   iconBgClass,
-  iconColorClass,
+  iconColorClass
 }) => {
-  const handleIncrement = () => {
-    onChange(value + 1);
-  };
-
-  const handleDecrement = () => {
-    if (value > used) {
-      onChange(value - 1);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseInt(e.target.value);
-    if (!isNaN(newValue) && newValue >= used) {
-      onChange(newValue);
-    }
-  };
-
+  // Calculer le nombre de jours restants
+  const remaining = total - used;
+  
+  // Calculer le pourcentage d'utilisation
+  const percentUsed = total > 0 ? Math.round((used / total) * 100) : 0;
+  
   return (
-    <Card className="border rounded-lg shadow-sm">
-      <CardContent className="p-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <p className="text-sm text-gray-500">{label}</p>
+    <div className="border rounded-lg p-4 shadow-sm bg-white">
+      <div className="flex items-start space-x-4">
+        <div className={`p-2 rounded-lg ${iconBgClass}`}>
+          <Calendar className={`h-5 w-5 ${iconColorClass}`} />
+        </div>
+        <div className="flex-1">
+          <h4 className="font-medium">{label}</h4>
+          <div className="mt-2">
             {isEditing ? (
-              <div className="flex items-center space-x-2 mt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={handleDecrement}
-                  disabled={value <= used}
-                  className="h-8 w-8"
-                >
-                  <Minus className="h-3 w-3" />
-                </Button>
+              <div className="flex items-center">
                 <Input
                   id={id}
                   type="number"
-                  min={used}
+                  min="0"
+                  max="100"
                   value={value}
-                  onChange={handleChange}
-                  className="h-9 text-center w-16"
+                  onChange={(e) => onChange(parseInt(e.target.value) || 0)}
+                  className="w-20 text-center"
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={handleIncrement}
-                  className="h-8 w-8"
-                >
-                  <Plus className="h-3 w-3" />
-                </Button>
+                <span className="ml-2 text-sm text-gray-500">jours</span>
               </div>
             ) : (
-              <>
-                <h4 className="text-2xl font-bold mt-1">{value - used}</h4>
-                <p className="text-xs text-gray-500 mt-1">
-                  disponibles sur {total} jours
-                </p>
-                <p className="text-xs text-gray-500">
-                  ({used} jours utilisés)
-                </p>
-              </>
+              <div className="flex items-baseline space-x-1">
+                <span className={`text-xl font-semibold ${colorClass}`}>{remaining}</span>
+                <span className="text-sm text-gray-500">/ {total} jours restants</span>
+              </div>
             )}
           </div>
-          <div className={`p-2 rounded-full ${iconBgClass}`}>
-            <Calendar className={`h-5 w-5 ${iconColorClass}`} />
+        </div>
+      </div>
+      
+      {!isEditing && (
+        <div className="mt-3">
+          <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div 
+              className={`h-full rounded-full ${
+                percentUsed > 80 ? 'bg-red-500' : 
+                percentUsed > 50 ? 'bg-yellow-500' : 
+                'bg-green-500'
+              }`}
+              style={{ width: `${percentUsed}%` }}
+            ></div>
+          </div>
+          <div className="flex justify-between mt-1 text-xs text-gray-500">
+            <span>Utilisé: {used} jours</span>
+            <span>{percentUsed}%</span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
-});
-
-AllocationCounter.displayName = "AllocationCounter";
+};
 
 export default AllocationCounter;

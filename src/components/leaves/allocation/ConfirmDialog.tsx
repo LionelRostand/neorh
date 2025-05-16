@@ -1,49 +1,53 @@
 
-import React from "react";
+import React from 'react';
 import {
   AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { ConfirmDialogProps } from "./types";
+import { Loader2 } from "lucide-react";
+
+interface ConfirmDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  isSaving: boolean;
+}
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   open,
   onOpenChange,
   onConfirm,
-  isSaving,
+  isSaving
 }) => {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            Confirmer la modification des allocations
-          </AlertDialogTitle>
+          <AlertDialogTitle>Confirmer les modifications</AlertDialogTitle>
           <AlertDialogDescription>
-            Êtes-vous sûr de vouloir modifier les allocations de congés pour cet employé ?
-            Cette action mettra à jour les jours disponibles pour l'année en cours.
+            Êtes-vous sûr de vouloir mettre à jour les allocations de congés pour cet employé ?
+            Cette action mettra à jour les droits à congés de l'employé.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
+          <AlertDialogCancel disabled={isSaving}>Annuler</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
             disabled={isSaving}
+            className="gap-2"
           >
-            Annuler
-          </Button>
-          <Button
-            className="bg-emerald-500 hover:bg-emerald-600"
-            onClick={onConfirm}
-            disabled={isSaving}
-          >
-            {isSaving ? "Enregistrement..." : "Confirmer"}
-          </Button>
+            {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+            Confirmer
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

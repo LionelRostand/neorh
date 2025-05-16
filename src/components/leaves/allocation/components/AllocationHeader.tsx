@@ -1,8 +1,9 @@
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { LeaveAllocation } from '@/hooks/leaves';
-import ManagerActions from '../ManagerActions';
+import { Edit, Save, X, Loader2 } from 'lucide-react';
 
 interface AllocationHeaderProps {
   allocation: LeaveAllocation;
@@ -23,42 +24,62 @@ const AllocationHeader: React.FC<AllocationHeaderProps> = ({
   onCancel,
   canEdit
 }) => {
-  // Mémoriser la date de dernière mise à jour pour éviter les re-rendus
-  const lastUpdatedDate = useMemo(() => {
-    if (allocation?.updatedAt) {
-      try {
-        return new Date(allocation.updatedAt).toLocaleDateString('fr-FR', {
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric'
-        });
-      } catch (e) {
-        return 'Date inconnue';
-      }
-    }
-    return 'Jamais mise à jour';
-  }, [allocation?.updatedAt]);
+  const formattedDate = new Date(allocation.updatedAt).toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 
   return (
-    <CardHeader className="pb-2">
-      <div className="flex items-center justify-between">
-        <CardTitle className="text-xl">
-          Allocations de congés {new Date().getFullYear()}
-        </CardTitle>
-        {canEdit && (
-          <ManagerActions
-            isEditing={isEditing}
-            isSaving={isSaving}
-            onSave={onSave}
-            onCancel={onCancel}
-            setShowConfirmDialog={() => onSave()}
-            showConfirmDialog={false}
-          />
-        )}
+    <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <div>
+        <CardTitle className="text-lg">Allocations {allocation.year}</CardTitle>
+        <p className="text-sm text-gray-500 mt-1">
+          Dernière mise à jour : {formattedDate}
+        </p>
       </div>
-      <p className="text-sm text-gray-500 mt-1">
-        Dernière mise à jour: {lastUpdatedDate}
-      </p>
+      {canEdit && (
+        <div className="flex space-x-2">
+          {isEditing ? (
+            <>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={onSave}
+                disabled={isSaving}
+                className="gap-1"
+              >
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                Enregistrer
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onCancel}
+                disabled={isSaving}
+                className="gap-1"
+              >
+                <X className="h-4 w-4" />
+                Annuler
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onEdit}
+              className="gap-1"
+            >
+              <Edit className="h-4 w-4" />
+              Modifier
+            </Button>
+          )}
+        </div>
+      )}
     </CardHeader>
   );
 };

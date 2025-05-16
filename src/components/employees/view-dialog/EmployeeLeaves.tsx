@@ -6,6 +6,8 @@ import LeaveAllocationManager from "@/components/leaves/allocation/LeaveAllocati
 import { Button } from "@/components/ui/button";
 import { CalendarPlus } from "lucide-react";
 import NewLeaveRequestForm from "@/components/leaves/NewLeaveRequestForm";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 
 interface EmployeeLeavesProps {
   employeeId: string;
@@ -17,6 +19,8 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
     allocation, 
     allocationLoading, 
     updateLeaveAllocation,
+    leaves,
+    loading,
     refetch
   } = useEmployeeLeaves(employeeId);
 
@@ -42,14 +46,72 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
           <CardTitle className="text-lg">Allocations</CardTitle>
         </CardHeader>
         <CardContent>
-          <LeaveAllocationManager 
-            allocation={allocation}
-            isLoading={allocationLoading}
-            onUpdate={updateLeaveAllocation}
-            employeeId={employeeId}
-          />
+          {allocationLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="w-full h-12" />
+              <Skeleton className="w-full h-12" />
+            </div>
+          ) : allocation ? (
+            <LeaveAllocationManager 
+              allocation={allocation}
+              isLoading={allocationLoading}
+              onUpdate={updateLeaveAllocation}
+              employeeId={employeeId}
+            />
+          ) : (
+            <div className="text-center p-6 bg-gray-50 rounded-md">
+              <p className="text-gray-500">Aucune allocation de congés trouvée.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Historique des demandes de congés */}
+      {leaves && leaves.length > 0 && (
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle className="text-lg">Historique des demandes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="space-y-4">
+                <Skeleton className="w-full h-12" />
+                <Skeleton className="w-full h-12" />
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Dates</TableHead>
+                    <TableHead>Statut</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {leaves.map((leave) => (
+                    <TableRow key={leave.id}>
+                      <TableCell>{leave.type}</TableCell>
+                      <TableCell>
+                        {leave.startDate} - {leave.endDate}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          leave.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                          leave.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {leave.status === 'approved' ? 'Approuvé' : 
+                           leave.status === 'rejected' ? 'Refusé' : 'En attente'}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Formulaire de demande de congés */}
       <NewLeaveRequestForm 
