@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
@@ -23,13 +23,17 @@ interface EmployeeFormProps {
   onSuccess?: () => void;
 }
 
+// Clé pour le stockage local des données du formulaire
+const FORM_STORAGE_KEY = 'employeeFormData';
+
 export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
   const { 
     photoPreview, 
     isUploading, 
     setIsUploading, 
     handlePhotoChange, 
-    uploadPhoto 
+    uploadPhoto,
+    resetPhoto 
   } = usePhotoUpload();
   
   // Récupérer les données des entreprises, départements et responsables
@@ -37,6 +41,7 @@ export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
   const { departments, isLoading: isLoadingDepartments } = useDepartmentsData();
   const { managers, isLoading: isLoadingManagers } = useManagersData();
 
+  // Initialiser le formulaire
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),
     defaultValues: {
@@ -55,12 +60,40 @@ export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
     },
   });
 
+  // Charger les données du formulaire depuis le localStorage
+  useEffect(() => {
+    const savedFormData = localStorage.getItem(FORM_STORAGE_KEY);
+    if (savedFormData) {
+      try {
+        const parsedData = JSON.parse(savedFormData);
+        
+        // Conversion de la date si elle existe
+        if (parsedData.birthDate) {
+          parsedData.birthDate = new Date(parsedData.birthDate);
+        }
+        
+        form.reset(parsedData);
+      } catch (error) {
+        console.error("Erreur lors du chargement des données du formulaire:", error);
+      }
+    }
+  }, [form]);
+
+  // Sauvegarder les données du formulaire dans le localStorage lorsqu'elles changent
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(value));
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form]);
+
   const onSubmit = async (data: EmployeeFormValues) => {
     setIsUploading(true);
     
     try {
-      // Téléverser la photo si elle existe
-      const photoUrl = await uploadPhoto();
+      // Récupérer la photo en base64
+      const photoBase64 = await uploadPhoto();
       
       // Préparer les données de l'employé pour Firebase
       const employeeData = {
@@ -80,7 +113,7 @@ export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
         position: data.position,
         professionalEmail: data.professionalEmail || data.email,
         managerId: data.managerId || '',
-        photoUrl: photoUrl || '',
+        photoBase64: photoBase64 || '', // Stockage direct en base64
         status: 'active',
         hireDate: format(new Date(), 'yyyy-MM-dd'),
       };
@@ -93,6 +126,10 @@ export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
         title: "Succès",
         description: "L'employé a été ajouté avec succès",
       });
+      
+      // Nettoyer les données sauvegardées
+      localStorage.removeItem(FORM_STORAGE_KEY);
+      resetPhoto();
       
       if (onSuccess) onSuccess();
       onClose();

@@ -1,7 +1,5 @@
 
-import { useState } from 'react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/lib/firebase';
+import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 
 export function usePhotoUpload() {
@@ -9,34 +7,42 @@ export function usePhotoUpload() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
+  // Charger la photo depuis le localStorage lors de l'initialisation
+  useEffect(() => {
+    const savedPhoto = localStorage.getItem('employeePhotoPreview');
+    if (savedPhoto) {
+      setPhotoPreview(savedPhoto);
+    }
+  }, []);
+
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setPhotoFile(file);
-      setPhotoPreview(URL.createObjectURL(file));
+      
+      // Convertir en base64 et sauvegarder dans localStorage
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        setPhotoPreview(base64);
+        localStorage.setItem('employeePhotoPreview', base64);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const uploadPhoto = async (): Promise<string | null> => {
-    if (!photoFile) return null;
+    if (!photoPreview) return null;
     
     setIsUploading(true);
     try {
-      // Créer un nom de fichier unique avec l'horodatage
-      const fileName = `employee_photos/${Date.now()}_${photoFile.name}`;
-      const storageRef = ref(storage, fileName);
-      
-      // Téléverser le fichier
-      await uploadBytes(storageRef, photoFile);
-      
-      // Obtenir l'URL de téléchargement
-      const downloadURL = await getDownloadURL(storageRef);
-      return downloadURL;
+      // Retourner directement le base64 au lieu de téléverser sur Firebase Storage
+      return photoPreview;
     } catch (error) {
-      console.error("Erreur lors du téléversement de la photo:", error);
+      console.error("Erreur lors du traitement de la photo:", error);
       toast({
         title: "Erreur",
-        description: "Impossible de téléverser la photo",
+        description: "Impossible de traiter la photo",
         variant: "destructive",
       });
       return null;
@@ -45,12 +51,19 @@ export function usePhotoUpload() {
     }
   };
 
+  const resetPhoto = () => {
+    setPhotoFile(null);
+    setPhotoPreview(null);
+    localStorage.removeItem('employeePhotoPreview');
+  };
+
   return {
     photoFile,
     photoPreview,
     isUploading,
     setIsUploading,
     handlePhotoChange,
-    uploadPhoto
+    uploadPhoto,
+    resetPhoto
   };
 }
