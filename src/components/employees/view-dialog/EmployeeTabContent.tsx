@@ -2,6 +2,7 @@
 import React from 'react';
 import { Employee } from '@/types/employee';
 import EmployeeLeaves from './EmployeeLeaves';
+import EmployeeTimesheets from './EmployeeTimesheets';
 
 // Autres composants
 export { default as InformationsTab } from './EmployeeInformations';
@@ -16,6 +17,10 @@ export const HorairesTab = () => {
       <p className="text-gray-500">Fonctionnalité en cours de développement.</p>
     </div>
   );
+};
+
+export const FeuillesDeTempsTab: React.FC<{ employee: Employee }> = ({ employee }) => {
+  return <EmployeeTimesheets employeeId={employee.id || ''} />;
 };
 
 export const CongesTab: React.FC<{ employee: Employee }> = ({ employee }) => {

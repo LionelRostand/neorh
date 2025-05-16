@@ -9,6 +9,7 @@ import {
   CompetencesTab,
   HorairesTab,
   CongesTab,
+  FeuillesDeTempsTab,
   EvaluationsTab
 } from './EmployeeTabContent';
 
@@ -27,11 +28,12 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
 }) => {
   return (
     <Tabs defaultValue="informations" value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className="grid grid-cols-6 bg-gray-50 border-b">
+      <TabsList className="grid grid-cols-7 bg-gray-50 border-b">
         <TabsTrigger value="informations">Informations</TabsTrigger>
         <TabsTrigger value="documents">Documents</TabsTrigger>
         <TabsTrigger value="competences">Compétences</TabsTrigger>
         <TabsTrigger value="horaires">Horaires</TabsTrigger>
+        <TabsTrigger value="feuillesdetemps">Feuilles de temps</TabsTrigger>
         <TabsTrigger value="conges">Congés</TabsTrigger>
         <TabsTrigger value="evaluations">Évaluations</TabsTrigger>
       </TabsList>
@@ -51,6 +53,10 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
         
         <TabsContent value="horaires" className="p-6">
           <HorairesTab />
+        </TabsContent>
+        
+        <TabsContent value="feuillesdetemps" className="p-6">
+          <FeuillesDeTempsTab employee={employee} />
         </TabsContent>
         
         <TabsContent value="conges" className="p-6">
