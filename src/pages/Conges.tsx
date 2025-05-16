@@ -39,7 +39,9 @@ const Conges = () => {
           endDate: doc.endDate || '',
           status: doc.status || '',
           comment: doc.comment || '',
-          managerId: doc.managerId || ''
+          managerId: doc.managerId || '',
+          paidDaysAllocated: doc.paidDaysAllocated || 0,
+          rttDaysAllocated: doc.rttDaysAllocated || 0
         } as Leave));
         
         setLeaves(typedLeaves);
@@ -143,12 +145,12 @@ const Conges = () => {
         onSearch={handleSearch}
       />
 
-      {/* Formulaire de nouvelle demande */}
+      {/* Formulaire d'attribution de congés sur période */}
       <NewLeaveRequestForm 
         open={showNewLeaveForm} 
         onClose={() => setShowNewLeaveForm(false)}
         onSuccess={handleRequestSuccess}
-        isAllocation={false}
+        isAllocation={true}
       />
 
       {/* Formulaire d'attribution de congés */}

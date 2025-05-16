@@ -53,31 +53,29 @@ export function LeaveRequestFormContent({
           allowedTypes={isAllocation ? defaultLeaveTypes : undefined}
         />
         
-        {isAllocation && (
-          <div className="space-y-6">
-            <AllocationFields 
-              form={form}
-              showPaidLeaveAllocation={true}
-              showRttAllocation={false}
-              paidLeaveLabel={getPaidLeaveAllocationLabel()}
-              rttLabel=""
-              paidLeaveHelperText={getPaidLeaveHelperText()}
-              rttHelperText=""
-              onSync={(type, value) => syncDaysAllocated("paid", value)}
-            />
-            
-            <AllocationFields 
-              form={form}
-              showPaidLeaveAllocation={false}
-              showRttAllocation={true}
-              paidLeaveLabel=""
-              rttLabel={getRttAllocationLabel()}
-              paidLeaveHelperText=""
-              rttHelperText={getRttHelperText()}
-              onSync={(type, value) => syncDaysAllocated("rtt", value)}
-            />
-          </div>
-        )}
+        <div className="space-y-6">
+          <AllocationFields 
+            form={form}
+            showPaidLeaveAllocation={true}
+            showRttAllocation={false}
+            paidLeaveLabel={getPaidLeaveAllocationLabel()}
+            rttLabel=""
+            paidLeaveHelperText={getPaidLeaveHelperText()}
+            rttHelperText=""
+            onSync={(type, value) => syncDaysAllocated("paid", value)}
+          />
+          
+          <AllocationFields 
+            form={form}
+            showPaidLeaveAllocation={false}
+            showRttAllocation={true}
+            paidLeaveLabel=""
+            rttLabel={getRttAllocationLabel()}
+            paidLeaveHelperText=""
+            rttHelperText={getRttHelperText()}
+            onSync={(type, value) => syncDaysAllocated("rtt", value)}
+          />
+        </div>
         
         <DatePickerField 
           form={form} 

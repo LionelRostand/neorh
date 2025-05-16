@@ -11,9 +11,9 @@ export function useLeaveRequestForm(
   isAllocation = false
 ) {
   const [selectedType, setSelectedType] = useState<string>("");
-  // Always show both allocation fields when it's an allocation form
-  const [showPaidLeaveAllocation, setShowPaidLeaveAllocation] = useState<boolean>(isAllocation);
-  const [showRttAllocation, setShowRttAllocation] = useState<boolean>(isAllocation);
+  // Toujours montrer les deux champs d'allocation
+  const [showPaidLeaveAllocation, setShowPaidLeaveAllocation] = useState<boolean>(true);
+  const [showRttAllocation, setShowRttAllocation] = useState<boolean>(true);
 
   const form = useForm<LeaveFormValues>({
     defaultValues: {
@@ -23,9 +23,9 @@ export function useLeaveRequestForm(
       endDate: undefined,
       comment: "",
       daysAllocated: 0,
-      paidDaysAllocated: 25, // Default value for France
-      rttDaysAllocated: 12, // Default RTT value
-      isAllocation: isAllocation
+      paidDaysAllocated: 25, // Valeur par défaut pour la France
+      rttDaysAllocated: 12, // Valeur par défaut pour les RTT
+      isAllocation: true // Toujours en mode allocation
     },
   });
 
@@ -35,43 +35,13 @@ export function useLeaveRequestForm(
       form.setValue("employeeId", employeeId);
     }
     
-    // Set isAllocation flag
-    form.setValue("isAllocation", isAllocation);
+    // Définir le flag isAllocation
+    form.setValue("isAllocation", true);
     
     // Pour les allocations, toujours montrer les champs d'allocation
-    if (isAllocation) {
-      setShowPaidLeaveAllocation(true);
-      setShowRttAllocation(true);
-    }
+    setShowPaidLeaveAllocation(true);
+    setShowRttAllocation(true);
   }, [employeeId, form, isAllocation]);
-
-  // Effet pour montrer/cacher les champs d'allocation selon le type
-  useEffect(() => {
-    // Si c'est une allocation, toujours afficher les deux champs
-    if (isAllocation) {
-      setShowPaidLeaveAllocation(true);
-      setShowRttAllocation(true);
-      
-      // Update daysAllocated based on selected type
-      if (selectedType === "paid") {
-        form.setValue("daysAllocated", form.getValues("paidDaysAllocated"));
-      } else if (selectedType === "rtt") {
-        form.setValue("daysAllocated", form.getValues("rttDaysAllocated"));
-      }
-    } else {
-      // Pour les demandes normales
-      const shouldShowAllocation = ["paid", "rtt"].includes(selectedType);
-      setShowPaidLeaveAllocation(false);
-      setShowRttAllocation(false);
-      
-      // Réinitialiser le nombre de jours si on ne montre plus le champ
-      if (!shouldShowAllocation) {
-        form.setValue("daysAllocated", 0);
-        form.setValue("paidDaysAllocated", 0);
-        form.setValue("rttDaysAllocated", 0);
-      }
-    }
-  }, [selectedType, form, isAllocation]);
 
   const handleTypeChange = (type: string) => {
     setSelectedType(type);
@@ -81,14 +51,8 @@ export function useLeaveRequestForm(
   const syncDaysAllocated = (type: string, value: number) => {
     if (type === "paid") {
       form.setValue("paidDaysAllocated", value);
-      if (selectedType === "paid") {
-        form.setValue("daysAllocated", value);
-      }
     } else if (type === "rtt") {
       form.setValue("rttDaysAllocated", value);
-      if (selectedType === "rtt") {
-        form.setValue("daysAllocated", value);
-      }
     }
   };
 
@@ -103,7 +67,7 @@ export function useLeaveRequestForm(
 
   // Déterminer le titre du formulaire
   const getDialogTitle = () => {
-    return isAllocation ? "Nouvelle attribution de congés" : "Nouvelle demande de congé";
+    return "Attribution de congés sur période";
   };
   
   // Texte d'aide pour l'allocation
