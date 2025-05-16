@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -169,7 +168,7 @@ const NewDepartmentDialog = ({ open, onOpenChange, onSuccess }: NewDepartmentDia
                             <SelectContent>
                               {managers.map((manager) => (
                                 <SelectItem key={manager.id} value={manager.id as string}>
-                                  {manager.firstName} {manager.lastName}
+                                  {manager.name || "Manager sans nom"}
                                 </SelectItem>
                               ))}
                             </SelectContent>

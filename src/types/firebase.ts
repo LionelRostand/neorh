@@ -1,4 +1,3 @@
-
 // Types pour la collection 'employees'
 export interface Employee {
   id?: string;
@@ -64,6 +63,7 @@ export interface Department {
   managerId?: string;
   budget?: number;
   objectives?: string;
+  color?: string;   // Added color property
 }
 
 // Types pour la collection 'hierarchy'
