@@ -19,7 +19,6 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee, startY: 
   const personalInfoData = [
     ['Nom', employee.name || 'Non spécifié'],
     ['Email personnel', employee.personalEmail || 'Non spécifié'],
-    ['Email professionnel', employee.professionalEmail || 'Non spécifié'],
     ['Téléphone', employee.phone || 'Non spécifié'],
     ['Date de naissance', employee.birthDate || 'Non spécifié']
   ];
@@ -48,7 +47,7 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee, startY: 
     ['Poste', employee.position || 'Non spécifié'],
     ['Département', employee.department || 'Non spécifié'],
     ['Entreprise', companyName || 'Non spécifié'],
-    ['Date d\'embauche', employee.startDate || '15 mai 2025'],
+    ['Date d\'embauche', employee.startDate || 'Non spécifié'],
     ['Statut', employee.status === 'active' ? 'Actif' : 
               employee.status === 'onLeave' ? 'En congé' : 
               employee.status === 'inactive' ? 'Inactif' : 'Inconnu']

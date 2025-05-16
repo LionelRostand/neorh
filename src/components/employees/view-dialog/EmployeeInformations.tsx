@@ -1,13 +1,43 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Employee } from '@/types/employee';
 import { Card, CardContent } from "@/components/ui/card";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface EmployeeInformationsProps {
   employee: Employee;
 }
 
 const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee }) => {
+  const [departmentName, setDepartmentName] = useState<string>(employee.department || 'Non spécifié');
+
+  useEffect(() => {
+    // Si nous avons déjà le nom du département, pas besoin de le récupérer
+    if (employee.department && !employee.department.includes('dCij')) {
+      return;
+    }
+    
+    // Si nous avons l'ID du département, récupérer son nom
+    if (employee.departmentId) {
+      const fetchDepartmentName = async () => {
+        try {
+          const deptRef = doc(db, 'hr_departments', employee.departmentId);
+          const deptSnap = await getDoc(deptRef);
+          
+          if (deptSnap.exists()) {
+            const deptData = deptSnap.data();
+            setDepartmentName(deptData.name || 'Non spécifié');
+          }
+        } catch (error) {
+          console.error("Erreur lors de la récupération du département:", error);
+        }
+      };
+      
+      fetchDepartmentName();
+    }
+  }, [employee.departmentId, employee.department]);
+
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold mb-4">Informations personnelles</h3>
@@ -46,7 +76,7 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
             </div>
             <div>
               <p className="text-sm text-gray-500">Département</p>
-              <p className="font-medium">{employee.department || 'Non spécifié'}</p>
+              <p className="font-medium">{departmentName}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Email professionnel</p>
