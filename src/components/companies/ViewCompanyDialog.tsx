@@ -44,6 +44,8 @@ const ViewCompanyDialog = ({ companyId, open, onOpenChange }: ViewCompanyDialogP
     hasCompany: !!company 
   });
 
+  if (!open) return null; // Ne pas rendre si le dialogue n'est pas ouvert
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">

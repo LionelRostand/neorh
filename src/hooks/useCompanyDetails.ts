@@ -28,25 +28,26 @@ export const useCompanyDetails = (): UseCompanyDetailsResult => {
       return;
     }
     
-    console.log("Tentative de récupération de l'entreprise avec ID:", id);
+    console.log("useCompanyDetails: Tentative de récupération de l'entreprise avec ID:", id);
     
     try {
       const result = await getById(id);
       
-      console.log("Résultat de la récupération:", result);
+      console.log("useCompanyDetails: Résultat de la récupération:", result);
       
       if (result) {
         // Make sure we have a proper company object with required fields
         const processedCompany: Company = {
+          id: result.id,
           ...result,
           status: result.status || 'inactive',
           name: result.name || 'Entreprise sans nom'
         };
         
-        console.log("Entreprise traitée:", processedCompany);
+        console.log("useCompanyDetails: Entreprise traitée:", processedCompany);
         setCompany(processedCompany);
       } else {
-        console.error("Entreprise non trouvée pour l'ID:", id);
+        console.error("useCompanyDetails: Entreprise non trouvée pour l'ID:", id);
         setError(new Error("Entreprise non trouvée"));
         toast({
           title: "Erreur",
@@ -55,7 +56,7 @@ export const useCompanyDetails = (): UseCompanyDetailsResult => {
         });
       }
     } catch (err) {
-      console.error("Erreur lors du chargement de l'entreprise:", err);
+      console.error("useCompanyDetails: Erreur lors du chargement de l'entreprise:", err);
       const errorMessage = err instanceof Error ? err.message : "Erreur inconnue";
       setError(err instanceof Error ? err : new Error(errorMessage));
       

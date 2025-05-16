@@ -77,20 +77,22 @@ export const getDoc_firestore = async <T>(
   docId: string
 ): Promise<T & { id: string } | null> => {
   try {
+    console.log(`getDoc_firestore: Fetching document from ${collectionName} with ID: ${docId}`);
     const docRef = doc(db, collectionName, docId);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
+      console.log(`getDoc_firestore: Document found:`, docSnap.data());
       return {
         id: docSnap.id,
         ...docSnap.data()
       } as T & { id: string };
     } else {
-      console.log(`No document found with ID: ${docId}`);
+      console.log(`getDoc_firestore: No document found with ID: ${docId}`);
       return null;
     }
   } catch (error) {
-    console.error('Error getting document:', error);
+    console.error('getDoc_firestore: Error getting document:', error);
     throw error;
   }
 };
