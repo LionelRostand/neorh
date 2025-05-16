@@ -48,7 +48,8 @@ export const usePermissionsManager = () => {
       try {
         setIsLoading(true);
         const permissionsResult = await search("employeeId", selectedEmployeeId, {
-          exactMatch: true
+          sortField: "menuName",
+          sortDirection: "asc"
         });
         
         if (permissionsResult.docs.length > 0) {

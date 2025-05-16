@@ -6,7 +6,8 @@ import {
   getDocs,
   orderBy,
   QueryOrderByConstraint,
-  OrderByDirection
+  OrderByDirection,
+  QueryConstraint
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "@/components/ui/use-toast";
@@ -32,7 +33,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
     
     try {
       const collectionRef = getCollection();
-      let queryConstraints = [where(field, "==", value)];
+      const queryConstraints: QueryConstraint[] = [where(field, "==", value)];
       
       // Add sorting if specified
       if (options?.sortField) {
