@@ -24,10 +24,10 @@ interface ParentDepartmentFieldProps {
 
 export function ParentDepartmentField({ control }: ParentDepartmentFieldProps) {
   const { departments, isLoading } = useDepartmentsData();
-  const { field } = useController({ name: 'parentDepartmentId', control });
   
-  // Get the current department ID from the form context
-  const currentDepartmentId = useController({ name: 'id', control, defaultValue: undefined }).field.value;
+  // Get the current department ID without trying to access it through the form control
+  // This approach avoids the TypeScript error since we're not using useController for 'id'
+  const currentDepartmentId = control._formValues?.id as string | undefined;
 
   // Filter out the current department to avoid self-reference
   const availableDepartments = departments?.filter(dept => dept.id !== currentDepartmentId) || [];

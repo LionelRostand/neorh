@@ -98,15 +98,15 @@ const DepartmentsHierarchy = () => {
             {manager && (
               <div className="flex items-center bg-gray-50 px-3 py-1 rounded-full">
                 <div className="mr-2">
-                  {manager.avatarUrl ? (
-                    <img src={manager.avatarUrl} alt={manager.firstName} className="w-6 h-6 rounded-full" />
+                  {manager.photoUrl ? (
+                    <img src={manager.photoUrl} alt={manager.name} className="w-6 h-6 rounded-full" />
                   ) : (
                     <User className="w-6 h-6 text-gray-500" />
                   )}
                 </div>
                 <div className="text-sm">
                   <span className="text-xs text-gray-500">Responsable:</span>
-                  <p className="font-medium">{manager.firstName} {manager.lastName}</p>
+                  <p className="font-medium">{manager.name}</p>
                 </div>
               </div>
             )}
