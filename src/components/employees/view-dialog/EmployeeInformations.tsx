@@ -24,10 +24,6 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
               <p className="font-medium">{employee.personalEmail || employee.email || 'Non spécifié'}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Email professionnel</p>
-              <p className="font-medium">{employee.professionalEmail || 'Non spécifié'}</p>
-            </div>
-            <div>
               <p className="text-sm text-gray-500">Téléphone</p>
               <p className="font-medium">{employee.phone || 'Non spécifié'}</p>
             </div>
