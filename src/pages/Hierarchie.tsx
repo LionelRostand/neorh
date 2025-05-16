@@ -2,7 +2,7 @@
 import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Network, FileText, Download, Building2, Users } from "lucide-react";
+import { FileText, Download, Building2, Users, Hierarchy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import EmployeesHierarchy from "@/components/hierarchy/EmployeesHierarchy";
 import DepartmentsHierarchy from "@/components/hierarchy/DepartmentsHierarchy";
@@ -55,37 +55,37 @@ const Hierarchie = () => {
         <HierarchyStatCard 
           title="Total des départements" 
           value={totalDepartments} 
-          icon={<Network className="h-8 w-8" />} 
+          icon={<Hierarchy className="h-5 w-5" />} 
           bgColor="bg-blue-50"
           textColor="text-blue-700"
-          borderColor="border-blue-500"
+          borderColor="border-blue-100"
           iconColor="text-blue-500"
         />
         <HierarchyStatCard 
           title="Responsables" 
           value={managerCount} 
-          icon={<Network className="h-8 w-8" />} 
+          icon={<Hierarchy className="h-5 w-5" />} 
           bgColor="bg-indigo-50"
           textColor="text-indigo-700"
-          borderColor="border-indigo-500"
+          borderColor="border-indigo-100"
           iconColor="text-indigo-500"
         />
         <HierarchyStatCard 
           title="Employés" 
           value={employeeCount} 
-          icon={<Network className="h-8 w-8" />} 
+          icon={<Hierarchy className="h-5 w-5" />} 
           bgColor="bg-green-50"
           textColor="text-green-700"
-          borderColor="border-green-500"
+          borderColor="border-green-100"
           iconColor="text-green-500"
         />
         <HierarchyStatCard 
           title="Postes vacants" 
           value={vacantPositions} 
-          icon={<Network className="h-8 w-8" />} 
+          icon={<Hierarchy className="h-5 w-5" />} 
           bgColor="bg-yellow-50"
           textColor="text-yellow-700"
-          borderColor="border-yellow-500"
+          borderColor="border-yellow-100"
           iconColor="text-yellow-500"
         />
       </div>
