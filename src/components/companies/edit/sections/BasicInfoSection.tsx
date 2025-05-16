@@ -29,6 +29,13 @@ const BasicInfoSection = ({
   onLogoChange,
   onResetLogo,
 }: BasicInfoSectionProps) => {
+  // Adaptateur pour convertir l'événement en File
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      onLogoChange(e.target.files[0]);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium">Informations de base</h3>
@@ -168,7 +175,7 @@ const BasicInfoSection = ({
         <FormLabel>Logo de l'entreprise</FormLabel>
         <CompanyLogoUpload
           logoUrl={logoPreview}
-          onLogoChange={onLogoChange}
+          onLogoChange={handleLogoChange}
           onResetLogo={onResetLogo}
         />
       </div>
