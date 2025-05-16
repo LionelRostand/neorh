@@ -1,12 +1,13 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Check, X } from "lucide-react";
+import { Calendar, Check, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Leave } from "@/lib/constants";
 import { format, differenceInDays } from "date-fns";
-import { fr } from "date-fns/locale";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface LeaveTableProps {
   leaves: Leave[];
@@ -16,6 +17,54 @@ interface LeaveTableProps {
 }
 
 const LeaveTable = ({ leaves, loading, onApprove, onReject }: LeaveTableProps) => {
+  const [employeeNames, setEmployeeNames] = useState<Record<string, string>>({});
+  const [managerNames, setManagerNames] = useState<Record<string, string>>({});
+  
+  // Charger les noms des employés et des managers
+  useEffect(() => {
+    const fetchEmployeeAndManagerNames = async () => {
+      const empIds = [...new Set(leaves.map(leave => leave.employeeId))];
+      const mgrIds = [...new Set(leaves.map(leave => leave.managerId).filter(Boolean))];
+      
+      const empNamesMap: Record<string, string> = {};
+      const mgrNamesMap: Record<string, string> = {};
+      
+      // Récupérer les noms des employés
+      for (const empId of empIds) {
+        try {
+          const empDoc = await getDoc(doc(db, 'hr_employees', empId));
+          if (empDoc.exists()) {
+            const data = empDoc.data();
+            empNamesMap[empId] = `${data.firstName || ''} ${data.lastName || ''}`.trim();
+          }
+        } catch (err) {
+          console.error(`Erreur lors du chargement de l'employé ${empId}:`, err);
+        }
+      }
+      
+      // Récupérer les noms des managers
+      for (const mgrId of mgrIds) {
+        if (!mgrId) continue;
+        try {
+          const mgrDoc = await getDoc(doc(db, 'hr_employees', mgrId));
+          if (mgrDoc.exists()) {
+            const data = mgrDoc.data();
+            mgrNamesMap[mgrId] = `${data.firstName || ''} ${data.lastName || ''}`.trim();
+          }
+        } catch (err) {
+          console.error(`Erreur lors du chargement du manager ${mgrId}:`, err);
+        }
+      }
+      
+      setEmployeeNames(empNamesMap);
+      setManagerNames(mgrNamesMap);
+    };
+    
+    if (leaves.length > 0) {
+      fetchEmployeeAndManagerNames();
+    }
+  }, [leaves]);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
@@ -78,7 +127,7 @@ const LeaveTable = ({ leaves, loading, onApprove, onReject }: LeaveTableProps) =
           <TableHead>Type</TableHead>
           <TableHead>Période</TableHead>
           <TableHead>Statut</TableHead>
-          <TableHead>Demande</TableHead>
+          <TableHead>Responsable</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -97,10 +146,16 @@ const LeaveTable = ({ leaves, loading, onApprove, onReject }: LeaveTableProps) =
               <TableCell>
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
-                    <span>{leave.employeeId.substring(0, 1).toUpperCase()}</span>
+                    <span>
+                      {employeeNames[leave.employeeId] ? 
+                        employeeNames[leave.employeeId].charAt(0).toUpperCase() : 
+                        leave.employeeId.substring(0, 1).toUpperCase()}
+                    </span>
                   </div>
                   <div>
-                    <div className="font-medium">ID: {leave.employeeId}</div>
+                    <div className="font-medium">
+                      {employeeNames[leave.employeeId] || leave.employeeId}
+                    </div>
                     <div className="text-xs text-gray-500">{leave.employeeId}</div>
                   </div>
                 </div>
@@ -114,13 +169,14 @@ const LeaveTable = ({ leaves, loading, onApprove, onReject }: LeaveTableProps) =
               </TableCell>
               <TableCell>{getStatusBadge(leave.status)}</TableCell>
               <TableCell>
-                <div className="flex items-center">
-                  <span className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </span>
-                </div>
+                {leave.managerId ? (
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-gray-500" />
+                    <span>{managerNames[leave.managerId] || leave.managerId}</span>
+                  </div>
+                ) : (
+                  <span className="text-gray-400">Non assigné</span>
+                )}
               </TableCell>
               <TableCell>
                 {leave.status === 'pending' && (

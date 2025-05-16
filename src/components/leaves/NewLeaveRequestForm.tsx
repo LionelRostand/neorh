@@ -14,27 +14,37 @@ import { DatePickerField } from "./form/DatePickerField";
 import { CommentField } from "./form/CommentField";
 import { LeaveFormActions } from "./form/LeaveFormActions";
 import { useLeaveFormSubmit } from "./form/useLeaveFormSubmit";
+import { useEffect } from "react";
 
 interface NewLeaveRequestFormProps {
   open: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  employeeId?: string;
 }
 
 const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({ 
   open, 
   onClose, 
-  onSuccess 
+  onSuccess,
+  employeeId
 }) => {
   const form = useForm<LeaveFormValues>({
     defaultValues: {
-      employeeId: "",
+      employeeId: employeeId || "",
       type: "",
       startDate: undefined,
       endDate: undefined,
       comment: "",
     },
   });
+
+  // Mettre à jour l'employeeId si fourni en prop
+  useEffect(() => {
+    if (employeeId) {
+      form.setValue("employeeId", employeeId);
+    }
+  }, [employeeId, form]);
 
   const { handleSubmit, isSubmitting } = useLeaveFormSubmit(() => {
     form.reset();
@@ -54,7 +64,7 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <EmployeeField form={form} />
+            {!employeeId && <EmployeeField form={form} />}
             <LeaveTypeField form={form} />
             <DatePickerField 
               form={form} 

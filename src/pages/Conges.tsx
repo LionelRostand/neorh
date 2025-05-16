@@ -6,12 +6,14 @@ import { Leave } from "@/lib/constants";
 import NewLeaveRequestForm from "@/components/leaves/NewLeaveRequestForm";
 import LeavesHeader from "@/components/leaves/LeavesHeader";
 import LeavesContent from "@/components/leaves/LeavesContent";
+import { useAuth } from "@/hooks/useAuth"; // Supposons que ce hook existe pour récupérer l'utilisateur connecté
 
 const Conges = () => {
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
-  const { getAll, isLoading, error, update } = useCollection<'hr_leaves'>();
+  const { getAll, isLoading, error, update, search } = useCollection<'hr_leaves'>();
+  // const { user } = useAuth(); // Décommenter si vous avez un hook d'authentification
 
   useEffect(() => {
     fetchLeaves();
@@ -20,6 +22,8 @@ const Conges = () => {
   const fetchLeaves = async () => {
     setLoading(true);
     try {
+      // Pour l'instant, récupère toutes les demandes
+      // Dans un système réel, filtrer selon le rôle de l'utilisateur (employé vs manager)
       const result = await getAll();
       if (result.docs) {
         // Ensure we map the data to match the Leave type
@@ -29,7 +33,9 @@ const Conges = () => {
           type: doc.type || '',
           startDate: doc.startDate || '',
           endDate: doc.endDate || '',
-          status: doc.status || ''
+          status: doc.status || '',
+          comment: doc.comment || '',
+          managerId: doc.managerId || ''
         } as Leave));
         
         setLeaves(typedLeaves);

@@ -1,3 +1,4 @@
+
 // Define the mapping between routes and Firestore collections
 export const ROUTE_TO_COLLECTION_MAP = {
   '/employes': 'hr_employees',
@@ -33,6 +34,7 @@ export type Leave = {
   status: string;
   comment?: string;
   createdAt?: string;
+  managerId?: string; // ID du responsable qui doit approuver la demande
 }
 
 export type Badge = {

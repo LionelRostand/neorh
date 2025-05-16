@@ -1,12 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useEmployeeLeaves } from '@/hooks/useEmployeeLeaves';
 import { Employee } from '@/types/employee';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Check, X, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Calendar, Check, X, Clock, Plus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import NewLeaveRequestForm from '@/components/leaves/NewLeaveRequestForm';
+import { format, differenceInDays } from 'date-fns';
 
 interface EmployeeLeavesProps {
   employee: Employee;
@@ -67,13 +70,56 @@ const getDateDifference = (startDate: string, endDate: string): number => {
 };
 
 const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
-  const { leaves, loading, error, totalDays } = useEmployeeLeaves(employee.id);
+  const { leaves, loading, error, totalDays, getLeaveTypeLabel } = useEmployeeLeaves(employee.id);
+  const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
+  
+  // Congés payés et RTT disponibles (à titre d'exemple - à adapter selon la logique métier)
+  const paidLeavesPerYear = 25; // Congés payés standard en France
+  const rttDaysPerYear = 12; // RTT standard (à adapter)
+  
+  // Calculer les jours pris par type
+  const paidLeavesTaken = leaves
+    .filter(leave => (leave.type === 'paid' || leave.type === 'annual') && leave.status === 'approved')
+    .reduce((sum, leave) => sum + getDateDifference(leave.startDate, leave.endDate), 0);
+  
+  const rttTaken = leaves
+    .filter(leave => leave.type === 'rtt' && leave.status === 'approved')
+    .reduce((sum, leave) => sum + getDateDifference(leave.startDate, leave.endDate), 0);
+  
+  const paidLeavesRemaining = paidLeavesPerYear - paidLeavesTaken;
+  const rttRemaining = rttDaysPerYear - rttTaken;
+
+  const handleNewLeaveRequest = () => {
+    setShowNewLeaveForm(true);
+  };
+
+  const handleRequestSuccess = () => {
+    setShowNewLeaveForm(false);
+    // Le hook useEmployeeLeaves sera rafraîchi automatiquement grâce à son useEffect
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'dd/MM/yyyy');
+    } catch (error) {
+      return dateString;
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-start">
         <h3 className="text-xl font-semibold">Congés</h3>
-        <Card className="w-64">
+        <Button 
+          onClick={handleNewLeaveRequest}
+          className="bg-emerald-500 hover:bg-emerald-600 gap-2"
+        >
+          <Plus className="h-4 w-4" /> Nouvelle demande
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
           <CardContent className="p-4">
             <div className="flex justify-between items-center">
               <div>
@@ -82,6 +128,36 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
               </div>
               <div className="p-2 rounded-full bg-blue-100">
                 <Calendar className="h-5 w-5 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-500">Congés payés disponibles</p>
+                <h4 className="text-2xl font-bold">{paidLeavesRemaining}</h4>
+                <p className="text-xs text-gray-500">sur {paidLeavesPerYear} jours/an</p>
+              </div>
+              <div className="p-2 rounded-full bg-green-100">
+                <Calendar className="h-5 w-5 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-500">RTT disponibles</p>
+                <h4 className="text-2xl font-bold">{rttRemaining}</h4>
+                <p className="text-xs text-gray-500">sur {rttDaysPerYear} jours/an</p>
+              </div>
+              <div className="p-2 rounded-full bg-amber-100">
+                <Calendar className="h-5 w-5 text-amber-600" />
               </div>
             </div>
           </CardContent>
@@ -118,8 +194,8 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
             {leaves.map((leave) => (
               <TableRow key={leave.id}>
                 <TableCell><LeaveTypeBadge type={leave.type} /></TableCell>
-                <TableCell>{leave.startDate}</TableCell>
-                <TableCell>{leave.endDate}</TableCell>
+                <TableCell>{formatDate(leave.startDate)}</TableCell>
+                <TableCell>{formatDate(leave.endDate)}</TableCell>
                 <TableCell>
                   {getDateDifference(leave.startDate, leave.endDate)}
                 </TableCell>
@@ -132,6 +208,13 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
           </TableBody>
         </Table>
       )}
+
+      <NewLeaveRequestForm 
+        open={showNewLeaveForm} 
+        onClose={() => setShowNewLeaveForm(false)}
+        onSuccess={handleRequestSuccess}
+        employeeId={employee.id}
+      />
     </div>
   );
 };
