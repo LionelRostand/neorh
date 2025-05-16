@@ -26,8 +26,6 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
 }) => {
   const {
     form,
-    selectedType,
-    handleTypeChange,
     syncDaysAllocated,
     handleFormSubmit,
     isSubmitting,
@@ -51,7 +49,6 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
           form={form}
           employeeId={employeeId}
           isAllocation={true}
-          onTypeChange={handleTypeChange}
           showPaidLeaveAllocation={showPaidLeaveAllocation}
           showRttAllocation={showRttAllocation}
           getPaidLeaveAllocationLabel={getPaidLeaveAllocationLabel}

@@ -4,7 +4,6 @@ import { Form } from "@/components/ui/form";
 import { UseFormReturn } from "react-hook-form";
 import { LeaveFormValues } from "./types";
 import { EmployeeField } from "./EmployeeField";
-import { LeaveTypeField, defaultLeaveTypes } from "./LeaveTypeField";
 import { DatePickerField } from "./DatePickerField";
 import { CommentField } from "./CommentField";
 import { LeaveFormActions } from "./LeaveFormActions";
@@ -14,7 +13,6 @@ interface LeaveRequestFormContentProps {
   form: UseFormReturn<LeaveFormValues>;
   employeeId?: string;
   isAllocation?: boolean;
-  onTypeChange: (type: string) => void;
   showPaidLeaveAllocation: boolean;
   showRttAllocation: boolean;
   getPaidLeaveAllocationLabel: () => string;
@@ -25,13 +23,13 @@ interface LeaveRequestFormContentProps {
   onSubmit: () => void;
   onClose: () => void;
   isSubmitting: boolean;
+  onTypeChange?: (type: string) => void;
 }
 
 export function LeaveRequestFormContent({
   form,
   employeeId,
   isAllocation = false,
-  onTypeChange,
   showPaidLeaveAllocation,
   showRttAllocation,
   getPaidLeaveAllocationLabel,
@@ -47,11 +45,6 @@ export function LeaveRequestFormContent({
     <Form {...form}>
       <form onSubmit={onSubmit} className="space-y-6">
         {!employeeId && <EmployeeField form={form} />}
-        <LeaveTypeField 
-          form={form} 
-          onTypeChange={onTypeChange} 
-          allowedTypes={isAllocation ? defaultLeaveTypes : undefined}
-        />
         
         <div className="space-y-6">
           <AllocationFields 

@@ -10,7 +10,6 @@ export function useLeaveRequestForm(
   employeeId?: string,
   isAllocation = false
 ) {
-  const [selectedType, setSelectedType] = useState<string>("");
   // Toujours montrer les deux champs d'allocation
   const [showPaidLeaveAllocation, setShowPaidLeaveAllocation] = useState<boolean>(true);
   const [showRttAllocation, setShowRttAllocation] = useState<boolean>(true);
@@ -18,7 +17,7 @@ export function useLeaveRequestForm(
   const form = useForm<LeaveFormValues>({
     defaultValues: {
       employeeId: employeeId || "",
-      type: "",
+      type: "allocation", // Default type for allocation
       startDate: undefined,
       endDate: undefined,
       comment: "",
@@ -35,17 +34,14 @@ export function useLeaveRequestForm(
       form.setValue("employeeId", employeeId);
     }
     
-    // Définir le flag isAllocation
+    // Définir le flag isAllocation et type
     form.setValue("isAllocation", true);
+    form.setValue("type", "allocation");
     
     // Pour les allocations, toujours montrer les champs d'allocation
     setShowPaidLeaveAllocation(true);
     setShowRttAllocation(true);
   }, [employeeId, form, isAllocation]);
-
-  const handleTypeChange = (type: string) => {
-    setSelectedType(type);
-  };
 
   // Synchroniser le champ daysAllocated avec paidDaysAllocated ou rttDaysAllocated
   const syncDaysAllocated = (type: string, value: number) => {
@@ -90,8 +86,6 @@ export function useLeaveRequestForm(
 
   return {
     form,
-    selectedType,
-    handleTypeChange,
     syncDaysAllocated,
     handleFormSubmit: form.handleSubmit(handleSubmit),
     isSubmitting,

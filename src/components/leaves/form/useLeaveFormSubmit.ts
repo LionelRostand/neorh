@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useCollection } from "@/hooks/useCollection";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
@@ -15,7 +14,7 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
   const { user } = useAuth();
 
   const handleSubmit = async (data: LeaveFormValues) => {
-    if (!data.startDate || !data.endDate || !data.employeeId || !data.type) {
+    if (!data.startDate || !data.endDate || !data.employeeId) {
       showErrorToast("Veuillez remplir tous les champs obligatoires");
       return;
     }
