@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { X, FileText } from 'lucide-react';
@@ -11,16 +10,6 @@ interface EmployeeHeaderProps {
   onClose: () => void;
   onExportPDF: () => void;
 }
-
-// Utility function to get initials from name
-export const getInitials = (name: string) => {
-  return name
-    .split(' ')
-    .map(part => part.charAt(0))
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-};
 
 // Utility function to get status badge
 export const getStatusBadge = (status: Employee['status']) => {
@@ -39,11 +28,7 @@ export const getStatusBadge = (status: Employee['status']) => {
 const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onClose, onExportPDF }) => {
   return (
     <div className="flex justify-between items-start p-4 bg-gray-50">
-      <div className="flex items-center gap-3">
-        <Avatar className="h-12 w-12">
-          <AvatarImage src={employee.photoUrl} alt={employee.name} />
-          <AvatarFallback className="text-lg">{getInitials(employee.name)}</AvatarFallback>
-        </Avatar>
+      <div className="flex items-center">
         <div className="flex flex-col">
           {getStatusBadge(employee.status)}
           <span className="text-lg font-medium mt-1">{employee.name}</span>

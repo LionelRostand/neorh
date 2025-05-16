@@ -56,8 +56,8 @@ export const InformationsTab: React.FC<InformationTabProps> = ({ employee }) => 
       
       <div className="grid md:grid-cols-2 gap-8">
         <div>
-          <div className="flex items-center gap-4 mb-6">
-            <Avatar className="h-20 w-20">
+          <div className="flex items-center gap-4 mb-8">
+            <Avatar className="h-24 w-24">
               <AvatarImage src={employee.photoUrl} alt={employee.name} />
               <AvatarFallback className="text-lg">{getInitials(employee.name)}</AvatarFallback>
             </Avatar>
