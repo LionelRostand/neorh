@@ -73,6 +73,11 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
   const { leaves, loading, error, totalDays, getLeaveTypeLabel } = useEmployeeLeaves(employee.id);
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
   
+  console.log("Employee ID:", employee.id);
+  console.log("Leave data in component:", leaves);
+  console.log("Loading state:", loading);
+  console.log("Error state:", error);
+  
   // Congés payés et RTT disponibles (à titre d'exemple - à adapter selon la logique métier)
   const paidLeavesPerYear = 25; // Congés payés standard en France
   const rttDaysPerYear = 12; // RTT standard (à adapter)
@@ -169,6 +174,16 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
+        </div>
+      ) : error ? (
+        <div className="text-center py-10 border rounded-lg bg-red-50">
+          <div className="text-red-500 mb-2">Une erreur est survenue lors du chargement des congés</div>
+          <Button 
+            variant="outline"
+            onClick={() => window.location.reload()}
+          >
+            Réessayer
+          </Button>
         </div>
       ) : leaves.length === 0 ? (
         <div className="text-center py-10 border rounded-lg bg-gray-50">

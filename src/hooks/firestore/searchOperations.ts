@@ -1,115 +1,70 @@
 
-import { useState } from 'react';
 import { 
   collection, 
-  getDocs, 
   query, 
-  where,
+  where, 
+  getDocs,
   orderBy,
-  limit,
-  startAfter,
-  DocumentData,
-  QuerySnapshot,
-  WhereFilterOp,
-  OrderByDirection,
-  QueryDocumentSnapshot,
-  QueryConstraint,
-  DocumentSnapshot
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { QueryParams, QueryResult } from '@/types/firebase';
+  QueryOrderByConstraint,
+  OrderByDirection
+} from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { toast } from "@/components/ui/use-toast";
 
-// Type for search options
-export interface SearchOptions {
-  exactMatch?: boolean;
-  caseInsensitive?: boolean;
-  sortField?: string;
-  sortDirection?: OrderByDirection;
-  limitCount?: number;
-  startAfterDoc?: DocumentSnapshot;
-  additionalQueryParams?: QueryParams[];
-}
-
-// Create search operations with correct typing
 export const createSearchOperations = <T extends Record<string, any>>(
   setIsLoading: (loading: boolean) => void,
   setError: (error: Error | null) => void,
-  getCollection: () => ReturnType<typeof collection>
+  getCollection: () => any
 ) => {
-  
-  // Search function to find documents by field value
+  // Search documents by field and value
   const search = async (
-    field: string,
-    value: any,
-    options: SearchOptions = {}
-  ): Promise<QueryResult<T>> => {
+    field: string, 
+    value: string | number | boolean,
+    options?: {
+      sortField?: string;
+      sortDirection?: OrderByDirection;
+    }
+  ) => {
     setIsLoading(true);
     setError(null);
     
+    console.log(`Searching with criteria: ${field} = ${value}`, options);
+    
     try {
-      const collectionName = getCollection().id;
+      const collectionRef = getCollection();
+      let queryConstraints = [where(field, "==", value)];
       
-      // Create a query with all necessary constraints
-      const queryConstraints: QueryConstraint[] = [];
-      
-      // Add field filter constraint
-      queryConstraints.push(where(field, '==', value));
-      
-      // Add additional query params if provided
-      if (options.additionalQueryParams) {
-        options.additionalQueryParams.forEach(param => {
-          queryConstraints.push(where(param.field, param.operator as WhereFilterOp, param.value));
-        });
+      // Add sorting if specified
+      if (options?.sortField) {
+        const sortDirection: OrderByDirection = options.sortDirection || 'asc';
+        queryConstraints.push(orderBy(options.sortField, sortDirection));
       }
       
-      // Add sorting if provided
-      if (options.sortField) {
-        queryConstraints.push(orderBy(options.sortField, options.sortDirection || 'asc'));
-      }
-      
-      // Add pagination if provided
-      if (options.limitCount) {
-        queryConstraints.push(limit(options.limitCount));
-      }
-      
-      // Create and execute the query with all constraints
-      const q = query(getCollection(), ...queryConstraints);
+      const q = query(collectionRef, ...queryConstraints);
       const querySnapshot = await getDocs(q);
       
-      // Transform the data with proper typing
-      const docs = querySnapshot.docs.map(doc => {
-        return {
-          id: doc.id,
-          ...doc.data()
-        } as T & { id: string };
+      const documents = querySnapshot.docs.map(doc => {
+        return { id: doc.id, ...doc.data() } as T & { id: string };
       });
       
-      // Get the last document for pagination
-      const lastDoc = querySnapshot.docs.length > 0 
-        ? querySnapshot.docs[querySnapshot.docs.length - 1] 
-        : null;
+      console.log(`Found ${documents.length} documents matching search criteria ${field} = ${value}`);
       
-      // Return the result with proper structure
-      return {
-        docs,
-        lastDoc,
-        count: querySnapshot.docs.length
-      };
-      
-    } catch (error) {
-      console.error(`Error searching documents in ${getCollection().id}:`, error);
-      setError(error instanceof Error ? error : new Error('An unknown error occurred during search'));
-      return {
-        docs: [],
-        lastDoc: null,
-        count: 0
-      };
+      return { docs: documents };
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Une erreur est survenue lors de la recherche");
+      console.error("Error during search operation:", error, "Field:", field, "Value:", value);
+      setError(error);
+      toast({
+        title: "Erreur de recherche",
+        description: `Impossible de rechercher les documents: ${error.message}`,
+        variant: "destructive"
+      });
+      return { docs: [] };
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Return all search related functions
   return {
     search
   };
