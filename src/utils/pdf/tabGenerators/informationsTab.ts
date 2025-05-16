@@ -6,7 +6,7 @@ import { Employee } from '@/types/employee';
 /**
  * Génère la section informations
  */
-export const generateInformationsTab = (doc: jsPDF, employee: Employee, startY: number) => {
+export const generateInformationsTab = (doc: jsPDF, employee: Employee, startY: number, companyName?: string) => {
   doc.setFontSize(16);
   doc.setTextColor('#000000');
   doc.setFont('helvetica', 'bold');
@@ -47,6 +47,7 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee, startY: 
   const professionalInfoData = [
     ['Poste', employee.position || 'Non spécifié'],
     ['Département', employee.department || 'Non spécifié'],
+    ['Entreprise', companyName || 'Non spécifié'],
     ['Date d\'embauche', employee.startDate || '15 mai 2025'],
     ['Statut', employee.status === 'active' ? 'Actif' : 
               employee.status === 'onLeave' ? 'En congé' : 

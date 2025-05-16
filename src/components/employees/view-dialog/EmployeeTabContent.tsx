@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Employee } from '@/types/employee';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
@@ -9,6 +9,8 @@ import EmployeeLeaves from './EmployeeLeaves';
 import EmployeeEvaluations from './EmployeeEvaluations';
 import EmployeeSkills from './EmployeeSkills';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface PersonalInfoFieldProps {
   label: string;
@@ -28,6 +30,39 @@ interface InformationTabProps {
 
 export const InformationsTab: React.FC<InformationTabProps> = ({ employee }) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [companyName, setCompanyName] = useState<string>('');
+  
+  // Fetch company details
+  useEffect(() => {
+    const fetchCompanyDetails = async () => {
+      if (!employee.departmentId) return;
+      
+      try {
+        // First, get department to find company ID
+        const departmentRef = doc(db, 'hr_departments', employee.departmentId);
+        const departmentSnap = await getDoc(departmentRef);
+        
+        if (!departmentSnap.exists()) return;
+        
+        const departmentData = departmentSnap.data();
+        const companyId = departmentData?.companyId;
+        
+        if (!companyId) return;
+        
+        // Then get company
+        const companyRef = doc(db, 'hr_companies', companyId);
+        const companySnap = await getDoc(companyRef);
+        
+        if (companySnap.exists()) {
+          setCompanyName(companySnap.data().name || '');
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération de l'entreprise:", error);
+      }
+    };
+    
+    fetchCompanyDetails();
+  }, [employee.departmentId]);
 
   // Helper function to get initials from name
   const getInitials = (name: string) => {
@@ -81,6 +116,7 @@ export const InformationsTab: React.FC<InformationTabProps> = ({ employee }) => 
           <div className="space-y-4">
             <PersonalInfoField label="Poste" value={employee.position} />
             <PersonalInfoField label="Département" value={employee.department} />
+            <PersonalInfoField label="Entreprise" value={companyName} />
             <PersonalInfoField label="Date d'embauche" value={employee.startDate || '15 mai 2025'} />
             <PersonalInfoField 
               label="Statut" 
