@@ -7,9 +7,6 @@ import { Button } from "@/components/ui/button";
 import { CalendarPlus } from "lucide-react";
 import NewLeaveRequestForm from "@/components/leaves/NewLeaveRequestForm";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LeaveHistory } from '@/components/leaves/history/LeaveHistory';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 interface EmployeeLeavesProps {
   employeeId: string;
@@ -23,8 +20,6 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
     allocation, 
     allocationLoading, 
     updateLeaveAllocation,
-    leaves,
-    loading,
     refetch
   } = useEmployeeLeaves(employeeId);
 
@@ -43,17 +38,6 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
       initialLoadCompleted.current = false;
     };
   }, [employeeId, refetch]);
-
-  // Helper function to format dates
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return format(date, 'dd/MM/yyyy', { locale: fr });
-    } catch (error) {
-      console.error("Invalid date format:", dateString);
-      return dateString;
-    }
-  };
 
   const handleLeaveRequestSuccess = () => {
     refetch();
@@ -96,18 +80,6 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
           )}
         </CardContent>
       </Card>
-
-      {/* Historique des demandes de congés */}
-      {loading ? (
-        <div className="space-y-4">
-          <Skeleton className="w-full h-56" />
-        </div>
-      ) : (
-        <LeaveHistory 
-          leaves={leaves || []} 
-          formatDate={formatDate} 
-        />
-      )}
 
       {/* Formulaire de demande de congés */}
       <NewLeaveRequestForm 
