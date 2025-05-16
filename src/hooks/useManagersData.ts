@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from '@/components/ui/use-toast';
 import { Employee } from '@/types/firebase';
