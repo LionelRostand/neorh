@@ -21,28 +21,22 @@ export const useEmployeeLeaves = (employeeId: string) => {
     setLoading(true);
     try {
       console.log("Fetching leaves for employee:", employeeId);
-      // Si la recherche avec tri échoue, essayez sans tri
-      let result;
       
-      try {
-        // Essayer d'abord avec le tri
-        result = await search('employeeId', employeeId, {
-          sortField: 'startDate',
-          sortDirection: 'desc'
-        });
-      } catch (sortError) {
-        console.warn("Failed to fetch leaves with sorting, trying without sorting:", sortError);
-        // Si le tri échoue (problème d'index), essayer sans tri
-        result = await search('employeeId', employeeId);
-      }
-      
+      // Essayer d'abord sans tri pour éviter les problèmes d'index composite
+      const result = await search('employeeId', employeeId);
       console.log("Leaves result:", result);
       
       if (result.docs) {
-        setLeaves(result.docs);
+        // Tri manuel des résultats par date de début décroissante
+        const sortedLeaves = [...result.docs].sort((a, b) => {
+          if (!a.startDate || !b.startDate) return 0;
+          return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+        });
+        
+        setLeaves(sortedLeaves);
         
         // Calculate total leave days
-        const total = result.docs.reduce((acc, leave) => {
+        const total = sortedLeaves.reduce((acc, leave) => {
           if (leave.startDate && leave.endDate && leave.status === 'approved') {
             const start = new Date(leave.startDate);
             const end = new Date(leave.endDate);
@@ -58,10 +52,9 @@ export const useEmployeeLeaves = (employeeId: string) => {
     } catch (err) {
       console.error("Error fetching employee leaves:", err);
       setError(err instanceof Error ? err : new Error('Erreur inconnue'));
-      // Éviter d'afficher plusieurs toasts pour la même erreur
       toast({
         title: "Erreur",
-        description: "Impossible de charger les congés de l'employé. Vérifiez les index Firestore.",
+        description: "Impossible de charger les congés de l'employé.",
         variant: "destructive"
       });
     } finally {
@@ -71,7 +64,7 @@ export const useEmployeeLeaves = (employeeId: string) => {
 
   useEffect(() => {
     fetchEmployeeLeaves();
-  }, [fetchEmployeeLeaves]); // Dépend uniquement de fetchEmployeeLeaves qui dépend d'employeeId
+  }, [fetchEmployeeLeaves]);
 
   // Ajouter une fonction pour traduire les types de congés
   const getLeaveTypeLabel = (type: string): string => {
@@ -93,6 +86,6 @@ export const useEmployeeLeaves = (employeeId: string) => {
     error,
     totalDays,
     getLeaveTypeLabel,
-    refetch: fetchEmployeeLeaves // Ajout d'une méthode pour rafraîchir manuellement
+    refetch: fetchEmployeeLeaves
   };
 };

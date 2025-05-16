@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
 import { useCollection } from "@/hooks/useCollection";
@@ -87,9 +88,27 @@ const Conges = () => {
     }
   };
 
-  const handleSearch = (query: string) => {
+  const handleSearch = async (query: string) => {
     console.log("Recherche:", query);
-    // Implement search functionality here
+    setLoading(true);
+    try {
+      if (!query || query.trim() === '') {
+        // Si la requête est vide, charger toutes les demandes
+        fetchLeaves();
+        return;
+      }
+      
+      // Recherche simple par employeeId (peut être améliorée)
+      const result = await search('employeeId', query);
+      if (result?.docs) {
+        setLeaves(result.docs);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la recherche:", error);
+      showErrorToast("Erreur lors de la recherche");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
