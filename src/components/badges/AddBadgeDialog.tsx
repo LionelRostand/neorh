@@ -83,11 +83,14 @@ export function AddBadgeDialog({
         type: data.type,
         status: data.status as "active" | "inactive" | "lost" | "pending",
         issueDate: format(data.issueDate, "dd/MM/yyyy"),
-        expiryDate: data.expiryDate ? format(data.expiryDate, "dd/MM/yyyy") : undefined,
         notes: data.notes,
-        // Ajouter le nom de l'employé pour l'affichage dans la liste
         employeeName
       };
+      
+      // Ajouter la date d'expiration uniquement si elle est définie
+      if (data.expiryDate) {
+        badge.expiryDate = format(data.expiryDate, "dd/MM/yyyy");
+      }
 
       // Ajouter le document à Firestore
       await add(badge as Badge);
