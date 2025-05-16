@@ -64,6 +64,13 @@ const Departements = () => {
     });
   };
 
+  // Fonction pour simplifier les IDs et les rendre plus faciles à retenir
+  const getSimplifiedId = (id: string | undefined): string => {
+    if (!id) return "-";
+    // Prendre seulement les 8 premiers caractères
+    return id.substring(0, 8);
+  };
+
   console.log("Departments loaded:", departments);
 
   return (
@@ -123,7 +130,11 @@ const Departements = () => {
               ) : (
                 departments.map((department) => (
                   <TableRow key={department.id}>
-                    <TableCell className="font-mono text-xs">{department.id}</TableCell>
+                    <TableCell className="font-mono text-sm">
+                      <span title={department.id} className="cursor-help">
+                        {getSimplifiedId(department.id)}
+                      </span>
+                    </TableCell>
                     <TableCell className="font-medium">{department.name}</TableCell>
                     <TableCell>{department.description || '-'}</TableCell>
                     <TableCell>
