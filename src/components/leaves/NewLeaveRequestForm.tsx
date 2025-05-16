@@ -37,6 +37,7 @@ import { cn } from "@/lib/utils";
 import { useEmployeeData } from "@/hooks/useEmployeeData";
 import { useFirestore } from "@/hooks/useFirestore";
 import { toast } from "@/components/ui/use-toast";
+import { Leave } from "@/lib/constants";
 
 interface NewLeaveRequestFormProps {
   open: boolean;
@@ -73,7 +74,8 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({ open, onClose
   });
 
   const { employees, isLoading: loadingEmployees } = useEmployeeData();
-  const { add } = useFirestore<'hr_leaves'>();
+  // Fix: Provide the collection name as a parameter to useFirestore
+  const { add } = useFirestore<Leave>('hr_leaves');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async (values: LeaveFormValues) => {
@@ -93,7 +95,8 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({ open, onClose
       const formattedStartDate = format(values.startDate, "yyyy-MM-dd");
       const formattedEndDate = format(values.endDate, "yyyy-MM-dd");
 
-      const leaveData = {
+      // Fix: Use the Leave type from constants to ensure type compatibility
+      const leaveData: Omit<Leave, 'id'> = {
         employeeId: values.employeeId,
         type: values.type,
         startDate: formattedStartDate,
@@ -153,7 +156,7 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({ open, onClose
                     <SelectContent>
                       {employees.map((employee) => (
                         <SelectItem key={employee.id} value={employee.id || ""}>
-                          {employee.name}
+                          {employee.firstName} {employee.lastName}
                         </SelectItem>
                       ))}
                     </SelectContent>
