@@ -12,42 +12,38 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import ContractStatusCards from "@/components/contracts/ContractStatusCards";
-
-interface Department {
-  id: string;
-  name: string;
-  description: string;
-  manager: string;
-  company: string;
-  employeesCount: number;
-}
+import { useFirestore } from "@/hooks/firestore";
+import { Department } from "@/types/firebase";
 
 const Departements = () => {
   const { toast } = useToast();
+  const { getAll, isLoading, error } = useFirestore<Department>("hr_departments");
   const [departments, setDepartments] = useState<Department[]>([]);
   const [stats, setStats] = useState({
-    total: 1,
-    active: 1,
+    total: 0,
+    active: 0,
     pending: 0,
     expired: 0
   });
 
-  // Simuler le chargement des départements
+  // Fetch departments using the useFirestore hook
   useEffect(() => {
-    // Simuler des données de départements basées sur la capture d'écran
-    const mockDepartments: Department[] = [
-      {
-        id: "95d6215b-8b5c-4247-ad8c-6bbce3313e7e",
-        name: "DIRECTION GENERALE",
-        description: "gérer par le PDG",
-        manager: "N/A",
-        company: "NEOTECH-CONSULTING",
-        employeesCount: 0
+    const fetchDepartments = async () => {
+      const result = await getAll();
+      if (result && result.docs) {
+        setDepartments(result.docs);
+        // Update stats
+        setStats({
+          total: result.docs.length,
+          active: result.docs.length, // Assuming all departments are active for now
+          pending: 0,
+          expired: 0
+        });
       }
-    ];
+    };
 
-    setDepartments(mockDepartments);
-  }, []);
+    fetchDepartments();
+  }, [getAll]);
 
   const handleNewDepartment = () => {
     toast({
@@ -109,54 +105,70 @@ const Departements = () => {
                 <TableHead>ID</TableHead>
                 <TableHead>Nom</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead>Manager</TableHead>
                 <TableHead>Entreprise</TableHead>
-                <TableHead>Employés</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {departments.map((department) => (
-                <TableRow key={department.id}>
-                  <TableCell className="font-mono text-xs">{department.id}</TableCell>
-                  <TableCell className="font-medium">{department.name}</TableCell>
-                  <TableCell>{department.description}</TableCell>
-                  <TableCell>{department.manager}</TableCell>
-                  <TableCell>{department.company}</TableCell>
-                  <TableCell>{department.employeesCount}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button 
-                        variant="outline"
-                        size="sm" 
-                        onClick={() => handleEdit(department.id)}
-                        className="flex items-center"
-                      >
-                        <Pencil className="h-4 w-4 mr-1" />
-                        Modifier
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        size="sm" 
-                        onClick={() => handleDelete(department.id)}
-                        className="flex items-center"
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Supprimer
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        size="sm" 
-                        onClick={() => handleManage(department.id)}
-                        className="flex items-center"
-                      >
-                        <Users className="h-4 w-4 mr-1" />
-                        Gérer
-                      </Button>
-                    </div>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-4">
+                    Chargement des départements...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : error ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-4 text-red-500">
+                    Erreur: {error.message}
+                  </TableCell>
+                </TableRow>
+              ) : departments.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-4">
+                    Aucun département trouvé
+                  </TableCell>
+                </TableRow>
+              ) : (
+                departments.map((department) => (
+                  <TableRow key={department.id}>
+                    <TableCell className="font-mono text-xs">{department.id}</TableCell>
+                    <TableCell className="font-medium">{department.name}</TableCell>
+                    <TableCell>{department.description || '-'}</TableCell>
+                    <TableCell>{department.company || '-'}</TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="outline"
+                          size="sm" 
+                          onClick={() => handleEdit(department.id as string)}
+                          className="flex items-center"
+                        >
+                          <Pencil className="h-4 w-4 mr-1" />
+                          Modifier
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          size="sm" 
+                          onClick={() => handleDelete(department.id as string)}
+                          className="flex items-center"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Supprimer
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          size="sm" 
+                          onClick={() => handleManage(department.id as string)}
+                          className="flex items-center"
+                        >
+                          <Users className="h-4 w-4 mr-1" />
+                          Gérer
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
