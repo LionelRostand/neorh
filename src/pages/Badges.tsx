@@ -26,7 +26,7 @@ const Badges = () => {
     const fetchBadges = async () => {
       try {
         const result = await badgesCollection.getAll();
-        const data = result.docs; // Extract docs array from QueryResult
+        const data = result.docs || []; // Extract docs array from QueryResult with fallback
         
         if (data.length === 0) {
           // Si aucun badge n'existe encore, utilisons des données fictives

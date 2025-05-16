@@ -21,7 +21,7 @@ const FeuillesDeTemps = () => {
     const fetchTimesheets = async () => {
       try {
         const result = await timesheetCollection.getAll();
-        const data = result.docs; // Extract docs array from QueryResult
+        const data = result.docs || []; // Extract docs array from QueryResult with fallback
         
         if (data.length === 0) {
           // Si aucune feuille de temps n'existe encore, utilisons des données fictives

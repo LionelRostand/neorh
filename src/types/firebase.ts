@@ -105,20 +105,16 @@ export interface Contract {
 // Types for Firestore query operations
 export interface QueryParams {
   field: string;
-  operator: firebase.firestore.WhereFilterOp;
+  operator: WhereFilterOp;
   value: any;
 }
 
 export interface QueryResult<T> {
   docs: Array<T & { id: string }>;
-  lastDoc: firebase.firestore.DocumentSnapshot | null;
+  lastDoc: DocumentSnapshot | null;
   count: number;
 }
 
-// FirebaseFirestore namespace for WhereFilterOp type
-declare namespace firebase {
-  namespace firestore {
-    type WhereFilterOp = '<' | '<=' | '==' | '!=' | '>=' | '>' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in';
-    interface DocumentSnapshot {}
-  }
-}
+// These types are used to maintain compatibility with Firebase imports
+export type WhereFilterOp = '<' | '<=' | '==' | '!=' | '>=' | '>' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in';
+export interface DocumentSnapshot {}

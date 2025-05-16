@@ -29,7 +29,7 @@ export const createReadOperations = <T extends Record<string, any>>(
         return { id: doc.id, ...doc.data() } as T & { id: string };
       });
       console.log(`Retrieved ${documents.length} documents from ${collectionName}`);
-      return documents;
+      return { docs: documents };
     } catch (err) {
       const error = err instanceof Error ? err : new Error("Une erreur est survenue");
       console.error(`Error getting documents from ${collectionName}:`, error);
@@ -39,7 +39,7 @@ export const createReadOperations = <T extends Record<string, any>>(
         description: `Impossible de récupérer les documents: ${error.message}`,
         variant: "destructive"
       });
-      return [];
+      return { docs: [] };
     } finally {
       setIsLoading(false);
     }
