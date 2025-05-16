@@ -3,15 +3,18 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge as BadgeUI } from "@/components/ui/badge";
-import { Edit, Trash } from "lucide-react";
+import { Eye, PenLine, Trash2 } from "lucide-react";
 import { Badge } from "@/types/firebase";
 
 interface BadgeTableProps {
   badges: Badge[];
   loading: boolean;
+  onView: (badge: Badge) => void;
+  onEdit: (badge: Badge) => void;
+  onDelete: (badge: Badge) => void;
 }
 
-const BadgeTable = ({ badges, loading }: BadgeTableProps) => {
+const BadgeTable = ({ badges, loading, onView, onEdit, onDelete }: BadgeTableProps) => {
   // Function to render appropriate badge UI for each status
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -59,11 +62,32 @@ const BadgeTable = ({ badges, loading }: BadgeTableProps) => {
             <TableCell>{badge.issueDate}</TableCell>
             <TableCell>{badge.expiryDate || "Non définie"}</TableCell>
             <TableCell className="text-right">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Edit className="h-4 w-4" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0 mr-1" 
+                onClick={() => onView(badge)}
+                title="Voir"
+              >
+                <Eye className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500">
-                <Trash className="h-4 w-4" />
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0 mr-1" 
+                onClick={() => onEdit(badge)}
+                title="Modifier"
+              >
+                <PenLine className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0 text-red-500" 
+                onClick={() => onDelete(badge)}
+                title="Supprimer"
+              >
+                <Trash2 className="h-4 w-4" />
               </Button>
             </TableCell>
           </TableRow>

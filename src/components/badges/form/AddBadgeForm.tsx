@@ -2,16 +2,17 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Employee } from "@/types/employee";
 import { Form } from "@/components/ui/form";
-import { badgeFormSchema, BadgeFormValues } from "./FormSchema";
+
+import { BadgeFormSchema, BadgeFormValues } from "./FormSchema";
 import { BasicInfoSection } from "./BasicInfoSection";
 import { EmployeeSection } from "./EmployeeSection";
 import { TypeSection } from "./TypeSection";
-import { DateSection } from "./DateSection";
 import { StatusSection } from "./StatusSection";
+import { DateSection } from "./DateSection";
 import { NotesSection } from "./NotesSection";
 import { FormActions } from "./FormActions";
+import { Employee } from "@/types/employee";
 
 interface AddBadgeFormProps {
   onSubmit: (data: BadgeFormValues) => void;
@@ -19,6 +20,8 @@ interface AddBadgeFormProps {
   employees: Employee[];
   isLoading: boolean;
   generatedBadgeNumber: string;
+  defaultValues?: BadgeFormValues;
+  isEditMode?: boolean;
 }
 
 export function AddBadgeForm({
@@ -27,25 +30,27 @@ export function AddBadgeForm({
   employees,
   isLoading,
   generatedBadgeNumber,
+  defaultValues,
+  isEditMode = false,
 }: AddBadgeFormProps) {
   const form = useForm<BadgeFormValues>({
-    resolver: zodResolver(badgeFormSchema),
-    defaultValues: {
+    resolver: zodResolver(BadgeFormSchema),
+    defaultValues: defaultValues || {
       number: generatedBadgeNumber,
+      employeeId: "",
+      type: "standard",
       status: "active",
       issueDate: new Date(),
+      expiryDate: undefined,
+      notes: "",
     },
   });
 
-  // Update the badge number field when the generated number changes
-  React.useEffect(() => {
-    if (generatedBadgeNumber) {
-      form.setValue("number", generatedBadgeNumber);
-    }
-  }, [generatedBadgeNumber, form]);
-
   const handleSubmit = (data: BadgeFormValues) => {
-    onSubmit(data);
+    onSubmit({
+      ...data,
+      number: generatedBadgeNumber, // Assurer que le numéro reste celui généré
+    });
   };
 
   return (
@@ -53,11 +58,15 @@ export function AddBadgeForm({
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <BasicInfoSection form={form} />
         <EmployeeSection form={form} employees={employees} isLoading={isLoading} />
-        <TypeSection form={form} isLoading={isLoading} />
+        <TypeSection form={form} />
+        <StatusSection form={form} />
         <DateSection form={form} />
-        <StatusSection form={form} isLoading={isLoading} />
         <NotesSection form={form} />
-        <FormActions onCancel={onCancel} />
+        <FormActions
+          onCancel={onCancel}
+          isLoading={isLoading}
+          submitLabel={isEditMode ? "Mettre à jour" : "Créer le badge"}
+        />
       </form>
     </Form>
   );

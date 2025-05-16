@@ -27,6 +27,9 @@ const Badges = () => {
         badges={badges}
         loading={loading}
         badgeStats={badgeStats}
+        employees={employees}
+        isLoadingEmployees={isLoadingEmployees}
+        onRefresh={handleRefreshBadges}
       />
 
       <AddBadgeDialog 
