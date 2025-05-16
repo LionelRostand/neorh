@@ -45,10 +45,10 @@ export const createSearchOperations = <T extends Record<string, any>>(
         constraints.push(orderBy(options.sortField, sortDirection));
       }
       
-      // Create the query with constraints
+      // Create the query with explicit constraint handling
       let q;
       
-      // Handle different number of constraints without using spread
+      // Handle each case separately without using spread operator
       if (constraints.length === 0) {
         q = query(collectionRef);
       } else if (constraints.length === 1) {
@@ -57,11 +57,11 @@ export const createSearchOperations = <T extends Record<string, any>>(
         q = query(collectionRef, constraints[0], constraints[1]);
       } else {
         // For more than 2 constraints, we need to handle them individually
-        // Note: This is a simplification, in a real-world scenario, you'd need to handle more constraints
+        // Note: This is a simplification, in a real-world scenario, you'd need to create a composite index in Firebase
         q = query(collectionRef, constraints[0], constraints[1]);
         console.warn('Search only supports up to 2 constraints. Additional constraints were ignored.');
       }
-          
+      
       const querySnapshot = await getDocs(q);
       
       const documents = querySnapshot.docs.map(doc => {
