@@ -1,6 +1,6 @@
 
 import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
@@ -23,6 +23,11 @@ function Calendar({
         month: "space-y-4",
         caption: "flex justify-center pt-1 relative items-center",
         caption_label: "text-sm font-medium",
+        caption_dropdowns: "flex justify-center gap-1",
+        dropdown: "relative inline-flex bg-transparent p-0",
+        dropdown_month: "text-sm font-medium pl-2 pr-6 rounded-md appearance-none bg-transparent hover:bg-accent",
+        dropdown_year: "text-sm font-medium pl-2 pr-6 rounded-md appearance-none bg-transparent hover:bg-accent",
+        dropdown_icon: "absolute right-1.5 top-1/2 -translate-y-1/2 opacity-70",
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
@@ -53,13 +58,45 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
+        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
+        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
+        Dropdown: ({ ...props }) => {
+          return (
+            <select
+              {...props}
+              className={cn(
+                "appearance-none bg-transparent p-1 outline-none",
+                props.className
+              )}
+            />
+          );
+        },
+        IconDropdown: () => <ChevronDown className="h-3 w-3 opacity-50" />,
       }}
       {...props}
     />
   );
 }
+
+function ChevronDown(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
 Calendar.displayName = "Calendar";
 
 export { Calendar };

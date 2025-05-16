@@ -125,7 +125,6 @@ export function EmployeePersonalInfo({ form }: EmployeePersonalInfoProps) {
                     initialFocus
                     locale={fr}
                     className="pointer-events-auto"
-                    monthsToShow={1}
                     captionLayout="dropdown-buttons"
                     fromYear={1940}
                     toYear={new Date().getFullYear()}
