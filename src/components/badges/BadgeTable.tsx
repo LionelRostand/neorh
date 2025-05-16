@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Badge as BadgeUI } from "@/components/ui/badge";
 import { Edit, Trash } from "lucide-react";
-import { Badge } from "@/lib/constants";
+import { Badge } from "@/types/firebase";
 
 interface BadgeTableProps {
   badges: Badge[];
@@ -57,7 +57,7 @@ const BadgeTable = ({ badges, loading }: BadgeTableProps) => {
             <TableCell>{badge.type}</TableCell>
             <TableCell>{getStatusBadge(badge.status)}</TableCell>
             <TableCell>{badge.issueDate}</TableCell>
-            <TableCell>{badge.expiryDate}</TableCell>
+            <TableCell>{badge.expiryDate || "Non définie"}</TableCell>
             <TableCell className="text-right">
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                 <Edit className="h-4 w-4" />

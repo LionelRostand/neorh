@@ -1,4 +1,3 @@
-
 // Define the mapping between routes and Firestore collections
 export const ROUTE_TO_COLLECTION_MAP = {
   '/employes': 'hr_employees',
@@ -42,7 +41,7 @@ export type Badge = {
   type: string;
   status: 'active' | 'inactive' | 'lost' | 'pending';
   issueDate: string;
-  expiryDate: string;
+  expiryDate?: string; // Changed to optional to match the Firebase type
 }
 
 export type Timesheet = {
