@@ -18,12 +18,14 @@ export const useCompanyDetails = (): UseCompanyDetailsResult => {
   const { getById, isLoading } = useFirestore<Company>("hr_companies");
 
   const resetState = useCallback(() => {
+    console.log("useCompanyDetails: Resetting state to initial values");
     setCompany(null);
     setError(null);
   }, []);
 
   const fetchCompany = useCallback(async (id: string) => {
     if (!id) {
+      console.error("useCompanyDetails: ID d'entreprise manquant");
       setError(new Error("ID d'entreprise non spécifié"));
       return;
     }
@@ -38,10 +40,21 @@ export const useCompanyDetails = (): UseCompanyDetailsResult => {
       if (result) {
         // Make sure we have a proper company object with required fields
         const processedCompany: Company = {
-          id: result.id,
-          ...result,
+          id: result.id || id,
+          name: result.name || 'Entreprise sans nom',
           status: result.status || 'inactive',
-          name: result.name || 'Entreprise sans nom'
+          industry: result.industry || '',
+          type: result.type || '',
+          email: result.email || '',
+          phone: result.phone || '',
+          website: result.website || '',
+          address: result.address || '',
+          city: result.city || '',
+          postalCode: result.postalCode || '',
+          country: result.country || '',
+          description: result.description || '',
+          logoUrl: result.logoUrl || '',
+          registrationDate: result.registrationDate || ''
         };
         
         console.log("useCompanyDetails: Entreprise traitée:", processedCompany);

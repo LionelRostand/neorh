@@ -82,7 +82,7 @@ export const getDoc_firestore = async <T>(
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
-      console.log(`getDoc_firestore: Document found:`, docSnap.data());
+      console.log(`getDoc_firestore: Document found with data:`, docSnap.data());
       return {
         id: docSnap.id,
         ...docSnap.data()
@@ -115,13 +115,16 @@ export const createReadOperations = <T extends Record<string, any>>(
     setIsLoading(true);
     setError(null);
     try {
+      console.log(`createReadOperations: Getting all documents from ${collectionName}`);
       const result = await getDocs_firestore<T>({
         collectionName,
         ...options
       });
+      console.log(`createReadOperations: Found ${result.count} documents in ${collectionName}`);
       return result;
     } catch (err) {
       const error = err instanceof Error ? err : new Error("Une erreur est survenue");
+      console.error(`createReadOperations: Error getting all documents from ${collectionName}:`, error);
       setError(error);
       return { docs: [], lastDoc: null, count: 0 };
     } finally {
@@ -133,14 +136,19 @@ export const createReadOperations = <T extends Record<string, any>>(
   const getById = async (id: string) => {
     setIsLoading(true);
     setError(null);
+    console.log(`createReadOperations: Getting document from ${collectionName} with ID: ${id}`);
+    
     try {
       const result = await getDoc_firestore<T>(collectionName, id);
+      console.log(`createReadOperations: Result for document ${id}:`, result ? "Document found" : "Document not found");
       return result;
     } catch (err) {
       const error = err instanceof Error ? err : new Error("Une erreur est survenue");
+      console.error(`createReadOperations: Error getting document with ID ${id}:`, error);
       setError(error);
       return null;
     } finally {
+      console.log(`createReadOperations: Finished getting document with ID ${id}, setting isLoading to false`);
       setIsLoading(false);
     }
   };

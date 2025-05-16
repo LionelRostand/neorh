@@ -48,9 +48,9 @@ const CompanyDetailsSkeleton = () => {
         <Skeleton className="h-9 w-20" />
       </div>
 
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        <Loader2 className="h-10 w-10 animate-spin text-emerald-500" />
-        <p className="text-emerald-700 mt-2">Chargement des informations...</p>
+      <div className="flex flex-col items-center justify-center py-4 text-center">
+        <Loader2 className="h-10 w-10 animate-spin text-emerald-500 mb-2" />
+        <p className="text-emerald-700">Chargement des informations...</p>
       </div>
     </div>
   );

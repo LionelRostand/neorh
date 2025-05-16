@@ -38,11 +38,13 @@ const CompanyActions = ({
       return;
     }
     
-    console.log("CompanyActions: Ouvrir la vue détaillée de l'entreprise:", companyId);
+    console.log("CompanyActions: Ouverture de la vue détaillée de l'entreprise:", companyId);
     
     if (onDetails) {
       onDetails(companyId);
     }
+    
+    // Assurons-nous que la boîte de dialogue est marquée comme ouverte
     setIsViewOpen(true);
   };
 
@@ -64,6 +66,12 @@ const CompanyActions = ({
     if (onSuccess) {
       onSuccess();
     }
+  };
+
+  // Gestionnaire de changement d'état de la boîte de dialogue
+  const handleViewOpenChange = (open: boolean) => {
+    console.log("CompanyActions: Changement d'état de la boîte de dialogue de visualisation:", open);
+    setIsViewOpen(open);
   };
 
   return (
@@ -95,13 +103,12 @@ const CompanyActions = ({
         </Button>
       </div>
 
-      {isViewOpen && (
-        <ViewCompanyDialog
-          companyId={companyId}
-          open={isViewOpen}
-          onOpenChange={setIsViewOpen}
-        />
-      )}
+      {/* Utiliser isViewOpen pour conditionner le rendu de la boîte de dialogue */}
+      <ViewCompanyDialog
+        companyId={companyId}
+        open={isViewOpen}
+        onOpenChange={handleViewOpenChange}
+      />
 
       {isEditOpen && (
         <EditCompanyDialog
