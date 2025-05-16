@@ -22,13 +22,15 @@ interface NewLeaveRequestFormProps {
   onClose: () => void;
   onSuccess?: () => void;
   employeeId?: string;
+  isAllocation?: boolean;
 }
 
 const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({ 
   open, 
   onClose, 
   onSuccess,
-  employeeId
+  employeeId,
+  isAllocation = false
 }) => {
   const [selectedType, setSelectedType] = useState<string>("");
   const [showDaysAllocation, setShowDaysAllocation] = useState<boolean>(false);
@@ -41,6 +43,7 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
       endDate: undefined,
       comment: "",
       daysAllocated: 0,
+      isAllocation: isAllocation
     },
   });
 
@@ -49,11 +52,25 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
     if (employeeId) {
       form.setValue("employeeId", employeeId);
     }
-  }, [employeeId, form]);
+    
+    // Set isAllocation flag
+    form.setValue("isAllocation", isAllocation);
+    
+    // Pour les allocations, toujours montrer le champ d'allocation
+    if (isAllocation) {
+      setShowDaysAllocation(true);
+    }
+  }, [employeeId, form, isAllocation]);
 
   // Effet pour montrer/cacher le champ d'allocation selon le type
   useEffect(() => {
-    // Vérifier si le type sélectionné nécessite une allocation
+    // Si c'est une allocation, toujours montrer le champ d'allocation
+    if (isAllocation) {
+      setShowDaysAllocation(true);
+      return;
+    }
+    
+    // Pour les demandes normales, vérifier si le type nécessite une allocation
     const shouldShowAllocation = ["paid", "rtt"].includes(selectedType);
     setShowDaysAllocation(shouldShowAllocation);
     
@@ -61,7 +78,7 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
     if (!shouldShowAllocation) {
       form.setValue("daysAllocated", 0);
     }
-  }, [selectedType, form]);
+  }, [selectedType, form, isAllocation]);
 
   const handleTypeChange = (type: string) => {
     setSelectedType(type);
@@ -78,27 +95,49 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
 
   // Générer le libellé du champ d'allocation en fonction du type
   const getAllocationLabel = () => {
+    if (isAllocation) {
+      return "Nombre de jours à attribuer";
+    }
+    
     const typeObj = leaveTypes.find(t => t.id === selectedType);
     return `Nombre de jours de ${typeObj?.label || "congés"} à attribuer`;
+  };
+  
+  // Déterminer le titre du formulaire
+  const getDialogTitle = () => {
+    return isAllocation ? "Nouvelle attribution de congés" : "Nouvelle demande de congé";
+  };
+  
+  // Texte d'aide pour l'allocation
+  const getAllocationHelperText = () => {
+    if (isAllocation && selectedType === "paid") {
+      return "Au-delà de 5 jours, les jours restants seront conservés pour la prochaine période";
+    }
+    return undefined;
   };
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Nouvelle attribution de congé</DialogTitle>
+          <DialogTitle>{getDialogTitle()}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             {!employeeId && <EmployeeField form={form} />}
-            <LeaveTypeField form={form} onTypeChange={handleTypeChange} />
+            <LeaveTypeField 
+              form={form} 
+              onTypeChange={handleTypeChange} 
+              allowedTypes={isAllocation ? ["paid", "rtt"] : undefined}
+            />
             
             {/* Champ d'allocation conditionnel */}
             {showDaysAllocation && (
               <DaysAllocationField 
                 form={form} 
                 label={getAllocationLabel()}
+                helperText={getAllocationHelperText()}
               />
             )}
             
@@ -117,7 +156,11 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
               }}
             />
             <CommentField form={form} />
-            <LeaveFormActions onCancel={onClose} isSubmitting={isSubmitting} />
+            <LeaveFormActions 
+              onCancel={onClose} 
+              isSubmitting={isSubmitting} 
+              submitLabel={isAllocation ? "Attribuer la demande" : "Soumettre la demande"}
+            />
           </form>
         </Form>
       </DialogContent>

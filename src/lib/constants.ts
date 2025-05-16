@@ -1,4 +1,3 @@
-
 // Define the mapping between routes and Firestore collections
 export const ROUTE_TO_COLLECTION_MAP = {
   '/employes': 'hr_employees',
@@ -32,10 +31,12 @@ export type Leave = {
   type: string;  // paid, rtt, sick, family, maternity, paternity
   startDate: string;
   endDate: string;
-  status: string;
+  status: 'pending' | 'approved' | 'rejected';
   comment?: string;
-  createdAt?: string;
   managerId?: string; // ID du responsable qui doit approuver la demande
+  createdAt?: string;
+  daysAllocated?: number;
+  isAllocation?: boolean;
 }
 
 export type LeaveAllocation = {

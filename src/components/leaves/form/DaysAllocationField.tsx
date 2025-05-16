@@ -10,9 +10,10 @@ import { LeaveFormValues } from "./types";
 interface DaysAllocationFieldProps {
   form: UseFormReturn<LeaveFormValues>;
   label: string;
+  helperText?: string;
 }
 
-export function DaysAllocationField({ form, label }: DaysAllocationFieldProps) {
+export function DaysAllocationField({ form, label, helperText }: DaysAllocationFieldProps) {
   return (
     <FormField
       control={form.control}
@@ -51,6 +52,7 @@ export function DaysAllocationField({ form, label }: DaysAllocationFieldProps) {
             </Button>
             <span className="text-sm text-gray-500">jours</span>
           </div>
+          {helperText && <p className="text-xs text-gray-500 mt-1">{helperText}</p>}
         </FormItem>
       )}
     />

@@ -29,9 +29,15 @@ export const leaveTypes = [
 interface LeaveTypeFieldProps {
   form: UseFormReturn<LeaveFormValues>;
   onTypeChange?: (type: string) => void;
+  allowedTypes?: string[];
 }
 
-export function LeaveTypeField({ form, onTypeChange }: LeaveTypeFieldProps) {
+export function LeaveTypeField({ form, onTypeChange, allowedTypes }: LeaveTypeFieldProps) {
+  // Filter types if allowedTypes is provided
+  const filteredTypes = allowedTypes 
+    ? leaveTypes.filter(type => allowedTypes.includes(type.id)) 
+    : leaveTypes;
+
   return (
     <FormField
       control={form.control}
@@ -52,7 +58,7 @@ export function LeaveTypeField({ form, onTypeChange }: LeaveTypeFieldProps) {
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {leaveTypes.map((type) => (
+              {filteredTypes.map((type) => (
                 <SelectItem key={type.id} value={type.id}>
                   {type.label}
                 </SelectItem>

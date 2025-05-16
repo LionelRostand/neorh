@@ -6,4 +6,5 @@ export interface LeaveFormValues {
   endDate: Date | undefined;
   comment: string;
   daysAllocated?: number;
+  isAllocation?: boolean; // To differentiate between leave request and allocation
 }

@@ -45,6 +45,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
   
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
   const [showNewAllocationForm, setShowNewAllocationForm] = useState(false);
+  const [showDirectAllocationForm, setShowDirectAllocationForm] = useState(false);
   const { user } = useAuth();
   
   console.log("[EmployeeLeaves] State:", { 
@@ -77,6 +78,10 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
   const handleNewAllocation = () => {
     setShowNewAllocationForm(true);
   };
+  
+  const handleDirectAllocation = () => {
+    setShowDirectAllocationForm(true);
+  };
 
   const handleRequestSuccess = () => {
     setShowNewLeaveForm(false);
@@ -85,6 +90,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
 
   const handleAllocationSuccess = () => {
     setShowNewAllocationForm(false);
+    setShowDirectAllocationForm(false);
     refetch(); // Utiliser refetch pour mettre à jour les données
   };
 
@@ -107,13 +113,22 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
         <h3 className="text-xl font-semibold">Congés</h3>
         <div className="flex gap-2">
           {canAllocateLeaves && (
-            <Button 
-              variant="outline" 
-              onClick={handleNewAllocation}
-              className="border-emerald-500 text-emerald-600 hover:bg-emerald-50 gap-2"
-            >
-              <Calendar className="h-4 w-4" /> Nouvelle attribution
-            </Button>
+            <>
+              <Button 
+                variant="outline" 
+                onClick={handleNewAllocation}
+                className="border-emerald-500 text-emerald-600 hover:bg-emerald-50 gap-2"
+              >
+                <Calendar className="h-4 w-4" /> Nouvelle attribution
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleDirectAllocation}
+                className="border-blue-500 text-blue-600 hover:bg-blue-50 gap-2"
+              >
+                <Calendar className="h-4 w-4" /> Attribuer congés période
+              </Button>
+            </>
           )}
           <Button 
             onClick={handleNewLeaveRequest}
@@ -168,6 +183,15 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
         onClose={() => setShowNewAllocationForm(false)}
         onSuccess={handleAllocationSuccess}
         employeeId={employeeId}
+      />
+      
+      {/* Formulaire d'attribution directe de congés sur période */}
+      <NewLeaveRequestForm 
+        open={showDirectAllocationForm} 
+        onClose={() => setShowDirectAllocationForm(false)}
+        onSuccess={handleAllocationSuccess}
+        employeeId={employeeId}
+        isAllocation={true}
       />
     </div>
   );

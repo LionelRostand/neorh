@@ -1,26 +1,35 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { DialogFooter } from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
 
 interface LeaveFormActionsProps {
   onCancel: () => void;
   isSubmitting: boolean;
+  submitLabel?: string;
 }
 
-export function LeaveFormActions({ onCancel, isSubmitting }: LeaveFormActionsProps) {
+export function LeaveFormActions({ onCancel, isSubmitting, submitLabel = "Soumettre la demande" }: LeaveFormActionsProps) {
   return (
-    <DialogFooter className="sm:justify-end">
-      <Button variant="outline" type="button" onClick={onCancel} disabled={isSubmitting}>
-        Annuler
-      </Button>
-      <Button 
-        type="submit" 
-        className="bg-emerald-500 hover:bg-emerald-600"
+    <div className="flex justify-end gap-2 pt-2">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onCancel}
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Attribution..." : "Attribuer la demande"}
+        Annuler
       </Button>
-    </DialogFooter>
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Traitement...
+          </>
+        ) : (
+          submitLabel
+        )}
+      </Button>
+    </div>
   );
 }
