@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Users } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Table,
@@ -17,6 +17,7 @@ import { useDepartmentsData } from "@/hooks/useDepartmentsData";
 import NewDepartmentDialog from "@/components/departments/NewDepartmentDialog";
 import EditDepartmentDialog from "@/components/departments/EditDepartmentDialog";
 import DeleteDepartmentConfirmDialog from "@/components/departments/DeleteDepartmentConfirmDialog";
+import ViewDepartmentDialog from "@/components/departments/ViewDepartmentDialog";
 
 const Departements = () => {
   const { toast } = useToast();
@@ -24,6 +25,7 @@ const Departements = () => {
   const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
   const [stats, setStats] = useState({
     total: 0,
@@ -76,11 +78,18 @@ const Departements = () => {
     }
   };
 
-  const handleManage = (departmentId: string) => {
-    toast({
-      title: "Gérer le département",
-      description: `Gestion des employés du département ${departmentId} à venir.`
-    });
+  const handleView = (departmentId: string) => {
+    const department = departments.find(dept => dept.id === departmentId);
+    if (department) {
+      setSelectedDepartment(department);
+      setIsViewDialogOpen(true);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Département non trouvé"
+      });
+    }
   };
 
   // Fonction pour simplifier les IDs et les rendre plus faciles à retenir
@@ -179,11 +188,11 @@ const Departements = () => {
                         <Button 
                           variant="outline"
                           size="sm" 
-                          onClick={() => handleManage(department.id as string)}
+                          onClick={() => handleView(department.id as string)}
                           className="flex items-center"
                         >
-                          <Users className="h-4 w-4 mr-1" />
-                          Gérer
+                          <Eye className="h-4 w-4 mr-1" />
+                          Voir
                         </Button>
                       </div>
                     </TableCell>
@@ -221,6 +230,13 @@ const Departements = () => {
         onOpenChange={setIsDeleteDialogOpen}
         department={selectedDepartment}
         onSuccess={refetch}
+      />
+
+      {/* View Department Dialog */}
+      <ViewDepartmentDialog
+        open={isViewDialogOpen}
+        onOpenChange={setIsViewDialogOpen}
+        department={selectedDepartment}
       />
     </div>
   );
