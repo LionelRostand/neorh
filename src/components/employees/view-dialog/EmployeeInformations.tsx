@@ -53,6 +53,10 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
               <p className="font-medium">{employee.department || 'Non spécifié'}</p>
             </div>
             <div>
+              <p className="text-sm text-gray-500">Email professionnel</p>
+              <p className="font-medium">{employee.professionalEmail || 'Non spécifié'}</p>
+            </div>
+            <div>
               <p className="text-sm text-gray-500">Date d'embauche</p>
               <p className="font-medium">{employee.startDate || 'Non spécifié'}</p>
             </div>
