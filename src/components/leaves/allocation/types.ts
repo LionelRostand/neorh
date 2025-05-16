@@ -1,5 +1,4 @@
-
-import { LeaveAllocation } from "@/hooks/useEmployeeLeaves";
+import { LeaveAllocation } from "@/hooks/leaves";
 
 export interface LeaveAllocationManagerProps {
   allocation: LeaveAllocation | null;

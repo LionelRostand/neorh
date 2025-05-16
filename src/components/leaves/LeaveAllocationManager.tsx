@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Card, 
@@ -10,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { LeaveAllocation } from '@/hooks/useEmployeeLeaves';
+import { LeaveAllocation } from '@/hooks/leaves'; // Updated import path
 import { Check, X, Calendar, Plus, Minus } from 'lucide-react';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/hooks/useAuth';

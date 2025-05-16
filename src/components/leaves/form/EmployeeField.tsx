@@ -1,28 +1,23 @@
 
-import React from "react";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import React from 'react';
+import { FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { UseFormReturn } from "react-hook-form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useManagersData } from "@/hooks/useManagersData";
 import { LeaveFormValues } from "./types";
-import { useEmployeeData } from "@/hooks/useEmployeeData";
 
-interface EmployeeFieldProps {
-  form: UseFormReturn<LeaveFormValues>;
+// Define a more generic type so we can reuse this component
+export interface EmployeeSelectProps {
+  employeeId: string;
 }
 
-export function EmployeeField({ form }: EmployeeFieldProps) {
-  const { employees, isLoading: loadingEmployees } = useEmployeeData();
+interface EmployeeFieldProps<T extends EmployeeSelectProps> {
+  form: UseFormReturn<T>;
+  disabled?: boolean;
+}
+
+export function EmployeeField<T extends EmployeeSelectProps>({ form, disabled }: EmployeeFieldProps<T>) {
+  const { managers, loading } = useManagersData();
   
   return (
     <FormField
@@ -31,20 +26,20 @@ export function EmployeeField({ form }: EmployeeFieldProps) {
       render={({ field }) => (
         <FormItem>
           <FormLabel>Employé</FormLabel>
-          <Select
-            disabled={loadingEmployees}
-            onValueChange={field.onChange}
-            value={field.value}
+          <Select 
+            onValueChange={field.onChange} 
+            value={field.value} 
+            disabled={disabled || loading}
           >
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un employé" />
+                <SelectValue placeholder="Sélectionner un employé" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {employees.map((employee) => (
-                <SelectItem key={employee.id} value={employee.id || ""}>
-                  {employee.name}
+              {managers.map((employee) => (
+                <SelectItem key={employee.id} value={employee.id}>
+                  {`${employee.firstName} ${employee.lastName}`}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -52,5 +47,5 @@ export function EmployeeField({ form }: EmployeeFieldProps) {
         </FormItem>
       )}
     />
-  );
+  )
 }

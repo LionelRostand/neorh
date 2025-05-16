@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "@/hooks/useAuth";
 import { useFirestore } from "@/hooks/firestore";
 import { toast } from "@/components/ui/use-toast";
-import { LeaveAllocation } from "@/hooks/useEmployeeLeaves";
+import { LeaveAllocation } from "@/hooks/leaves";
 import {
   Dialog,
   DialogContent,

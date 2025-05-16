@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Calendar } from "lucide-react";
-import { LeaveAllocation } from "@/hooks/useEmployeeLeaves";
+import { LeaveAllocation } from "@/hooks/leaves"; // Updated import path
 import { LeaveAllocationManagerProps } from "./types";
 import ManagerActions from "./ManagerActions";
 import AllocationCounter from "./AllocationCounter";
