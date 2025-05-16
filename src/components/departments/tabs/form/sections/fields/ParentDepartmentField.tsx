@@ -51,7 +51,8 @@ export function ParentDepartmentField({ control }: ParentDepartmentFieldProps) {
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="">Aucun (département racine)</SelectItem>
+              {/* Changed from empty string to "none" */}
+              <SelectItem value="none">Aucun (département racine)</SelectItem>
               {availableDepartments.map((dept) => (
                 <SelectItem key={dept.id} value={dept.id || ""}>
                   {dept.name}

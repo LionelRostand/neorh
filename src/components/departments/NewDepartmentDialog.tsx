@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useManagersData } from "@/hooks/useManagersData";
 import { useCompaniesData } from "@/hooks/useCompaniesData";
+import { useDepartmentsData } from "@/hooks/useDepartmentsData";
 
 // Schema for the department form
 const formSchema = z.object({
@@ -35,6 +36,7 @@ const formSchema = z.object({
   managerId: z.string().optional(),
   companyId: z.string().optional(),
   color: z.string().default("Bleu"),
+  parentDepartmentId: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -58,6 +60,7 @@ const NewDepartmentDialog = ({ open, onOpenChange, onSuccess }: NewDepartmentDia
   const { add } = useFirestore<Department>("hr_departments");
   const { managers, isLoading: isLoadingManagers } = useManagersData();
   const { companies, isLoading: isLoadingCompanies } = useCompaniesData();
+  const { departments, isLoading: isLoadingDepartments } = useDepartmentsData();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -66,7 +69,8 @@ const NewDepartmentDialog = ({ open, onOpenChange, onSuccess }: NewDepartmentDia
       description: "",
       managerId: "",
       companyId: "",
-      color: "Bleu",
+      color: "#1EAEDB",
+      parentDepartmentId: "none",
     },
   });
 
@@ -76,7 +80,9 @@ const NewDepartmentDialog = ({ open, onOpenChange, onSuccess }: NewDepartmentDia
         name: values.name,
         description: values.description || "",
         managerId: values.managerId || "",
+        companyId: values.companyId || "",
         color: values.color,
+        parentDepartmentId: values.parentDepartmentId === "none" ? "" : values.parentDepartmentId,
       };
 
       await add(departmentData as Department);
@@ -201,6 +207,38 @@ const NewDepartmentDialog = ({ open, onOpenChange, onSuccess }: NewDepartmentDia
                               {companies.map((company) => (
                                 <SelectItem key={company.id} value={company.id || "no-company"}>
                                   {company.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="parentDepartmentId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Département parent</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            disabled={isLoadingDepartments}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Aucun département parent" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="none">Aucun (département racine)</SelectItem>
+                              {departments.map((dept) => (
+                                <SelectItem key={dept.id} value={dept.id || "dept-unknown"}>
+                                  {dept.name}
                                 </SelectItem>
                               ))}
                             </SelectContent>
