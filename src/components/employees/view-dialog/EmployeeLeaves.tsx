@@ -1,7 +1,7 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEmployeeLeaves } from '@/hooks/useEmployeeLeaves';
-import { Calendar } from 'lucide-react';
 import LeaveAllocationManager from "@/components/leaves/allocation/LeaveAllocationManager";
 
 interface EmployeeLeavesProps {
