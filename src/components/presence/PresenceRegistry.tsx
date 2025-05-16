@@ -13,6 +13,7 @@ export const PresenceRegistry = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   
+  // Utilisation du hook pour charger les données (optimisé pour éviter les boucles)
   const { presenceRecords, isLoading, error, refreshData } = usePresenceData();
   
   // Filtrer les enregistrements en fonction des critères
@@ -65,26 +66,11 @@ export const PresenceRegistry = () => {
           {isLoading && <div className="text-sm text-muted-foreground">Chargement...</div>}
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Employé</TableHead>
-                <TableHead>ID</TableHead>
-                <TableHead>Badge</TableHead>
-                <TableHead>Heure d'entrée</TableHead>
-                <TableHead>Heure de sortie</TableHead>
-                <TableHead>Durée</TableHead>
-                <TableHead>Statut</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <PresenceTable 
-                records={filteredRecords}
-                isLoading={isLoading}
-                error={error}
-              />
-            </TableBody>
-          </Table>
+          <PresenceTable 
+            records={filteredRecords}
+            isLoading={isLoading}
+            error={error}
+          />
         </CardContent>
       </Card>
     </div>

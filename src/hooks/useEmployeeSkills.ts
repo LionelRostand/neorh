@@ -57,10 +57,10 @@ export function useEmployeeSkills(employeeId: string) {
       
       const resultId = await add(skillData);
       if (resultId) {
-        // Fix the typing issue by first casting resultId to unknown, then to string
+        // Corriger le problème de typage en créant correctement la nouvelle compétence
         const newSkill: Skill = {
           ...skillData,
-          id: (resultId as unknown) as string
+          id: String(resultId) // Convertir explicitement en string
         };
         
         setSkills(prevSkills => [...prevSkills, newSkill]);
@@ -117,12 +117,15 @@ export function useEmployeeSkills(employeeId: string) {
   }, [remove]);
 
   useEffect(() => {
-    if (employeeId) {
+    let mounted = true;
+    
+    if (employeeId && mounted) {
       fetchEmployeeSkills();
     }
     
     // Nettoyage lors du démontage du composant
     return () => {
+      mounted = false;
       isFetchingRef.current = false;
     };
   }, [fetchEmployeeSkills, employeeId]);
