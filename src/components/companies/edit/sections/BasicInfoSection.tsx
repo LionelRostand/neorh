@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Control } from "react-hook-form";
 import {
@@ -80,7 +79,7 @@ const BasicInfoSection = ({
                 <RadioGroup
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  className="flex space-x-4"
+                  className="flex flex-wrap gap-4"
                 >
                   <FormItem className="flex items-center space-x-2 space-y-0">
                     <FormControl>
@@ -104,6 +103,22 @@ const BasicInfoSection = ({
                     </FormControl>
                     <FormLabel className="font-normal" htmlFor="partenaire">
                       Partenaire
+                    </FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="proprietaire" id="proprietaire" />
+                    </FormControl>
+                    <FormLabel className="font-normal" htmlFor="proprietaire">
+                      Propriétaire
+                    </FormLabel>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="local" id="local" />
+                    </FormControl>
+                    <FormLabel className="font-normal" htmlFor="local">
+                      Local
                     </FormLabel>
                   </FormItem>
                 </RadioGroup>

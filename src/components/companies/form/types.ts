@@ -13,7 +13,7 @@ export const companyFormSchema = z.object({
   postalCode: z.string().optional(),
   country: z.string().optional(),
   description: z.string().optional(),
-  type: z.string().default("client"),
+  type: z.enum(["client", "fournisseur", "partenaire", "proprietaire", "local"]).default("client"),
   status: z.string().default("active"),
   registrationDate: z.string().default(() => new Date().toISOString().split('T')[0]),
   logoUrl: z.string().optional()
