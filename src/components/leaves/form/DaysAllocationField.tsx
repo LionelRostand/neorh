@@ -66,7 +66,8 @@ export function DaysAllocationField({
                 {...field}
                 onChange={handleInputChange}
                 className="h-9 text-center w-16"
-                value={field.value || 0}
+                // Ensure value is always a number or string
+                value={typeof field.value === 'number' ? field.value : 0}
                 // Fix for the TypeScript error - ensure value is always a number or string
                 onBlur={() => {
                   // Ensure value is a number on blur
