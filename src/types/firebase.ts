@@ -18,10 +18,12 @@ export interface Badge {
   id?: string;
   number: string;
   employeeId: string;
+  employeeName?: string;
   type: string;
   status: 'active' | 'inactive' | 'lost' | 'pending';
   issueDate: string;
-  expiryDate: string;
+  expiryDate?: string;
+  notes?: string;
 }
 
 // Types pour la collection 'accessZones'

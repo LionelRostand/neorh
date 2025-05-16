@@ -4,14 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Plus, FileText } from "lucide-react";
 import { useCollection } from "@/hooks/useCollection";
-import { Badge } from "@/lib/constants";
-import { toast } from "@/hooks/use-toast";
+import { useFirestore } from "@/hooks/useFirestore";
+import { Badge, Employee } from "@/types/firebase";
+import { toast } from "@/components/ui/use-toast";
 import BadgeStatusCards from "@/components/badges/BadgeStatusCards";
 import BadgeTable from "@/components/badges/BadgeTable";
+import { AddBadgeDialog } from "@/components/badges/AddBadgeDialog";
 
 const Badges = () => {
   const [badges, setBadges] = useState<Badge[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [badgeStats, setBadgeStats] = useState({
     active: 0,
     pending: 0,
@@ -21,6 +25,9 @@ const Badges = () => {
   
   // Utilisation de notre hook pour accéder à la collection des badges
   const badgesCollection = useCollection<'hr_badges'>();
+  
+  // Utilisation du hook Firestore pour récupérer les employés
+  const employeesFirestore = useFirestore<Employee>("employees");
 
   useEffect(() => {
     const fetchBadges = async () => {
@@ -36,7 +43,7 @@ const Badges = () => {
               number: "B2023-001",
               employeeId: "1",
               employeeName: "Thomas Dubois",
-              type: "Standard",
+              type: "standard",
               status: "active" as "active",
               issueDate: "15/03/2021",
               expiryDate: "15/03/2023"
@@ -46,7 +53,7 @@ const Badges = () => {
               number: "B2023-002",
               employeeId: "2",
               employeeName: "Sophie Martin",
-              type: "Admin",
+              type: "admin",
               status: "pending" as "pending",
               issueDate: "02/05/2022",
               expiryDate: "02/05/2024"
@@ -56,7 +63,7 @@ const Badges = () => {
               number: "B2023-003",
               employeeId: "3",
               employeeName: "Jean Bernard",
-              type: "Standard",
+              type: "standard",
               status: "inactive" as "inactive",
               issueDate: "10/11/2019",
               expiryDate: "10/11/2021"
@@ -80,7 +87,45 @@ const Badges = () => {
       }
     };
 
+    const fetchEmployees = async () => {
+      try {
+        const result = await employeesFirestore.getAll();
+        if (result.docs && result.docs.length > 0) {
+          setEmployees(result.docs);
+        } else {
+          // Données fictives si aucun employé n'existe
+          setEmployees([
+            {
+              id: "1",
+              firstName: "Thomas",
+              lastName: "Dubois",
+              email: "thomas.dubois@example.com",
+              phone: "0123456789",
+              department: "IT",
+              position: "Développeur",
+              status: "active" as "active",
+              hireDate: "10/01/2020"
+            },
+            {
+              id: "2",
+              firstName: "Sophie",
+              lastName: "Martin",
+              email: "sophie.martin@example.com",
+              phone: "0123456790",
+              department: "RH",
+              position: "Responsable RH",
+              status: "active" as "active",
+              hireDate: "05/03/2019"
+            }
+          ]);
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des employés:", error);
+      }
+    };
+
     fetchBadges();
+    fetchEmployees();
   }, []);
 
   const calculateStats = (badgeData: Badge[]) => {
@@ -89,7 +134,7 @@ const Badges = () => {
     const inactive = badgeData.filter(b => b.status === 'inactive' || b.status === 'lost').length;
     
     // Simulons un calcul de couverture (dans un cas réel, il faudrait comparer avec le nombre total d'employés)
-    const coverage = badgeData.length > 0 ? Math.round((active / 2) * 100) : 0;
+    const coverage = badgeData.length > 0 ? Math.round((active / (employees.length || 2)) * 100) : 0;
     
     setBadgeStats({
       active,
@@ -100,7 +145,22 @@ const Badges = () => {
   };
 
   const handleAddBadge = () => {
-    // Cette fonction sera implémentée plus tard
+    setIsAddDialogOpen(true);
+  };
+
+  const handleRefreshBadges = async () => {
+    setLoading(true);
+    try {
+      const result = await badgesCollection.getAll();
+      if (result.docs) {
+        setBadges(result.docs);
+        calculateStats(result.docs);
+      }
+    } catch (error) {
+      console.error("Erreur lors du rafraîchissement des badges:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -141,6 +201,14 @@ const Badges = () => {
           <BadgeTable badges={badges} loading={loading} />
         </CardContent>
       </Card>
+
+      <AddBadgeDialog 
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        employees={employees}
+        onSuccess={handleRefreshBadges}
+        isLoadingEmployees={employeesFirestore.isLoading}
+      />
     </div>
   );
 };
