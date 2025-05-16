@@ -1,11 +1,9 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format } from 'date-fns';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/use-toast';
 import { useCompaniesData } from '@/hooks/useCompaniesData';
 import { useDepartmentsData } from '@/hooks/useDepartmentsData';
 import { useManagersData } from '@/hooks/useManagersData';
@@ -13,35 +11,17 @@ import { EmployeePhotoUpload } from './EmployeePhotoUpload';
 import { EmployeePersonalInfo } from './EmployeePersonalInfo';
 import { EmployeeAddressInfo } from './EmployeeAddressInfo';
 import { EmployeeProfessionalInfo } from './EmployeeProfessionalInfo';
-import { usePhotoUpload } from './usePhotoUpload';
 import { employeeFormSchema, EmployeeFormValues } from './types';
-import { collection, addDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { usePersistForm } from './hooks/usePersistForm';
+import { useEmployeeFormSubmit } from './hooks/useEmployeeFormSubmit';
 
 interface EmployeeFormProps {
   onClose: () => void;
   onSuccess?: () => void;
 }
 
-// Clé pour le stockage local des données du formulaire
-const FORM_STORAGE_KEY = 'employeeFormData';
-
 export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
-  const { 
-    photoPreview, 
-    isUploading, 
-    setIsUploading, 
-    handlePhotoChange, 
-    uploadPhoto,
-    resetPhoto 
-  } = usePhotoUpload();
-  
-  // Récupérer les données des entreprises, départements et responsables
-  const { companies, isLoading: isLoadingCompanies } = useCompaniesData();
-  const { departments, isLoading: isLoadingDepartments } = useDepartmentsData();
-  const { managers, isLoading: isLoadingManagers } = useManagersData();
-
-  // Initialiser le formulaire
+  // Initialize the form
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeFormSchema),
     defaultValues: {
@@ -60,90 +40,25 @@ export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
     },
   });
 
-  // Charger les données du formulaire depuis le localStorage
-  useEffect(() => {
-    const savedFormData = localStorage.getItem(FORM_STORAGE_KEY);
-    if (savedFormData) {
-      try {
-        const parsedData = JSON.parse(savedFormData);
-        
-        // Conversion de la date si elle existe
-        if (parsedData.birthDate) {
-          parsedData.birthDate = new Date(parsedData.birthDate);
-        }
-        
-        form.reset(parsedData);
-      } catch (error) {
-        console.error("Erreur lors du chargement des données du formulaire:", error);
-      }
-    }
-  }, [form]);
-
-  // Sauvegarder les données du formulaire dans le localStorage lorsqu'elles changent
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(value));
-    });
-    
-    return () => subscription.unsubscribe();
-  }, [form]);
-
-  const onSubmit = async (data: EmployeeFormValues) => {
-    setIsUploading(true);
-    
-    try {
-      // Récupérer la photo en base64
-      const photoBase64 = await uploadPhoto();
-      
-      // Préparer les données de l'employé pour Firebase
-      const employeeData = {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        phone: data.phone,
-        birthDate: data.birthDate ? format(data.birthDate, 'yyyy-MM-dd') : '',
-        address: {
-          streetNumber: data.streetNumber,
-          streetName: data.streetName,
-          city: data.city,
-          postalCode: data.postalCode,
-        },
-        department: data.department,
-        company: data.company,
-        position: data.position,
-        professionalEmail: data.professionalEmail || data.email,
-        managerId: data.managerId || '',
-        photoBase64: photoBase64 || '', // Stockage direct en base64
-        status: 'active',
-        hireDate: format(new Date(), 'yyyy-MM-dd'),
-      };
-
-      // Utiliser directement les imports de Firebase pour ajouter l'employé
-      const employeesCollection = collection(db, 'hr_employees');
-      const docRef = await addDoc(employeesCollection, employeeData);
-      
-      toast({
-        title: "Succès",
-        description: "L'employé a été ajouté avec succès",
-      });
-      
-      // Nettoyer les données sauvegardées
-      localStorage.removeItem(FORM_STORAGE_KEY);
-      resetPhoto();
-      
-      if (onSuccess) onSuccess();
-      onClose();
-    } catch (error) {
-      console.error("Erreur lors de l'ajout de l'employé:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible d'ajouter l'employé",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
+  // Load and persist form data
+  const { clearFormData } = usePersistForm(form);
+  
+  // Get companies, departments, and managers data
+  const { companies, isLoading: isLoadingCompanies } = useCompaniesData();
+  const { departments, isLoading: isLoadingDepartments } = useDepartmentsData();
+  const { managers, isLoading: isLoadingManagers } = useManagersData();
+  
+  // Set up form submission
+  const { 
+    photoPreview, 
+    isUploading, 
+    handlePhotoChange, 
+    onSubmit 
+  } = useEmployeeFormSubmit({ 
+    onClose, 
+    onSuccess, 
+    clearFormData 
+  });
 
   return (
     <div className="space-y-6 px-2 py-4 max-h-[80vh] overflow-y-auto">
