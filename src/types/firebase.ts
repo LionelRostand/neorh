@@ -85,12 +85,20 @@ export interface Hierarchy {
 export interface Leave {
   id?: string;
   employeeId: string;
-  type: 'annual' | 'sick' | 'maternity' | 'paternity' | 'other';
+  type: 'paid' | 'rtt' | 'sick' | 'maternity' | 'paternity' | 'other' | 'allocation';
   startDate: string;
   endDate: string;
   status: 'pending' | 'approved' | 'rejected';
   approvedBy?: string;
   comment?: string;
+  managerId?: string;
+  isAllocation?: boolean;
+  paidDaysAllocated?: number;
+  rttDaysAllocated?: number;
+  daysRequested?: number;
+  paidDaysUsed?: number;
+  rttDaysUsed?: number;
+  createdAt?: string;
 }
 
 // Types pour la collection 'contracts'

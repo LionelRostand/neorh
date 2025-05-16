@@ -4,6 +4,8 @@ import { toast } from '@/components/ui/use-toast';
 import { LeaveAllocation } from '../types';
 import { allocationCache } from '../utils/leaveAllocationCache';
 import { useAllocationService } from '../api/allocationService';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 /**
  * Custom hook for updating allocation data
@@ -48,7 +50,36 @@ export const useAllocationUpdate = (
     }
   }, [allocation, updateAllocationData, employeeId, setAllocation]);
 
+  /**
+   * Cette fonction met à jour l'allocation lorsqu'une demande de congé est approuvée
+   */
+  const updateLeaveAllocationOnApproval = useCallback(async (leaveId: string, leaveType: string, daysRequested: number) => {
+    if (!allocation?.id || !employeeId) return false;
+
+    try {
+      console.log(`[useAllocationUpdate] Updating allocation on leave approval: ${leaveType}, ${daysRequested} days`);
+      
+      // Mettre à jour les jours utilisés selon le type de congé
+      const updates: Partial<LeaveAllocation> = {};
+      
+      if (leaveType === 'paid') {
+        updates.paidLeavesUsed = (allocation.paidLeavesUsed || 0) + daysRequested;
+      } else if (leaveType === 'rtt') {
+        updates.rttUsed = (allocation.rttUsed || 0) + daysRequested;
+      }
+      
+      // S'il n'y a pas de mise à jour à faire, sortir
+      if (Object.keys(updates).length === 0) return true;
+      
+      return await updateLeaveAllocation(updates);
+    } catch (err) {
+      console.error("[useAllocationUpdate] Error updating allocation on leave approval:", err);
+      return false;
+    }
+  }, [allocation, employeeId, updateLeaveAllocation]);
+
   return { 
-    updateLeaveAllocation 
+    updateLeaveAllocation,
+    updateLeaveAllocationOnApproval
   };
 };

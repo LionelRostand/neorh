@@ -13,6 +13,7 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { add: addLeave } = useCollection<'hr_leaves'>();
   const { add: addAllocation } = useFirestore<LeaveAllocation>('hr_leave_allocations');
+  const { update: updateAllocation } = useFirestore<LeaveAllocation>('hr_leave_allocations');
   const { user } = useAuth();
 
   const handleSubmit = async (data: LeaveFormValues) => {
@@ -146,7 +147,43 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
         // C'est une demande de congé classique
         const leaveType = data.type || 'paid';
         
-        await addLeave({
+        // Rechercher l'allocation existante pour l'employé
+        const currentYear = new Date().getFullYear();
+        const allocationRef = collection(db, 'hr_leave_allocations');
+        const q = query(allocationRef, where('employeeId', '==', data.employeeId), where('year', '==', currentYear));
+        const querySnapshot = await getDocs(q);
+        
+        let existingAllocation = null;
+        if (!querySnapshot.empty) {
+          existingAllocation = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() };
+        }
+
+        // Vérifier s'il y a assez de congés disponibles
+        if (existingAllocation) {
+          let hasEnoughLeaves = true;
+          let errorMessage = "";
+          
+          if (leaveType === 'paid' && existingAllocation.paidLeavesUsed + diffDays > existingAllocation.paidLeavesTotal) {
+            hasEnoughLeaves = false;
+            errorMessage = `Solde de congés payés insuffisant. Il vous reste ${existingAllocation.paidLeavesTotal - existingAllocation.paidLeavesUsed} jours, vous demandez ${diffDays} jours.`;
+          } else if (leaveType === 'rtt' && existingAllocation.rttUsed + diffDays > existingAllocation.rttTotal) {
+            hasEnoughLeaves = false;
+            errorMessage = `Solde de RTT insuffisant. Il vous reste ${existingAllocation.rttTotal - existingAllocation.rttUsed} jours, vous demandez ${diffDays} jours.`;
+          }
+          
+          if (!hasEnoughLeaves) {
+            showErrorToast(errorMessage);
+            setIsSubmitting(false);
+            return;
+          }
+        }
+        
+        // Calculer les jours utilisés pour chaque type de congé
+        const paidDaysUsed = leaveType === 'paid' ? diffDays : 0;
+        const rttDaysUsed = leaveType === 'rtt' ? diffDays : 0;
+        
+        // Créer la demande de congé
+        const leaveData = {
           employeeId: data.employeeId,
           type: leaveType,
           startDate: startDateStr,
@@ -155,8 +192,12 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
           comment: data.comment || '',
           managerId,
           createdAt: new Date().toISOString(),
-          daysRequested: diffDays
-        });
+          daysRequested: diffDays,
+          paidDaysUsed,
+          rttDaysUsed
+        };
+        
+        await addLeave(leaveData);
 
         // Notifier le manager de la nouvelle demande
         if (managerId) {

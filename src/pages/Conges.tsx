@@ -8,6 +8,7 @@ import LeaveAllocationForm from "@/components/leaves/allocation/LeaveAllocationF
 import LeavesHeader from "@/components/leaves/LeavesHeader";
 import LeavesContent from "@/components/leaves/LeavesContent";
 import { useAuth } from "@/hooks/useAuth";
+import { useLeaveApproval } from "@/hooks/leaves/useLeaveApproval";
 
 const Conges = () => {
   const [leaves, setLeaves] = useState<Leave[]>([]);
@@ -16,6 +17,7 @@ const Conges = () => {
   const [showAllocationForm, setShowAllocationForm] = useState(false);
   const { getAll, isLoading, error, update, search } = useCollection<'hr_leaves'>();
   const { user } = useAuth();
+  const { approveLeave, rejectLeave } = useLeaveApproval();
 
   // Déterminer si l'utilisateur peut attribuer des congés (admin ou manager)
   const canAllocateLeaves = Boolean((user && user.isAdmin) || (user && user.role === 'manager'));
@@ -41,7 +43,10 @@ const Conges = () => {
           comment: doc.comment || '',
           managerId: doc.managerId || '',
           paidDaysAllocated: doc.paidDaysAllocated || 0,
-          rttDaysAllocated: doc.rttDaysAllocated || 0
+          rttDaysAllocated: doc.rttDaysAllocated || 0,
+          paidDaysUsed: doc.paidDaysUsed || 0,
+          rttDaysUsed: doc.rttDaysUsed || 0,
+          daysRequested: doc.daysRequested || 0
         } as Leave));
         
         setLeaves(typedLeaves);
@@ -85,24 +90,16 @@ const Conges = () => {
   };
 
   const handleApprove = async (id: string) => {
-    try {
-      await update(id, { status: 'approved' });
-      showSuccessToast("Demande approuvée");
+    const success = await approveLeave(id);
+    if (success) {
       fetchLeaves(); // Actualiser la liste après mise à jour
-    } catch (error) {
-      console.error("Erreur lors de l'approbation de la demande:", error);
-      showErrorToast("Impossible d'approuver la demande");
     }
   };
 
   const handleReject = async (id: string) => {
-    try {
-      await update(id, { status: 'rejected' });
-      showErrorToast("Demande refusée");
+    const success = await rejectLeave(id);
+    if (success) {
       fetchLeaves(); // Actualiser la liste après mise à jour
-    } catch (error) {
-      console.error("Erreur lors du refus de la demande:", error);
-      showErrorToast("Impossible de refuser la demande");
     }
   };
 
@@ -145,12 +142,12 @@ const Conges = () => {
         onSearch={handleSearch}
       />
 
-      {/* Formulaire d'attribution de congés sur période */}
+      {/* Formulaire de demande de congés */}
       <NewLeaveRequestForm 
         open={showNewLeaveForm} 
         onClose={() => setShowNewLeaveForm(false)}
         onSuccess={handleRequestSuccess}
-        isAllocation={true}
+        isAllocation={false}
       />
 
       {/* Formulaire d'attribution de congés */}
