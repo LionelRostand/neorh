@@ -2,7 +2,7 @@
 import { useCallback } from 'react';
 import { useFirestore } from '@/hooks/firestore';
 import { LeaveAllocation } from './types';
-import { Leave } from '@/lib/constants';
+import { Leave } from '@/types/firebase'; // Updated import path
 import { showSuccessToast, showErrorToast } from '@/utils/toastUtils';
 import { doc, getDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
