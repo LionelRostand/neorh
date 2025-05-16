@@ -11,8 +11,9 @@ export function useLeaveRequestForm(
   isAllocation = false
 ) {
   const [selectedType, setSelectedType] = useState<string>("");
-  const [showPaidLeaveAllocation, setShowPaidLeaveAllocation] = useState<boolean>(false);
-  const [showRttAllocation, setShowRttAllocation] = useState<boolean>(false);
+  // Always show both allocation fields when it's an allocation form
+  const [showPaidLeaveAllocation, setShowPaidLeaveAllocation] = useState<boolean>(isAllocation);
+  const [showRttAllocation, setShowRttAllocation] = useState<boolean>(isAllocation);
 
   const form = useForm<LeaveFormValues>({
     defaultValues: {
@@ -22,8 +23,8 @@ export function useLeaveRequestForm(
       endDate: undefined,
       comment: "",
       daysAllocated: 0,
-      paidDaysAllocated: 0,
-      rttDaysAllocated: 0,
+      paidDaysAllocated: 25, // Default value for France
+      rttDaysAllocated: 12, // Default RTT value
       isAllocation: isAllocation
     },
   });
@@ -37,31 +38,25 @@ export function useLeaveRequestForm(
     // Set isAllocation flag
     form.setValue("isAllocation", isAllocation);
     
-    // Pour les allocations, toujours montrer les champs d'allocation selon le type sélectionné
+    // Pour les allocations, toujours montrer les champs d'allocation
     if (isAllocation) {
-      setShowPaidLeaveAllocation(selectedType === "paid");
-      setShowRttAllocation(selectedType === "rtt");
+      setShowPaidLeaveAllocation(true);
+      setShowRttAllocation(true);
     }
-  }, [employeeId, form, isAllocation, selectedType]);
+  }, [employeeId, form, isAllocation]);
 
   // Effet pour montrer/cacher les champs d'allocation selon le type
   useEffect(() => {
-    // Si c'est une allocation, gérer les champs d'allocation selon le type
+    // Si c'est une allocation, toujours afficher les deux champs
     if (isAllocation) {
-      setShowPaidLeaveAllocation(selectedType === "paid");
-      setShowRttAllocation(selectedType === "rtt");
+      setShowPaidLeaveAllocation(true);
+      setShowRttAllocation(true);
       
-      // Réinitialiser les valeurs non utilisées
+      // Update daysAllocated based on selected type
       if (selectedType === "paid") {
-        form.setValue("rttDaysAllocated", 0);
         form.setValue("daysAllocated", form.getValues("paidDaysAllocated"));
       } else if (selectedType === "rtt") {
-        form.setValue("paidDaysAllocated", 0);
         form.setValue("daysAllocated", form.getValues("rttDaysAllocated"));
-      } else {
-        form.setValue("paidDaysAllocated", 0);
-        form.setValue("rttDaysAllocated", 0);
-        form.setValue("daysAllocated", 0);
       }
     } else {
       // Pour les demandes normales
@@ -84,11 +79,16 @@ export function useLeaveRequestForm(
 
   // Synchroniser le champ daysAllocated avec paidDaysAllocated ou rttDaysAllocated
   const syncDaysAllocated = (type: string, value: number) => {
-    form.setValue("daysAllocated", value);
     if (type === "paid") {
       form.setValue("paidDaysAllocated", value);
+      if (selectedType === "paid") {
+        form.setValue("daysAllocated", value);
+      }
     } else if (type === "rtt") {
       form.setValue("rttDaysAllocated", value);
+      if (selectedType === "rtt") {
+        form.setValue("daysAllocated", value);
+      }
     }
   };
 
@@ -108,17 +108,11 @@ export function useLeaveRequestForm(
   
   // Texte d'aide pour l'allocation
   const getPaidLeaveHelperText = () => {
-    if (isAllocation && selectedType === "paid") {
-      return "Au-delà de 5 jours, les jours restants seront conservés pour la prochaine période";
-    }
-    return undefined;
+    return "Au-delà de 5 jours, les jours restants seront conservés pour la prochaine période";
   };
   
   const getRttHelperText = () => {
-    if (isAllocation && selectedType === "rtt") {
-      return "Les jours de RTT doivent être utilisés dans la période courante";
-    }
-    return undefined;
+    return "Les jours de RTT doivent être utilisés dans la période courante";
   };
 
   // Générer le libellé du champ d'allocation en fonction du type

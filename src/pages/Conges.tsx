@@ -148,7 +148,7 @@ const Conges = () => {
         open={showNewLeaveForm} 
         onClose={() => setShowNewLeaveForm(false)}
         onSuccess={handleRequestSuccess}
-        isAllocation={true}
+        isAllocation={false}
       />
 
       {/* Formulaire d'attribution de congés */}

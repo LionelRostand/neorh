@@ -67,7 +67,9 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
             comment: data.comment || '',
             managerId,
             createdAt: new Date().toISOString(),
-            daysAllocated: data.daysAllocated || 0,
+            paidDaysAllocated: data.paidDaysAllocated || 0,
+            rttDaysAllocated: data.rttDaysAllocated || 0,
+            daysAllocated: (data.type === 'paid' ? data.paidDaysAllocated : data.rttDaysAllocated) || 0,
             isAllocation: true
           });
           
@@ -81,30 +83,17 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
             existingAllocation = { id: allocationSnapshot.docs[0].id, ...allocationSnapshot.docs[0].data() };
           }
           
-          // Create base allocation data with proper typing
-          let allocationData: Partial<LeaveAllocation> = {
+          // Always store both values in the allocation, regardless of leave type
+          const allocationData: Partial<LeaveAllocation> = {
             employeeId: data.employeeId,
             year: currentYear,
+            paidLeavesTotal: data.paidDaysAllocated || (existingAllocation?.paidLeavesTotal || 0),
+            rttTotal: data.rttDaysAllocated || (existingAllocation?.rttTotal || 0),
+            paidLeavesUsed: existingAllocation?.paidLeavesUsed || 0,
+            rttUsed: existingAllocation?.rttUsed || 0,
             updatedAt: new Date().toISOString(),
             updatedBy: user?.uid
           };
-          
-          if (data.type === 'paid') {
-            // Pour les congés payés, gérer la règle des 5 jours
-            const paidLeavesTotal = data.paidDaysAllocated || 0;
-            allocationData = {
-              ...allocationData,
-              paidLeavesTotal,
-              paidLeavesUsed: existingAllocation?.paidLeavesUsed || 0
-            };
-          } else if (data.type === 'rtt') {
-            // Pour les RTT, simplement attribuer le nombre de jours
-            allocationData = {
-              ...allocationData,
-              rttTotal: data.rttDaysAllocated || 0,
-              rttUsed: existingAllocation?.rttUsed || 0
-            };
-          }
           
           // Créer ou mettre à jour l'allocation
           if (existingAllocation) {
@@ -114,9 +103,9 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
             const newAllocation: LeaveAllocation = {
               employeeId: data.employeeId,
               year: currentYear,
-              paidLeavesTotal: data.type === 'paid' ? (data.paidDaysAllocated || 0) : 0,
+              paidLeavesTotal: data.paidDaysAllocated || 0,
               paidLeavesUsed: 0,
-              rttTotal: data.type === 'rtt' ? (data.rttDaysAllocated || 0) : 0,
+              rttTotal: data.rttDaysAllocated || 0,
               rttUsed: 0,
               updatedAt: new Date().toISOString(),
               updatedBy: user?.uid
@@ -142,7 +131,7 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
             });
             
             // Pour les congés payés, gérer la règle des 5 jours reportés
-            if (data.type === 'paid' && (data.paidDaysAllocated || 0) > 5) {
+            if (data.paidDaysAllocated && data.paidDaysAllocated > 5) {
               const nextPeriodNotif = {
                 userId: managerId,
                 title: `Report de congés de ${employee?.name || 'un employé'}`,
@@ -159,7 +148,7 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
             }
           }
           
-          showSuccessToast(`Attribution de congés ${data.type === 'paid' ? 'payés' : 'RTT'} effectuée avec succès`);
+          showSuccessToast(`Attribution de congés effectuée avec succès`);
         } catch (error) {
           console.error("Erreur lors de la mise à jour de l'allocation:", error);
           throw error;
