@@ -4,6 +4,7 @@ import { Employee } from '@/types/employee';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from '@/components/ui/use-toast';
+import { useDepartmentsData } from '@/hooks/useDepartmentsData';
 
 export const useEmployeeData = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -11,6 +12,9 @@ export const useEmployeeData = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departmentStats, setDepartmentStats] = useState<Record<string, number>>({});
   const [statusStats, setStatusStats] = useState<Record<string, number>>({});
+  
+  // Get departments data to map department IDs to names
+  const { departments } = useDepartmentsData();
 
   const fetchEmployees = useCallback(async () => {
     setIsLoading(true);
@@ -20,19 +24,38 @@ export const useEmployeeData = () => {
       const employeesCollection = collection(db, 'hr_employees');
       const employeesSnapshot = await getDocs(employeesCollection);
       
-      const employeesData = employeesSnapshot.docs.map(doc => {
+      // Create a set to track unique employee IDs to prevent duplicates
+      const processedEmployeeIds = new Set<string>();
+      const employeesData: Employee[] = [];
+      
+      employeesSnapshot.docs.forEach(doc => {
+        // Skip if we've already processed this ID
+        if (processedEmployeeIds.has(doc.id)) return;
+        
+        processedEmployeeIds.add(doc.id);
         const data = doc.data();
-        return {
+        
+        // Find department name based on department ID
+        let departmentName = data.department || '';
+        if (departments?.length && data.department) {
+          const dept = departments.find(d => d.id === data.department);
+          if (dept) {
+            departmentName = dept.name;
+          }
+        }
+        
+        employeesData.push({
           id: doc.id,
           name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
           position: data.position || '',
-          department: data.department || '',
+          department: departmentName,
+          departmentId: data.department || '', // Keep the original ID for reference
           email: data.email || '',
           phone: data.phone || '',
           photoUrl: data.photoUrl || '',
           startDate: data.hireDate || '',
           status: data.status || 'inactive'
-        } as Employee;
+        } as Employee);
       });
       
       setEmployees(employeesData);
@@ -55,19 +78,20 @@ export const useEmployeeData = () => {
       });
       setStatusStats(statStats);
       
-      setIsLoading(false);
+      console.log("Fetched employees:", employeesData.length);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
       setError(err instanceof Error ? err : new Error(errorMessage));
-      setIsLoading(false);
       
       toast({
         title: "Erreur de chargement",
         description: `Impossible de charger les données des employés: ${errorMessage}`,
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  }, [departments]);
 
   useEffect(() => {
     fetchEmployees();

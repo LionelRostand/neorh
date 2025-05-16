@@ -4,6 +4,7 @@ export interface Employee {
   name: string;
   position: string;
   department: string;
+  departmentId?: string; // Added to keep reference to the original department ID
   email: string;
   phone?: string;
   photoUrl?: string;

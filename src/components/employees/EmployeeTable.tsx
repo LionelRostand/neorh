@@ -30,7 +30,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { toast } from '@/components/ui/use-toast';
 import { Employee } from '@/types/employee';
 
 interface EmployeeTableProps {
@@ -78,6 +77,9 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
       .slice(0, 2);
   };
 
+  // Utiliser un Set pour suivre les employés déjà affichés et éviter les doublons
+  const renderedEmployees = new Set<string>();
+
   return (
     <div className="border rounded-md overflow-hidden">
       <Table>
@@ -113,81 +115,91 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {employees.map((employee) => (
-            <TableRow key={employee.id}>
-              <TableCell>
-                <Avatar>
-                  <AvatarImage src={employee.photoUrl} />
-                  <AvatarFallback>{getInitials(employee.name || '')}</AvatarFallback>
-                </Avatar>
-              </TableCell>
-              <TableCell className="font-medium">
-                {employee.name}
-                <div className="text-sm text-muted-foreground md:hidden">
-                  {employee.position}
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center">
-                  <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                  {employee.email}
-                </div>
-                <div className="md:hidden flex items-center mt-1">
-                  <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                  {employee.phone}
-                </div>
-              </TableCell>
-              <TableCell className="hidden md:table-cell">
-                <div className="flex items-center">
-                  <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
-                  {employee.department}
-                </div>
-              </TableCell>
-              <TableCell className="hidden md:table-cell">
-                {getStatusBadge(employee.status)}
-              </TableCell>
-              <TableCell className="hidden md:table-cell">
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                  {employee.startDate}
-                </div>
-              </TableCell>
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Ouvrir le menu</span>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => handleView(employee.id)}>
-                      <Eye className="mr-2 h-4 w-4" />
-                      Voir
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleEdit(employee.id)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      Modifier
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Download className="mr-2 h-4 w-4" />
-                      Exporter
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="text-red-600"
-                      onClick={() => handleDelete(employee.id)}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Supprimer
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
+          {employees.map((employee) => {
+            // Vérifier si cet employé a déjà été affiché
+            if (renderedEmployees.has(employee.id)) {
+              return null; // Ne pas afficher les doublons
+            }
+            
+            // Ajouter l'ID à la liste des employés déjà affichés
+            renderedEmployees.add(employee.id);
+            
+            return (
+              <TableRow key={employee.id}>
+                <TableCell>
+                  <Avatar>
+                    <AvatarImage src={employee.photoUrl} />
+                    <AvatarFallback>{getInitials(employee.name || '')}</AvatarFallback>
+                  </Avatar>
+                </TableCell>
+                <TableCell className="font-medium">
+                  {employee.name}
+                  <div className="text-sm text-muted-foreground md:hidden">
+                    {employee.position}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center">
+                    <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                    {employee.email}
+                  </div>
+                  <div className="md:hidden flex items-center mt-1">
+                    <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                    {employee.phone}
+                  </div>
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <div className="flex items-center">
+                    <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
+                    {employee.department}
+                  </div>
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {getStatusBadge(employee.status)}
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                    {employee.startDate}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Ouvrir le menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => handleView(employee.id)}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        Voir
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEdit(employee.id)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Modifier
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Download className="mr-2 h-4 w-4" />
+                        Exporter
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="text-red-600"
+                        onClick={() => handleDelete(employee.id)}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Supprimer
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
