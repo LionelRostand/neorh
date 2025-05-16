@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Card, 
@@ -37,7 +36,7 @@ const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Vérifier si l'utilisateur est un administrateur ou un manager
-  const canEdit = Boolean(user?.isAdmin || user?.role === 'manager');
+  const canEdit = Boolean((user && user.isAdmin) || (user && user.role === 'manager'));
 
   const handleSave = async () => {
     if (!allocation) return;
