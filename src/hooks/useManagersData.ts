@@ -7,8 +7,13 @@ import { toast } from '@/components/ui/use-toast';
 // Using the firebase type definition for Employee
 import { Employee } from '@/types/firebase';
 
+// Extended type for managers with name property
+interface ManagerData extends Employee {
+  name: string;
+}
+
 export const useManagersData = () => {
-  const [managers, setManagers] = useState<Employee[]>([]);
+  const [managers, setManagers] = useState<ManagerData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -27,19 +32,24 @@ export const useManagersData = () => {
         console.log('No managers found in Firestore');
         setManagers([]);
       } else {
-        const managersData = employeesSnapshot.docs.map(doc => ({
-          id: doc.id,
-          firstName: doc.data().firstName || '',
-          lastName: doc.data().lastName || '',
-          email: doc.data().email || '',
-          phone: doc.data().phone || '',
-          department: doc.data().department || '',
-          position: doc.data().position || '',
-          status: doc.data().status || 'active',
-          hireDate: doc.data().hireDate || '',
-          avatarUrl: doc.data().avatarUrl || '',
-          managerId: doc.data().managerId || ''
-        }));
+        const managersData = employeesSnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            firstName: data.firstName || '',
+            lastName: data.lastName || '',
+            email: data.email || '',
+            phone: data.phone || '',
+            department: data.department || '',
+            position: data.position || '',
+            status: data.status || 'active',
+            hireDate: data.hireDate || '',
+            avatarUrl: data.avatarUrl || '',
+            managerId: data.managerId || '',
+            // Add the name property by combining firstName and lastName
+            name: `${data.firstName || ''} ${data.lastName || ''}`.trim()
+          };
+        });
         
         console.log(`Retrieved ${managersData.length} managers`, managersData);
         setManagers(managersData);
