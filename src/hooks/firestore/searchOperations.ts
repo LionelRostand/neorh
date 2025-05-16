@@ -37,7 +37,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
       const constraints: QueryConstraint[] = [];
       
       // Add field equality constraint
-      constraints.push(where(field, "==" as WhereFilterOp, value));
+      constraints.push(where(field, "==", value));
       
       // Add sorting if specified
       if (options?.sortField) {
@@ -45,35 +45,31 @@ export const createSearchOperations = <T extends Record<string, any>>(
         constraints.push(orderBy(options.sortField, sortDirection));
       }
       
-      // Create the query with explicit constraint handling
-      let q;
+      // Create and execute query based on number of constraints
+      let querySnapshot;
       
-      // Handle each case separately without using spread operator
+      // Explicitly handle different numbers of constraints to avoid spread operator
       if (constraints.length === 0) {
-        q = query(collectionRef);
+        querySnapshot = await getDocs(query(collectionRef));
       } else if (constraints.length === 1) {
-        q = query(collectionRef, constraints[0]);
+        querySnapshot = await getDocs(query(collectionRef, constraints[0]));
       } else if (constraints.length === 2) {
-        q = query(collectionRef, constraints[0], constraints[1]);
+        querySnapshot = await getDocs(query(collectionRef, constraints[0], constraints[1]));
       } else {
-        // Pour plus de 2 contraintes, nous devons créer un index composite dans Firebase
-        console.warn('Attention: La recherche avec tri nécessite un index composite dans Firebase.');
+        // For more than 2 constraints, we need a composite index in Firebase
+        console.warn('Warning: Search with sorting requires a composite index in Firebase.');
+        
+        // Use only the first constraint (where) without sorting to avoid composite index error
+        querySnapshot = await getDocs(query(collectionRef, constraints[0]));
         
         if (options?.sortField) {
-          // Dans ce cas, nous effectuons uniquement la requête avec le filtre where, sans le tri
-          // pour éviter l'erreur d'index composite
-          q = query(collectionRef, constraints[0]);
           toast({
-            title: "Erreur de recherche",
+            title: "Recherche",
             description: "La recherche avec tri nécessite un index composite. Le tri a été désactivé.",
             variant: "destructive"
           });
-        } else {
-          q = query(collectionRef, constraints[0]);
         }
       }
-      
-      const querySnapshot = await getDocs(q);
       
       const documents = querySnapshot.docs.map(doc => {
         return { id: doc.id, ...doc.data() } as T & { id: string };
