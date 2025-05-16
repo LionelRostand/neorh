@@ -1,154 +1,88 @@
 
-import { collection, doc, getDoc, getDocs, query, where, orderBy, limit, startAfter, DocumentData, QueryConstraint, DocumentReference, Query, DocumentSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { QueryParams, QueryResult } from '@/types/firebase';
+import { 
+  doc, 
+  getDocs, 
+  getDoc,
+  DocumentData,
+  FirestoreError,
+  Query,
+  DocumentReference
+} from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { toast } from "@/components/ui/use-toast";
 
-// Helper function to get documents from a collection with optional query params
-export const getDocs_firestore = async <T>({
-  collectionName,
-  queryParams = [],
-  orderByField,
-  orderByDirection = 'asc',
-  limitCount,
-  startAfterDoc,
-}: {
-  collectionName: string;
-  queryParams?: QueryParams[];
-  orderByField?: string;
-  orderByDirection?: 'asc' | 'desc';
-  limitCount?: number;
-  startAfterDoc?: DocumentSnapshot;
-}): Promise<QueryResult<T>> => {
-  try {
-    const collectionRef = collection(db, collectionName);
-    
-    // Build query constraints
-    const constraints: QueryConstraint[] = [];
-    
-    // Add where clauses
-    queryParams.forEach(param => {
-      constraints.push(where(param.field, param.operator, param.value));
-    });
-    
-    // Add orderBy if specified
-    if (orderByField) {
-      constraints.push(orderBy(orderByField, orderByDirection));
-    }
-    
-    // Add limit if specified
-    if (limitCount) {
-      constraints.push(limit(limitCount));
-    }
-    
-    // Create the query
-    let q: Query = query(collectionRef, ...constraints);
-    
-    // Add startAfter if pagination is needed
-    if (startAfterDoc) {
-      q = query(q, startAfter(startAfterDoc));
-    }
-    
-    // Execute the query
-    const querySnapshot = await getDocs(q);
-    
-    // Process the results
-    const docs = querySnapshot.docs.map(doc => {
-      return {
-        id: doc.id,
-        ...doc.data()
-      } as T & { id: string };
-    });
-    
-    // Return the results and last document for pagination
-    return {
-      docs,
-      lastDoc: querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : null,
-      count: querySnapshot.size
-    };
-  } catch (error) {
-    console.error('Error getting documents:', error);
-    throw error;
-  }
-};
-
-// Helper function to get a single document by ID
-export const getDoc_firestore = async <T>(
-  collectionName: string,
-  docId: string
-): Promise<T & { id: string } | null> => {
-  try {
-    console.log(`getDoc_firestore: Fetching document from ${collectionName} with ID: ${docId}`);
-    const docRef = doc(db, collectionName, docId);
-    const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-      console.log(`getDoc_firestore: Document found with data:`, docSnap.data());
-      return {
-        id: docSnap.id,
-        ...docSnap.data()
-      } as T & { id: string };
-    } else {
-      console.log(`getDoc_firestore: No document found with ID: ${docId}`);
-      return null;
-    }
-  } catch (error) {
-    console.error('getDoc_firestore: Error getting document:', error);
-    throw error;
-  }
-};
-
-// Create read operations for a collection
+// Read operations for Firestore
 export const createReadOperations = <T extends Record<string, any>>(
   collectionName: string,
   setIsLoading: (loading: boolean) => void,
   setError: (error: Error | null) => void,
   getCollection: () => any
 ) => {
-  // Get all documents from the collection
-  const getAll = async (options: {
-    queryParams?: QueryParams[];
-    orderByField?: string;
-    orderByDirection?: 'asc' | 'desc';
-    limitCount?: number;
-    startAfterDoc?: DocumentSnapshot;
-  } = {}) => {
+  // Récupérer tous les documents
+  const getAll = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      console.log(`createReadOperations: Getting all documents from ${collectionName}`);
-      const result = await getDocs_firestore<T>({
-        collectionName,
-        ...options
+      console.log(`Getting all documents from ${collectionName}`);
+      const querySnapshot = await getDocs(getCollection());
+      const documents = querySnapshot.docs.map(doc => {
+        return { id: doc.id, ...doc.data() } as T & { id: string };
       });
-      console.log(`createReadOperations: Found ${result.count} documents in ${collectionName}`);
-      return result;
+      console.log(`Retrieved ${documents.length} documents from ${collectionName}`);
+      return documents;
     } catch (err) {
       const error = err instanceof Error ? err : new Error("Une erreur est survenue");
-      console.error(`createReadOperations: Error getting all documents from ${collectionName}:`, error);
+      console.error(`Error getting documents from ${collectionName}:`, error);
       setError(error);
-      return { docs: [], lastDoc: null, count: 0 };
+      toast({
+        title: "Erreur de récupération",
+        description: `Impossible de récupérer les documents: ${error.message}`,
+        variant: "destructive"
+      });
+      return [];
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Get a document by ID
-  const getById = async (id: string) => {
+  // Récupérer un document par son ID
+  const getById = async (id: string): Promise<(T & { id: string }) | null> => {
     setIsLoading(true);
     setError(null);
-    console.log(`createReadOperations: Getting document from ${collectionName} with ID: ${id}`);
+    
+    console.info(`getDoc_firestore: Fetching document from ${collectionName} with ID: ${id}`);
     
     try {
-      const result = await getDoc_firestore<T>(collectionName, id);
-      console.log(`createReadOperations: Result for document ${id}:`, result ? "Document found" : "Document not found");
-      return result;
+      if (!id) {
+        throw new Error("ID non fourni");
+      }
+      
+      const docRef = doc(db, collectionName, id);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        console.info(`createReadOperations: Result for document ${id}: Document found`);
+        const result = { id: docSnap.id, ...docSnap.data() } as T & { id: string };
+        return result;
+      } else {
+        console.warn(`createReadOperations: Document with ID ${id} not found in ${collectionName}`);
+        return null;
+      }
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Une erreur est survenue");
-      console.error(`createReadOperations: Error getting document with ID ${id}:`, error);
+      const errorMessage = err instanceof FirestoreError 
+        ? `Erreur Firestore (${err.code}): ${err.message}` 
+        : err instanceof Error 
+          ? err.message 
+          : "Erreur inconnue";
+      
+      console.error(`createReadOperations: Error getting document ${id} from ${collectionName}:`, err);
+      
+      const error = err instanceof Error ? err : new Error(errorMessage);
       setError(error);
+      
       return null;
     } finally {
-      console.log(`createReadOperations: Finished getting document with ID ${id}, setting isLoading to false`);
+      console.info(`createReadOperations: Finished getting document with ID ${id}, setting isLoading to false`);
       setIsLoading(false);
     }
   };

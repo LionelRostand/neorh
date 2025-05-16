@@ -43,51 +43,60 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
   // Load company data
   useEffect(() => {
     const fetchCompany = async () => {
-      if (companyId && open) {
-        setIsLoadingCompany(true);
-        try {
-          const company = await getById(companyId);
-          if (company) {
-            setInitialData({
-              name: company.name || "",
-              industry: company.industry || "",
-              email: company.email || "",
-              phone: company.phone || "",
-              website: company.website || "",
-              address: company.address || "",
-              city: company.city || "",
-              postalCode: company.postalCode || "",
-              country: company.country || "",
-              description: company.description || "",
-              logoUrl: company.logoUrl || (company.logo?.base64 || ""),
-              type: company.type || "client",
-              status: company.status || "active",
-              registrationDate: company.registrationDate || new Date().toISOString().split('T')[0]
-            });
-          }
-        } catch (error) {
-          setLoadError(error instanceof Error ? error : new Error('Erreur lors du chargement des données'));
-          toast({
-            title: "Erreur",
-            description: "Impossible de charger les données de l'entreprise",
-            variant: "destructive"
+      if (!companyId || !open) return;
+      
+      console.log("EditCompanyDialog: Fetching company with ID:", companyId);
+      setIsLoadingCompany(true);
+      setLoadError(null);
+      
+      try {
+        const company = await getById(companyId);
+        console.log("EditCompanyDialog: Company data received:", company);
+        
+        if (company) {
+          setInitialData({
+            name: company.name || "",
+            industry: company.industry || "",
+            email: company.email || "",
+            phone: company.phone || "",
+            website: company.website || "",
+            address: company.address || "",
+            city: company.city || "",
+            postalCode: company.postalCode || "",
+            country: company.country || "",
+            description: company.description || "",
+            logoUrl: company.logoUrl || (company.logo?.base64 || ""),
+            type: company.type || "client",
+            status: company.status || "active",
+            registrationDate: company.registrationDate || new Date().toISOString().split('T')[0]
           });
-        } finally {
-          setIsLoadingCompany(false);
+        } else {
+          throw new Error("Entreprise non trouvée");
         }
+      } catch (error) {
+        console.error("EditCompanyDialog: Error fetching company:", error);
+        setLoadError(error instanceof Error ? error : new Error('Erreur lors du chargement des données'));
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les données de l'entreprise",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoadingCompany(false);
       }
     };
 
-    fetchCompany();
+    if (open) {
+      fetchCompany();
+    }
   }, [companyId, open, getById]);
 
-  // Updated the function signature to match what EditCompanyForm is passing
   const handleSubmit = async (data: CompanyFormValues, logoData: { base64: string | null, type: string | null, name: string | null } | null) => {
     try {
-      // If there's a new logo file, we'll handle the upload in the form component
+      console.log("EditCompanyDialog: Submitting data:", data);
+      
       let updatedData: any = { ...data };
       
-      // If we have new logo data in base64 format, add it to the update data
       if (logoData && logoData.base64) {
         updatedData.logo = {
           base64: logoData.base64,
@@ -106,7 +115,7 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
       if (onSuccess) onSuccess();
       onOpenChange(false);
     } catch (error) {
-      console.error("Erreur lors de la mise à jour:", error);
+      console.error("EditCompanyDialog: Error updating company:", error);
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour l'entreprise",

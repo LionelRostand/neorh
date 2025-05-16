@@ -1,68 +1,105 @@
 
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { toast } from '@/components/ui/use-toast';
 
-export function useLogoUpload() {
+export const useLogoUpload = () => {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [logoBase64, setLogoBase64] = useState<string | null>(null);
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      
-      // Vérifier le type de fichier (uniquement images)
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Erreur",
-          description: "Veuillez sélectionner un fichier image",
-          variant: "destructive"
-        });
-        return;
-      }
+  const handleLogoChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      // Vérifier la taille du fichier (max 2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        toast({
-          title: "Erreur",
-          description: "La taille du fichier ne doit pas dépasser 2MB",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      setLogoFile(file);
-      setLogoPreview(URL.createObjectURL(file));
-      
-      // Convertir le fichier en base64 string (pas un ArrayBuffer)
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target && event.target.result) {
-          setLogoBase64(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+    // Vérifier le type de fichier
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Format non supporté",
+        description: "Seules les images sont acceptées",
+        variant: "destructive"
+      });
+      return;
     }
+
+    // Vérifier la taille du fichier (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "Fichier trop volumineux",
+        description: "Le fichier ne doit pas dépasser 2MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLogoFile(file);
+
+    // Créer une URL pour la prévisualisation
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setLogoPreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
-  // Cette fonction renvoie maintenant les données au format base64 string
-  const uploadLogo = async (): Promise<{ base64: string | null, type: string | null, name: string | null } | null> => {
-    if (!logoFile || !logoBase64) return null;
-    
-    setIsUploading(true);
+  const resetLogo = () => {
+    setLogoFile(null);
+    setLogoPreview(null);
+  };
+
+  const uploadLogo = async () => {
+    // Si pas de nouveau logo, on retourne null
+    if (!logoFile) {
+      console.log("useLogoUpload: No new logo file to upload");
+      
+      // Si on a un preview mais pas de file, c'est qu'on a gardé le logo existant
+      if (logoPreview && logoPreview.startsWith('data:image')) {
+        console.log("useLogoUpload: Keeping existing logo (base64)");
+        return {
+          base64: logoPreview,
+          type: logoPreview.split(';')[0].split(':')[1],
+          name: "existing-logo"
+        };
+      }
+      
+      return null;
+    }
+
     try {
-      return {
-        base64: logoBase64,
-        type: logoFile.type,
-        name: logoFile.name
-      };
+      console.log("useLogoUpload: Starting logo upload process");
+      setIsUploading(true);
+
+      // Convertir l'image en base64
+      return new Promise<{ base64: string, type: string, name: string } | null>((resolve) => {
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+          const base64 = e.target?.result as string;
+          console.log("useLogoUpload: Logo converted to base64 successfully");
+          resolve({
+            base64,
+            type: logoFile.type,
+            name: logoFile.name
+          });
+        };
+        
+        reader.onerror = (error) => {
+          console.error("useLogoUpload: Error reading file:", error);
+          toast({
+            title: "Erreur",
+            description: "Impossible de traiter l'image",
+            variant: "destructive"
+          });
+          resolve(null);
+        };
+        
+        reader.readAsDataURL(logoFile);
+      });
     } catch (error) {
-      console.error("Erreur lors de la préparation du logo:", error);
+      console.error("useLogoUpload: Upload error:", error);
       toast({
         title: "Erreur",
-        description: "Impossible de préparer le logo",
-        variant: "destructive",
+        description: "Impossible de traiter l'image",
+        variant: "destructive"
       });
       return null;
     } finally {
@@ -70,22 +107,13 @@ export function useLogoUpload() {
     }
   };
 
-  const resetLogo = () => {
-    setLogoFile(null);
-    setLogoBase64(null);
-    if (logoPreview) {
-      URL.revokeObjectURL(logoPreview);
-    }
-    setLogoPreview(null);
-  };
-
   return {
     logoFile,
     logoPreview,
+    setLogoPreview,
     isUploading,
     handleLogoChange,
     uploadLogo,
-    resetLogo,
-    setLogoPreview
+    resetLogo
   };
-}
+};

@@ -27,6 +27,8 @@ const EditCompanyForm = ({
   onSubmit, 
   onCancel 
 }: EditCompanyFormProps) => {
+  console.log("EditCompanyForm: Rendering with initialData:", initialData);
+  
   const { 
     logoFile, 
     logoPreview, 
@@ -40,17 +42,28 @@ const EditCompanyForm = ({
   // Set initial logo if exists
   React.useEffect(() => {
     if (initialData.logoUrl) {
+      console.log("EditCompanyForm: Setting initial logo preview:", initialData.logoUrl.substring(0, 30) + "...");
       setLogoPreview(initialData.logoUrl);
+    } else {
+      console.log("EditCompanyForm: No initial logo URL");
     }
   }, [initialData.logoUrl, setLogoPreview]);
   
   const form = useForm<CompanyFormValues>({
     resolver: zodResolver(companyFormSchema),
-    defaultValues: initialData
+    defaultValues: initialData,
+    mode: "onChange"
   });
 
+  React.useEffect(() => {
+    console.log("EditCompanyForm: Form reset with initialData");
+    form.reset(initialData);
+  }, [initialData, form]);
+
   const handleSubmit = async (data: CompanyFormValues) => {
+    console.log("EditCompanyForm: Form submitted with data:", data);
     const logoData = await uploadLogo();
+    console.log("EditCompanyForm: Logo data after upload:", logoData ? "Has logo data" : "No logo data");
     await onSubmit(data, logoData);
   };
 
