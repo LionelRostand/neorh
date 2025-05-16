@@ -7,7 +7,8 @@ import {
   orderBy,
   QueryOrderByConstraint,
   OrderByDirection,
-  QueryConstraint
+  QueryConstraint,
+  WhereFilterOp
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "@/components/ui/use-toast";
@@ -33,16 +34,19 @@ export const createSearchOperations = <T extends Record<string, any>>(
     
     try {
       const collectionRef = getCollection();
-      const queryConstraints: QueryConstraint[] = [where(field, "==", value)];
+      const constraints: QueryConstraint[] = [];
+      
+      // Add field equality constraint
+      constraints.push(where(field, "==" as WhereFilterOp, value));
       
       // Add sorting if specified
       if (options?.sortField) {
         const sortDirection: OrderByDirection = options.sortDirection || 'asc';
-        queryConstraints.push(orderBy(options.sortField, sortDirection));
+        constraints.push(orderBy(options.sortField, sortDirection));
       }
       
       // Construire la requête correctement avec les contraintes individuelles
-      const q = query(collectionRef, ...queryConstraints);
+      const q = query(collectionRef, ...constraints);
       const querySnapshot = await getDocs(q);
       
       const documents = querySnapshot.docs.map(doc => {

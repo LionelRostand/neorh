@@ -1,9 +1,8 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import LeaveStatusCards from "./LeaveStatusCards";
 import LeaveFilters from "./LeaveFilters";
-import LeaveTable from "./LeaveTable";
+import LeaveTable from "./table/LeaveTable";
 import { Leave } from "@/lib/constants";
 
 interface LeavesContentProps {
