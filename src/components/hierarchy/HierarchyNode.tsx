@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { ChevronDown, ChevronRight, User } from "lucide-react";
+import { ChevronDown, ChevronRight, User, Building2 } from "lucide-react";
 import { Employee } from "@/types/employee";
 
 interface HierarchyNodeProps {
@@ -49,10 +49,24 @@ const HierarchyNode = ({ employee, employees, level, isLast = false }: Hierarchy
           )}
         </div>
         
-        <div className="ml-3">
+        <div className="ml-3 flex-1">
           <p className="font-medium">{employee.name}</p>
-          <p className="text-xs text-gray-500">{employee.position}</p>
+          <div className="flex items-center text-xs text-gray-500">
+            <span>{employee.position}</span>
+            {employee.department && (
+              <div className="flex items-center ml-2 bg-gray-100 px-2 py-0.5 rounded-full">
+                <Building2 className="h-3 w-3 mr-1" />
+                <span>{employee.department}</span>
+              </div>
+            )}
+          </div>
         </div>
+        
+        {directReports.length > 0 && (
+          <div className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+            {directReports.length} {directReports.length === 1 ? 'membre' : 'membres'}
+          </div>
+        )}
       </div>
       
       {hasChildren && isExpanded && (

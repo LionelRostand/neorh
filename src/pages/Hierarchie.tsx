@@ -1,15 +1,17 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Network, FileText, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import EmployeesHierarchy from "@/components/hierarchy/EmployeesHierarchy";
 import HierarchyStatCard from "@/components/hierarchy/HierarchyStatCard";
+import { useDepartmentsData } from "@/hooks/useDepartmentsData";
 
 const Hierarchie = () => {
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedDepartment, setSelectedDepartment] = useState("all");
   const { toast } = useToast();
+  const { departments, isLoading: isLoadingDepartments } = useDepartmentsData();
 
   const handleExportImport = () => {
     toast({
@@ -74,18 +76,20 @@ const Hierarchie = () => {
         <div className="flex items-center space-x-2">
           <h2 className="text-lg font-medium">Structure Hiérarchique</h2>
           <Select 
-            value={statusFilter}
-            onValueChange={setStatusFilter}
+            value={selectedDepartment}
+            onValueChange={setSelectedDepartment}
+            disabled={isLoadingDepartments}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[250px]">
               <SelectValue placeholder="Tous les départements" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les départements</SelectItem>
-              <SelectItem value="marketing">Marketing</SelectItem>
-              <SelectItem value="it">IT</SelectItem>
-              <SelectItem value="hr">Ressources Humaines</SelectItem>
-              <SelectItem value="finance">Finance</SelectItem>
+              {departments && departments.map(dept => (
+                <SelectItem key={dept.id} value={dept.id}>
+                  {dept.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -104,7 +108,7 @@ const Hierarchie = () => {
 
       {/* Hierarchy Chart */}
       <div className="border rounded-lg bg-white p-6">
-        <EmployeesHierarchy />
+        <EmployeesHierarchy departmentFilter={selectedDepartment} />
       </div>
     </div>
   );
