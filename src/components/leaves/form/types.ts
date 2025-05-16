@@ -9,4 +9,5 @@ export interface LeaveFormValues {
   paidDaysAllocated?: number;
   rttDaysAllocated?: number;
   isAllocation?: boolean; // Pour différencier entre demande de congé et allocation
+  year?: number; // Année de l'allocation
 }

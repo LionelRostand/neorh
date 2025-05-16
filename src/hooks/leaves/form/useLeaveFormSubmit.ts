@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useCollection } from "@/hooks/useCollection";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
@@ -6,11 +7,12 @@ import { doc, getDoc, updateDoc, addDoc, collection, query, where, getDocs } fro
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/hooks/useAuth";
 import { LeaveAllocation } from "@/hooks/leaves";
+import { useFirestore } from "@/hooks/firestore";
 
 export const useLeaveFormSubmit = (onSuccess?: () => void) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { add: addLeave } = useCollection<'hr_leaves'>();
-  const { add: addAllocation } = useCollection<'hr_leave_allocations'>();
+  const { add: addAllocation } = useFirestore<LeaveAllocation>('hr_leave_allocations');
   const { user } = useAuth();
 
   const handleSubmit = async (data: LeaveFormValues) => {
@@ -78,39 +80,25 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
             existingAllocation = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() };
           }
           
-          // Toujours stocker les deux valeurs dans l'allocation
-          const allocationData: Partial<LeaveAllocation> = {
+          // Préparer les données d'allocation pour la collection hr_leave_allocations
+          const allocationData: Omit<LeaveAllocation, 'id'> = {
             employeeId: data.employeeId,
             year: currentYear,
             paidLeavesTotal: data.paidDaysAllocated || (existingAllocation?.paidLeavesTotal || 0),
-            rttTotal: data.rttDaysAllocated || (existingAllocation?.rttTotal || 0),
             paidLeavesUsed: existingAllocation?.paidLeavesUsed || 0,
+            rttTotal: data.rttDaysAllocated || (existingAllocation?.rttTotal || 0),
             rttUsed: existingAllocation?.rttUsed || 0,
             updatedAt: new Date().toISOString(),
+            // Ajouter updatedBy seulement s'il est défini
+            ...(user?.uid ? { updatedBy: user.uid } : {})
           };
-
-          // Ajouter updatedBy seulement s'il est défini
-          if (user?.uid) {
-            allocationData.updatedBy = user.uid;
-          }
           
           // Créer ou mettre à jour l'allocation
           if (existingAllocation && existingAllocation.id) {
             await updateDoc(doc(db, 'hr_leave_allocations', existingAllocation.id), allocationData);
           } else {
-            // Pour une nouvelle allocation, initialiser tous les champs
-            const newAllocation: Omit<LeaveAllocation, 'id'> = {
-              employeeId: data.employeeId,
-              year: currentYear,
-              paidLeavesTotal: data.paidDaysAllocated || 0,
-              paidLeavesUsed: 0,
-              rttTotal: data.rttDaysAllocated || 0,
-              rttUsed: 0,
-              updatedAt: new Date().toISOString(),
-              // Seulement ajouter updatedBy s'il est défini
-              ...(user?.uid ? { updatedBy: user.uid } : {})
-            };
-            await addAllocation(newAllocation);
+            // Pour une nouvelle allocation, créer l'entrée dans hr_leave_allocations
+            await addAllocation(allocationData);
           }
           
           // Programmer une notification pour le manager lorsque les congés expirent

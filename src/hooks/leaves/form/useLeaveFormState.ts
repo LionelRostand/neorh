@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { LeaveFormValues } from "@/components/leaves/form/types";
 
 /**
- * Hook to manage the form state for leave requests
+ * Hook to manage the form state for leave requests and allocations
  */
 export function useLeaveFormState(
   employeeId?: string,
@@ -13,6 +13,9 @@ export function useLeaveFormState(
   // State for showing allocation fields
   const [showPaidLeaveAllocation, setShowPaidLeaveAllocation] = useState<boolean>(true);
   const [showRttAllocation, setShowRttAllocation] = useState<boolean>(true);
+
+  // Get the current year
+  const currentYear = new Date().getFullYear();
 
   // Initialize form with default values
   const form = useForm<LeaveFormValues>({
@@ -25,7 +28,8 @@ export function useLeaveFormState(
       daysAllocated: 0,
       paidDaysAllocated: isAllocation ? 25 : undefined, // Default value for France
       rttDaysAllocated: isAllocation ? 12 : undefined, // Default value for RTT
-      isAllocation: isAllocation // Flag to identify if it's an allocation or a request
+      isAllocation: isAllocation, // Flag to identify if it's an allocation or a request
+      year: currentYear // Add the year field for allocations
     },
   });
 
