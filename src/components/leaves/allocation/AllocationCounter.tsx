@@ -4,19 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Minus, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-
-interface AllocationCounterProps {
-  id: string;
-  value: number;
-  onChange: (value: number) => void;
-  isEditing: boolean;
-  label: string;
-  used: number;
-  total: number;
-  colorClass: string;
-  iconBgClass: string;
-  iconColorClass: string;
-}
+import { AllocationCounterProps } from "./types";
 
 const AllocationCounter: React.FC<AllocationCounterProps> = ({
   id,

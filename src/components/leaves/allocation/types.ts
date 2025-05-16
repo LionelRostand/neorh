@@ -16,3 +16,23 @@ export interface ManagerActionsProps {
   setShowConfirmDialog: (show: boolean) => void;
   showConfirmDialog: boolean;
 }
+
+export interface AllocationCounterProps {
+  id: string;
+  value: number;
+  onChange: (value: number) => void;
+  isEditing: boolean;
+  label: string;
+  used: number;
+  total: number;
+  colorClass: string;
+  iconBgClass: string;
+  iconColorClass: string;
+}
+
+export interface ConfirmDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  isSaving: boolean;
+}

@@ -9,13 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-
-interface ConfirmDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
-  isSaving: boolean;
-}
+import { ConfirmDialogProps } from "./types";
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   open,

@@ -38,7 +38,7 @@ const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = memo(({
     }
   }, [allocation]);
 
-  // Vérifier si l'utilisateur est un administrateur ou un manager
+  // Check if user is an administrator or manager
   const canEdit = Boolean((user?.isAdmin) || (user?.role === 'manager'));
 
   const handleSave = async () => {
@@ -66,14 +66,7 @@ const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = memo(({
   };
 
   if (isLoading) {
-    return <Card className="border rounded-lg shadow-sm mb-6">
-      <CardContent className="p-6">
-        <div className="flex flex-col space-y-3">
-          <div className="h-4 w-1/2 bg-gray-200 rounded animate-pulse"></div>
-          <div className="h-8 w-full bg-gray-200 rounded animate-pulse"></div>
-        </div>
-      </CardContent>
-    </Card>;
+    return <LoadingSkeleton />;
   }
 
   return (
