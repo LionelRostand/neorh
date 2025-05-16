@@ -6,23 +6,22 @@ import { NameField } from './fields/NameField';
 import { DescriptionField } from './fields/DescriptionField';
 import { ManagerField } from './fields/ManagerField';
 import { CompanyField } from './fields/CompanyField';
-import { Card, CardContent } from '@/components/ui/card';
+import { ParentDepartmentField } from './fields/ParentDepartmentField';
 
 interface BasicInfoSectionProps {
   control: Control<DepartmentFormValues>;
 }
 
-export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({ control }) => {
+export function BasicInfoSection({ control }: BasicInfoSectionProps) {
   return (
-    <Card>
-      <CardContent className="space-y-4 pt-6">
-        <NameField control={control} />
-        <DescriptionField control={control} />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ManagerField control={control} />
-          <CompanyField control={control} />
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <NameField control={control} />
+      <DescriptionField control={control} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ManagerField control={control} />
+        <CompanyField control={control} />
+      </div>
+      <ParentDepartmentField control={control} />
+    </div>
   );
-};
+}

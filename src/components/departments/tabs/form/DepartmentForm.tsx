@@ -22,7 +22,7 @@ const DepartmentForm: React.FC<DepartmentFormProps> = ({
   onOpenChange,
   onSubmit,
 }) => {
-  const form = useForm<DepartmentFormValues>({
+  const form = useForm<DepartmentFormValues & { id?: string }>({
     resolver: zodResolver(departmentFormSchema),
     defaultValues: {
       name: department?.name || '',
@@ -30,6 +30,8 @@ const DepartmentForm: React.FC<DepartmentFormProps> = ({
       managerId: department?.managerId || '',
       companyId: department?.companyId || '',
       color: department?.color || '',
+      parentDepartmentId: department?.parentDepartmentId || '',
+      id: department?.id
     }
   });
 
@@ -42,12 +44,16 @@ const DepartmentForm: React.FC<DepartmentFormProps> = ({
         managerId: department.managerId || '',
         companyId: department.companyId || '',
         color: department.color || '',
+        parentDepartmentId: department.parentDepartmentId || '',
+        id: department.id
       });
     }
   }, [department, form]);
 
-  const handleFormSubmit = async (values: DepartmentFormValues) => {
-    await onSubmit(values);
+  const handleFormSubmit = async (values: DepartmentFormValues & { id?: string }) => {
+    // Remove the id field before submitting as it's not part of DepartmentFormValues
+    const { id, ...formValues } = values;
+    await onSubmit(formValues);
   };
 
   return (

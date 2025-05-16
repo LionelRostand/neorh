@@ -32,7 +32,8 @@ export const useDepartmentsData = () => {
           companyId: doc.data().companyId || '',
           budget: doc.data().budget || 0,
           objectives: doc.data().objectives || '',
-          color: doc.data().color || DEPARTMENT_COLORS[0]
+          color: doc.data().color || DEPARTMENT_COLORS[0],
+          parentDepartmentId: doc.data().parentDepartmentId || ''
         }));
         
         console.log(`Retrieved ${departmentsData.length} departments`, departmentsData);

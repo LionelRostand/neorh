@@ -1,3 +1,4 @@
+
 // Types pour la collection 'employees'
 export interface Employee {
   id?: string;
@@ -67,6 +68,7 @@ export interface Department {
   objectives?: string;
   color?: string;   // Added color property
   companyId?: string; // Added company reference
+  parentDepartmentId?: string; // Added parent department reference
 }
 
 // Types pour la collection 'hierarchy'

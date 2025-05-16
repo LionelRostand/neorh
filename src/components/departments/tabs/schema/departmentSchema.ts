@@ -20,6 +20,7 @@ export const departmentFormSchema = z.object({
   managerId: z.string().optional(),
   companyId: z.string().optional(),
   color: z.string().optional(),
+  parentDepartmentId: z.string().optional(), // Added parent department field
 });
 
 export type DepartmentFormValues = z.infer<typeof departmentFormSchema>;
