@@ -6,10 +6,12 @@ import { toast } from '@/components/ui/use-toast';
 
 // Using the firebase type definition for Employee
 import { Employee } from '@/types/firebase';
+import { Employee as EmployeeType } from '@/types/employee';
 
 // Extended type for managers with name property
 interface ManagerData extends Employee {
   name: string;
+  startDate: string; // Added to match the Employee type from types/employee.ts
 }
 
 export const useManagersData = () => {
@@ -47,7 +49,9 @@ export const useManagersData = () => {
             avatarUrl: data.avatarUrl || '',
             managerId: data.managerId || '',
             // Add the name property by combining firstName and lastName
-            name: `${data.firstName || ''} ${data.lastName || ''}`.trim()
+            name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
+            // Add startDate using hireDate to match the Employee type requirements
+            startDate: data.hireDate || ''
           };
         });
         
