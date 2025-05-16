@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -32,7 +33,8 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
   isAllocation = false
 }) => {
   const [selectedType, setSelectedType] = useState<string>("");
-  const [showDaysAllocation, setShowDaysAllocation] = useState<boolean>(false);
+  const [showPaidLeaveAllocation, setShowPaidLeaveAllocation] = useState<boolean>(false);
+  const [showRttAllocation, setShowRttAllocation] = useState<boolean>(false);
 
   const form = useForm<LeaveFormValues>({
     defaultValues: {
@@ -42,6 +44,8 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
       endDate: undefined,
       comment: "",
       daysAllocated: 0,
+      paidDaysAllocated: 0,
+      rttDaysAllocated: 0,
       isAllocation: isAllocation
     },
   });
@@ -55,29 +59,56 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
     // Set isAllocation flag
     form.setValue("isAllocation", isAllocation);
     
-    // Pour les allocations, toujours montrer le champ d'allocation
+    // Pour les allocations, toujours montrer les champs d'allocation selon le type sélectionné
     if (isAllocation) {
-      setShowDaysAllocation(true);
+      setShowPaidLeaveAllocation(selectedType === "paid");
+      setShowRttAllocation(selectedType === "rtt");
     }
-  }, [employeeId, form, isAllocation]);
+  }, [employeeId, form, isAllocation, selectedType]);
 
-  // Effet pour montrer/cacher le champ d'allocation selon le type
+  // Effet pour montrer/cacher les champs d'allocation selon le type
   useEffect(() => {
-    // Si c'est une allocation, toujours montrer le champ d'allocation
+    // Si c'est une allocation, gérer les champs d'allocation selon le type
     if (isAllocation) {
-      setShowDaysAllocation(true);
-      return;
-    }
-    
-    // Pour les demandes normales, vérifier si le type nécessite une allocation
-    const shouldShowAllocation = ["paid", "rtt"].includes(selectedType);
-    setShowDaysAllocation(shouldShowAllocation);
-    
-    // Réinitialiser le nombre de jours si on ne montre plus le champ
-    if (!shouldShowAllocation) {
-      form.setValue("daysAllocated", 0);
+      setShowPaidLeaveAllocation(selectedType === "paid");
+      setShowRttAllocation(selectedType === "rtt");
+      
+      // Réinitialiser les valeurs non utilisées
+      if (selectedType === "paid") {
+        form.setValue("rttDaysAllocated", 0);
+        form.setValue("daysAllocated", form.getValues("paidDaysAllocated"));
+      } else if (selectedType === "rtt") {
+        form.setValue("paidDaysAllocated", 0);
+        form.setValue("daysAllocated", form.getValues("rttDaysAllocated"));
+      } else {
+        form.setValue("paidDaysAllocated", 0);
+        form.setValue("rttDaysAllocated", 0);
+        form.setValue("daysAllocated", 0);
+      }
+    } else {
+      // Pour les demandes normales
+      const shouldShowAllocation = ["paid", "rtt"].includes(selectedType);
+      setShowPaidLeaveAllocation(false);
+      setShowRttAllocation(false);
+      
+      // Réinitialiser le nombre de jours si on ne montre plus le champ
+      if (!shouldShowAllocation) {
+        form.setValue("daysAllocated", 0);
+        form.setValue("paidDaysAllocated", 0);
+        form.setValue("rttDaysAllocated", 0);
+      }
     }
   }, [selectedType, form, isAllocation]);
+
+  // Synchroniser le champ daysAllocated avec paidDaysAllocated ou rttDaysAllocated
+  const syncDaysAllocated = (type: string, value: number) => {
+    form.setValue("daysAllocated", value);
+    if (type === "paid") {
+      form.setValue("paidDaysAllocated", value);
+    } else if (type === "rtt") {
+      form.setValue("rttDaysAllocated", value);
+    }
+  };
 
   const handleTypeChange = (type: string) => {
     setSelectedType(type);
@@ -93,17 +124,12 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
   });
 
   // Générer le libellé du champ d'allocation en fonction du type
-  const getAllocationLabel = () => {
-    if (!selectedType) return "Nombre de jours à attribuer";
-    
-    switch (selectedType) {
-      case "paid":
-        return "Nombre de jours de Congé payé à attribuer";
-      case "rtt":
-        return "Nombre de jours de RTT à attribuer";
-      default:
-        return "Nombre de jours à attribuer";
-    }
+  const getPaidLeaveAllocationLabel = () => {
+    return "Nombre de jours de Congé payé à attribuer";
+  };
+  
+  const getRttAllocationLabel = () => {
+    return "Nombre de jours de RTT à attribuer";
   };
   
   // Déterminer le titre du formulaire
@@ -112,14 +138,16 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
   };
   
   // Texte d'aide pour l'allocation
-  const getAllocationHelperText = () => {
-    if (isAllocation) {
-      if (selectedType === "paid") {
-        return "Au-delà de 5 jours, les jours restants seront conservés pour la prochaine période";
-      }
-      else if (selectedType === "rtt") {
-        return "Les jours de RTT doivent être utilisés dans la période courante";
-      }
+  const getPaidLeaveHelperText = () => {
+    if (isAllocation && selectedType === "paid") {
+      return "Au-delà de 5 jours, les jours restants seront conservés pour la prochaine période";
+    }
+    return undefined;
+  };
+  
+  const getRttHelperText = () => {
+    if (isAllocation && selectedType === "rtt") {
+      return "Les jours de RTT doivent être utilisés dans la période courante";
     }
     return undefined;
   };
@@ -140,12 +168,25 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
               allowedTypes={isAllocation ? defaultLeaveTypes : undefined}
             />
             
-            {/* Champ d'allocation conditionnel */}
-            {showDaysAllocation && (
+            {/* Champ d'allocation pour congés payés */}
+            {showPaidLeaveAllocation && (
               <DaysAllocationField 
                 form={form} 
-                label={getAllocationLabel()}
-                helperText={getAllocationHelperText()}
+                name="paidDaysAllocated"
+                label={getPaidLeaveAllocationLabel()}
+                helperText={getPaidLeaveHelperText()}
+                onChange={(value) => syncDaysAllocated("paid", value)}
+              />
+            )}
+            
+            {/* Champ d'allocation pour RTT */}
+            {showRttAllocation && (
+              <DaysAllocationField 
+                form={form} 
+                name="rttDaysAllocated"
+                label={getRttAllocationLabel()}
+                helperText={getRttHelperText()}
+                onChange={(value) => syncDaysAllocated("rtt", value)}
               />
             )}
             
@@ -167,7 +208,7 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
             <LeaveFormActions 
               onCancel={onClose} 
               isSubmitting={isSubmitting} 
-              submitLabel={isAllocation ? "Attribuer la demande" : "Soumettre la demande"}
+              submitLabel={isAllocation ? "Attribuer les congés" : "Soumettre la demande"}
             />
           </form>
         </Form>
