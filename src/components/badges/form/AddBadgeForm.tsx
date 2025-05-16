@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 
-import { BadgeFormSchema, BadgeFormValues } from "./FormSchema";
+import { badgeFormSchema, BadgeFormValues } from "./FormSchema";
 import { BasicInfoSection } from "./BasicInfoSection";
 import { EmployeeSection } from "./EmployeeSection";
 import { TypeSection } from "./TypeSection";
@@ -34,7 +34,7 @@ export function AddBadgeForm({
   isEditMode = false,
 }: AddBadgeFormProps) {
   const form = useForm<BadgeFormValues>({
-    resolver: zodResolver(BadgeFormSchema),
+    resolver: zodResolver(badgeFormSchema),
     defaultValues: defaultValues || {
       number: generatedBadgeNumber,
       employeeId: "",
@@ -58,13 +58,12 @@ export function AddBadgeForm({
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <BasicInfoSection form={form} />
         <EmployeeSection form={form} employees={employees} isLoading={isLoading} />
-        <TypeSection form={form} />
-        <StatusSection form={form} />
+        <TypeSection form={form} isLoading={isLoading} />
+        <StatusSection form={form} isLoading={isLoading} />
         <DateSection form={form} />
         <NotesSection form={form} />
         <FormActions
           onCancel={onCancel}
-          isLoading={isLoading}
           submitLabel={isEditMode ? "Mettre à jour" : "Créer le badge"}
         />
       </form>
