@@ -22,6 +22,26 @@ export function DaysAllocationField({
   name = "daysAllocated",
   onChange 
 }: DaysAllocationFieldProps) {
+  const handleIncrement = () => {
+    const currentValue = Number(form.getValues(name as FieldPath<LeaveFormValues>) || 0);
+    const newValue = currentValue + 1;
+    form.setValue(name as FieldPath<LeaveFormValues>, newValue);
+    if (onChange) onChange(newValue);
+  };
+
+  const handleDecrement = () => {
+    const currentValue = Number(form.getValues(name as FieldPath<LeaveFormValues>) || 0);
+    const newValue = Math.max(0, currentValue - 1);
+    form.setValue(name as FieldPath<LeaveFormValues>, newValue);
+    if (onChange) onChange(newValue);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = Math.max(0, parseInt(e.target.value) || 0);
+    form.setValue(name as FieldPath<LeaveFormValues>, newValue);
+    if (onChange) onChange(newValue);
+  };
+
   return (
     <FormField
       control={form.control}
@@ -34,11 +54,7 @@ export function DaysAllocationField({
               type="button"
               variant="outline"
               size="icon"
-              onClick={() => {
-                const newValue = Math.max(0, Number(field.value) - 1);
-                form.setValue(name as FieldPath<LeaveFormValues>, newValue);
-                if (onChange) onChange(newValue);
-              }}
+              onClick={handleDecrement}
               className="h-8 w-8"
             >
               <Minus className="h-3 w-3" />
@@ -48,11 +64,7 @@ export function DaysAllocationField({
                 type="number"
                 min={0}
                 {...field}
-                onChange={(e) => {
-                  const newValue = Math.max(0, parseInt(e.target.value) || 0);
-                  field.onChange(newValue);
-                  if (onChange) onChange(newValue);
-                }}
+                onChange={handleInputChange}
                 className="h-9 text-center w-16"
                 value={field.value || 0}
               />
@@ -61,11 +73,7 @@ export function DaysAllocationField({
               type="button"
               variant="outline"
               size="icon"
-              onClick={() => {
-                const newValue = Number(field.value) + 1;
-                form.setValue(name as FieldPath<LeaveFormValues>, newValue);
-                if (onChange) onChange(newValue);
-              }}
+              onClick={handleIncrement}
               className="h-8 w-8"
             >
               <Plus className="h-3 w-3" />
