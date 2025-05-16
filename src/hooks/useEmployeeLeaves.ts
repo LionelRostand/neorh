@@ -111,8 +111,8 @@ export const useEmployeeLeaves = (employeeId: string) => {
         };
         
         const newAllocationId = await addAllocation(defaultAllocation);
-        if (typeof newAllocationId === 'string') {
-          setAllocation({ ...defaultAllocation, id: newAllocationId });
+        if (newAllocationId !== null) {
+          setAllocation({ ...defaultAllocation, id: newAllocationId as string });
         }
       }
     } catch (err) {
@@ -129,7 +129,7 @@ export const useEmployeeLeaves = (employeeId: string) => {
 
   // Mettre à jour les allocations de congés
   const updateLeaveAllocation = async (updates: Partial<LeaveAllocation>) => {
-    if (!allocation?.id) return;
+    if (!allocation?.id) return false;
     
     try {
       await updateAllocation(allocation.id, {

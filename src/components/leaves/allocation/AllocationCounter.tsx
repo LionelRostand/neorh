@@ -1,10 +1,19 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Plus, Minus } from 'lucide-react';
-import { AllocationCounterProps } from './types';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Plus, Minus } from "lucide-react";
+
+interface AllocationCounterProps {
+  id: string;
+  value: number;
+  onChange: (value: number) => void;
+  isEditing: boolean;
+  label: string;
+  used: number;
+  total: number;
+  colorClass: string;
+}
 
 const AllocationCounter: React.FC<AllocationCounterProps> = ({
   id,
@@ -14,47 +23,69 @@ const AllocationCounter: React.FC<AllocationCounterProps> = ({
   label,
   used,
   total,
-  colorClass
+  colorClass,
 }) => {
+  const handleIncrement = () => {
+    onChange(value + 1);
+  };
+
+  const handleDecrement = () => {
+    if (value > used) {
+      onChange(value - 1);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = parseInt(e.target.value);
+    if (!isNaN(newValue) && newValue >= used) {
+      onChange(newValue);
+    }
+  };
+
   return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
+    <div className="p-4 rounded-lg border">
+      <div className="flex justify-between items-center mb-2">
+        <div className={`px-2 py-1 rounded text-sm ${colorClass}`}>{label}</div>
+        <div className="text-sm text-gray-500">{used} utilisés</div>
+      </div>
       {isEditing ? (
-        <div className="flex items-center space-x-2">
-          <Button 
-            variant="outline" 
+        <div className="flex items-center justify-between gap-2">
+          <Button
+            type="button"
+            variant="outline"
             size="icon"
-            onClick={() => onChange(Math.max(0, value - 1))}
+            onClick={handleDecrement}
+            disabled={value <= used}
+            className="h-8 w-8"
           >
-            <Minus className="h-4 w-4" />
+            <Minus className="h-3 w-3" />
           </Button>
-          <Input 
-            id={id} 
-            type="number" 
-            value={value} 
-            onChange={e => onChange(Math.max(0, parseInt(e.target.value) || 0))} 
-            className="max-w-20 text-center"
+          <Input
+            id={id}
+            type="number"
+            min={used}
+            value={value}
+            onChange={handleChange}
+            className="h-9 text-center"
           />
-          <Button 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             size="icon"
-            onClick={() => onChange(value + 1)}
+            onClick={handleIncrement}
+            className="h-8 w-8"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3 w-3" />
           </Button>
-          <span className="text-sm text-gray-500">jours</span>
         </div>
       ) : (
-        <div className="flex items-center space-x-2">
-          <div className={`${colorClass} rounded-md px-3 py-1 text-lg font-medium`}>
-            {total}
-          </div>
-          <span className="text-sm text-gray-500">jours</span>
+        <div className="flex items-end gap-2">
+          <span className="text-2xl font-bold">{total - used}</span>
+          <span className="text-sm text-gray-500 mb-1">
+            sur {total} jours
+          </span>
         </div>
       )}
-      <p className="text-xs text-gray-500">
-        Utilisés: {used} jours
-      </p>
     </div>
   );
 };

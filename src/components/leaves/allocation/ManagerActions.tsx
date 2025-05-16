@@ -20,6 +20,7 @@ const ManagerActions: React.FC<ManagerActionsProps> = ({
           variant="outline" 
           onClick={onCancel}
           disabled={isSaving}
+          className="border-gray-300"
         >
           <X className="mr-1 h-4 w-4" />
           Annuler
@@ -43,7 +44,7 @@ const ManagerActions: React.FC<ManagerActionsProps> = ({
     <Button 
       variant="outline" 
       onClick={() => setShowConfirmDialog(true)}
-      className="ml-auto"
+      className="ml-auto border-gray-300 hover:bg-gray-100"
     >
       <Calendar className="mr-1 h-4 w-4" />
       Modifier l'allocation

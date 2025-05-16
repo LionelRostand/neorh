@@ -102,7 +102,6 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
 
   const handleRequestSuccess = () => {
     setShowNewLeaveForm(false);
-    // Le hook useEmployeeLeaves sera rafraîchi automatiquement grâce à son useEffect
   };
 
   const formatDate = (dateString: string) => {
@@ -115,7 +114,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-center">
         <h3 className="text-xl font-semibold">Congés</h3>
         <Button 
           onClick={handleNewLeaveRequest}
@@ -134,12 +133,12 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
+        <Card className="border rounded-lg overflow-hidden">
+          <CardContent className="p-6">
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-gray-500">Total jours pris</p>
-                <h4 className="text-2xl font-bold">{totalDays}</h4>
+                <h4 className="text-2xl font-bold mt-1">{totalDays}</h4>
               </div>
               <div className="p-2 rounded-full bg-blue-100">
                 <Calendar className="h-5 w-5 text-blue-600" />
@@ -148,13 +147,13 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="p-4">
+        <Card className="border rounded-lg overflow-hidden">
+          <CardContent className="p-6">
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-gray-500">Congés payés disponibles</p>
-                <h4 className="text-2xl font-bold">{paidLeavesRemaining}</h4>
-                <p className="text-xs text-gray-500">sur {allocation?.paidLeavesTotal || 25} jours</p>
+                <h4 className="text-2xl font-bold mt-1">{paidLeavesRemaining}</h4>
+                <p className="text-xs text-gray-500 mt-1">sur {allocation?.paidLeavesTotal || 25} jours</p>
               </div>
               <div className="p-2 rounded-full bg-green-100">
                 <Calendar className="h-5 w-5 text-green-600" />
@@ -163,13 +162,13 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
           </CardContent>
         </Card>
         
-        <Card>
-          <CardContent className="p-4">
+        <Card className="border rounded-lg overflow-hidden">
+          <CardContent className="p-6">
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-gray-500">RTT disponibles</p>
-                <h4 className="text-2xl font-bold">{rttRemaining}</h4>
-                <p className="text-xs text-gray-500">sur {allocation?.rttTotal || 12} jours</p>
+                <h4 className="text-2xl font-bold mt-1">{rttRemaining}</h4>
+                <p className="text-xs text-gray-500 mt-1">sur {allocation?.rttTotal || 12} jours</p>
               </div>
               <div className="p-2 rounded-full bg-amber-100">
                 <Calendar className="h-5 w-5 text-amber-600" />
@@ -180,7 +179,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
       </div>
 
       {loading ? (
-        <div className="space-y-2">
+        <div className="bg-gray-50 p-6 rounded-lg space-y-2">
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
@@ -204,34 +203,38 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
           </p>
         </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Type</TableHead>
-              <TableHead>Du</TableHead>
-              <TableHead>Au</TableHead>
-              <TableHead>Jours</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead>Motif</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {leaves.map((leave) => (
-              <TableRow key={leave.id}>
-                <TableCell><LeaveTypeBadge type={leave.type} /></TableCell>
-                <TableCell>{formatDate(leave.startDate)}</TableCell>
-                <TableCell>{formatDate(leave.endDate)}</TableCell>
-                <TableCell>
-                  {getDateDifference(leave.startDate, leave.endDate)}
-                </TableCell>
-                <TableCell><LeaveStatusBadge status={leave.status} /></TableCell>
-                <TableCell className="max-w-[200px] truncate">
-                  {leave.comment || "-"}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <Card className="border rounded-lg overflow-hidden">
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Du</TableHead>
+                  <TableHead>Au</TableHead>
+                  <TableHead>Jours</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead>Motif</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {leaves.map((leave) => (
+                  <TableRow key={leave.id}>
+                    <TableCell><LeaveTypeBadge type={leave.type} /></TableCell>
+                    <TableCell>{formatDate(leave.startDate)}</TableCell>
+                    <TableCell>{formatDate(leave.endDate)}</TableCell>
+                    <TableCell>
+                      {getDateDifference(leave.startDate, leave.endDate)}
+                    </TableCell>
+                    <TableCell><LeaveStatusBadge status={leave.status} /></TableCell>
+                    <TableCell className="max-w-[200px] truncate">
+                      {leave.comment || "-"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       )}
 
       <NewLeaveRequestForm 

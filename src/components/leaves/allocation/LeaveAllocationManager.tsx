@@ -59,15 +59,15 @@ const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = ({
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="border rounded-lg overflow-hidden">
+      <CardHeader className="bg-gray-50 pb-3 border-b">
         <CardTitle className="text-xl">Allocation de congés</CardTitle>
         <CardDescription>
           Gérer les jours de congés disponibles pour l'année {allocation?.year || new Date().getFullYear()}
         </CardDescription>
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="p-6">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <AllocationCounter
@@ -95,7 +95,7 @@ const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = ({
         </div>
       </CardContent>
 
-      <CardFooter className="pt-0">
+      <CardFooter className="pt-0 px-6 pb-6">
         {canEdit && (
           <>
             <ConfirmDialog
