@@ -123,6 +123,12 @@ export function EmployeePersonalInfo({ form }: EmployeePersonalInfoProps) {
                       date > new Date() || date < new Date("1900-01-01")
                     }
                     initialFocus
+                    locale={fr}
+                    className="pointer-events-auto"
+                    monthsToShow={1}
+                    captionLayout="dropdown-buttons"
+                    fromYear={1940}
+                    toYear={new Date().getFullYear()}
                   />
                 </PopoverContent>
               </Popover>
