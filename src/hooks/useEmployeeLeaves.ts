@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Leave } from '@/lib/constants';
 import { useFirestore } from './useFirestore';
@@ -112,7 +111,9 @@ export const useEmployeeLeaves = (employeeId: string) => {
         };
         
         const newAllocationId = await addAllocation(defaultAllocation);
-        setAllocation({ ...defaultAllocation, id: newAllocationId });
+        if (typeof newAllocationId === 'string') {
+          setAllocation({ ...defaultAllocation, id: newAllocationId });
+        }
       }
     } catch (err) {
       console.error("Error fetching leave allocations:", err);

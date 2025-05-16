@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from 'react';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 
 // Extend the Firebase User type with our custom properties
-interface ExtendedUser extends firebase.User {
+export interface ExtendedUser extends User {
   isAdmin?: boolean;
   role?: string;
 }

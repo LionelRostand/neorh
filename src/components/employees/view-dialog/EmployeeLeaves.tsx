@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useEmployeeLeaves } from '@/hooks/useEmployeeLeaves';
 import { Employee } from '@/types/employee';
@@ -10,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import NewLeaveRequestForm from '@/components/leaves/NewLeaveRequestForm';
 import { format, differenceInDays } from 'date-fns';
-import LeaveAllocationManager from '@/components/leaves/LeaveAllocationManager';
+import LeaveAllocationManager from '@/components/leaves/allocation/LeaveAllocationManager';
 
 interface EmployeeLeavesProps {
   employee: Employee;
