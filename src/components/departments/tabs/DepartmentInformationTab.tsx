@@ -132,7 +132,7 @@ const DepartmentInformationTab: React.FC<DepartmentInformationTabProps> = ({
                   <option value="">Aucun responsable</option>
                   {managers && managers.map(manager => (
                     <option key={manager.id} value={manager.id}>
-                      {manager.firstName} {manager.lastName}
+                      {manager.name}
                     </option>
                   ))}
                 </select>
