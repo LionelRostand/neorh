@@ -57,10 +57,10 @@ export function useEmployeeSkills(employeeId: string) {
       
       const resultId = await add(skillData);
       if (resultId) {
-        // Fix the typing issue by ensuring resultId is treated as string
+        // Create a new skill object with the correct type
         const newSkill: Skill = {
           ...skillData,
-          id: resultId
+          id: resultId as string // Explicitly cast resultId to string
         };
         
         setSkills(prevSkills => [...prevSkills, newSkill]);
