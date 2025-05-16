@@ -12,13 +12,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import ContractStatusCards from "@/components/contracts/ContractStatusCards";
-import { useFirestore } from "@/hooks/firestore";
 import { Department } from "@/types/firebase";
+import { useDepartmentsData } from "@/hooks/useDepartmentsData";
 
 const Departements = () => {
   const { toast } = useToast();
-  const { getAll, isLoading, error } = useFirestore<Department>("hr_departments");
-  const [departments, setDepartments] = useState<Department[]>([]);
+  const { departments, isLoading, error, refetch } = useDepartmentsData();
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -26,24 +25,17 @@ const Departements = () => {
     expired: 0
   });
 
-  // Fetch departments using the useFirestore hook
+  // Update stats when departments change
   useEffect(() => {
-    const fetchDepartments = async () => {
-      const result = await getAll();
-      if (result && result.docs) {
-        setDepartments(result.docs);
-        // Update stats
-        setStats({
-          total: result.docs.length,
-          active: result.docs.length, // Assuming all departments are active for now
-          pending: 0,
-          expired: 0
-        });
-      }
-    };
-
-    fetchDepartments();
-  }, [getAll]);
+    if (departments) {
+      setStats({
+        total: departments.length,
+        active: departments.length, // Assuming all departments are active for now
+        pending: 0,
+        expired: 0
+      });
+    }
+  }, [departments]);
 
   const handleNewDepartment = () => {
     toast({
@@ -72,6 +64,8 @@ const Departements = () => {
       description: `Gestion des employés du département ${departmentId} à venir.`
     });
   };
+
+  console.log("Departments loaded:", departments);
 
   return (
     <div className="space-y-6">
@@ -170,6 +164,11 @@ const Departements = () => {
             </TableBody>
           </Table>
         </div>
+      </div>
+
+      {/* Debug info - helps troubleshoot during development */}
+      <div className="text-xs text-gray-500 mt-4">
+        Nombre de départements: {departments.length}
       </div>
     </div>
   );
