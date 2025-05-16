@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, FieldPath } from "react-hook-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useManagersData } from "@/hooks/useManagersData";
 
@@ -21,7 +21,7 @@ export function EmployeeField<T extends EmployeeSelectProps>({ form, disabled }:
   return (
     <FormField
       control={form.control}
-      name="employeeId" 
+      name={"employeeId" as FieldPath<T>}
       render={({ field }) => (
         <FormItem>
           <FormLabel>Employé</FormLabel>
