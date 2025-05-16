@@ -11,12 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Calendar as CalendarIcon, RefreshCw } from "lucide-react";
 import { usePresenceData } from '@/hooks/usePresenceData';
-import { Presence } from '@/types/presence';
 
 export const PresenceRegistry = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("");
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   
   const { presenceRecords, isLoading, error, refreshData } = usePresenceData();
   
@@ -40,7 +39,7 @@ export const PresenceRegistry = () => {
     }
     
     // Filtrer par département si sélectionné
-    if (selectedDepartment && record.department !== selectedDepartment) {
+    if (selectedDepartment !== "all" && record.department !== selectedDepartment) {
       return false;
     }
     
@@ -121,7 +120,7 @@ export const PresenceRegistry = () => {
                   <SelectValue placeholder="Tous les départements" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tous les départements</SelectItem>
+                  <SelectItem value="all">Tous les départements</SelectItem>
                   <SelectItem value="it">IT</SelectItem>
                   <SelectItem value="rh">Ressources Humaines</SelectItem>
                   <SelectItem value="finance">Finance</SelectItem>
