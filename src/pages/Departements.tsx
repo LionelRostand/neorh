@@ -15,11 +15,16 @@ import ContractStatusCards from "@/components/contracts/ContractStatusCards";
 import { Department } from "@/types/firebase";
 import { useDepartmentsData } from "@/hooks/useDepartmentsData";
 import NewDepartmentDialog from "@/components/departments/NewDepartmentDialog";
+import EditDepartmentDialog from "@/components/departments/EditDepartmentDialog";
+import DeleteDepartmentConfirmDialog from "@/components/departments/DeleteDepartmentConfirmDialog";
 
 const Departements = () => {
   const { toast } = useToast();
   const { departments, isLoading, error, refetch } = useDepartmentsData();
   const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -44,17 +49,31 @@ const Departements = () => {
   };
 
   const handleEdit = (departmentId: string) => {
-    toast({
-      title: "Modifier le département",
-      description: `Modification du département ${departmentId} à venir.`
-    });
+    const department = departments.find(dept => dept.id === departmentId);
+    if (department) {
+      setSelectedDepartment(department);
+      setIsEditDialogOpen(true);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Département non trouvé"
+      });
+    }
   };
 
   const handleDelete = (departmentId: string) => {
-    toast({
-      title: "Supprimer le département",
-      description: `Suppression du département ${departmentId} à venir.`
-    });
+    const department = departments.find(dept => dept.id === departmentId);
+    if (department) {
+      setSelectedDepartment(department);
+      setIsDeleteDialogOpen(true);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Département non trouvé"
+      });
+    }
   };
 
   const handleManage = (departmentId: string) => {
@@ -185,6 +204,22 @@ const Departements = () => {
       <NewDepartmentDialog
         open={isNewDialogOpen}
         onOpenChange={setIsNewDialogOpen}
+        onSuccess={refetch}
+      />
+
+      {/* Edit Department Dialog */}
+      <EditDepartmentDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        department={selectedDepartment}
+        onSuccess={refetch}
+      />
+
+      {/* Delete Department Confirm Dialog */}
+      <DeleteDepartmentConfirmDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        department={selectedDepartment}
         onSuccess={refetch}
       />
     </div>
