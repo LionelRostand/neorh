@@ -59,7 +59,7 @@ const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = ({
   }
 
   return (
-    <Card className="border rounded-lg overflow-hidden">
+    <Card className="border rounded-lg overflow-hidden shadow-sm">
       <CardHeader className="bg-gray-50 pb-3 border-b">
         <CardTitle className="text-xl">Allocation de congés</CardTitle>
         <CardDescription>
@@ -105,25 +105,14 @@ const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = ({
               isSaving={isSaving}
             />
             
-            {isEditing ? (
-              <ManagerActions
-                isEditing={isEditing}
-                isSaving={isSaving}
-                onSave={handleSave}
-                onCancel={resetForm}
-                setShowConfirmDialog={setShowConfirmDialog}
-                showConfirmDialog={showConfirmDialog}
-              />
-            ) : (
-              <ManagerActions
-                isEditing={isEditing}
-                isSaving={isSaving}
-                onSave={handleSave}
-                onCancel={resetForm}
-                setShowConfirmDialog={() => setIsEditing(true)}
-                showConfirmDialog={showConfirmDialog}
-              />
-            )}
+            <ManagerActions
+              isEditing={isEditing}
+              isSaving={isSaving}
+              onSave={handleSave}
+              onCancel={resetForm}
+              setShowConfirmDialog={isEditing ? setShowConfirmDialog : () => setIsEditing(true)}
+              showConfirmDialog={showConfirmDialog}
+            />
           </>
         )}
       </CardFooter>

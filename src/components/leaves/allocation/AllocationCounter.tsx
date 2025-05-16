@@ -44,7 +44,7 @@ const AllocationCounter: React.FC<AllocationCounterProps> = ({
 
   return (
     <div className="p-4 rounded-lg border">
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-center mb-3">
         <div className={`px-2 py-1 rounded text-sm ${colorClass}`}>{label}</div>
         <div className="text-sm text-gray-500">{used} utilisés</div>
       </div>

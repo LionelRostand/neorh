@@ -111,10 +111,10 @@ export const useEmployeeLeaves = (employeeId: string) => {
           updatedAt: new Date().toISOString()
         };
         
-        // Fix the type issue here
+        // Résolution du problème de type
         const newAllocationId = await addAllocation(defaultAllocation);
         if (newAllocationId !== null) {
-          // Convert newAllocationId to string explicitly since it might be coming as an object
+          // On s'assure que l'ID est bien une chaîne de caractères
           const allocationId = typeof newAllocationId === 'string' ? newAllocationId : String(newAllocationId);
           setAllocation({ ...defaultAllocation, id: allocationId });
         }

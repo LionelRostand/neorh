@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const LoadingSkeleton: React.FC = () => {
   return (
-    <Card className="border rounded-lg overflow-hidden">
+    <Card className="border rounded-lg overflow-hidden shadow-sm">
       <CardHeader className="bg-gray-50 border-b">
         <Skeleton className="h-6 w-1/3 mb-2" />
         <Skeleton className="h-4 w-1/2" />

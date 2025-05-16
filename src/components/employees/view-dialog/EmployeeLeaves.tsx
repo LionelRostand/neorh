@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useEmployeeLeaves } from '@/hooks/useEmployeeLeaves';
 import { Employee } from '@/types/employee';
@@ -82,11 +83,6 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
   } = useEmployeeLeaves(employee.id);
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
   
-  console.log("Employee ID:", employee.id);
-  console.log("Leave data in component:", leaves);
-  console.log("Loading state:", loading);
-  console.log("Error state:", error);
-  
   // Calculer les congés restants à partir des allocations
   const paidLeavesRemaining = allocation 
     ? allocation.paidLeavesTotal - allocation.paidLeavesUsed
@@ -124,16 +120,25 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
         </Button>
       </div>
 
-      {/* Gestionnaire d'allocations de congés */}
-      <LeaveAllocationManager 
-        allocation={allocation}
-        isLoading={allocationLoading}
-        onUpdate={updateLeaveAllocation}
-        employeeId={employee.id}
-      />
+      {/* Gestionnaire d'allocations de congés - affichage du chargement ou des erreurs */}
+      {allocationLoading ? (
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <div className="animate-pulse space-y-4">
+            <div className="h-5 w-1/3 bg-gray-200 rounded"></div>
+            <div className="h-10 w-full bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      ) : (
+        <LeaveAllocationManager 
+          allocation={allocation}
+          isLoading={allocationLoading}
+          onUpdate={updateLeaveAllocation}
+          employeeId={employee.id}
+        />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border rounded-lg overflow-hidden">
+        <Card className="border rounded-lg overflow-hidden shadow-sm">
           <CardContent className="p-6">
             <div className="flex justify-between items-center">
               <div>
@@ -147,7 +152,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
           </CardContent>
         </Card>
         
-        <Card className="border rounded-lg overflow-hidden">
+        <Card className="border rounded-lg overflow-hidden shadow-sm">
           <CardContent className="p-6">
             <div className="flex justify-between items-center">
               <div>
@@ -162,7 +167,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
           </CardContent>
         </Card>
         
-        <Card className="border rounded-lg overflow-hidden">
+        <Card className="border rounded-lg overflow-hidden shadow-sm">
           <CardContent className="p-6">
             <div className="flex justify-between items-center">
               <div>
@@ -179,31 +184,41 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
       </div>
 
       {loading ? (
-        <div className="bg-gray-50 p-6 rounded-lg space-y-2">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </div>
+        <Card className="border rounded-lg shadow-sm">
+          <CardContent className="p-6 space-y-3">
+            <Skeleton className="h-6 w-1/2 rounded" />
+            <Skeleton className="h-12 w-full rounded" />
+            <Skeleton className="h-12 w-full rounded" />
+            <Skeleton className="h-12 w-full rounded" />
+          </CardContent>
+        </Card>
       ) : error ? (
-        <div className="text-center py-10 border rounded-lg bg-red-50">
-          <div className="text-red-500 mb-2">Une erreur est survenue lors du chargement des congés</div>
-          <Button 
-            variant="outline"
-            onClick={() => window.location.reload()}
-          >
-            Réessayer
-          </Button>
-        </div>
+        <Card className="border rounded-lg shadow-sm">
+          <CardContent className="text-center py-10">
+            <div className="text-red-500 mb-2">Une erreur est survenue lors du chargement des congés</div>
+            <Button 
+              variant="outline"
+              onClick={() => window.location.reload()}
+            >
+              Réessayer
+            </Button>
+          </CardContent>
+        </Card>
       ) : leaves.length === 0 ? (
-        <div className="text-center py-10 border rounded-lg bg-gray-50">
-          <Calendar className="mx-auto h-10 w-10 text-gray-400" />
-          <h3 className="mt-2 text-sm font-semibold text-gray-900">Aucun congé</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Aucun congé n'a été enregistré pour cet employé.
-          </p>
-        </div>
+        <Card className="border rounded-lg shadow-sm">
+          <CardContent className="text-center py-10">
+            <Calendar className="mx-auto h-10 w-10 text-gray-400" />
+            <h3 className="mt-2 text-sm font-semibold text-gray-900">Aucun congé</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Aucun congé n'a été enregistré pour cet employé.
+            </p>
+          </CardContent>
+        </Card>
       ) : (
-        <Card className="border rounded-lg overflow-hidden">
+        <Card className="border rounded-lg overflow-hidden shadow-sm">
+          <CardHeader className="bg-gray-50 pb-2">
+            <CardTitle className="text-lg">Historique des congés</CardTitle>
+          </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
