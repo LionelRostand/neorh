@@ -1,13 +1,13 @@
 
 import React from "react";
+import { UseFormReturn } from "react-hook-form";
 import {
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
+  FormControl,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { UseFormReturn } from "react-hook-form";
 import { LeaveFormValues } from "./types";
 
 interface CommentFieldProps {
@@ -23,10 +23,10 @@ export function CommentField({ form }: CommentFieldProps) {
         <FormItem>
           <FormLabel>Motif (optionnel)</FormLabel>
           <FormControl>
-            <Textarea
-              placeholder="Entrez votre motif ici..."
-              {...field}
-              className="resize-none"
+            <Textarea 
+              placeholder="Entrez votre motif ici..." 
+              className="resize-none" 
+              {...field} 
             />
           </FormControl>
         </FormItem>
