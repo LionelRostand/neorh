@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Network, FileText, Download, Building2, Users } from "lucide-react";
@@ -18,7 +18,7 @@ const Hierarchie = () => {
   const { departments, isLoading: isLoadingDepartments } = useDepartmentsData();
   const { employees } = useEmployeeData();
   
-  // Calculate statistics for the hierarchy view
+  // Calculate statistics for the hierarchy view - memoize calculations to prevent unnecessary recalculations
   const totalDepartments = departments?.length || 0;
   
   const managerCount = employees?.filter(emp => 
@@ -32,19 +32,19 @@ const Hierarchie = () => {
     !employees?.some(emp => emp.id === dept.managerId)
   ).length || 0;
 
-  const handleExportImport = () => {
+  const handleExportImport = useCallback(() => {
     toast({
       title: "Fonctionnalité d'export/import",
       description: "Cette fonctionnalité sera disponible prochainement.",
     });
-  };
+  }, [toast]);
 
-  const handlePrintHierarchy = () => {
+  const handlePrintHierarchy = useCallback(() => {
     toast({
       title: "Impression de l'organigramme",
       description: "L'impression de l'organigramme sera disponible prochainement.",
     });
-  };
+  }, [toast]);
 
   return (
     <div className="space-y-6">

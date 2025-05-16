@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from '@/components/ui/use-toast';
@@ -10,8 +10,15 @@ export const useDepartmentsData = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const isMounted = useRef(true);
+  const hasRun = useRef(false);
 
   const fetchDepartments = useCallback(async () => {
+    // Skip if we've already run this once and we're not being explicitly called
+    if (hasRun.current) {
+      return;
+    }
+    
     setIsLoading(true);
     setError(null);
     
@@ -19,6 +26,9 @@ export const useDepartmentsData = () => {
       console.log('Fetching departments from Firestore');
       const departmentsCollection = collection(db, 'hr_departments');
       const departmentsSnapshot = await getDocs(departmentsCollection);
+      
+      // Check if component is still mounted
+      if (!isMounted.current) return;
       
       if (departmentsSnapshot.empty) {
         console.log('No departments found in Firestore');
@@ -36,32 +46,50 @@ export const useDepartmentsData = () => {
           parentDepartmentId: doc.data().parentDepartmentId || ''
         }));
         
-        console.log(`Retrieved ${departmentsData.length} departments`, departmentsData);
+        console.log(`Retrieved ${departmentsData.length} departments`);
         setDepartments(departmentsData);
       }
+      
+      // Mark that we've run the fetch
+      hasRun.current = true;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
       console.error('Error fetching departments:', errorMessage);
-      setError(err instanceof Error ? err : new Error(errorMessage));
       
-      toast({
-        title: "Erreur de chargement",
-        description: `Impossible de charger les données des départements: ${errorMessage}`,
-        variant: "destructive"
-      });
+      if (isMounted.current) {
+        setError(err instanceof Error ? err : new Error(errorMessage));
+        
+        toast({
+          title: "Erreur de chargement",
+          description: `Impossible de charger les données des départements: ${errorMessage}`,
+          variant: "destructive"
+        });
+      }
     } finally {
-      setIsLoading(false);
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
     }
   }, []);
+  
+  // Manual refetch that bypasses the hasRun check
+  const refetch = useCallback(async () => {
+    hasRun.current = false;
+    await fetchDepartments();
+  }, [fetchDepartments]);
 
   useEffect(() => {
     fetchDepartments();
+    
+    return () => {
+      isMounted.current = false;
+    };
   }, [fetchDepartments]);
 
   return {
     departments,
     isLoading,
     error,
-    refetch: fetchDepartments
+    refetch
   };
 };
