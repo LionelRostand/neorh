@@ -17,14 +17,20 @@ export const generateCompetencesTab = async (doc: jsPDF, startY: number, employe
   // Récupérer les compétences de l'employé depuis Firestore
   const skills: Skill[] = [];
   try {
+    // Utiliser une requête simple sans tri pour éviter les problèmes d'index
     const skillsQuery = query(
       collection(db, 'hr_skills'),
       where('employeeId', '==', employee.id)
     );
     const skillsSnapshot = await getDocs(skillsQuery);
+    
+    // Ajouter les compétences à notre tableau et trier côté client
     skillsSnapshot.forEach((doc) => {
       skills.push({ id: doc.id, ...(doc.data() as Omit<Skill, 'id'>) });
     });
+    
+    // Trier les compétences par nom
+    skills.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   } catch (error) {
     console.error('Erreur lors de la récupération des compétences:', error);
   }

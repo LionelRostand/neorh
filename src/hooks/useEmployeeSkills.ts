@@ -20,13 +20,15 @@ export function useEmployeeSkills(employeeId: string) {
       isFetchingRef.current = true;
       setLoading(true);
       
-      const result = await search('employeeId', employeeId, {
-        sortField: 'name',
-        sortDirection: 'asc'
-      });
+      // Simplifier la requête pour éviter le problème d'index composite
+      const result = await search('employeeId', employeeId);
       
       if (result.docs) {
-        setSkills(result.docs);
+        // Trier les résultats côté client pour éviter le besoin d'un index composite
+        const sortedSkills = [...result.docs].sort((a, b) => 
+          a.name.localeCompare(b.name)
+        );
+        setSkills(sortedSkills);
       } else {
         setSkills([]);
       }
