@@ -74,6 +74,9 @@ export const InformationsTab: React.FC<InformationTabProps> = ({ employee }) => 
       .slice(0, 2);
   };
 
+  // Check if the photo URL exists and is valid
+  const hasValidPhoto = employee.photoUrl && employee.photoUrl.trim() !== '';
+
   return (
     <>
       <div className="flex justify-between items-start mb-6">
@@ -93,12 +96,14 @@ export const InformationsTab: React.FC<InformationTabProps> = ({ employee }) => 
         <div>
           <div className="flex items-center gap-4 mb-8">
             <Avatar className="h-24 w-24 border-2 border-gray-200">
-              <AvatarImage 
-                src={employee.photoUrl} 
-                alt={employee.name} 
-                className="object-cover"
-              />
-              <AvatarFallback className="text-lg bg-gray-100">
+              {hasValidPhoto ? (
+                <AvatarImage 
+                  src={employee.photoUrl} 
+                  alt={employee.name} 
+                  className="object-cover h-full w-full"
+                />
+              ) : null}
+              <AvatarFallback className="text-xl bg-gray-100">
                 {getInitials(employee.name)}
               </AvatarFallback>
             </Avatar>
