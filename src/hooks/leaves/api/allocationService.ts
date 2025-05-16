@@ -56,10 +56,10 @@ export function useAllocationService() {
       year: currentYear,
       paidLeavesTotal: 25, // Default value for France
       paidLeavesUsed: 0,
-      rttTotal: 12, // Default value
+      rttTotal: 12, // Default value for France
       rttUsed: 0,
       updatedAt: new Date().toISOString(),
-      // Seulement ajouter updatedBy s'il est défini
+      // Only add updatedBy if defined
       ...(user?.uid ? { updatedBy: user.uid } : {})
     };
     
@@ -97,7 +97,7 @@ export function useAllocationService() {
       updatedAt: new Date().toISOString()
     };
     
-    // Ajouter updatedBy seulement s'il est défini
+    // Only add updatedBy if defined
     if (user?.uid) {
       updatesWithTimestamp.updatedBy = user.uid;
     }

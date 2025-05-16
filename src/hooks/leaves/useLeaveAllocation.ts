@@ -141,7 +141,7 @@ export const useLeaveAllocation = (employeeId: string) => {
             setRequestInProgress(false);
           }
         }
-      }, 500);
+      }, 300); // Reduced from 500ms to 300ms for faster response
     });
   }, [employeeId, isMounted, isRequestInProgress, allocation, hasLoaded, 
       clearDebounceTimer, debounceTimerRef, fetchEmployeeAllocation, createDefaultAllocation]);

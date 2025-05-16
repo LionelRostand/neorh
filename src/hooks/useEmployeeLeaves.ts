@@ -6,9 +6,9 @@ import { useLeaveAllocation, useEmployeeLeaveData, useLeaveTypeLabels } from './
 export type { LeaveAllocation } from './leaves/useLeaveAllocation';
 
 export const useEmployeeLeaves = (employeeId: string) => {
-  // Référence pour suivre si le hook est monté
+  // Reference to track if the hook is mounted
   const isMountedRef = useRef(true);
-  // Référence pour contrôler si les données ont déjà été chargées
+  // Reference to control if data has already been loaded
   const dataLoadedRef = useRef(false);
 
   // Use our smaller hooks with stabilized inputs
@@ -31,12 +31,12 @@ export const useEmployeeLeaves = (employeeId: string) => {
     getLeaveTypeLabel
   } = useLeaveTypeLabels();
 
-  // Utiliser useEffect pour contrôler le chargement initial, une seule fois
+  // Use useEffect to control initial loading, only once
   useEffect(() => {
-    // Marquer le composant comme monté
+    // Mark component as mounted
     isMountedRef.current = true;
     
-    // Ne charger qu'une fois au montage si les données n'ont pas été chargées
+    // Only load once on mount if data hasn't been loaded
     if (employeeId && !dataLoadedRef.current) {
       console.log(`[useEmployeeLeaves] Initial fetch for employee: ${employeeId}`);
       // Load leaves and allocations in parallel
@@ -46,17 +46,17 @@ export const useEmployeeLeaves = (employeeId: string) => {
       }).catch(err => {
         console.error(`[useEmployeeLeaves] Error fetching allocation:`, err);
       });
-      // Marquer les données comme chargées
+      // Mark data as loaded
       dataLoadedRef.current = true;
     }
     
-    // Nettoyage lors du démontage
+    // Cleanup on unmount
     return () => {
       isMountedRef.current = false;
     };
   }, [employeeId, fetchLeaves, fetchAllocation]);
 
-  // Utiliser useCallback pour la fonction fetchData afin d'éviter des rendus inutiles
+  // Use useCallback for refetch function to avoid unnecessary rerenders
   const refetch = useCallback(() => {
     if (employeeId && isMountedRef.current) {
       console.log(`[useEmployeeLeaves] Manual refetch for employee: ${employeeId}`);
@@ -67,7 +67,7 @@ export const useEmployeeLeaves = (employeeId: string) => {
       }).catch(err => {
         console.error(`[useEmployeeLeaves] Error refetching allocation:`, err);
       });
-      // Marquer les données comme chargées
+      // Mark data as loaded
       dataLoadedRef.current = true;
     }
   }, [employeeId, fetchLeaves, fetchAllocation]);

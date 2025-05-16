@@ -66,7 +66,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
             />
           ) : (
             <div className="text-center p-6 bg-gray-50 rounded-md">
-              <p className="text-gray-500">Aucune allocation de congés trouvée.</p>
+              <p className="text-gray-500">Aucune allocation de congés trouvée dans hr_leave_allocations.</p>
             </div>
           )}
         </CardContent>

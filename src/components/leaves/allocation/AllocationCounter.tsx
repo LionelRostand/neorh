@@ -28,10 +28,10 @@ const AllocationCounter: React.FC<AllocationCounterProps> = ({
   iconBgClass,
   iconColorClass
 }) => {
-  // Calculer le nombre de jours restants
+  // Calculate remaining days
   const remaining = total - used;
   
-  // Calculer le pourcentage d'utilisation
+  // Calculate usage percentage
   const percentUsed = total > 0 ? Math.round((used / total) * 100) : 0;
   
   return (
