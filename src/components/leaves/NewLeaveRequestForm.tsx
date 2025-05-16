@@ -59,7 +59,7 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Nouvelle demande de congé</DialogTitle>
+          <DialogTitle>Nouvelle attribution de congé</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>

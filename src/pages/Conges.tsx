@@ -4,6 +4,7 @@ import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
 import { useCollection } from "@/hooks/useCollection";
 import { Leave } from "@/lib/constants";
 import NewLeaveRequestForm from "@/components/leaves/NewLeaveRequestForm";
+import LeaveAllocationForm from "@/components/leaves/allocation/LeaveAllocationForm";
 import LeavesHeader from "@/components/leaves/LeavesHeader";
 import LeavesContent from "@/components/leaves/LeavesContent";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,8 +13,12 @@ const Conges = () => {
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
+  const [showAllocationForm, setShowAllocationForm] = useState(false);
   const { getAll, isLoading, error, update, search } = useCollection<'hr_leaves'>();
   const { user } = useAuth();
+
+  // Déterminer si l'utilisateur peut attribuer des congés (admin ou manager)
+  const canAllocateLeaves = Boolean((user && user.isAdmin) || (user && user.role === 'manager'));
 
   // Utiliser un useEffect avec une dépendance vide pour éviter les boucles
   useEffect(() => {
@@ -59,11 +64,22 @@ const Conges = () => {
     setShowNewLeaveForm(true);
   };
 
+  const handleNewAllocation = () => {
+    setShowAllocationForm(true);
+  };
+
   const handleRequestSuccess = () => {
     // Fermer le formulaire
     setShowNewLeaveForm(false);
     // Rafraîchir la liste des congés
     fetchLeaves();
+  };
+
+  const handleAllocationSuccess = () => {
+    // Fermer le formulaire d'allocation
+    setShowAllocationForm(false);
+    // Pas besoin de rafraîchir les congés car les allocations n'affectent pas cette liste
+    showSuccessToast("Attribution de congés réalisée avec succès");
   };
 
   const handleApprove = async (id: string) => {
@@ -113,7 +129,10 @@ const Conges = () => {
 
   return (
     <div className="space-y-6">
-      <LeavesHeader onNewRequest={handleNewRequest} />
+      <LeavesHeader 
+        onNewRequest={handleNewRequest} 
+        onNewAllocation={canAllocateLeaves ? handleNewAllocation : undefined}
+      />
       
       <LeavesContent 
         leaves={leaves}
@@ -129,6 +148,13 @@ const Conges = () => {
         open={showNewLeaveForm} 
         onClose={() => setShowNewLeaveForm(false)}
         onSuccess={handleRequestSuccess}
+      />
+
+      {/* Formulaire d'attribution de congés */}
+      <LeaveAllocationForm
+        open={showAllocationForm}
+        onClose={() => setShowAllocationForm(false)}
+        onSuccess={handleAllocationSuccess}
       />
     </div>
   );

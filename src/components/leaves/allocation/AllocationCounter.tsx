@@ -75,7 +75,10 @@ const AllocationCounter: React.FC<AllocationCounterProps> = memo(({
               <>
                 <h4 className="text-2xl font-bold mt-1">{value - used}</h4>
                 <p className="text-xs text-gray-500 mt-1">
-                  sur {total} jours
+                  disponibles sur {total} jours
+                </p>
+                <p className="text-xs text-gray-500">
+                  ({used} jours utilisés)
                 </p>
               </>
             )}
