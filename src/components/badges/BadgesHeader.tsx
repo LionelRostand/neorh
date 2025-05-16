@@ -1,13 +1,14 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Plus, FileText } from "lucide-react";
+import { Plus, FileText, Printer } from "lucide-react";
 
 interface BadgesHeaderProps {
   onAddBadge: () => void;
+  onPrintBadges?: () => void;
 }
 
-const BadgesHeader = ({ onAddBadge }: BadgesHeaderProps) => {
+const BadgesHeader = ({ onAddBadge, onPrintBadges }: BadgesHeaderProps) => {
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
       <div>
@@ -18,6 +19,10 @@ const BadgesHeader = ({ onAddBadge }: BadgesHeaderProps) => {
         <Button variant="outline" size="sm">
           <FileText className="mr-2 h-4 w-4" />
           Exporter
+        </Button>
+        <Button variant="outline" size="sm" onClick={onPrintBadges}>
+          <Printer className="mr-2 h-4 w-4" />
+          Imprimer
         </Button>
         <Button size="sm" onClick={onAddBadge}>
           <Plus className="mr-2 h-4 w-4" />
