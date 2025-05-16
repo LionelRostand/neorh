@@ -112,7 +112,8 @@ export const useAllocationFetch = (
             
             // Implement retry logic with exponential backoff
             if (retryCount < MAX_RETRIES) {
-              setRetryCount(prev => prev + 1);
+              // Fix: Use a direct number instead of a function
+              setRetryCount(retryCount + 1);
               const delay = Math.pow(2, retryCount) * 500; // 500ms, 1s, 2s, 4s
               
               setTimeout(() => {
@@ -153,7 +154,8 @@ export const useAllocationFetch = (
           
           // Implement retry logic
           if (retryCount < MAX_RETRIES) {
-            setRetryCount(prev => prev + 1);
+            // Fix: Use a direct number instead of a function
+            setRetryCount(retryCount + 1);
             const delay = Math.pow(2, retryCount) * 500;
             
             setTimeout(() => {
