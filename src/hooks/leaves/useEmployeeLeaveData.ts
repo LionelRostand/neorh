@@ -12,12 +12,20 @@ export const useEmployeeLeaveData = (employeeId: string) => {
   const [hasLoaded, setHasLoaded] = useState(false);
   const requestInProgressRef = useRef(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const mountedRef = useRef(true); // Pour suivre si le composant est monté
   
   const { search } = useFirestore<Leave>('hr_leaves');
 
   const fetchEmployeeLeaves = useCallback(async () => {
+    // Skip fetch if not mounted
+    if (!mountedRef.current) {
+      console.log('[useEmployeeLeaveData] Component unmounted, skipping fetch');
+      return;
+    }
+    
     // Skip fetch if no employeeId
     if (!employeeId) {
+      console.log('[useEmployeeLeaveData] No employeeId provided, skipping fetch');
       return;
     }
     
@@ -40,6 +48,9 @@ export const useEmployeeLeaveData = (employeeId: string) => {
     
     // Use debounce to prevent rapid successive calls
     debounceTimerRef.current = setTimeout(async () => {
+      // Skip if component unmounted during debounce
+      if (!mountedRef.current) return;
+      
       // Set loading state and mark request as in progress
       setLoading(true);
       requestInProgressRef.current = true;
@@ -49,6 +60,9 @@ export const useEmployeeLeaveData = (employeeId: string) => {
         
         // Perform search by employeeId
         const result = await search('employeeId', employeeId);
+        
+        // Skip if component unmounted during fetch
+        if (!mountedRef.current) return;
         
         if (result.docs) {
           console.log(`[useEmployeeLeaveData] Found ${result.docs.length} leave records for employee ${employeeId}`);
@@ -78,21 +92,31 @@ export const useEmployeeLeaveData = (employeeId: string) => {
           setTotalDays(total);
         }
       } catch (err) {
+        // Skip if component unmounted during error
+        if (!mountedRef.current) return;
+        
         console.error("[useEmployeeLeaveData] Error fetching employee leaves:", err);
         setError(err instanceof Error ? err : new Error('Erreur inconnue'));
         setLeaves([]);
       } finally {
+        // Skip if component unmounted during finally
+        if (!mountedRef.current) return;
+        
         setLoading(false);
         requestInProgressRef.current = false;
         debounceTimerRef.current = null;
       }
-    }, 300); // 300ms debounce
+    }, 500); // Increased debounce to 500ms for more stability
 
   }, [employeeId, search, hasLoaded, leaves.length]);
   
   useEffect(() => {
-    // Cleanup function to cancel debounce timer
+    // Reset mounted ref on mount
+    mountedRef.current = true;
+    
+    // Cleanup function to cancel debounce timer and mark as unmounted
     return () => {
+      mountedRef.current = false;
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }

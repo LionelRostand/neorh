@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useEmployeeLeaves } from '@/hooks/useEmployeeLeaves';
 import { Employee } from '@/types/employee';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,9 @@ interface EmployeeLeavesProps {
 
 const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
   console.log("[EmployeeLeaves] Rendering for employee:", employee?.id);
+  
+  // Référence pour éviter les chargements multiples
+  const initialLoadCompletedRef = useRef(false);
   
   // Utilisation du hook avec un ID stable
   const employeeId = employee?.id || '';
@@ -55,11 +58,11 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
     rttTotal
   });
   
-  // Force initial load when component mounts 
+  // Chargement initial des données une seule fois au montage
   useEffect(() => {
-    // Force refresh data when component mounts
-    console.log("[EmployeeLeaves] Component mounted, forcing data refresh");
-    if (employeeId) {
+    if (employeeId && !initialLoadCompletedRef.current) {
+      console.log("[EmployeeLeaves] Component initial mount, loading data");
+      initialLoadCompletedRef.current = true;
       refetch();
     }
   }, [employeeId, refetch]);

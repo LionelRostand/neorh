@@ -1,12 +1,15 @@
 
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { useLeaveAllocation, useEmployeeLeaveData, useLeaveTypeLabels } from './leaves';
 
 // Re-export LeaveAllocation interface for backward compatibility
 export type { LeaveAllocation } from './leaves/useLeaveAllocation';
 
 export const useEmployeeLeaves = (employeeId: string) => {
-  const [shouldFetch, setShouldFetch] = useState(true);
+  // Référence pour suivre si le hook est monté
+  const isMountedRef = useRef(true);
+  // Référence pour contrôler si les données ont déjà été chargées
+  const dataLoadedRef = useRef(false);
 
   // Use our smaller hooks with stabilized inputs
   const { 
@@ -30,23 +33,34 @@ export const useEmployeeLeaves = (employeeId: string) => {
 
   // Utiliser useEffect pour contrôler le chargement initial, une seule fois
   useEffect(() => {
-    if (employeeId && shouldFetch) {
+    // Marquer le composant comme monté
+    isMountedRef.current = true;
+    
+    // Ne charger qu'une fois au montage si les données n'ont pas été chargées
+    if (employeeId && !dataLoadedRef.current) {
       console.log(`[useEmployeeLeaves] Initial fetch for employee: ${employeeId}`);
       // Load leaves and allocations in parallel
       fetchLeaves();
       fetchAllocation();
-      // Désactiver les fetches automatiques après le premier chargement
-      setShouldFetch(false);
+      // Marquer les données comme chargées
+      dataLoadedRef.current = true;
     }
-  }, [employeeId, fetchLeaves, fetchAllocation, shouldFetch]);
+    
+    // Nettoyage lors du démontage
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [employeeId, fetchLeaves, fetchAllocation]);
 
   // Utiliser useCallback pour la fonction fetchData afin d'éviter des rendus inutiles
   const refetch = useCallback(() => {
-    if (employeeId) {
+    if (employeeId && isMountedRef.current) {
       console.log(`[useEmployeeLeaves] Manual refetch for employee: ${employeeId}`);
       // Load leaves and allocations in parallel
       fetchLeaves();
       fetchAllocation();
+      // Marquer les données comme chargées
+      dataLoadedRef.current = true;
     }
   }, [employeeId, fetchLeaves, fetchAllocation]);
 

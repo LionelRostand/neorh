@@ -21,6 +21,9 @@ export const useLeaveAllocation = (employeeId: string) => {
   const [hasLoaded, setHasLoaded] = useState(false);
   const requestInProgressRef = useRef(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const mountedRef = useRef(true); // Pour suivre si le composant est monté
+  const cacheRef = useRef<{[key: string]: {data: LeaveAllocation, timestamp: number}}>({});
+  const CACHE_TTL = 60000; // 1 minute cache
   
   const { 
     search: searchAllocation,
@@ -29,8 +32,15 @@ export const useLeaveAllocation = (employeeId: string) => {
   } = useFirestore<LeaveAllocation>('hr_leave_allocations');
 
   const fetchAllocation = useCallback(async () => {
+    // Skip fetch if not mounted
+    if (!mountedRef.current) {
+      console.log('[useLeaveAllocation] Component unmounted, skipping fetch');
+      return null;
+    }
+    
     // Skip fetch if no employeeId
     if (!employeeId) {
+      console.log('[useLeaveAllocation] No employeeId provided, skipping fetch');
       return null;
     }
     
@@ -40,9 +50,21 @@ export const useLeaveAllocation = (employeeId: string) => {
       return null;
     }
     
+    // Check cache first
+    const now = Date.now();
+    const cachedData = cacheRef.current[employeeId];
+    if (cachedData && now - cachedData.timestamp < CACHE_TTL) {
+      console.log(`[useLeaveAllocation] Using cached allocation data for employee ${employeeId}`);
+      if (!allocation) {
+        setAllocation(cachedData.data);
+        setHasLoaded(true);
+      }
+      return cachedData.data;
+    }
+    
     // Return cached data if already loaded
     if (hasLoaded && allocation !== null) {
-      console.log(`[useLeaveAllocation] Using cached allocation data for employee ${employeeId}`);
+      console.log(`[useLeaveAllocation] Using loaded allocation data for employee ${employeeId}`);
       return allocation;
     }
 
@@ -54,6 +76,12 @@ export const useLeaveAllocation = (employeeId: string) => {
     // Use debounce to prevent rapid successive calls
     return new Promise<LeaveAllocation | null>((resolve) => {
       debounceTimerRef.current = setTimeout(async () => {
+        // Skip if component unmounted during debounce
+        if (!mountedRef.current) {
+          resolve(null);
+          return;
+        }
+        
         // Set loading state and mark request as in progress
         setLoading(true);
         requestInProgressRef.current = true;
@@ -64,10 +92,23 @@ export const useLeaveAllocation = (employeeId: string) => {
           console.log(`[useLeaveAllocation] Fetching leave allocations for employee ${employeeId}, year ${currentYear}`);
           const result = await searchAllocation('employeeId', employeeId);
           
+          // Skip if component unmounted during fetch
+          if (!mountedRef.current) {
+            resolve(null);
+            return;
+          }
+          
           let currentAllocation = result.docs?.find(doc => doc.year === currentYear);
           
           if (currentAllocation) {
             console.log(`[useLeaveAllocation] Found existing allocation for employee ${employeeId}:`, currentAllocation);
+            
+            // Update cache
+            cacheRef.current[employeeId] = {
+              data: currentAllocation,
+              timestamp: now
+            };
+            
             setAllocation(currentAllocation);
             setHasLoaded(true);
             resolve(currentAllocation);
@@ -87,12 +128,25 @@ export const useLeaveAllocation = (employeeId: string) => {
             try {
               const newAllocationId = await addAllocation(defaultAllocation);
               
+              // Skip if component unmounted during add
+              if (!mountedRef.current) {
+                resolve(null);
+                return;
+              }
+              
               if (newAllocationId) {
                 const allocationId = typeof newAllocationId === 'string' 
                   ? newAllocationId 
                   : (newAllocationId as any).id || String(newAllocationId);
                   
                 const newAllocation = { ...defaultAllocation, id: allocationId };
+                
+                // Update cache
+                cacheRef.current[employeeId] = {
+                  data: newAllocation,
+                  timestamp: now
+                };
+                
                 setAllocation(newAllocation);
                 setHasLoaded(true);
                 resolve(newAllocation);
@@ -105,14 +159,23 @@ export const useLeaveAllocation = (employeeId: string) => {
             }
           }
         } catch (err) {
+          // Skip if component unmounted during error
+          if (!mountedRef.current) {
+            resolve(null);
+            return;
+          }
+          
           console.error("[useLeaveAllocation] Error fetching leave allocations:", err);
           resolve(null);
         } finally {
-          setLoading(false);
-          requestInProgressRef.current = false;
-          debounceTimerRef.current = null;
+          // Skip if component unmounted
+          if (mountedRef.current) {
+            setLoading(false);
+            requestInProgressRef.current = false;
+            debounceTimerRef.current = null;
+          }
         }
-      }, 300); // 300ms debounce
+      }, 500); // Increased debounce to 500ms for more stability
     });
   }, [employeeId, searchAllocation, addAllocation, hasLoaded, allocation]);
 
@@ -128,7 +191,16 @@ export const useLeaveAllocation = (employeeId: string) => {
       });
       
       // Update local state immediately for a faster UI response
-      setAllocation(prev => prev ? { ...prev, ...updates } : null);
+      const updatedAllocation = { ...allocation, ...updates };
+      setAllocation(updatedAllocation);
+      
+      // Update cache
+      if (employeeId) {
+        cacheRef.current[employeeId] = {
+          data: updatedAllocation,
+          timestamp: Date.now()
+        };
+      }
       
       toast({
         title: "Succès",
@@ -147,9 +219,12 @@ export const useLeaveAllocation = (employeeId: string) => {
     }
   }, [allocation, updateAllocation, employeeId]);
 
-  // Cleanup when component unmounts
+  // Reset mounted ref on mount and clear on unmount
   useEffect(() => {
+    mountedRef.current = true;
+    
     return () => {
+      mountedRef.current = false;
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
