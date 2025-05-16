@@ -46,12 +46,22 @@ export const createSearchOperations = <T extends Record<string, any>>(
       }
       
       // Create the query with constraints
-      // Fix: Apply constraints without spreading to avoid TypeScript error
-      const q = constraints.length === 1 
-        ? query(collectionRef, constraints[0])
-        : constraints.length === 2 
-          ? query(collectionRef, constraints[0], constraints[1])
-          : query(collectionRef);
+      let q;
+      
+      // Handle different number of constraints without using spread
+      if (constraints.length === 0) {
+        q = query(collectionRef);
+      } else if (constraints.length === 1) {
+        q = query(collectionRef, constraints[0]);
+      } else {
+        // For multiple constraints, we need to handle them individually
+        q = query(collectionRef, constraints[0], constraints[1]);
+        
+        // If there are more constraints, log a warning as this simple approach only handles up to 2
+        if (constraints.length > 2) {
+          console.warn('Search only supports up to 2 constraints. Additional constraints were ignored.');
+        }
+      }
           
       const querySnapshot = await getDocs(q);
       
