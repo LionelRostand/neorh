@@ -1,46 +1,54 @@
 
 import React, { ReactNode } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 
 interface HierarchyStatCardProps {
   title: string;
   value: number;
   icon: ReactNode;
   textColor: string;
-  bgColor: string;
-  borderColor: string;
+  bgColor?: string;
+  borderColor?: string;
   iconColor?: string;
+  subtitle?: string;
 }
 
 const HierarchyStatCard = ({
   title,
   value,
   icon,
-  textColor = "text-blue-700",
-  bgColor = "bg-blue-100",
-  borderColor = "border-blue-500",
-  iconColor
+  textColor,
+  bgColor,
+  borderColor,
+  iconColor,
+  subtitle
 }: HierarchyStatCardProps) => {
+  // Generate the subtitle if not provided
+  const generatedSubtitle = subtitle || (() => {
+    if (value === 0) {
+      return `Aucun ${title.toLowerCase()}`;
+    } else if (value === 1) {
+      // Handle singular form
+      return `${value} ${title.toLowerCase().replace(/s$/, '')}`;
+    } else {
+      return `${value} ${title.toLowerCase()}`;
+    }
+  })();
+
   return (
-    <Card className={`border ${borderColor} rounded-lg`}>
-      <CardContent className="p-6">
-        <div className="flex flex-col h-full">
-          <div className="flex justify-between items-start">
-            <p className={`text-sm font-medium ${textColor}`}>{title}</p>
-            <div className={`p-1.5 rounded ${bgColor}`}>
-              <div className={iconColor}>{icon}</div>
-            </div>
-          </div>
-          <div className="mt-6">
-            <h3 className="text-4xl font-bold">{value}</h3>
-            <p className="text-xs text-gray-500 mt-1">
-              {value === 0 ? `Aucun ${title.toLowerCase()}` : 
-               value === 1 ? `${value} ${title.toLowerCase()}` : 
-               `${value} ${title.toLowerCase()}`}
-            </p>
+    <Card className="bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex flex-col p-6">
+        <div className="flex justify-between items-start mb-6">
+          <h3 className={`text-sm font-medium ${textColor}`}>{title}</h3>
+          <div className={`p-2 rounded-full ${iconColor ? iconColor : 'text-primary'}`}>
+            {icon}
           </div>
         </div>
-      </CardContent>
+        <div>
+          <p className="text-5xl font-bold">{value}</p>
+          <p className="text-xs text-gray-500 mt-2">{generatedSubtitle}</p>
+        </div>
+      </div>
     </Card>
   );
 };

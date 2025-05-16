@@ -55,38 +55,30 @@ const Hierarchie = () => {
         <HierarchyStatCard 
           title="Total des départements" 
           value={totalDepartments} 
-          icon={<ChartBar className="h-5 w-5" />} 
-          bgColor="bg-blue-50"
+          icon={<ChartBar className="h-6 w-6 text-blue-500" />} 
           textColor="text-blue-700"
-          borderColor="border-blue-100"
-          iconColor="text-blue-500"
+          subtitle={totalDepartments === 1 ? "1 total des départements" : `${totalDepartments} total des départements`}
         />
         <HierarchyStatCard 
           title="Responsables" 
           value={managerCount} 
-          icon={<ChartBar className="h-5 w-5" />} 
-          bgColor="bg-indigo-50"
+          icon={<ChartBar className="h-6 w-6 text-indigo-500" />}
           textColor="text-indigo-700"
-          borderColor="border-indigo-100"
-          iconColor="text-indigo-500"
+          subtitle={managerCount === 0 ? "Aucun responsables" : managerCount === 1 ? "1 responsable" : `${managerCount} responsables`}
         />
         <HierarchyStatCard 
           title="Employés" 
           value={employeeCount} 
-          icon={<ChartBar className="h-5 w-5" />} 
-          bgColor="bg-green-50"
-          textColor="text-green-700"
-          borderColor="border-green-100"
-          iconColor="text-green-500"
+          icon={<ChartBar className="h-6 w-6 text-green-500" />}
+          textColor="text-green-700" 
+          subtitle={employeeCount === 1 ? "1 employé" : `${employeeCount} employés`}
         />
         <HierarchyStatCard 
           title="Postes vacants" 
-          value={vacantPositions} 
-          icon={<ChartBar className="h-5 w-5" />} 
-          bgColor="bg-yellow-50"
+          value={vacantPositions}
+          icon={<ChartBar className="h-6 w-6 text-yellow-500" />}
           textColor="text-yellow-700"
-          borderColor="border-yellow-100"
-          iconColor="text-yellow-500"
+          subtitle={vacantPositions === 0 ? "Aucun postes vacants" : vacantPositions === 1 ? "1 poste vacant" : `${vacantPositions} postes vacants`}
         />
       </div>
 
