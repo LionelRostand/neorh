@@ -18,10 +18,10 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee, startY: 
   
   const personalInfoData = [
     ['Nom', employee.name || 'Non spécifié'],
-    ['Email personnel', employee.email || 'Non spécifié'],
-    ['Email professionnel', 'Non spécifié'],
+    ['Email personnel', employee.personalEmail || 'Non spécifié'],
+    ['Email professionnel', employee.professionalEmail || 'Non spécifié'],
     ['Téléphone', employee.phone || 'Non spécifié'],
-    ['Date de naissance', 'Non spécifié']
+    ['Date de naissance', employee.birthDate || 'Non spécifié']
   ];
   
   autoTable(doc, {

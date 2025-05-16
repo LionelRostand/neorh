@@ -54,7 +54,10 @@ export const useEmployeeData = () => {
           phone: data.phone || '',
           photoUrl: data.photoUrl || '',
           startDate: data.hireDate || '',
-          status: data.status || 'inactive'
+          status: data.status || 'inactive',
+          professionalEmail: data.professionalEmail || '',
+          birthDate: data.birthDate || '',
+          personalEmail: data.email || ''
         } as Employee);
       });
       

@@ -12,6 +12,7 @@ export interface Employee {
   startDate: string;
   status: 'active' | 'inactive' | 'onLeave';
   // Ajout de nouveaux champs optionnels pour plus d'informations
+  professionalEmail?: string;
   personalEmail?: string;
   birthDate?: string;
   address?: string;

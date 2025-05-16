@@ -8,6 +8,7 @@ import EmployeeDocuments from './EmployeeDocuments';
 import EmployeeLeaves from './EmployeeLeaves';
 import EmployeeEvaluations from './EmployeeEvaluations';
 import EmployeeSkills from './EmployeeSkills';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface PersonalInfoFieldProps {
   label: string;
@@ -28,6 +29,16 @@ interface InformationTabProps {
 export const InformationsTab: React.FC<InformationTabProps> = ({ employee }) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
+  // Helper function to get initials from name
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <>
       <div className="flex justify-between items-start mb-6">
@@ -45,12 +56,23 @@ export const InformationsTab: React.FC<InformationTabProps> = ({ employee }) => 
       
       <div className="grid md:grid-cols-2 gap-8">
         <div>
+          <div className="flex items-center gap-4 mb-6">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={employee.photoUrl} alt={employee.name} />
+              <AvatarFallback className="text-lg">{getInitials(employee.name)}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h4 className="text-lg font-medium">{employee.name}</h4>
+              <p className="text-sm text-gray-500">{employee.position}</p>
+            </div>
+          </div>
+          
           <div className="space-y-4">
             <PersonalInfoField label="Nom" value={employee.name} />
-            <PersonalInfoField label="Email personnel" value={employee.email} />
-            <PersonalInfoField label="Email professionnel" value={undefined} />
+            <PersonalInfoField label="Email personnel" value={employee.personalEmail} />
+            <PersonalInfoField label="Email professionnel" value={employee.professionalEmail} />
             <PersonalInfoField label="Téléphone" value={employee.phone} />
-            <PersonalInfoField label="Date de naissance" value={undefined} />
+            <PersonalInfoField label="Date de naissance" value={employee.birthDate} />
           </div>
         </div>
         
@@ -62,7 +84,7 @@ export const InformationsTab: React.FC<InformationTabProps> = ({ employee }) => 
             <PersonalInfoField label="Date d'embauche" value={employee.startDate || '15 mai 2025'} />
             <PersonalInfoField 
               label="Statut" 
-              value={employee.status === 'active' ? 'Active' : 
+              value={employee.status === 'active' ? 'Actif' : 
                 employee.status === 'onLeave' ? 'En congé' : 
                 employee.status === 'inactive' ? 'Inactif' : 'Inconnu'} 
             />

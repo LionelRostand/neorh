@@ -26,7 +26,7 @@ export const getInitials = (name: string) => {
 export const getStatusBadge = (status: Employee['status']) => {
   switch (status) {
     case 'active':
-      return <Badge className="bg-green-500 hover:bg-green-600">Active</Badge>;
+      return <Badge className="bg-green-500 hover:bg-green-600">Actif</Badge>;
     case 'onLeave':
       return <Badge className="bg-amber-500 hover:bg-amber-600">En congé</Badge>;
     case 'inactive':
@@ -46,7 +46,7 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onClose, onEx
         </Avatar>
         <div className="flex flex-col">
           {getStatusBadge(employee.status)}
-          <span className="text-lg font-medium mt-1">Employé</span>
+          <span className="text-lg font-medium mt-1">{employee.name}</span>
         </div>
       </div>
       <div className="flex space-x-2">
