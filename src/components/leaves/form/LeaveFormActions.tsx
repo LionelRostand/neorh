@@ -19,7 +19,7 @@ export function LeaveFormActions({ onCancel, isSubmitting }: LeaveFormActionsPro
         className="bg-emerald-500 hover:bg-emerald-600"
         disabled={isSubmitting}
       >
-        Créer la demande
+        Attribuer la demande
       </Button>
     </DialogFooter>
   );
