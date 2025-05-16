@@ -40,7 +40,7 @@ const LeaveSummaryCards: React.FC<LeaveSummaryCardsProps> = ({
   rttRemaining,
   rttTotal
 }) => {
-  console.log("LeaveSummaryCards rendering with data:", { 
+  console.log("[LeaveSummaryCards] Rendering with data:", { 
     totalDays, paidLeavesRemaining, paidLeavesTotal, rttRemaining, rttTotal 
   });
   
@@ -56,19 +56,19 @@ const LeaveSummaryCards: React.FC<LeaveSummaryCardsProps> = ({
       <LeaveSummaryCard
         title="Total jours posés"
         value={safeTotalDays}
-        total={safeTotalDays}
+        total={safeTotalDays || 1} // Pour éviter la division par zéro
         color="text-gray-700"
       />
       <LeaveSummaryCard
         title="Congés payés restants"
         value={safePaidRemaining}
-        total={safePaidTotal}
+        total={safePaidTotal || 1} // Pour éviter la division par zéro
         color="text-blue-600"
       />
       <LeaveSummaryCard
         title="RTT restants"
         value={safeRttRemaining}
-        total={safeRttTotal}
+        total={safeRttTotal || 1} // Pour éviter la division par zéro
         color="text-emerald-600"
       />
     </div>

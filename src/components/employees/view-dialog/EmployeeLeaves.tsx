@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEmployeeLeaves } from '@/hooks/useEmployeeLeaves';
 import { Employee } from '@/types/employee';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ interface EmployeeLeavesProps {
 }
 
 const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
-  console.log("EmployeeLeaves rendering for employee:", employee?.id);
+  console.log("[EmployeeLeaves] Rendering for employee:", employee?.id);
   
   // Utilisation du hook avec un ID stable
   const employeeId = employee?.id || '';
@@ -44,12 +44,25 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
   const [showNewAllocationForm, setShowNewAllocationForm] = useState(false);
   const { user } = useAuth();
   
-  console.log("EmployeeLeaves state:", { 
+  console.log("[EmployeeLeaves] State:", { 
     leaves: leaves?.length, 
     loading, 
     hasAllocation: !!allocation,
-    totalDays
+    totalDays,
+    paidLeavesRemaining,
+    paidLeavesTotal,
+    rttRemaining,
+    rttTotal
   });
+  
+  // Force initial load when component mounts 
+  useEffect(() => {
+    // Force refresh data when component mounts
+    console.log("[EmployeeLeaves] Component mounted, forcing data refresh");
+    if (employeeId) {
+      refetch();
+    }
+  }, [employeeId, refetch]);
   
   // Déterminer si l'utilisateur peut attribuer des congés (admin ou manager)
   const canAllocateLeaves = Boolean((user && user.isAdmin) || (user && user.role === 'manager'));

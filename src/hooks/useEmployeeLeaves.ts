@@ -1,11 +1,13 @@
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { useLeaveAllocation, useEmployeeLeaveData, useLeaveTypeLabels } from './leaves';
 
 // Re-export LeaveAllocation interface for backward compatibility
 export type { LeaveAllocation } from './leaves/useLeaveAllocation';
 
 export const useEmployeeLeaves = (employeeId: string) => {
+  const [shouldFetch, setShouldFetch] = useState(true);
+
   // Use our smaller hooks with stabilized inputs
   const { 
     leaves,
@@ -26,10 +28,22 @@ export const useEmployeeLeaves = (employeeId: string) => {
     getLeaveTypeLabel
   } = useLeaveTypeLabels();
 
+  // Utiliser useEffect pour contrôler le chargement initial, une seule fois
+  useEffect(() => {
+    if (employeeId && shouldFetch) {
+      console.log(`[useEmployeeLeaves] Initial fetch for employee: ${employeeId}`);
+      // Load leaves and allocations in parallel
+      fetchLeaves();
+      fetchAllocation();
+      // Désactiver les fetches automatiques après le premier chargement
+      setShouldFetch(false);
+    }
+  }, [employeeId, fetchLeaves, fetchAllocation, shouldFetch]);
+
   // Utiliser useCallback pour la fonction fetchData afin d'éviter des rendus inutiles
-  const fetchData = useCallback(() => {
+  const refetch = useCallback(() => {
     if (employeeId) {
-      console.log(`Fetching leave data for employee: ${employeeId}`);
+      console.log(`[useEmployeeLeaves] Manual refetch for employee: ${employeeId}`);
       // Load leaves and allocations in parallel
       fetchLeaves();
       fetchAllocation();
@@ -53,7 +67,7 @@ export const useEmployeeLeaves = (employeeId: string) => {
     allocation,
     allocationLoading,
     getLeaveTypeLabel,
-    refetch: fetchData,
+    refetch,
     updateLeaveAllocation,
     paidLeavesRemaining,
     paidLeavesTotal: allocation?.paidLeavesTotal || 0,
