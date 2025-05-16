@@ -15,6 +15,7 @@ export interface Presence {
 export interface PresenceRecord {
   id: string;
   employeeId: string;
+  employeeName?: string; // Added this property
   badgeId?: string;
   timestamp: string; // ISO date string
   eventType: 'entry' | 'exit';

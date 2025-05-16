@@ -87,8 +87,14 @@ export const usePresenceData = () => {
           const existingRecord = presenceMap.get(key);
           if (record.eventType === 'entry' && (!existingRecord.timeIn || time < existingRecord.timeIn)) {
             existingRecord.timeIn = time;
+            if (record.employeeName) {
+              existingRecord.employeeName = record.employeeName;
+            }
           } else if (record.eventType === 'exit' && (!existingRecord.timeOut || time > existingRecord.timeOut)) {
             existingRecord.timeOut = time;
+            if (record.employeeName) {
+              existingRecord.employeeName = record.employeeName;
+            }
           }
         }
       });

@@ -4,8 +4,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Employee } from '@/types/employee';
 import { generateEmployeePdfWithDocuments } from '@/utils/pdfExport';
 import { toast } from '@/components/ui/use-toast';
-import EmployeeHeader from './view-dialog/EmployeeHeader';
-import EmployeeTabs from './view-dialog/EmployeeTabs';
+import EmployeeHeader from './EmployeeHeader';
+import EmployeeTabs from './EmployeeTabs';
 
 interface ViewEmployeeDialogProps {
   open: boolean;
