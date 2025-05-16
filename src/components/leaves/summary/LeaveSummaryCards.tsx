@@ -40,6 +40,10 @@ const LeaveSummaryCards: React.FC<LeaveSummaryCardsProps> = ({
   rttRemaining,
   rttTotal
 }) => {
+  console.log("LeaveSummaryCards rendering with data:", { 
+    totalDays, paidLeavesRemaining, paidLeavesTotal, rttRemaining, rttTotal 
+  });
+  
   // Ensure we have valid values
   const safeTotalDays = isNaN(totalDays) ? 0 : totalDays;
   const safePaidRemaining = isNaN(paidLeavesRemaining) ? 0 : paidLeavesRemaining;

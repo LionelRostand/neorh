@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useFirestore } from '../firestore';
 import { toast } from '@/components/ui/use-toast';
 
@@ -17,8 +17,9 @@ export interface LeaveAllocation {
 
 export const useLeaveAllocation = (employeeId: string) => {
   const [allocation, setAllocation] = useState<LeaveAllocation | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const requestInProgressRef = useRef(false);
   
   const { 
     search: searchAllocation,
@@ -27,33 +28,37 @@ export const useLeaveAllocation = (employeeId: string) => {
   } = useFirestore<LeaveAllocation>('hr_leave_allocations');
 
   const fetchAllocation = useCallback(async () => {
-    // Skip fetch if no employeeId
-    if (!employeeId) {
-      setLoading(false);
+    // Skip fetch if no employeeId or request already in progress
+    if (!employeeId || requestInProgressRef.current) {
       return null;
     }
     
     // Return cached data if already loaded
     if (hasLoaded && allocation !== null) {
       console.log(`Using cached allocation data for employee ${employeeId}`);
-      setLoading(false);
       return allocation;
     }
 
+    // Set loading state and mark request as in progress
     setLoading(true);
+    requestInProgressRef.current = true;
+
     try {
       // Get allocation for current year
       const currentYear = new Date().getFullYear();
+      console.log(`Fetching leave allocations for employee ${employeeId}, year ${currentYear}`);
       const result = await searchAllocation('employeeId', employeeId);
       
       let currentAllocation = result.docs?.find(doc => doc.year === currentYear);
       
       if (currentAllocation) {
+        console.log(`Found existing allocation for employee ${employeeId}:`, currentAllocation);
         setAllocation(currentAllocation);
         setHasLoaded(true);
         return currentAllocation;
       } else {
         // Create default allocation if none exists
+        console.log(`No allocation found for employee ${employeeId}, creating default`);
         const defaultAllocation: Omit<LeaveAllocation, 'id'> = {
           employeeId,
           year: currentYear,
@@ -75,7 +80,6 @@ export const useLeaveAllocation = (employeeId: string) => {
             const newAllocation = { ...defaultAllocation, id: allocationId };
             setAllocation(newAllocation);
             setHasLoaded(true);
-            setLoading(false);
             return newAllocation;
           }
         } catch (err) {
@@ -93,12 +97,19 @@ export const useLeaveAllocation = (employeeId: string) => {
       return null;
     } finally {
       setLoading(false);
+      requestInProgressRef.current = false;
     }
-  }, [employeeId, searchAllocation, addAllocation, allocation, hasLoaded]);
+  }, [employeeId, searchAllocation, addAllocation]);
 
   // Initial fetch when component mounts or employeeId changes
   useEffect(() => {
-    fetchAllocation();
+    if (employeeId) {
+      fetchAllocation();
+    } else {
+      // Reset state if no employeeId
+      setAllocation(null);
+      setHasLoaded(false);
+    }
   }, [employeeId, fetchAllocation]);
 
   // Update leave allocations
@@ -106,6 +117,7 @@ export const useLeaveAllocation = (employeeId: string) => {
     if (!allocation?.id) return false;
     
     try {
+      console.log(`Updating leave allocation for ${employeeId}:`, updates);
       await updateAllocation(allocation.id, {
         ...updates,
         updatedAt: new Date().toISOString()
@@ -129,7 +141,7 @@ export const useLeaveAllocation = (employeeId: string) => {
       });
       return false;
     }
-  }, [allocation, updateAllocation]);
+  }, [allocation, updateAllocation, employeeId]);
 
   return {
     allocation,

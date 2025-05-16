@@ -1,33 +1,35 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Leave } from '@/lib/constants';
 import { useFirestore } from '../firestore';
 import { toast } from '@/components/ui/use-toast';
 
 export const useEmployeeLeaveData = (employeeId: string) => {
   const [leaves, setLeaves] = useState<Leave[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [totalDays, setTotalDays] = useState(0);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const requestInProgressRef = useRef(false);
   
   const { search } = useFirestore<Leave>('hr_leaves');
 
   const fetchEmployeeLeaves = useCallback(async () => {
-    // Skip fetch if no employeeId
-    if (!employeeId) {
-      setLoading(false);
+    // Skip fetch if no employeeId or request already in progress
+    if (!employeeId || requestInProgressRef.current) {
       return;
     }
     
     // Skip fetch if already loaded
     if (hasLoaded && leaves.length > 0) {
       console.log(`Using cached leave data for employee ${employeeId}`);
-      setLoading(false);
       return;
     }
     
+    // Set loading state and mark request as in progress
     setLoading(true);
+    requestInProgressRef.current = true;
+
     try {
       console.log("Fetching leaves for employee:", employeeId);
       
@@ -35,6 +37,8 @@ export const useEmployeeLeaveData = (employeeId: string) => {
       const result = await search('employeeId', employeeId);
       
       if (result.docs) {
+        console.log(`Found ${result.docs.length} leave records for employee ${employeeId}`);
+        
         // Sort results by start date in descending order
         const sortedLeaves = [...result.docs].sort((a, b) => {
           if (!a.startDate || !b.startDate) return 0;
@@ -43,6 +47,7 @@ export const useEmployeeLeaveData = (employeeId: string) => {
         
         setLeaves(sortedLeaves);
         setHasLoaded(true);
+        setError(null);
         
         // Calculate total leave days
         const total = sortedLeaves.reduce((acc, leave) => {
@@ -61,6 +66,7 @@ export const useEmployeeLeaveData = (employeeId: string) => {
     } catch (err) {
       console.error("Error fetching employee leaves:", err);
       setError(err instanceof Error ? err : new Error('Erreur inconnue'));
+      setLeaves([]);
       toast({
         title: "Erreur",
         description: "Impossible de charger les congés de l'employé.",
@@ -68,12 +74,20 @@ export const useEmployeeLeaveData = (employeeId: string) => {
       });
     } finally {
       setLoading(false);
+      requestInProgressRef.current = false;
     }
-  }, [employeeId, search, leaves.length, hasLoaded]);
+  }, [employeeId, search]);
   
   // Initial fetch when component mounts or employeeId changes
   useEffect(() => {
-    fetchEmployeeLeaves();
+    if (employeeId) {
+      fetchEmployeeLeaves();
+    } else {
+      // Reset state if no employeeId
+      setLeaves([]);
+      setTotalDays(0);
+      setHasLoaded(false);
+    }
   }, [employeeId, fetchEmployeeLeaves]);
 
   return {

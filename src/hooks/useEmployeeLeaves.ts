@@ -1,12 +1,12 @@
 
-import { useEffect, useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useLeaveAllocation, useEmployeeLeaveData, useLeaveTypeLabels } from './leaves';
 
 // Re-export LeaveAllocation interface for backward compatibility
 export type { LeaveAllocation } from './leaves/useLeaveAllocation';
 
 export const useEmployeeLeaves = (employeeId: string) => {
-  // Use our new smaller hooks
+  // Use our smaller hooks with stabilized inputs
   const { 
     leaves,
     loading: leavesLoading,
@@ -36,12 +36,14 @@ export const useEmployeeLeaves = (employeeId: string) => {
     }
   }, [employeeId, fetchLeaves, fetchAllocation]);
 
-  // Load data when the component mounts or when employeeId changes
-  useEffect(() => {
-    if (employeeId) {
-      fetchData();
-    }
-  }, [employeeId, fetchData]);
+  // Memoize derived values to prevent unnecessary re-renders
+  const paidLeavesRemaining = useMemo(() => {
+    return allocation ? allocation.paidLeavesTotal - allocation.paidLeavesUsed : 0;
+  }, [allocation]);
+
+  const rttRemaining = useMemo(() => {
+    return allocation ? allocation.rttTotal - allocation.rttUsed : 0;
+  }, [allocation]);
 
   return {
     leaves,
@@ -52,6 +54,10 @@ export const useEmployeeLeaves = (employeeId: string) => {
     allocationLoading,
     getLeaveTypeLabel,
     refetch: fetchData,
-    updateLeaveAllocation
+    updateLeaveAllocation,
+    paidLeavesRemaining,
+    paidLeavesTotal: allocation?.paidLeavesTotal || 0,
+    rttRemaining,
+    rttTotal: allocation?.rttTotal || 0
   };
 };

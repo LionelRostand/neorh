@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useEmployeeLeaves } from '@/hooks/useEmployeeLeaves';
 import { Employee } from '@/types/employee';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,8 @@ interface EmployeeLeavesProps {
 }
 
 const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
+  console.log("EmployeeLeaves rendering for employee:", employee?.id);
+  
   // Utilisation du hook avec un ID stable
   const employeeId = employee?.id || '';
   
@@ -31,12 +33,23 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
     allocation,
     allocationLoading,
     updateLeaveAllocation,
-    refetch
+    refetch,
+    paidLeavesRemaining,
+    paidLeavesTotal,
+    rttRemaining,
+    rttTotal
   } = useEmployeeLeaves(employeeId);
   
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
   const [showNewAllocationForm, setShowNewAllocationForm] = useState(false);
   const { user } = useAuth();
+  
+  console.log("EmployeeLeaves state:", { 
+    leaves: leaves?.length, 
+    loading, 
+    hasAllocation: !!allocation,
+    totalDays
+  });
   
   // Déterminer si l'utilisateur peut attribuer des congés (admin ou manager)
   const canAllocateLeaves = Boolean((user && user.isAdmin) || (user && user.role === 'manager'));
@@ -67,15 +80,11 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
     }
   };
 
-  // Calculer les valeurs dérivées
-  const paidLeavesRemaining = allocation ? allocation.paidLeavesTotal - allocation.paidLeavesUsed : 0;
-  const rttRemaining = allocation ? allocation.rttTotal - allocation.rttUsed : 0;
-
+  // Afficher un squelette pendant le chargement initial
   if (loading && !leaves.length) {
     return <LoadingSkeleton />;
   }
 
-  // Même en cas de chargement, afficher un contenu minimal
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-2">
@@ -99,7 +108,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
         </div>
       </div>
 
-      {/* Toujours afficher le gestionnaire d'allocation pour éviter les erreurs de rendu */}
+      {/* Gestionnaire d'allocation */}
       <LeaveAllocationManager 
         allocation={allocation}
         isLoading={allocationLoading}
@@ -107,14 +116,16 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
         employeeId={employeeId}
       />
 
+      {/* Cartes de résumé des congés */}
       <LeaveSummaryCards
         totalDays={totalDays}
         paidLeavesRemaining={paidLeavesRemaining}
-        paidLeavesTotal={allocation?.paidLeavesTotal || 0}
+        paidLeavesTotal={paidLeavesTotal}
         rttRemaining={rttRemaining}
-        rttTotal={allocation?.rttTotal || 0}
+        rttTotal={rttTotal}
       />
 
+      {/* Historique des congés */}
       {error ? (
         <Card className="border rounded-lg shadow-sm">
           <CardContent className="p-4 py-6">
@@ -128,6 +139,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
         />
       )}
 
+      {/* Formulaires de dialogue */}
       <NewLeaveRequestForm 
         open={showNewLeaveForm} 
         onClose={() => setShowNewLeaveForm(false)}
