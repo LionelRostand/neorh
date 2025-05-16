@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEmployeeLeaves } from '@/hooks/useEmployeeLeaves';
 import LeaveAllocationManager from "@/components/leaves/allocation/LeaveAllocationManager";
@@ -23,6 +23,12 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
     loading,
     refetch
   } = useEmployeeLeaves(employeeId);
+
+  // Log allocation data for debugging
+  useEffect(() => {
+    console.log("EmployeeLeaves - allocation data:", allocation);
+    console.log("EmployeeLeaves - loading state:", allocationLoading);
+  }, [allocation, allocationLoading]);
 
   const handleLeaveRequestSuccess = () => {
     refetch();

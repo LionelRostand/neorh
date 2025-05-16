@@ -41,7 +41,11 @@ export const useEmployeeLeaves = (employeeId: string) => {
       console.log(`[useEmployeeLeaves] Initial fetch for employee: ${employeeId}`);
       // Load leaves and allocations in parallel
       fetchLeaves();
-      fetchAllocation();
+      fetchAllocation().then(data => {
+        console.log(`[useEmployeeLeaves] Allocation data fetched:`, data);
+      }).catch(err => {
+        console.error(`[useEmployeeLeaves] Error fetching allocation:`, err);
+      });
       // Marquer les données comme chargées
       dataLoadedRef.current = true;
     }
@@ -58,7 +62,11 @@ export const useEmployeeLeaves = (employeeId: string) => {
       console.log(`[useEmployeeLeaves] Manual refetch for employee: ${employeeId}`);
       // Load leaves and allocations in parallel
       fetchLeaves();
-      fetchAllocation();
+      fetchAllocation().then(data => {
+        console.log(`[useEmployeeLeaves] Allocation data refetched:`, data);
+      }).catch(err => {
+        console.error(`[useEmployeeLeaves] Error refetching allocation:`, err);
+      });
       // Marquer les données comme chargées
       dataLoadedRef.current = true;
     }

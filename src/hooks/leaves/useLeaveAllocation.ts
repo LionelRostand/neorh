@@ -41,10 +41,12 @@ export const useLeaveAllocation = (employeeId: string) => {
       return null;
     }
     
+    console.log(`[useLeaveAllocation] Starting fetch for employee ${employeeId}`);
+    
     // Check cache first
     const cachedData = allocationCache.get(employeeId);
     if (cachedData) {
-      console.log(`[useLeaveAllocation] Using cached allocation data for employee ${employeeId}`);
+      console.log(`[useLeaveAllocation] Using cached allocation data for employee ${employeeId}`, cachedData);
       if (!allocation) {
         setAllocation(cachedData as LeaveAllocation);
         setHasLoaded(true);
@@ -54,7 +56,7 @@ export const useLeaveAllocation = (employeeId: string) => {
     
     // Return already loaded data if available
     if (hasLoaded && allocation !== null) {
-      console.log(`[useLeaveAllocation] Using loaded allocation data for employee ${employeeId}`);
+      console.log(`[useLeaveAllocation] Using loaded allocation data for employee ${employeeId}`, allocation);
       return allocation;
     }
 
@@ -75,6 +77,7 @@ export const useLeaveAllocation = (employeeId: string) => {
         setRequestInProgress(true);
 
         try {
+          console.log(`[useLeaveAllocation] Fetching allocation data from service for employee ${employeeId}`);
           // Get allocation for current year
           const currentAllocation = await fetchEmployeeAllocation(employeeId);
           
@@ -85,7 +88,7 @@ export const useLeaveAllocation = (employeeId: string) => {
           }
           
           if (currentAllocation) {
-            console.log(`[useLeaveAllocation] Found existing allocation for employee ${employeeId}`);
+            console.log(`[useLeaveAllocation] Found existing allocation for employee ${employeeId}`, currentAllocation);
             
             // Update cache
             allocationCache.set(employeeId, currentAllocation);
@@ -94,6 +97,7 @@ export const useLeaveAllocation = (employeeId: string) => {
             setHasLoaded(true);
             resolve(currentAllocation);
           } else {
+            console.log(`[useLeaveAllocation] No allocation found for employee ${employeeId}, creating default`);
             // Create default allocation if none exists
             try {
               const newAllocation = await createDefaultAllocation(employeeId);
@@ -105,6 +109,7 @@ export const useLeaveAllocation = (employeeId: string) => {
               }
               
               if (newAllocation) {
+                console.log(`[useLeaveAllocation] Created default allocation for employee ${employeeId}`, newAllocation);
                 // Update cache
                 allocationCache.set(employeeId, newAllocation);
                 
@@ -112,6 +117,7 @@ export const useLeaveAllocation = (employeeId: string) => {
                 setHasLoaded(true);
                 resolve(newAllocation);
               } else {
+                console.log(`[useLeaveAllocation] Failed to create default allocation for employee ${employeeId}`);
                 resolve(null);
               }
             } catch (err) {
