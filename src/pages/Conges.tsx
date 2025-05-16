@@ -6,14 +6,14 @@ import { Leave } from "@/lib/constants";
 import NewLeaveRequestForm from "@/components/leaves/NewLeaveRequestForm";
 import LeavesHeader from "@/components/leaves/LeavesHeader";
 import LeavesContent from "@/components/leaves/LeavesContent";
-import { useAuth } from "@/hooks/useAuth"; // Supposons que ce hook existe pour récupérer l'utilisateur connecté
+import { useAuth } from "@/hooks/useAuth";
 
 const Conges = () => {
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
   const { getAll, isLoading, error, update, search } = useCollection<'hr_leaves'>();
-  // const { user } = useAuth(); // Décommenter si vous avez un hook d'authentification
+  const { user } = useAuth(); // Now this import exists
 
   useEffect(() => {
     fetchLeaves();
