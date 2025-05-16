@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -109,7 +108,7 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
   
   // Déterminer le titre du formulaire
   const getDialogTitle = () => {
-    return isAllocation ? "Nouvelle attribution de congés" : "Nouvelle demande de congé";
+    return isAllocation ? "Nouvelle attribution de congés" : "Nouvelle attribution de congé";
   };
   
   // Texte d'aide pour l'allocation
