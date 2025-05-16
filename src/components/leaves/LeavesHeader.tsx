@@ -33,7 +33,7 @@ const LeavesHeader = ({ onNewRequest, onNewAllocation }: LeavesHeaderProps) => {
           className="gap-2 bg-emerald-500 hover:bg-emerald-600" 
           onClick={onNewRequest}
         >
-          <Plus className="h-4 w-4" /> Nouvelle demande
+          <Plus className="h-4 w-4" /> Nouvelle attribution
         </Button>
       </div>
     </div>
