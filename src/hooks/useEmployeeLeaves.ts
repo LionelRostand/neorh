@@ -22,7 +22,7 @@ export const useEmployeeLeaves = (employeeId: string) => {
     try {
       console.log("Fetching leaves for employee:", employeeId);
       
-      // Essayer d'abord sans tri pour éviter les problèmes d'index composite
+      // Effectuer la recherche par employeeId sans options de tri
       const result = await search('employeeId', employeeId);
       console.log("Leaves result:", result);
       
