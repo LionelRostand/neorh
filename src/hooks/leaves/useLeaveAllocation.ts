@@ -13,7 +13,7 @@ export const useLeaveAllocation = (employeeId: string) => {
   const [loading, setLoading] = useState(true);  // Start with loading true
   const [hasLoaded, setHasLoaded] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
-  const MAX_RETRIES = 2;
+  const MAX_RETRIES = 3;
   
   const { 
     isRequestInProgress, 
@@ -55,34 +55,18 @@ export const useLeaveAllocation = (employeeId: string) => {
     const cachedData = allocationCache.get(employeeId);
     if (cachedData) {
       console.log(`[useLeaveAllocation] Using cached allocation data for employee ${employeeId}`, cachedData);
-      if (!allocation) {
-        setAllocation(cachedData as LeaveAllocation);
-        setHasLoaded(true);
-        setLoading(false);
-      }
-      return cachedData;
-    }
-    
-    // Return already loaded data if available
-    if (hasLoaded && allocation !== null) {
-      console.log(`[useLeaveAllocation] Using loaded allocation data for employee ${employeeId}`, allocation);
+      setAllocation(cachedData as LeaveAllocation);
+      setHasLoaded(true);
       setLoading(false);
-      return allocation;
+      return cachedData;
     }
     
     // Use debounce to prevent rapid successive calls
     return new Promise<LeaveAllocation | null>((resolve) => {
-      debounceTimerRef.current = setTimeout(async () => {
-        // Skip if component unmounted during debounce
-        if (!isMounted()) {
-          setLoading(false);
-          resolve(null);
-          return;
-        }
-        
-        // Mark request as in progress
-        setRequestInProgress(true);
-
+      // Mark request as in progress immediately
+      setRequestInProgress(true);
+      
+      const fetchData = async () => {
         try {
           console.log(`[useLeaveAllocation] Fetching allocation data from service for employee ${employeeId}`);
           // Get allocation for current year
@@ -95,7 +79,7 @@ export const useLeaveAllocation = (employeeId: string) => {
           }
           
           if (currentAllocation) {
-            console.log(`[useLeaveAllocation] Found existing allocation for employee ${employeeId}`, currentAllocation);
+            console.log(`[useLeaveAllocation] Found allocation for employee ${employeeId}`, currentAllocation);
             
             // Update cache
             allocationCache.set(employeeId, currentAllocation);
@@ -107,19 +91,36 @@ export const useLeaveAllocation = (employeeId: string) => {
           } else {
             console.log(`[useLeaveAllocation] No allocation found for employee ${employeeId}, will retry: ${retryCount}`);
             
-            // Implement retry logic
+            // Implement retry logic with exponential backoff
             if (retryCount < MAX_RETRIES) {
               setRetryCount(prev => prev + 1);
-              setTimeout(() => {
-                setRequestInProgress(false);
-                fetchAllocation();
-              }, 1000); // Wait 1 second before retry
+              const delay = Math.pow(2, retryCount) * 500; // 500ms, 1s, 2s, 4s
               
-              resolve(null);
+              setTimeout(() => {
+                if (isMounted()) {
+                  setRequestInProgress(false);
+                  fetchAllocation().then(resolve);
+                }
+              }, delay);
             } else {
-              setLoading(false);
-              setHasLoaded(true);
-              resolve(null);
+              // Create default allocation as last resort
+              try {
+                console.log(`[useLeaveAllocation] Creating default allocation after max retries`);
+                const defaultAllocation = await createDefaultAllocation(employeeId);
+                
+                if (defaultAllocation && isMounted()) {
+                  setAllocation(defaultAllocation);
+                  allocationCache.set(employeeId, defaultAllocation);
+                }
+              } catch (err) {
+                console.error("[useLeaveAllocation] Failed to create default allocation:", err);
+              } finally {
+                if (isMounted()) {
+                  setLoading(false);
+                  setHasLoaded(true);
+                  resolve(null);
+                }
+              }
             }
           }
         } catch (err) {
@@ -130,30 +131,53 @@ export const useLeaveAllocation = (employeeId: string) => {
           }
           
           console.error("[useLeaveAllocation] Error fetching leave allocations:", err);
-          setLoading(false);
           
           // Implement retry logic
           if (retryCount < MAX_RETRIES) {
             setRetryCount(prev => prev + 1);
+            const delay = Math.pow(2, retryCount) * 500;
+            
             setTimeout(() => {
-              setRequestInProgress(false);
-              fetchAllocation();
-            }, 1000); // Wait 1 second before retry
+              if (isMounted()) {
+                setRequestInProgress(false);
+                fetchAllocation().then(resolve);
+              }
+            }, delay);
           } else {
-            setHasLoaded(true);
+            // Final attempt to create default allocation
+            try {
+              console.log(`[useLeaveAllocation] Creating default allocation after error and max retries`);
+              createDefaultAllocation(employeeId).then(defaultAllocation => {
+                if (defaultAllocation && isMounted()) {
+                  setAllocation(defaultAllocation);
+                  allocationCache.set(employeeId, defaultAllocation);
+                }
+                setLoading(false);
+                setHasLoaded(true);
+                resolve(defaultAllocation);
+              });
+            } catch (fallbackErr) {
+              if (isMounted()) {
+                console.error("[useLeaveAllocation] Final fallback failed:", fallbackErr);
+                setLoading(false);
+                setHasLoaded(true);
+                resolve(null);
+              }
+            }
           }
-          
-          resolve(null);
         } finally {
           // Skip if component unmounted
           if (isMounted()) {
             setRequestInProgress(false);
           }
         }
-      }, 300); // 300ms debounce
+      };
+      
+      // Start fetching after a short delay
+      setTimeout(fetchData, 100);
     });
-  }, [employeeId, isMounted, isRequestInProgress, allocation, hasLoaded, retryCount,
-      clearDebounceTimer, debounceTimerRef, fetchEmployeeAllocation]);
+  }, [employeeId, isMounted, isRequestInProgress, retryCount,
+      clearDebounceTimer, fetchEmployeeAllocation, createDefaultAllocation, setRequestInProgress]);
 
   // Update leave allocations
   const updateLeaveAllocation = useCallback(async (updates: Partial<LeaveAllocation>) => {
@@ -189,10 +213,14 @@ export const useLeaveAllocation = (employeeId: string) => {
     }
   }, [allocation, updateAllocationData, employeeId]);
 
-  // Initial fetch when the component mounts
+  // Force a retry when employeeId changes
   useEffect(() => {
     if (employeeId) {
-      console.log(`[useLeaveAllocation] Initial useEffect fetch for employee: ${employeeId}`);
+      // Reset retry count when employee changes
+      setRetryCount(0);
+      setHasLoaded(false);
+      setLoading(true);
+      console.log(`[useLeaveAllocation] Employee ID changed to ${employeeId}, forcing fetch`);
       fetchAllocation();
     }
     

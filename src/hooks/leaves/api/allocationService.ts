@@ -48,8 +48,14 @@ export function useAllocationService() {
       }
     } catch (error) {
       console.error(`[allocationService] Error fetching allocation for employee ${employeeId}:`, error);
-      // Return null instead of throwing so the UI can still render
-      return null;
+      // Create a default allocation as fallback strategy instead of returning null
+      console.log(`[allocationService] Creating default allocation as fallback after error`);
+      try {
+        return await createDefaultAllocation(employeeId, currentYear);
+      } catch (fallbackError) {
+        console.error(`[allocationService] Error creating fallback allocation:`, fallbackError);
+        return null;
+      }
     }
   };
   
@@ -89,7 +95,7 @@ export function useAllocationService() {
       }
     } catch (error) {
       console.error(`[allocationService] Error creating default allocation:`, error);
-      return null;
+      throw error; // Propagate error to caller instead of returning null
     }
   };
   

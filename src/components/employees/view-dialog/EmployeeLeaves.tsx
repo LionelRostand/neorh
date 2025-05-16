@@ -8,6 +8,8 @@ import { CalendarPlus } from "lucide-react";
 import NewLeaveRequestForm from "@/components/leaves/NewLeaveRequestForm";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface EmployeeLeavesProps {
   employeeId: string;
@@ -21,25 +23,42 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
     updateLeaveAllocation,
     leaves,
     loading,
-    refetch
+    refetch,
+    getLeaveTypeLabel
   } = useEmployeeLeaves(employeeId);
 
-  // Force refetch on initial load to ensure we get the latest data
+  // Force refetch on mount and when employeeId changes
   useEffect(() => {
     if (employeeId) {
       console.log("EmployeeLeaves - initial force refetch for employee:", employeeId);
-      refetch();
+      // Small delay to ensure component is fully mounted
+      const timer = setTimeout(() => {
+        refetch();
+      }, 200);
+      return () => clearTimeout(timer);
     }
   }, [employeeId, refetch]);
 
-  // Log allocation data for debugging
+  // Log data for debugging
   useEffect(() => {
     console.log("EmployeeLeaves - allocation data:", allocation);
     console.log("EmployeeLeaves - loading state:", allocationLoading);
-  }, [allocation, allocationLoading]);
+    console.log("EmployeeLeaves - leaves data:", leaves);
+  }, [allocation, allocationLoading, leaves]);
 
   const handleLeaveRequestSuccess = () => {
     refetch();
+  };
+
+  // Helper function to format dates
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return format(date, 'dd/MM/yyyy', { locale: fr });
+    } catch (error) {
+      console.error("Invalid date format:", dateString);
+      return dateString;
+    }
   };
 
   return (
@@ -74,58 +93,62 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
             />
           ) : (
             <div className="text-center p-6 bg-gray-50 rounded-md">
-              <p className="text-gray-500">Aucune allocation de congés trouvée dans hr_leave_allocations.</p>
+              <p className="text-gray-500">Aucune allocation de congés trouvée. Cliquez sur "Nouvelle demande" pour en créer une.</p>
             </div>
           )}
         </CardContent>
       </Card>
 
       {/* Historique des demandes de congés */}
-      {leaves && leaves.length > 0 && (
-        <Card className="col-span-2">
-          <CardHeader>
-            <CardTitle className="text-lg">Historique des demandes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="space-y-4">
-                <Skeleton className="w-full h-12" />
-                <Skeleton className="w-full h-12" />
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Dates</TableHead>
-                    <TableHead>Statut</TableHead>
+      <Card className="col-span-2">
+        <CardHeader>
+          <CardTitle className="text-lg">Historique des demandes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="space-y-4">
+              <Skeleton className="w-full h-12" />
+              <Skeleton className="w-full h-12" />
+            </div>
+          ) : leaves && leaves.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Dates</TableHead>
+                  <TableHead>Statut</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {leaves.map((leave) => (
+                  <TableRow key={leave.id}>
+                    <TableCell>{getLeaveTypeLabel(leave.type)}</TableCell>
+                    <TableCell>
+                      {leave.startDate && leave.endDate ? 
+                        `${formatDate(leave.startDate)} - ${formatDate(leave.endDate)}` : 
+                        "Dates non définies"}
+                    </TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        leave.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                        leave.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {leave.status === 'approved' ? 'Approuvé' : 
+                         leave.status === 'rejected' ? 'Refusé' : 'En attente'}
+                      </span>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {leaves.map((leave) => (
-                    <TableRow key={leave.id}>
-                      <TableCell>{leave.type}</TableCell>
-                      <TableCell>
-                        {leave.startDate} - {leave.endDate}
-                      </TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          leave.status === 'approved' ? 'bg-green-100 text-green-800' : 
-                          leave.status === 'rejected' ? 'bg-red-100 text-red-800' : 
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {leave.status === 'approved' ? 'Approuvé' : 
-                           leave.status === 'rejected' ? 'Refusé' : 'En attente'}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-      )}
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center p-6 bg-gray-50 rounded-md">
+              <p className="text-gray-500">Aucune demande de congés trouvée.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Formulaire de demande de congés */}
       <NewLeaveRequestForm 

@@ -36,9 +36,11 @@ export const useEmployeeLeaves = (employeeId: string) => {
     // Mark component as mounted
     isMountedRef.current = true;
     
-    // Only load once on mount if data hasn't been loaded
-    if (employeeId && !dataLoadedRef.current) {
+    // Force immediate loading on mount
+    if (employeeId) {
       console.log(`[useEmployeeLeaves] Initial fetch for employee: ${employeeId}`);
+      // Reset loaded flag to ensure fresh data
+      dataLoadedRef.current = false;
       // Load leaves and allocations in parallel
       fetchLeaves();
       fetchAllocation().then(data => {
@@ -63,15 +65,19 @@ export const useEmployeeLeaves = (employeeId: string) => {
       // Reset data loaded flag to force refetch
       dataLoadedRef.current = false;
       
-      // Load leaves and allocations in parallel
-      fetchLeaves();
-      fetchAllocation().then(data => {
-        console.log(`[useEmployeeLeaves] Allocation data refetched:`, data);
-      }).catch(err => {
-        console.error(`[useEmployeeLeaves] Error refetching allocation:`, err);
+      // Load leaves and allocations in parallel with explicit promises
+      Promise.all([
+        fetchLeaves(),
+        fetchAllocation().then(data => {
+          console.log(`[useEmployeeLeaves] Allocation data refetched:`, data);
+          return data;
+        })
+      ]).catch(err => {
+        console.error(`[useEmployeeLeaves] Error during refetch:`, err);
+      }).finally(() => {
+        // Mark data as loaded
+        dataLoadedRef.current = true;
       });
-      // Mark data as loaded
-      dataLoadedRef.current = true;
     }
   }, [employeeId, fetchLeaves, fetchAllocation]);
 
