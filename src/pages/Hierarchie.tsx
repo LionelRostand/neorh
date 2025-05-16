@@ -2,15 +2,17 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Network, FileText, Download } from "lucide-react";
+import { Network, FileText, Download, Building2, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import EmployeesHierarchy from "@/components/hierarchy/EmployeesHierarchy";
+import DepartmentsHierarchy from "@/components/hierarchy/DepartmentsHierarchy";
 import HierarchyStatCard from "@/components/hierarchy/HierarchyStatCard";
 import { useDepartmentsData } from "@/hooks/useDepartmentsData";
 import { useEmployeeData } from "@/hooks/useEmployeeData";
 
 const Hierarchie = () => {
   const [selectedDepartment, setSelectedDepartment] = useState("all");
+  const [viewMode, setViewMode] = useState<"employees" | "departments">("employees");
   const { toast } = useToast();
   const { departments, isLoading: isLoadingDepartments } = useDepartmentsData();
   const { employees } = useEmployeeData();
@@ -87,27 +89,51 @@ const Hierarchie = () => {
         />
       </div>
 
+      {/* View Type Toggle */}
+      <div className="flex items-center space-x-2">
+        <div className="bg-gray-100 p-1 rounded-lg flex">
+          <Button
+            variant={viewMode === "employees" ? "default" : "ghost"}
+            className={`flex items-center ${viewMode === "employees" ? "" : "text-gray-600 bg-transparent"}`}
+            onClick={() => setViewMode("employees")}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            Hiérarchie des Employés
+          </Button>
+          <Button
+            variant={viewMode === "departments" ? "default" : "ghost"}
+            className={`flex items-center ${viewMode === "departments" ? "" : "text-gray-600 bg-transparent"}`}
+            onClick={() => setViewMode("departments")}
+          >
+            <Building2 className="h-4 w-4 mr-2" />
+            Hiérarchie des Départements
+          </Button>
+        </div>
+      </div>
+
       {/* Controls */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <h2 className="text-lg font-medium">Structure Hiérarchique</h2>
-          <Select 
-            value={selectedDepartment}
-            onValueChange={setSelectedDepartment}
-            disabled={isLoadingDepartments}
-          >
-            <SelectTrigger className="w-[250px]">
-              <SelectValue placeholder="Tous les départements" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les départements</SelectItem>
-              {departments && departments.map(dept => (
-                <SelectItem key={dept.id} value={dept.id}>
-                  {dept.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {viewMode === "employees" && (
+            <Select 
+              value={selectedDepartment}
+              onValueChange={setSelectedDepartment}
+              disabled={isLoadingDepartments}
+            >
+              <SelectTrigger className="w-[250px]">
+                <SelectValue placeholder="Tous les départements" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les départements</SelectItem>
+                {departments && departments.map(dept => (
+                  <SelectItem key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         <div className="flex space-x-2">
@@ -124,7 +150,11 @@ const Hierarchie = () => {
 
       {/* Hierarchy Chart */}
       <div className="border rounded-lg bg-white p-6 overflow-x-auto">
-        <EmployeesHierarchy departmentFilter={selectedDepartment} />
+        {viewMode === "employees" ? (
+          <EmployeesHierarchy departmentFilter={selectedDepartment} />
+        ) : (
+          <DepartmentsHierarchy />
+        )}
       </div>
     </div>
   );
