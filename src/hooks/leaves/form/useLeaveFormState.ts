@@ -18,14 +18,14 @@ export function useLeaveFormState(
   const form = useForm<LeaveFormValues>({
     defaultValues: {
       employeeId: employeeId || "",
-      type: "allocation", // Default type for allocation
+      type: isAllocation ? "allocation" : "paid", // Default type for requests is paid leave, allocation for allocations
       startDate: new Date(),
       endDate: new Date(),
       comment: "",
       daysAllocated: 0,
-      paidDaysAllocated: 25, // Default value for France
-      rttDaysAllocated: 12, // Default value for RTT
-      isAllocation: true // Always in allocation mode
+      paidDaysAllocated: isAllocation ? 25 : undefined, // Default value for France
+      rttDaysAllocated: isAllocation ? 12 : undefined, // Default value for RTT
+      isAllocation: isAllocation // Flag to identify if it's an allocation or a request
     },
   });
 

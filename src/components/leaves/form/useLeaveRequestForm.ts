@@ -52,6 +52,6 @@ export function useLeaveRequestForm(
     getRttAllocationLabel,
     getPaidLeaveHelperText,
     getRttHelperText,
-    getDialogTitle
+    getDialogTitle: () => getDialogTitle(isAllocation)
   };
 }

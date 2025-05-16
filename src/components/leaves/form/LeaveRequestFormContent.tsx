@@ -8,6 +8,7 @@ import { DatePickerField } from "./DatePickerField";
 import { CommentField } from "./CommentField";
 import { LeaveFormActions } from "./LeaveFormActions";
 import { AllocationFields } from "./AllocationFields";
+import { LeaveTypeField } from "./LeaveTypeField";
 
 interface LeaveRequestFormContentProps {
   form: UseFormReturn<LeaveFormValues>;
@@ -39,36 +40,42 @@ export function LeaveRequestFormContent({
   syncDaysAllocated,
   onSubmit,
   onClose,
-  isSubmitting
+  isSubmitting,
+  onTypeChange
 }: LeaveRequestFormContentProps) {
   return (
     <Form {...form}>
       <form onSubmit={onSubmit} className="space-y-6">
         {!employeeId && <EmployeeField form={form} />}
         
-        <div className="grid grid-cols-1 gap-4">
-          <AllocationFields 
-            form={form}
-            showPaidLeaveAllocation={showPaidLeaveAllocation}
-            showRttAllocation={false}
-            paidLeaveLabel={getPaidLeaveAllocationLabel()}
-            rttLabel=""
-            paidLeaveHelperText={getPaidLeaveHelperText()}
-            rttHelperText=""
-            onSync={(type, value) => syncDaysAllocated("paid", value)}
-          />
-          
-          <AllocationFields 
-            form={form}
-            showPaidLeaveAllocation={false}
-            showRttAllocation={showRttAllocation}
-            paidLeaveLabel=""
-            rttLabel={getRttAllocationLabel()}
-            paidLeaveHelperText=""
-            rttHelperText={getRttHelperText()}
-            onSync={(type, value) => syncDaysAllocated("rtt", value)}
-          />
-        </div>
+        {/* Afficher le sélecteur de type de congé uniquement pour les demandes, pas pour les allocations */}
+        {!isAllocation && <LeaveTypeField form={form} onTypeChange={onTypeChange} />}
+        
+        {isAllocation && (
+          <div className="grid grid-cols-1 gap-4">
+            <AllocationFields 
+              form={form}
+              showPaidLeaveAllocation={showPaidLeaveAllocation}
+              showRttAllocation={false}
+              paidLeaveLabel={getPaidLeaveAllocationLabel()}
+              rttLabel=""
+              paidLeaveHelperText={getPaidLeaveHelperText()}
+              rttHelperText=""
+              onSync={(type, value) => syncDaysAllocated("paid", value)}
+            />
+            
+            <AllocationFields 
+              form={form}
+              showPaidLeaveAllocation={false}
+              showRttAllocation={showRttAllocation}
+              paidLeaveLabel=""
+              rttLabel={getRttAllocationLabel()}
+              paidLeaveHelperText=""
+              rttHelperText={getRttHelperText()}
+              onSync={(type, value) => syncDaysAllocated("rtt", value)}
+            />
+          </div>
+        )}
         
         <DatePickerField 
           form={form} 

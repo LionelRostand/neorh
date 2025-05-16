@@ -48,7 +48,7 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
         <LeaveRequestFormContent
           form={form}
           employeeId={employeeId}
-          isAllocation={true}
+          isAllocation={isAllocation}
           showPaidLeaveAllocation={showPaidLeaveAllocation}
           showRttAllocation={showRttAllocation}
           getPaidLeaveAllocationLabel={getPaidLeaveAllocationLabel}

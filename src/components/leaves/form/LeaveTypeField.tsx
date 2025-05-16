@@ -1,43 +1,31 @@
 
 import React from "react";
 import {
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
+  FormControl,
 } from "@/components/ui/form";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
 import { LeaveFormValues } from "./types";
-
-// Types de congés selon le droit du travail français
-export const leaveTypes = [
-  { id: "paid", label: "Congé payé" },
-  { id: "rtt", label: "RTT" },
-  { id: "sick", label: "Congé Maladie" },
-  { id: "family", label: "Congé Familial" },
-  { id: "maternity", label: "Congé Maternité" },
-  { id: "paternity", label: "Congé Paternité" },
-];
-
-// Types de congés à afficher par défaut dans le formulaire de nouvelle demande
-export const defaultLeaveTypes = ["paid", "rtt"];
+import { useLeaveFormLabels } from "@/hooks/leaves/form";
 
 interface LeaveTypeFieldProps {
   form: UseFormReturn<LeaveFormValues>;
   onTypeChange?: (type: string) => void;
-  allowedTypes?: string[];
 }
 
-export function LeaveTypeField({ form, onTypeChange, allowedTypes = defaultLeaveTypes }: LeaveTypeFieldProps) {
-  // Filter types if allowedTypes is provided
-  const filteredTypes = leaveTypes.filter(type => allowedTypes.includes(type.id));
+export function LeaveTypeField({ form, onTypeChange }: LeaveTypeFieldProps) {
+  const { getLeaveTypeLabel, getLeaveTypeOptions } = useLeaveFormLabels();
+  const leaveTypeOptions = getLeaveTypeOptions();
 
   return (
     <FormField
@@ -45,25 +33,29 @@ export function LeaveTypeField({ form, onTypeChange, allowedTypes = defaultLeave
       name="type"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Type de congé</FormLabel>
-          <Select 
+          <FormLabel>{getLeaveTypeLabel()}</FormLabel>
+          <Select
+            value={field.value}
             onValueChange={(value) => {
               field.onChange(value);
-              if (onTypeChange) onTypeChange(value);
-            }} 
-            value={field.value}
+              if (onTypeChange) {
+                onTypeChange(value);
+              }
+            }}
           >
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un type de congé" />
+                <SelectValue placeholder="Sélectionner un type de congé" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {filteredTypes.map((type) => (
-                <SelectItem key={type.id} value={type.id}>
-                  {type.label}
-                </SelectItem>
-              ))}
+              <SelectGroup>
+                {leaveTypeOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
         </FormItem>

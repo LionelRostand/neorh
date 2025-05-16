@@ -4,8 +4,10 @@
  */
 export function useLeaveFormLabels() {
   // Determine the title of the form
-  const getDialogTitle = () => {
-    return "Attribution de congés sur période";
+  const getDialogTitle = (isAllocation = false) => {
+    return isAllocation 
+      ? "Attribution de congés sur période"
+      : "Demande de congés";
   };
   
   // Texte d'aide pour l'allocation
@@ -26,11 +28,27 @@ export function useLeaveFormLabels() {
     return "Nombre de jours de RTT à attribuer";
   };
 
+  // Labels pour le type de congés
+  const getLeaveTypeLabel = () => {
+    return "Type de congé";
+  };
+  
+  const getLeaveTypeOptions = () => {
+    return [
+      { label: "Congé payé", value: "paid" },
+      { label: "RTT", value: "rtt" },
+      { label: "Congé sans solde", value: "unpaid" },
+      { label: "Congé maladie", value: "sick" }
+    ];
+  };
+
   return {
     getDialogTitle,
     getPaidLeaveHelperText,
     getRttHelperText,
     getPaidLeaveAllocationLabel,
-    getRttAllocationLabel
+    getRttAllocationLabel,
+    getLeaveTypeLabel,
+    getLeaveTypeOptions
   };
 }
