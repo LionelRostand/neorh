@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarPlus } from "lucide-react";
 import NewLeaveRequestForm from "@/components/leaves/NewLeaveRequestForm";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { LeaveHistory } from '@/components/leaves/history/LeaveHistory';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -23,8 +23,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
     updateLeaveAllocation,
     leaves,
     loading,
-    refetch,
-    getLeaveTypeLabel
+    refetch
   } = useEmployeeLeaves(employeeId);
 
   // Force refetch on mount and when employeeId changes
@@ -100,55 +99,16 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
       </Card>
 
       {/* Historique des demandes de congés */}
-      <Card className="col-span-2">
-        <CardHeader>
-          <CardTitle className="text-lg">Historique des demandes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="space-y-4">
-              <Skeleton className="w-full h-12" />
-              <Skeleton className="w-full h-12" />
-            </div>
-          ) : leaves && leaves.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Dates</TableHead>
-                  <TableHead>Statut</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {leaves.map((leave) => (
-                  <TableRow key={leave.id}>
-                    <TableCell>{getLeaveTypeLabel(leave.type)}</TableCell>
-                    <TableCell>
-                      {leave.startDate && leave.endDate ? 
-                        `${formatDate(leave.startDate)} - ${formatDate(leave.endDate)}` : 
-                        "Dates non définies"}
-                    </TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        leave.status === 'approved' ? 'bg-green-100 text-green-800' : 
-                        leave.status === 'rejected' ? 'bg-red-100 text-red-800' : 
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {leave.status === 'approved' ? 'Approuvé' : 
-                         leave.status === 'rejected' ? 'Refusé' : 'En attente'}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="text-center p-6 bg-gray-50 rounded-md">
-              <p className="text-gray-500">Aucune demande de congés trouvée.</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {loading ? (
+        <div className="space-y-4">
+          <Skeleton className="w-full h-56" />
+        </div>
+      ) : (
+        <LeaveHistory 
+          leaves={leaves || []} 
+          formatDate={formatDate} 
+        />
+      )}
 
       {/* Formulaire de demande de congés */}
       <NewLeaveRequestForm 

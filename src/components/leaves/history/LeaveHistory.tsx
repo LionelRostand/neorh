@@ -123,7 +123,7 @@ export const LeaveHistory: React.FC<LeaveHistoryProps> = ({ leaves, formatDate }
   return (
     <Card className="border rounded-lg shadow-sm">
       <CardHeader className="pb-0">
-        <CardTitle className="text-lg">Historique des congés</CardTitle>
+        <CardTitle className="text-lg">Historique des demandes</CardTitle>
       </CardHeader>
       <CardContent>
         {leaves && leaves.length > 0 ? (
