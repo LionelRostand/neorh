@@ -70,6 +70,7 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
             status: company.status || "active",
             registrationDate: company.registrationDate || new Date().toISOString().split('T')[0]
           });
+          setIsLoadingCompany(false); // Important: Move this here to ensure we're not stuck in loading state
         } else {
           throw new Error("Entreprise non trouvée");
         }
@@ -81,8 +82,7 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
           description: "Impossible de charger les données de l'entreprise",
           variant: "destructive"
         });
-      } finally {
-        setIsLoadingCompany(false);
+        setIsLoadingCompany(false); // Important: also set loading to false on error
       }
     };
 

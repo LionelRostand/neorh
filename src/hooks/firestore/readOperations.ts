@@ -26,7 +26,7 @@ export const createReadOperations = <T extends Record<string, any>>(
       console.log(`Getting all documents from ${collectionName}`);
       const querySnapshot = await getDocs(getCollection());
       const documents = querySnapshot.docs.map(doc => {
-        return { id: doc.id, ...doc.data() } as T & { id: string };
+        return { id: doc.id, ...doc.data() as DocumentData } as T & { id: string };
       });
       console.log(`Retrieved ${documents.length} documents from ${collectionName}`);
       return { docs: documents };
@@ -62,7 +62,7 @@ export const createReadOperations = <T extends Record<string, any>>(
       
       if (docSnap.exists()) {
         console.info(`createReadOperations: Result for document ${id}: Document found`);
-        const result = { id: docSnap.id, ...docSnap.data() } as T & { id: string };
+        const result = { id: docSnap.id, ...docSnap.data() as DocumentData } as T & { id: string };
         return result;
       } else {
         console.warn(`createReadOperations: Document with ID ${id} not found in ${collectionName}`);
