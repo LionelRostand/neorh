@@ -2,7 +2,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, Calendar } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface AllocationCounterProps {
   id: string;
@@ -13,6 +14,8 @@ interface AllocationCounterProps {
   used: number;
   total: number;
   colorClass: string;
+  iconBgClass: string;
+  iconColorClass: string;
 }
 
 const AllocationCounter: React.FC<AllocationCounterProps> = ({
@@ -24,6 +27,8 @@ const AllocationCounter: React.FC<AllocationCounterProps> = ({
   used,
   total,
   colorClass,
+  iconBgClass,
+  iconColorClass,
 }) => {
   const handleIncrement = () => {
     onChange(value + 1);
@@ -43,50 +48,56 @@ const AllocationCounter: React.FC<AllocationCounterProps> = ({
   };
 
   return (
-    <div className="p-4 rounded-lg border">
-      <div className="flex justify-between items-center mb-3">
-        <div className={`px-2 py-1 rounded text-sm ${colorClass}`}>{label}</div>
-        <div className="text-sm text-gray-500">{used} utilisés</div>
-      </div>
-      {isEditing ? (
-        <div className="flex items-center justify-between gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={handleDecrement}
-            disabled={value <= used}
-            className="h-8 w-8"
-          >
-            <Minus className="h-3 w-3" />
-          </Button>
-          <Input
-            id={id}
-            type="number"
-            min={used}
-            value={value}
-            onChange={handleChange}
-            className="h-9 text-center"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={handleIncrement}
-            className="h-8 w-8"
-          >
-            <Plus className="h-3 w-3" />
-          </Button>
+    <Card className="border rounded-lg shadow-sm">
+      <CardContent className="p-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <p className="text-sm text-gray-500">{label}</p>
+            {isEditing ? (
+              <div className="flex items-center space-x-2 mt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={handleDecrement}
+                  disabled={value <= used}
+                  className="h-8 w-8"
+                >
+                  <Minus className="h-3 w-3" />
+                </Button>
+                <Input
+                  id={id}
+                  type="number"
+                  min={used}
+                  value={value}
+                  onChange={handleChange}
+                  className="h-9 text-center w-16"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={handleIncrement}
+                  className="h-8 w-8"
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <>
+                <h4 className="text-2xl font-bold mt-1">{value - used}</h4>
+                <p className="text-xs text-gray-500 mt-1">
+                  sur {total} jours
+                </p>
+              </>
+            )}
+          </div>
+          <div className={`p-2 rounded-full ${iconBgClass}`}>
+            <Calendar className={`h-5 w-5 ${iconColorClass}`} />
+          </div>
         </div>
-      ) : (
-        <div className="flex items-end gap-2">
-          <span className="text-2xl font-bold">{total - used}</span>
-          <span className="text-sm text-gray-500 mb-1">
-            sur {total} jours
-          </span>
-        </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

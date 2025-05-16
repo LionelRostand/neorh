@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -16,7 +16,8 @@ import ManagerActions from './ManagerActions';
 import LoadingSkeleton from './LoadingSkeleton';
 import { LeaveAllocationManagerProps } from './types';
 
-const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = ({
+// Use memo to prevent unnecessary re-renders
+const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = memo(({
   allocation,
   isLoading,
   onUpdate,
@@ -24,10 +25,18 @@ const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = ({
 }) => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [paidLeavesTotal, setPaidLeavesTotal] = useState(allocation?.paidLeavesTotal || 25);
-  const [rttTotal, setRttTotal] = useState(allocation?.rttTotal || 12);
+  const [paidLeavesTotal, setPaidLeavesTotal] = useState(0);
+  const [rttTotal, setRttTotal] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  // Update local state when allocation changes
+  useEffect(() => {
+    if (allocation) {
+      setPaidLeavesTotal(allocation.paidLeavesTotal);
+      setRttTotal(allocation.rttTotal);
+    }
+  }, [allocation]);
 
   // Vérifier si l'utilisateur est un administrateur ou un manager
   const canEdit = Boolean((user?.isAdmin) || (user?.role === 'manager'));
@@ -49,17 +58,26 @@ const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = ({
   };
 
   const resetForm = () => {
-    setPaidLeavesTotal(allocation?.paidLeavesTotal || 25);
-    setRttTotal(allocation?.rttTotal || 12);
+    if (allocation) {
+      setPaidLeavesTotal(allocation.paidLeavesTotal);
+      setRttTotal(allocation.rttTotal);
+    }
     setIsEditing(false);
   };
 
   if (isLoading) {
-    return <LoadingSkeleton />;
+    return <Card className="border rounded-lg shadow-sm mb-6">
+      <CardContent className="p-6">
+        <div className="flex flex-col space-y-3">
+          <div className="h-4 w-1/2 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-8 w-full bg-gray-200 rounded animate-pulse"></div>
+        </div>
+      </CardContent>
+    </Card>;
   }
 
   return (
-    <Card className="border rounded-lg overflow-hidden shadow-sm">
+    <Card className="border rounded-lg shadow-sm mb-6">
       <CardHeader className="bg-gray-50 pb-3 border-b">
         <CardTitle className="text-xl">Allocation de congés</CardTitle>
         <CardDescription>
@@ -77,8 +95,10 @@ const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = ({
               isEditing={isEditing}
               label="Congés payés disponibles"
               used={allocation?.paidLeavesUsed || 0}
-              total={allocation?.paidLeavesTotal || 25}
+              total={paidLeavesTotal}
               colorClass="bg-blue-100 text-blue-800"
+              iconBgClass="bg-green-100"
+              iconColorClass="text-green-600"
             />
 
             <AllocationCounter
@@ -88,8 +108,10 @@ const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = ({
               isEditing={isEditing}
               label="RTT disponibles"
               used={allocation?.rttUsed || 0}
-              total={allocation?.rttTotal || 12}
+              total={rttTotal}
               colorClass="bg-amber-100 text-amber-800"
+              iconBgClass="bg-amber-100"
+              iconColorClass="text-amber-600"
             />
           </div>
         </div>
@@ -118,6 +140,8 @@ const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = ({
       </CardFooter>
     </Card>
   );
-};
+});
+
+LeaveAllocationManager.displayName = "LeaveAllocationManager";
 
 export default LeaveAllocationManager;

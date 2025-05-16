@@ -111,12 +111,20 @@ export const useEmployeeLeaves = (employeeId: string) => {
           updatedAt: new Date().toISOString()
         };
         
-        // Résolution du problème de type
-        const newAllocationId = await addAllocation(defaultAllocation);
-        if (newAllocationId !== null) {
-          // On s'assure que l'ID est bien une chaîne de caractères
-          const allocationId = typeof newAllocationId === 'string' ? newAllocationId : String(newAllocationId);
-          setAllocation({ ...defaultAllocation, id: allocationId });
+        try {
+          // Résolution du problème de type
+          const newAllocationId = await addAllocation(defaultAllocation);
+          
+          // Vérifier si l'ID est une chaîne ou un objet
+          if (newAllocationId !== null) {
+            const allocationId = typeof newAllocationId === 'string' 
+              ? newAllocationId 
+              : (newAllocationId as any).id || String(newAllocationId);
+              
+            setAllocation({ ...defaultAllocation, id: allocationId });
+          }
+        } catch (err) {
+          console.error("Error creating allocation:", err);
         }
       }
     } catch (err) {
@@ -132,7 +140,7 @@ export const useEmployeeLeaves = (employeeId: string) => {
   }, [employeeId, searchAllocation, addAllocation]);
 
   // Mettre à jour les allocations de congés
-  const updateLeaveAllocation = async (updates: Partial<LeaveAllocation>) => {
+  const updateLeaveAllocation = useCallback(async (updates: Partial<LeaveAllocation>) => {
     if (!allocation?.id) return false;
     
     try {
@@ -159,12 +167,15 @@ export const useEmployeeLeaves = (employeeId: string) => {
       });
       return false;
     }
-  };
+  }, [allocation, updateAllocation]);
 
+  // Utiliser useEffect avec les dépendances correctes
   useEffect(() => {
-    fetchEmployeeLeaves();
-    fetchAllocation();
-  }, [fetchEmployeeLeaves, fetchAllocation]);
+    if (employeeId) {
+      fetchEmployeeLeaves();
+      fetchAllocation();
+    }
+  }, [employeeId, fetchEmployeeLeaves, fetchAllocation]);
 
   // Ajouter une fonction pour traduire les types de congés
   const getLeaveTypeLabel = (type: string): string => {

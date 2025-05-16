@@ -1,16 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useEmployeeLeaves } from '@/hooks/useEmployeeLeaves';
 import { Employee } from '@/types/employee';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, Check, X, Clock, Plus } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import NewLeaveRequestForm from '@/components/leaves/NewLeaveRequestForm';
-import { format, differenceInDays } from 'date-fns';
+import { format } from 'date-fns';
 import LeaveAllocationManager from '@/components/leaves/allocation/LeaveAllocationManager';
+import LoadingSkeleton from '@/components/leaves/allocation/LoadingSkeleton';
 
 interface EmployeeLeavesProps {
   employee: Employee;
@@ -80,37 +80,42 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
     allocation,
     allocationLoading,
     updateLeaveAllocation
-  } = useEmployeeLeaves(employee.id);
+  } = useEmployeeLeaves(employee?.id || '');
+  
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
   
-  // Calculer les congés restants à partir des allocations
-  const paidLeavesRemaining = allocation 
-    ? allocation.paidLeavesTotal - allocation.paidLeavesUsed
-    : 25;
-
-  const rttRemaining = allocation
-    ? allocation.rttTotal - allocation.rttUsed
-    : 12;
-
-  const handleNewLeaveRequest = () => {
+  const handleNewLeaveRequest = useCallback(() => {
     setShowNewLeaveForm(true);
-  };
+  }, []);
 
-  const handleRequestSuccess = () => {
+  const handleRequestSuccess = useCallback(() => {
     setShowNewLeaveForm(false);
-  };
+  }, []);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     try {
       return format(new Date(dateString), 'dd/MM/yyyy');
     } catch (error) {
       return dateString;
     }
-  };
+  }, []);
+
+  // Only recalculate when allocation changes
+  const paidLeavesRemaining = useMemo(() => 
+    allocation ? allocation.paidLeavesTotal - allocation.paidLeavesUsed : 0
+  , [allocation]);
+
+  const rttRemaining = useMemo(() => 
+    allocation ? allocation.rttTotal - allocation.rttUsed : 0
+  , [allocation]);
+
+  if (loading || allocationLoading) {
+    return <LoadingSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-2">
         <h3 className="text-xl font-semibold">Congés</h3>
         <Button 
           onClick={handleNewLeaveRequest}
@@ -120,25 +125,15 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
         </Button>
       </div>
 
-      {/* Gestionnaire d'allocations de congés - affichage du chargement ou des erreurs */}
-      {allocationLoading ? (
-        <div className="bg-white p-6 rounded-lg border shadow-sm">
-          <div className="animate-pulse space-y-4">
-            <div className="h-5 w-1/3 bg-gray-200 rounded"></div>
-            <div className="h-10 w-full bg-gray-200 rounded"></div>
-          </div>
-        </div>
-      ) : (
-        <LeaveAllocationManager 
-          allocation={allocation}
-          isLoading={allocationLoading}
-          onUpdate={updateLeaveAllocation}
-          employeeId={employee.id}
-        />
-      )}
+      <LeaveAllocationManager 
+        allocation={allocation}
+        isLoading={allocationLoading}
+        onUpdate={updateLeaveAllocation}
+        employeeId={employee.id}
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border rounded-lg overflow-hidden shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Card className="border rounded-lg shadow-sm">
           <CardContent className="p-6">
             <div className="flex justify-between items-center">
               <div>
@@ -152,13 +147,13 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
           </CardContent>
         </Card>
         
-        <Card className="border rounded-lg overflow-hidden shadow-sm">
+        <Card className="border rounded-lg shadow-sm">
           <CardContent className="p-6">
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-gray-500">Congés payés disponibles</p>
                 <h4 className="text-2xl font-bold mt-1">{paidLeavesRemaining}</h4>
-                <p className="text-xs text-gray-500 mt-1">sur {allocation?.paidLeavesTotal || 25} jours</p>
+                <p className="text-xs text-gray-500 mt-1">sur {allocation?.paidLeavesTotal || 0} jours</p>
               </div>
               <div className="p-2 rounded-full bg-green-100">
                 <Calendar className="h-5 w-5 text-green-600" />
@@ -167,13 +162,13 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
           </CardContent>
         </Card>
         
-        <Card className="border rounded-lg overflow-hidden shadow-sm">
+        <Card className="border rounded-lg shadow-sm">
           <CardContent className="p-6">
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-gray-500">RTT disponibles</p>
                 <h4 className="text-2xl font-bold mt-1">{rttRemaining}</h4>
-                <p className="text-xs text-gray-500 mt-1">sur {allocation?.rttTotal || 12} jours</p>
+                <p className="text-xs text-gray-500 mt-1">sur {allocation?.rttTotal || 0} jours</p>
               </div>
               <div className="p-2 rounded-full bg-amber-100">
                 <Calendar className="h-5 w-5 text-amber-600" />
@@ -183,16 +178,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
         </Card>
       </div>
 
-      {loading ? (
-        <Card className="border rounded-lg shadow-sm">
-          <CardContent className="p-6 space-y-3">
-            <Skeleton className="h-6 w-1/2 rounded" />
-            <Skeleton className="h-12 w-full rounded" />
-            <Skeleton className="h-12 w-full rounded" />
-            <Skeleton className="h-12 w-full rounded" />
-          </CardContent>
-        </Card>
-      ) : error ? (
+      {error ? (
         <Card className="border rounded-lg shadow-sm">
           <CardContent className="text-center py-10">
             <div className="text-red-500 mb-2">Une erreur est survenue lors du chargement des congés</div>
@@ -215,7 +201,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
           </CardContent>
         </Card>
       ) : (
-        <Card className="border rounded-lg overflow-hidden shadow-sm">
+        <Card className="border rounded-lg shadow-sm">
           <CardHeader className="bg-gray-50 pb-2">
             <CardTitle className="text-lg">Historique des congés</CardTitle>
           </CardHeader>
