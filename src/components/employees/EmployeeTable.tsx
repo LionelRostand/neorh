@@ -1,36 +1,12 @@
 
 import React from 'react';
-import {
-  Edit,
-  Trash2,
-  Download,
-  MoreHorizontal,
-  Mail,
-  Phone,
-  Building2,
-  Calendar,
-  Eye
-} from 'lucide-react';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
 import { 
   Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+  TableBody
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Employee } from '@/types/employee';
+import EmployeeTableHead from './table/EmployeeTableHead';
+import EmployeeTableRow from './table/EmployeeTableRow';
 
 interface EmployeeTableProps {
   employees: Employee[];
@@ -55,149 +31,35 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
   handleDelete,
   handleView
 }) => {
-  const getStatusBadge = (status: Employee['status']) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-500 hover:bg-green-600">Actif</Badge>;
-      case 'onLeave':
-        return <Badge className="bg-amber-500 hover:bg-amber-600">En congé</Badge>;
-      case 'inactive':
-        return <Badge className="bg-red-500 hover:bg-red-600">Inactif</Badge>;
-      default:
-        return <Badge>Inconnu</Badge>;
-    }
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  // Utiliser un Set pour suivre les employés déjà affichés et éviter les doublons
+  // Use a Set to track employees already displayed and avoid duplicates
   const renderedEmployees = new Set<string>();
 
   return (
     <div className="border rounded-md overflow-hidden">
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[60px]">Photo</TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort('name')}>
-              Nom
-              {sortField === 'name' && (
-                <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-              )}
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort('email')}>
-              Email
-              {sortField === 'email' && (
-                <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-              )}
-            </TableHead>
-            <TableHead className="hidden md:table-cell cursor-pointer" onClick={() => handleSort('department')}>
-              Département
-              {sortField === 'department' && (
-                <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-              )}
-            </TableHead>
-            <TableHead className="hidden md:table-cell">Statut</TableHead>
-            <TableHead className="hidden md:table-cell cursor-pointer" onClick={() => handleSort('startDate')}>
-              Date d'embauche
-              {sortField === 'startDate' && (
-                <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-              )}
-            </TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+        <EmployeeTableHead
+          sortField={sortField}
+          sortDirection={sortDirection}
+          handleSort={handleSort}
+        />
         <TableBody>
           {employees.map((employee) => {
-            // Vérifier si cet employé a déjà été affiché
+            // Skip duplicates
             if (renderedEmployees.has(employee.id)) {
-              return null; // Ne pas afficher les doublons
+              return null;
             }
             
-            // Ajouter l'ID à la liste des employés déjà affichés
+            // Add the ID to the list of employees already displayed
             renderedEmployees.add(employee.id);
             
             return (
-              <TableRow key={employee.id}>
-                <TableCell>
-                  <Avatar>
-                    <AvatarImage src={employee.photoUrl} />
-                    <AvatarFallback>{getInitials(employee.name || '')}</AvatarFallback>
-                  </Avatar>
-                </TableCell>
-                <TableCell className="font-medium">
-                  {employee.name}
-                  <div className="text-sm text-muted-foreground md:hidden">
-                    {employee.position}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center">
-                    <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                    {employee.email}
-                  </div>
-                  <div className="md:hidden flex items-center mt-1">
-                    <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                    {employee.phone}
-                  </div>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <div className="flex items-center">
-                    <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
-                    {employee.department}
-                  </div>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  {getStatusBadge(employee.status)}
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                    {employee.startDate}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Ouvrir le menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleView(employee.id)}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        Voir
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleEdit(employee.id)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Modifier
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Download className="mr-2 h-4 w-4" />
-                        Exporter
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => handleDelete(employee.id)}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Supprimer
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
+              <EmployeeTableRow
+                key={employee.id}
+                employee={employee}
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+                handleView={handleView}
+              />
             );
           })}
         </TableBody>
