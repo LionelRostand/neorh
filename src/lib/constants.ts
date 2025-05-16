@@ -23,6 +23,7 @@ export interface CollectionTypes {
   hr_contracts: any;
   hr_documents: any;
   hr_trainings: any;
+  hr_leave_allocations: any;
 }
 
 export type Leave = {
@@ -35,6 +36,18 @@ export type Leave = {
   comment?: string;
   createdAt?: string;
   managerId?: string; // ID du responsable qui doit approuver la demande
+}
+
+export type LeaveAllocation = {
+  id?: string;
+  employeeId: string;
+  year: number;
+  paidLeavesTotal: number;
+  paidLeavesUsed: number;
+  rttTotal: number;
+  rttUsed: number;
+  updatedAt: string;
+  updatedBy?: string;
 }
 
 export type Badge = {

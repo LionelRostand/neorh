@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import NewLeaveRequestForm from '@/components/leaves/NewLeaveRequestForm';
 import { format, differenceInDays } from 'date-fns';
+import LeaveAllocationManager from '@/components/leaves/LeaveAllocationManager';
 
 interface EmployeeLeavesProps {
   employee: Employee;
@@ -70,7 +71,16 @@ const getDateDifference = (startDate: string, endDate: string): number => {
 };
 
 const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
-  const { leaves, loading, error, totalDays, getLeaveTypeLabel } = useEmployeeLeaves(employee.id);
+  const { 
+    leaves, 
+    loading, 
+    error, 
+    totalDays, 
+    getLeaveTypeLabel,
+    allocation,
+    allocationLoading,
+    updateLeaveAllocation
+  } = useEmployeeLeaves(employee.id);
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
   
   console.log("Employee ID:", employee.id);
@@ -78,21 +88,14 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
   console.log("Loading state:", loading);
   console.log("Error state:", error);
   
-  // Congés payés et RTT disponibles (à titre d'exemple - à adapter selon la logique métier)
-  const paidLeavesPerYear = 25; // Congés payés standard en France
-  const rttDaysPerYear = 12; // RTT standard (à adapter)
-  
-  // Calculer les jours pris par type
-  const paidLeavesTaken = leaves
-    .filter(leave => (leave.type === 'paid' || leave.type === 'annual') && leave.status === 'approved')
-    .reduce((sum, leave) => sum + getDateDifference(leave.startDate, leave.endDate), 0);
-  
-  const rttTaken = leaves
-    .filter(leave => leave.type === 'rtt' && leave.status === 'approved')
-    .reduce((sum, leave) => sum + getDateDifference(leave.startDate, leave.endDate), 0);
-  
-  const paidLeavesRemaining = paidLeavesPerYear - paidLeavesTaken;
-  const rttRemaining = rttDaysPerYear - rttTaken;
+  // Calculer les congés restants à partir des allocations
+  const paidLeavesRemaining = allocation 
+    ? allocation.paidLeavesTotal - allocation.paidLeavesUsed
+    : 25;
+
+  const rttRemaining = allocation
+    ? allocation.rttTotal - allocation.rttUsed
+    : 12;
 
   const handleNewLeaveRequest = () => {
     setShowNewLeaveForm(true);
@@ -123,6 +126,14 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
         </Button>
       </div>
 
+      {/* Gestionnaire d'allocations de congés */}
+      <LeaveAllocationManager 
+        allocation={allocation}
+        isLoading={allocationLoading}
+        onUpdate={updateLeaveAllocation}
+        employeeId={employee.id}
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
@@ -144,7 +155,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
               <div>
                 <p className="text-sm text-gray-500">Congés payés disponibles</p>
                 <h4 className="text-2xl font-bold">{paidLeavesRemaining}</h4>
-                <p className="text-xs text-gray-500">sur {paidLeavesPerYear} jours/an</p>
+                <p className="text-xs text-gray-500">sur {allocation?.paidLeavesTotal || 25} jours</p>
               </div>
               <div className="p-2 rounded-full bg-green-100">
                 <Calendar className="h-5 w-5 text-green-600" />
@@ -159,7 +170,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
               <div>
                 <p className="text-sm text-gray-500">RTT disponibles</p>
                 <h4 className="text-2xl font-bold">{rttRemaining}</h4>
-                <p className="text-xs text-gray-500">sur {rttDaysPerYear} jours/an</p>
+                <p className="text-xs text-gray-500">sur {allocation?.rttTotal || 12} jours</p>
               </div>
               <div className="p-2 rounded-full bg-amber-100">
                 <Calendar className="h-5 w-5 text-amber-600" />

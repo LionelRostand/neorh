@@ -4,12 +4,32 @@ import { Leave } from '@/lib/constants';
 import { useFirestore } from './useFirestore';
 import { toast } from '@/components/ui/use-toast';
 
+export interface LeaveAllocation {
+  id?: string;
+  employeeId: string;
+  year: number;
+  paidLeavesTotal: number;
+  paidLeavesUsed: number;
+  rttTotal: number;
+  rttUsed: number;
+  updatedAt: string;
+  updatedBy?: string;
+}
+
 export const useEmployeeLeaves = (employeeId: string) => {
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [totalDays, setTotalDays] = useState(0);
+  const [allocation, setAllocation] = useState<LeaveAllocation | null>(null);
+  const [allocationLoading, setAllocationLoading] = useState(true);
+  
   const { search } = useFirestore<Leave>('hr_leaves');
+  const { 
+    search: searchAllocation,
+    add: addAllocation,
+    update: updateAllocation
+  } = useFirestore<LeaveAllocation>('hr_leave_allocations');
 
   // Utiliser useCallback pour mémoriser la fonction fetchEmployeeLeaves
   const fetchEmployeeLeaves = useCallback(async () => {
@@ -62,9 +82,84 @@ export const useEmployeeLeaves = (employeeId: string) => {
     }
   }, [employeeId, search]);
 
+  // Charger les allocations de congés pour l'employé
+  const fetchAllocation = useCallback(async () => {
+    if (!employeeId) {
+      setAllocationLoading(false);
+      return;
+    }
+
+    setAllocationLoading(true);
+    try {
+      // Récupérer l'allocation pour l'année en cours
+      const currentYear = new Date().getFullYear();
+      const result = await searchAllocation('employeeId', employeeId);
+      
+      let currentAllocation = result.docs?.find(doc => doc.year === currentYear);
+      
+      if (currentAllocation) {
+        setAllocation(currentAllocation);
+      } else {
+        // Créer une allocation par défaut si elle n'existe pas
+        const defaultAllocation: Omit<LeaveAllocation, 'id'> = {
+          employeeId,
+          year: currentYear,
+          paidLeavesTotal: 25, // Valeur par défaut en France
+          paidLeavesUsed: 0,
+          rttTotal: 12, // Valeur par défaut (à adapter)
+          rttUsed: 0,
+          updatedAt: new Date().toISOString()
+        };
+        
+        const newAllocationId = await addAllocation(defaultAllocation);
+        setAllocation({ ...defaultAllocation, id: newAllocationId });
+      }
+    } catch (err) {
+      console.error("Error fetching leave allocations:", err);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les allocations de congés.",
+        variant: "destructive"
+      });
+    } finally {
+      setAllocationLoading(false);
+    }
+  }, [employeeId, searchAllocation, addAllocation]);
+
+  // Mettre à jour les allocations de congés
+  const updateLeaveAllocation = async (updates: Partial<LeaveAllocation>) => {
+    if (!allocation?.id) return;
+    
+    try {
+      await updateAllocation(allocation.id, {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      });
+      
+      // Mettre à jour l'état local
+      setAllocation(prev => prev ? { ...prev, ...updates } : null);
+      
+      toast({
+        title: "Succès",
+        description: "Les allocations de congés ont été mises à jour.",
+      });
+      
+      return true;
+    } catch (err) {
+      console.error("Error updating leave allocations:", err);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour les allocations de congés.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
   useEffect(() => {
     fetchEmployeeLeaves();
-  }, [fetchEmployeeLeaves]);
+    fetchAllocation();
+  }, [fetchEmployeeLeaves, fetchAllocation]);
 
   // Ajouter une fonction pour traduire les types de congés
   const getLeaveTypeLabel = (type: string): string => {
@@ -85,7 +180,10 @@ export const useEmployeeLeaves = (employeeId: string) => {
     loading,
     error,
     totalDays,
+    allocation,
+    allocationLoading,
     getLeaveTypeLabel,
-    refetch: fetchEmployeeLeaves
+    refetch: fetchEmployeeLeaves,
+    updateLeaveAllocation
   };
 };
