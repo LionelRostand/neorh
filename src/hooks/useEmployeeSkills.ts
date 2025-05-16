@@ -49,17 +49,22 @@ export function useEmployeeSkills(employeeId: string) {
 
   const addSkill = useCallback(async (skill: Omit<Skill, 'id' | 'employeeId'>) => {
     try {
-      const newSkill = {
+      const skillData = {
         ...skill,
         employeeId,
         createdAt: new Date().toISOString()
       };
       
-      const result = await add(newSkill);
-      if (result) {
-        // Mettre à jour le state local au lieu de refaire un appel API complet
-        setSkills(prevSkills => [...prevSkills, { ...newSkill, id: result }]);
-        return result;
+      const resultId = await add(skillData);
+      if (resultId) {
+        // Correction du typage pour éviter l'erreur TS2345
+        const newSkill: Skill = {
+          ...skillData,
+          id: resultId
+        };
+        
+        setSkills(prevSkills => [...prevSkills, newSkill]);
+        return resultId;
       }
     } catch (err) {
       toast({

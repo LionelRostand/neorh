@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, memo, useMemo } from 'react';
 import { Employee } from '@/types/employee';
 import { Skill } from '@/types/skill';
 import { useEmployeeSkills } from '@/hooks/useEmployeeSkills';
@@ -55,8 +55,8 @@ const EmployeeSkills: React.FC<EmployeeSkillsProps> = ({ employee }) => {
     }
   }, [skills]);
 
-  // Grouper les compétences par catégorie
-  const getCategorizedSkills = useCallback(() => {
+  // Grouper les compétences par catégorie avec useMemo pour éviter les recalculs inutiles
+  const categorizedSkills = useMemo(() => {
     const categorized: { [key: string]: Skill[] } = {};
     
     skills.forEach(skill => {
@@ -69,8 +69,6 @@ const EmployeeSkills: React.FC<EmployeeSkillsProps> = ({ employee }) => {
     
     return categorized;
   }, [skills]);
-  
-  const categorizedSkills = getCategorizedSkills();
   
   if (loading) {
     return (
