@@ -20,12 +20,19 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
 
     try {
       // Récupérer les informations de l'employé pour obtenir son managerId
-      const employeeRef = doc(db, 'hr_employees', data.employeeId);
-      const employeeSnap = await getDoc(employeeRef);
-      
       let managerId = undefined;
-      if (employeeSnap.exists()) {
-        managerId = employeeSnap.data().managerId;
+
+      if (data.employeeId) {
+        try {
+          const employeeRef = doc(db, 'hr_employees', data.employeeId);
+          const employeeSnap = await getDoc(employeeRef);
+          
+          if (employeeSnap.exists()) {
+            managerId = employeeSnap.data().managerId;
+          }
+        } catch (err) {
+          console.error("Erreur lors de la récupération des données de l'employé:", err);
+        }
       }
 
       // Formater les dates en string pour Firestore

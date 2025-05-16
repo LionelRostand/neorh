@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
 import { useCollection } from "@/hooks/useCollection";
@@ -13,17 +12,16 @@ const Conges = () => {
   const [loading, setLoading] = useState(true);
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
   const { getAll, isLoading, error, update, search } = useCollection<'hr_leaves'>();
-  const { user } = useAuth(); // Now this import exists
+  const { user } = useAuth();
 
+  // Utiliser un useEffect avec une dépendance vide pour éviter les boucles
   useEffect(() => {
     fetchLeaves();
-  }, []);
+  }, []); // <-- Tableau de dépendances vide pour exécuter une seule fois
 
   const fetchLeaves = async () => {
     setLoading(true);
     try {
-      // Pour l'instant, récupère toutes les demandes
-      // Dans un système réel, filtrer selon le rôle de l'utilisateur (employé vs manager)
       const result = await getAll();
       if (result.docs) {
         // Ensure we map the data to match the Leave type
