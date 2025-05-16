@@ -54,7 +54,7 @@ export function DaysAllocationField({
                   if (onChange) onChange(newValue);
                 }}
                 className="h-9 text-center w-16"
-                value={Number(field.value || 0)}
+                value={field.value === undefined || field.value === null ? 0 : Number(field.value)}
               />
             </FormControl>
             <Button
@@ -62,7 +62,7 @@ export function DaysAllocationField({
               variant="outline"
               size="icon"
               onClick={() => {
-                const newValue = Number(field.value || 0) + 1;
+                const newValue = Number(field.value) + 1;
                 form.setValue(name as FieldPath<LeaveFormValues>, newValue);
                 if (onChange) onChange(newValue);
               }}
