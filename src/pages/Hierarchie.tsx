@@ -62,7 +62,7 @@ const Hierarchie = () => {
           iconColor="text-blue-500"
         />
         <HierarchyStatCard 
-          title="Managers" 
+          title="Responsables" 
           value={managerCount} 
           icon={<Network className="h-8 w-8" />} 
           bgColor="bg-indigo-50"
