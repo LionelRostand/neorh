@@ -91,18 +91,18 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
           
           if (data.type === 'paid') {
             // Pour les congés payés, gérer la règle des 5 jours
-            const paidLeavesTotal = data.daysAllocated || 0;
+            const paidLeavesTotal = data.paidDaysAllocated || 0;
             allocationData = {
               ...allocationData,
               paidLeavesTotal,
-              paidLeavesUsed: 0
+              paidLeavesUsed: existingAllocation?.paidLeavesUsed || 0
             };
           } else if (data.type === 'rtt') {
             // Pour les RTT, simplement attribuer le nombre de jours
             allocationData = {
               ...allocationData,
-              rttTotal: data.daysAllocated || 0,
-              rttUsed: 0
+              rttTotal: data.rttDaysAllocated || 0,
+              rttUsed: existingAllocation?.rttUsed || 0
             };
           }
           
@@ -110,7 +110,18 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
           if (existingAllocation) {
             await updateDoc(doc(db, 'hr_leave_allocations', existingAllocation.id), allocationData);
           } else {
-            await addAllocation(allocationData as LeaveAllocation);
+            // Pour une nouvelle allocation, initialiser tous les champs
+            const newAllocation: LeaveAllocation = {
+              employeeId: data.employeeId,
+              year: currentYear,
+              paidLeavesTotal: data.type === 'paid' ? (data.paidDaysAllocated || 0) : 0,
+              paidLeavesUsed: 0,
+              rttTotal: data.type === 'rtt' ? (data.rttDaysAllocated || 0) : 0,
+              rttUsed: 0,
+              updatedAt: new Date().toISOString(),
+              updatedBy: user?.uid
+            };
+            await addAllocation(newAllocation);
           }
           
           // Programmer une notification pour le manager lorsque les congés expirent
@@ -131,7 +142,7 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
             });
             
             // Pour les congés payés, gérer la règle des 5 jours reportés
-            if (data.type === 'paid' && (data.daysAllocated || 0) > 5) {
+            if (data.type === 'paid' && (data.paidDaysAllocated || 0) > 5) {
               const nextPeriodNotif = {
                 userId: managerId,
                 title: `Report de congés de ${employee?.name || 'un employé'}`,

@@ -159,6 +159,6 @@ const Conges = () => {
       />
     </div>
   );
-}
+};
 
 export default Conges;
