@@ -23,18 +23,26 @@ const ViewCompanyDialog = ({ companyId, open, onOpenChange }: ViewCompanyDialogP
   useEffect(() => {
     // Only fetch when dialog is open and we have a valid ID
     if (open && companyId) {
-      console.log("Fetching company data for ID:", companyId);
+      console.log("ViewCompanyDialog: Fetching company data for ID:", companyId);
       fetchCompany(companyId);
     }
     
     // Clean up state when dialog closes
     return () => {
       if (!open) {
-        console.log("Resetting company details state");
+        console.log("ViewCompanyDialog: Resetting company details state");
         resetState();
       }
     };
   }, [open, companyId, fetchCompany, resetState]);
+
+  console.log("ViewCompanyDialog: Current state:", { 
+    companyId, 
+    open, 
+    isLoading, 
+    hasError: !!error, 
+    hasCompany: !!company 
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

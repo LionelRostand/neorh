@@ -16,6 +16,8 @@ interface CompanyDetailsProps {
 }
 
 const CompanyDetails = ({ company, onClose }: CompanyDetailsProps) => {
+  console.log("Rendering CompanyDetails with data:", company);
+
   const handlePrint = () => {
     try {
       exportCompanyToPdf(company);

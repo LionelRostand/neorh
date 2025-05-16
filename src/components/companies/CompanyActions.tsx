@@ -38,6 +38,8 @@ const CompanyActions = ({
       return;
     }
     
+    console.log("Ouvrir la vue détaillée de l'entreprise:", companyId);
+    
     if (onDetails) {
       onDetails(companyId);
     }

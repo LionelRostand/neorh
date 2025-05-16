@@ -28,8 +28,12 @@ export const useCompanyDetails = (): UseCompanyDetailsResult => {
       return;
     }
     
+    console.log("Tentative de récupération de l'entreprise avec ID:", id);
+    
     try {
       const result = await getById(id);
+      
+      console.log("Résultat de la récupération:", result);
       
       if (result) {
         // Make sure we have a proper company object with required fields
@@ -39,8 +43,10 @@ export const useCompanyDetails = (): UseCompanyDetailsResult => {
           name: result.name || 'Entreprise sans nom'
         };
         
+        console.log("Entreprise traitée:", processedCompany);
         setCompany(processedCompany);
       } else {
+        console.error("Entreprise non trouvée pour l'ID:", id);
         setError(new Error("Entreprise non trouvée"));
         toast({
           title: "Erreur",

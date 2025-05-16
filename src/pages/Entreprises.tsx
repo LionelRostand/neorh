@@ -33,11 +33,16 @@ const Entreprises = () => {
 
   // Filter companies based on search term
   const filteredCompanies = useMemo(() => 
-    companies.filter(company => 
-      company.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      company.industry?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      company.type?.toLowerCase().includes(searchTerm.toLowerCase())
-    ), [companies, searchTerm]);
+    companies.filter(company => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        company.name?.toLowerCase().includes(searchLower) || 
+        company.industry?.toLowerCase().includes(searchLower) ||
+        company.type?.toLowerCase().includes(searchLower)
+      );
+    }), [companies, searchTerm]);
+
+  console.log("Entreprises rendues:", filteredCompanies.length);
 
   // Si une erreur se produit, afficher un message
   if (error) {

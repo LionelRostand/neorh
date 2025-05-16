@@ -27,10 +27,10 @@ export const useCompaniesData = () => {
         
         return {
           id: doc.id,
-          name: data.name || '',
+          name: data.name || 'Entreprise inconnue',
           industry: data.industry || '',
           type: data.type || '',
-          status: data.status || '',
+          status: data.status || 'inactive',
           logoUrl: data.logoUrl || '',
           email: data.email || '',
           phone: data.phone || '',
@@ -40,9 +40,13 @@ export const useCompaniesData = () => {
           postalCode: data.postalCode || '',
           country: data.country || '',
           description: data.description || '',
-          registrationDate: data.registrationDate || '',
+          registrationDate: data.registrationDate || null,
           // Support pour l'ancien format de logo
-          logo: data.logo || undefined
+          logo: data.logo ? {
+            base64: data.logo.base64 || '',
+            type: data.logo.type || '',
+            name: data.logo.name || '',
+          } : undefined
         } as Company;
       });
       
