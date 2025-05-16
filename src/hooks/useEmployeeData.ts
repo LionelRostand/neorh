@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Employee } from '@/types/employee';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, DocumentData } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from '@/components/ui/use-toast';
 import { useDepartmentsData } from '@/hooks/useDepartmentsData';
@@ -36,12 +36,12 @@ export const useEmployeeData = () => {
       const employeesData: Employee[] = [];
       
       // Traitements parallèles avec Promise.all pour les données des départements
-      const employeePromises = employeesSnapshot.docs.map(async (doc) => {
+      const employeePromises = employeesSnapshot.docs.map(async (docSnapshot) => {
         // Skip if we've already processed this ID
-        if (processedEmployeeIds.has(doc.id)) return null;
+        if (processedEmployeeIds.has(docSnapshot.id)) return null;
         
-        processedEmployeeIds.add(doc.id);
-        const data = doc.data();
+        processedEmployeeIds.add(docSnapshot.id);
+        const data = docSnapshot.data();
         
         // Find department name based on department ID
         let departmentName = data.department || '';
@@ -52,9 +52,11 @@ export const useEmployeeData = () => {
           } else if (data.department) {
             // Si on n'a pas trouvé le département dans la liste, essayons de le récupérer directement
             try {
-              const deptDoc = await getDoc(doc(db, 'hr_departments', data.department));
-              if (deptDoc.exists()) {
-                departmentName = deptDoc.data().name || data.department;
+              const deptDocRef = doc(db, 'hr_departments', data.department);
+              const deptDocSnap = await getDoc(deptDocRef);
+              if (deptDocSnap.exists()) {
+                const deptData = deptDocSnap.data();
+                departmentName = deptData.name || data.department;
               }
             } catch (err) {
               console.error("Erreur lors de la récupération du département:", err);
@@ -63,7 +65,7 @@ export const useEmployeeData = () => {
         }
         
         return {
-          id: doc.id,
+          id: docSnapshot.id,
           name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
           position: data.position || '',
           department: departmentName,
