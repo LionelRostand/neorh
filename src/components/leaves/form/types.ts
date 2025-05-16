@@ -1,5 +1,4 @@
 
-
 export interface LeaveFormValues {
   employeeId: string;
   type: string;
@@ -8,4 +7,3 @@ export interface LeaveFormValues {
   comment: string;
   daysAllocated?: number;
 }
-

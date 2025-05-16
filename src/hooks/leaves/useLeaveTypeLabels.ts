@@ -1,19 +1,14 @@
 
-export const useLeaveTypeLabels = () => {
-  // Fonction pour traduire les types de congés
-  const getLeaveTypeLabel = (type: string): string => {
-    switch (type) {
-      case 'paid': return 'Congé payé';
-      case 'rtt': return 'RTT';
-      case 'sick': return 'Congé Maladie';
-      case 'family': return 'Congé Familial';
-      case 'maternity': return 'Congé Maternité';
-      case 'paternity': return 'Congé Paternité';
-      case 'annual': return 'Congé annuel';
-      default: return type;
-    }
-  };
+import { useState, useCallback } from 'react';
+import { leaveTypes } from '@/components/leaves/form/LeaveTypeField';
 
+export const useLeaveTypeLabels = () => {
+  // Mémoriser les étiquettes pour éviter des créations inutiles
+  const getLeaveTypeLabel = useCallback((type: string) => {
+    const foundType = leaveTypes.find(t => t.id === type);
+    return foundType ? foundType.label : 'Congé';
+  }, []);
+  
   return {
     getLeaveTypeLabel
   };
