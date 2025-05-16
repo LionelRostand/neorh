@@ -57,10 +57,10 @@ export function useEmployeeSkills(employeeId: string) {
       
       const resultId = await add(skillData);
       if (resultId) {
-        // Fix the typing issue by correctly typing the new skill
+        // Fix the typing issue by ensuring resultId is treated as string
         const newSkill: Skill = {
           ...skillData,
-          id: resultId as string // Ensuring id is treated as string
+          id: resultId
         };
         
         setSkills(prevSkills => [...prevSkills, newSkill]);
