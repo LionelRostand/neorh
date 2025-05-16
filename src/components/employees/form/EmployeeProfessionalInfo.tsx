@@ -18,7 +18,7 @@ import {
 import { UseFormReturn } from 'react-hook-form';
 import { EmployeeFormValues } from './types';
 import { Company } from '@/types/company';
-import { Department } from '@/hooks/useDepartmentsData';
+import { Department } from '@/types/firebase';
 import { Employee } from '@/types/employee';
 
 interface EmployeeProfessionalInfoProps {
