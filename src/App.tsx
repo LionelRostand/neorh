@@ -4,7 +4,9 @@ import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./hooks/useAuth";
 import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
 import Employes from "./pages/Employes";
 import Badges from "./pages/Badges";
@@ -23,36 +25,114 @@ import Entreprises from "./pages/Entreprises";
 import Rapports from "./pages/Rapports";
 import Parametres from "./pages/Parametres";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <SonnerToaster />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout><Index /></Layout>} />
-          <Route path="/employes" element={<Layout><Employes /></Layout>} />
-          <Route path="/badges" element={<Layout><Badges /></Layout>} />
-          <Route path="/hierarchie" element={<Layout><Hierarchie /></Layout>} />
-          <Route path="/feuilles-de-temps" element={<Layout><FeuillesDeTemps /></Layout>} />
-          <Route path="/presences" element={<Layout><Presences /></Layout>} />
-          <Route path="/conges" element={<Layout><Conges /></Layout>} />
-          <Route path="/contrats" element={<Layout><Contrats /></Layout>} />
-          <Route path="/documents" element={<Layout><DocumentsRH /></Layout>} />
-          <Route path="/departements" element={<Layout><Departements /></Layout>} />
-          <Route path="/evaluations" element={<Layout><Evaluations /></Layout>} />
-          <Route path="/formations" element={<Layout><Formations /></Layout>} />
-          <Route path="/salaires" element={<Layout><Salaires /></Layout>} />
-          <Route path="/recrutement" element={<Layout><Recrutement /></Layout>} />
-          <Route path="/entreprises" element={<Layout><Entreprises /></Layout>} />
-          <Route path="/rapports" element={<Layout><Rapports /></Layout>} />
-          <Route path="/parametres" element={<Layout><Parametres /></Layout>} />
-          <Route path="*" element={<Layout><NotFound /></Layout>} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <Toaster />
+        <SonnerToaster />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            
+            {/* Protected Routes */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Layout><Index /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/employes" element={
+              <ProtectedRoute>
+                <Layout><Employes /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/badges" element={
+              <ProtectedRoute>
+                <Layout><Badges /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/hierarchie" element={
+              <ProtectedRoute>
+                <Layout><Hierarchie /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/feuilles-de-temps" element={
+              <ProtectedRoute>
+                <Layout><FeuillesDeTemps /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/presences" element={
+              <ProtectedRoute>
+                <Layout><Presences /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/conges" element={
+              <ProtectedRoute>
+                <Layout><Conges /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/contrats" element={
+              <ProtectedRoute>
+                <Layout><Contrats /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/documents" element={
+              <ProtectedRoute>
+                <Layout><DocumentsRH /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/departements" element={
+              <ProtectedRoute>
+                <Layout><Departements /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/evaluations" element={
+              <ProtectedRoute>
+                <Layout><Evaluations /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/formations" element={
+              <ProtectedRoute>
+                <Layout><Formations /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/salaires" element={
+              <ProtectedRoute>
+                <Layout><Salaires /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/recrutement" element={
+              <ProtectedRoute>
+                <Layout><Recrutement /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/entreprises" element={
+              <ProtectedRoute>
+                <Layout><Entreprises /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/rapports" element={
+              <ProtectedRoute>
+                <Layout><Rapports /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/parametres" element={
+              <ProtectedRoute>
+                <Layout><Parametres /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={
+              <ProtectedRoute>
+                <Layout><NotFound /></Layout>
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
