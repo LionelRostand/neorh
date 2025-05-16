@@ -1,5 +1,7 @@
 
 import { useState } from 'react';
+import { doc, deleteDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 
 export const useEmployeeDelete = () => {
@@ -9,16 +11,11 @@ export const useEmployeeDelete = () => {
   const deleteEmployee = async (id: string) => {
     try {
       setIsProcessing(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // In a real app, this would be an API call:
-      // const response = await fetch(`/api/employees/${id}`, {
-      //   method: 'DELETE',
-      // });
-      // const data = await response.json();
+      // Delete the employee from Firebase
+      await deleteDoc(doc(db, 'hr_employees', id));
       
-      console.log('Deleting employee:', id);
+      console.log('Employee deleted successfully:', id);
       showSuccessToast("Employé supprimé avec succès");
       return true;
     } catch (error) {
@@ -34,18 +31,15 @@ export const useEmployeeDelete = () => {
   const bulkDelete = async (ids: string[]) => {
     try {
       setIsProcessing(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
       
-      // In a real app, this would be an API call:
-      // const response = await fetch(`/api/employees/bulk-delete`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ ids }),
-      // });
-      // const data = await response.json();
+      // Delete multiple employees from Firebase
+      const deletePromises = ids.map(id => 
+        deleteDoc(doc(db, 'hr_employees', id))
+      );
       
-      console.log('Bulk deleting employees:', ids);
+      await Promise.all(deletePromises);
+      
+      console.log('Bulk deleted employees:', ids);
       showSuccessToast("Employés supprimés avec succès");
       return true;
     } catch (error) {

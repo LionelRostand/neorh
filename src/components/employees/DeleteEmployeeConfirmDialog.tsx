@@ -10,8 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from '@/components/ui/use-toast';
-import { useEmployeeActions } from '@/hooks/useEmployeeActions';
+import { useEmployeeDelete } from '@/hooks/employee/useEmployeeDelete';
 import { Employee } from '@/types/employee';
 
 interface DeleteEmployeeConfirmDialogProps {
@@ -27,7 +26,7 @@ const DeleteEmployeeConfirmDialog: React.FC<DeleteEmployeeConfirmDialogProps> = 
   employee,
   onSuccess
 }) => {
-  const { deleteEmployee, isProcessing } = useEmployeeActions();
+  const { deleteEmployee, isProcessing } = useEmployeeDelete();
 
   const handleDelete = async () => {
     if (!employee?.id) return;
@@ -36,21 +35,11 @@ const DeleteEmployeeConfirmDialog: React.FC<DeleteEmployeeConfirmDialogProps> = 
       const success = await deleteEmployee(employee.id);
       
       if (success) {
-        toast({
-          title: "Employé supprimé",
-          description: "L'employé a été supprimé avec succès."
-        });
-        
         if (onSuccess) onSuccess();
         onOpenChange(false);
       }
     } catch (error) {
       console.error("Erreur lors de la suppression:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de supprimer l'employé.",
-        variant: "destructive"
-      });
     }
   };
 

@@ -25,7 +25,7 @@ const Employes = () => {
     }
   }, [error]);
 
-  const handleAddSuccess = () => {
+  const handleRefresh = () => {
     refetch();
   };
 
@@ -47,7 +47,7 @@ const Employes = () => {
           <EmployeesProfiles 
             employees={employees} 
             isLoading={isLoading}
-            onRefresh={refetch}
+            onRefresh={handleRefresh}
           />
         </CardContent>
       </Card>
@@ -55,7 +55,7 @@ const Employes = () => {
       <AddEmployeeDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
-        onSuccess={handleAddSuccess}
+        onSuccess={handleRefresh}
       />
     </div>
   );
