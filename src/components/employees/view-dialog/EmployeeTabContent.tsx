@@ -92,9 +92,15 @@ export const InformationsTab: React.FC<InformationTabProps> = ({ employee }) => 
       <div className="grid md:grid-cols-2 gap-8">
         <div>
           <div className="flex items-center gap-4 mb-8">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={employee.photoUrl} alt={employee.name} />
-              <AvatarFallback className="text-lg">{getInitials(employee.name)}</AvatarFallback>
+            <Avatar className="h-24 w-24 border-2 border-gray-200">
+              <AvatarImage 
+                src={employee.photoUrl} 
+                alt={employee.name} 
+                className="object-cover"
+              />
+              <AvatarFallback className="text-lg bg-gray-100">
+                {getInitials(employee.name)}
+              </AvatarFallback>
             </Avatar>
             <div>
               <h4 className="text-lg font-medium">{employee.name}</h4>
