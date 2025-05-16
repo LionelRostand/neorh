@@ -1,5 +1,7 @@
 
 import { useState } from 'react';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { showErrorToast, showSuccessToast } from '@/utils/toastUtils';
 import type { Employee } from '@/types/employeeTypes';
 
@@ -10,18 +12,14 @@ export const useEmployeeUpdate = () => {
   const updateEmployee = async (id: string, employeeData: Partial<Employee>) => {
     try {
       setIsProcessing(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('Updating employee in Firebase:', id, employeeData);
       
-      // In a real app, this would be an API call:
-      // const response = await fetch(`/api/employees/${id}`, {
-      //   method: 'PATCH',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(employeeData),
-      // });
-      // const data = await response.json();
+      // Update in Firebase
+      await updateDoc(doc(db, 'hr_employees', id), {
+        ...employeeData,
+        updatedAt: new Date().toISOString()
+      });
       
-      console.log('Updating employee:', id, employeeData);
       showSuccessToast("Employé mis à jour avec succès");
       return true;
     } catch (error) {

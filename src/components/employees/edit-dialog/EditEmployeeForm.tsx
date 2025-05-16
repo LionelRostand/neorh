@@ -6,10 +6,9 @@ import { format } from 'date-fns';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
-import { useEmployeeActions } from '@/hooks/useEmployeeActions';
+import { useEmployeeUpdate } from '@/hooks/employee/useEmployeeUpdate';
 import { editEmployeeFormSchema, EmployeeEditFormValues } from './types';
 import { Employee } from '@/types/employee';
-import { Employee as EmployeeType } from '@/types/employeeTypes';
 import { EditEmployeePersonalInfo } from './EditEmployeePersonalInfo';
 import { EditEmployeeStatusInfo } from './EditEmployeeStatusInfo';
 import { DialogFooter } from '@/components/ui/dialog';
@@ -21,7 +20,7 @@ interface EditEmployeeFormProps {
 }
 
 export function EditEmployeeForm({ employee, onClose, onSuccess }: EditEmployeeFormProps) {
-  const { updateEmployee, isProcessing } = useEmployeeActions();
+  const { updateEmployee, isProcessing } = useEmployeeUpdate();
   
   const form = useForm<EmployeeEditFormValues>({
     resolver: zodResolver(editEmployeeFormSchema),
@@ -60,17 +59,21 @@ export function EditEmployeeForm({ employee, onClose, onSuccess }: EditEmployeeF
     if (!employee?.id) return;
     
     try {
-      // Convert to the expected EmployeeType format
-      const updatedEmployeeData: Partial<EmployeeType> = {
-        firstName: data.name.split(' ')[0] || '',
-        lastName: data.name.split(' ').slice(1).join(' ') || '',
+      const nameParts = data.name.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      // Prepare the employee data for Firebase
+      const updatedEmployeeData = {
+        firstName: firstName,
+        lastName: lastName,
         email: data.email,
         phone: data.phone || '',
         position: data.position,
-        department: data.department,
+        department: employee.departmentId || '', // Keep the original departmentId
         status: data.status,
-        hireDate: format(data.startDate, 'yyyy-MM-dd'),
-        avatarUrl: data.photoUrl
+        hireDate: data.startDate ? format(data.startDate, 'yyyy-MM-dd') : '',
+        photoUrl: data.photoUrl || ''
       };
 
       const success = await updateEmployee(employee.id, updatedEmployeeData);

@@ -22,13 +22,15 @@ interface EmployeeActionsProps {
   handleEdit: (employeeId: string) => void;
   handleDelete: (employeeId: string) => void;
   handleView: (employeeId: string) => void;
+  handleExport?: (employeeId: string) => void;
 }
 
 const EmployeeActions: React.FC<EmployeeActionsProps> = ({
   employeeId,
   handleEdit,
   handleDelete,
-  handleView
+  handleView,
+  handleExport
 }) => {
   return (
     <DropdownMenu>
@@ -49,10 +51,12 @@ const EmployeeActions: React.FC<EmployeeActionsProps> = ({
           <Edit className="mr-2 h-4 w-4" />
           Modifier
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Download className="mr-2 h-4 w-4" />
-          Exporter
-        </DropdownMenuItem>
+        {handleExport && (
+          <DropdownMenuItem onClick={() => handleExport(employeeId)}>
+            <Download className="mr-2 h-4 w-4" />
+            Exporter
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-red-600"

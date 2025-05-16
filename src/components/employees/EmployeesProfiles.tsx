@@ -1,6 +1,6 @@
+
 import React, { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import { useEmployeeActions } from '@/hooks/useEmployeeActions';
 import { useEmployeeFilters } from '@/hooks/useEmployeeFilters';
 import { Employee } from '@/types/employee';
 import EmployeeSearch from './EmployeeSearch';
@@ -10,7 +10,7 @@ import EmployeePagination from './EmployeePagination';
 import EmployeeTableSkeleton from './EmployeeTableSkeleton';
 import EditEmployeeDialog from './EditEmployeeDialog';
 import DeleteEmployeeConfirmDialog from './DeleteEmployeeConfirmDialog';
-import ViewEmployeeDialog from './ViewEmployeeDialog';
+import ViewEmployeeDialog from './view-dialog/ViewEmployeeDialog';
 
 interface EmployeesProfilesProps {
   employees: Employee[] | undefined;
