@@ -156,7 +156,7 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({ open, onClose
                     <SelectContent>
                       {employees.map((employee) => (
                         <SelectItem key={employee.id} value={employee.id || ""}>
-                          {employee.firstName} {employee.lastName}
+                          {employee.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
