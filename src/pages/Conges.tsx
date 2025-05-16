@@ -11,7 +11,7 @@ const Conges = () => {
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
-  const { getAll, isLoading, error } = useCollection<'hr_leaves'>();
+  const { getAll, isLoading, error, update } = useCollection<'hr_leaves'>();
 
   useEffect(() => {
     fetchLeaves();
@@ -54,12 +54,33 @@ const Conges = () => {
     setShowNewLeaveForm(true);
   };
 
-  const handleApprove = (id: string) => {
-    showSuccessToast("Demande approuvée");
+  const handleRequestSuccess = () => {
+    // Fermer le formulaire
+    setShowNewLeaveForm(false);
+    // Rafraîchir la liste des congés
+    fetchLeaves();
   };
 
-  const handleReject = (id: string) => {
-    showErrorToast("Demande refusée");
+  const handleApprove = async (id: string) => {
+    try {
+      await update(id, { status: 'approved' });
+      showSuccessToast("Demande approuvée");
+      fetchLeaves(); // Actualiser la liste après mise à jour
+    } catch (error) {
+      console.error("Erreur lors de l'approbation de la demande:", error);
+      showErrorToast("Impossible d'approuver la demande");
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    try {
+      await update(id, { status: 'rejected' });
+      showErrorToast("Demande refusée");
+      fetchLeaves(); // Actualiser la liste après mise à jour
+    } catch (error) {
+      console.error("Erreur lors du refus de la demande:", error);
+      showErrorToast("Impossible de refuser la demande");
+    }
   };
 
   const handleSearch = (query: string) => {
@@ -84,6 +105,7 @@ const Conges = () => {
       <NewLeaveRequestForm 
         open={showNewLeaveForm} 
         onClose={() => setShowNewLeaveForm(false)}
+        onSuccess={handleRequestSuccess}
       />
     </div>
   );

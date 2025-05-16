@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Leave } from "@/lib/constants";
+import { format, differenceInDays } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface LeaveTableProps {
   leaves: Leave[];
@@ -27,12 +29,45 @@ const LeaveTable = ({ leaves, loading, onApprove, onReject }: LeaveTableProps) =
     }
   };
 
-  const formatDateRange = (startDate?: string, endDate?: string) => {
-    if (!startDate) return "-";
-    if (!endDate || startDate === endDate) {
-      return `${startDate} - 0 jour`;
+  const getLeaveTypeLabel = (type: string): string => {
+    switch (type) {
+      case 'paid': return 'Congé payé';
+      case 'rtt': return 'RTT';
+      case 'sick': return 'Congé Maladie';
+      case 'family': return 'Congé Familial';
+      case 'maternity': return 'Congé Maternité';
+      case 'paternity': return 'Congé Paternité';
+      case 'annual': return 'Congé annuel';
+      default: return type;
     }
-    return `${startDate} - ${endDate}`;
+  };
+
+  const formatDateRange = (startDate: string, endDate: string) => {
+    try {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const days = differenceInDays(end, start) + 1; // +1 car on compte le jour de début
+
+      const formattedStart = format(start, 'dd/MM/yyyy');
+      const formattedEnd = format(end, 'dd/MM/yyyy');
+      
+      return (
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-gray-500" />
+          <span>
+            {formattedStart} - {formattedEnd} ({days} jour{days > 1 ? 's' : ''})
+          </span>
+        </div>
+      );
+    } catch (error) {
+      console.error("Erreur de formatage de date:", error);
+      return (
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-gray-500" />
+          <span>Dates non valides</span>
+        </div>
+      );
+    }
   };
 
   return (
@@ -57,28 +92,27 @@ const LeaveTable = ({ leaves, loading, onApprove, onReject }: LeaveTableProps) =
             <TableCell colSpan={6} className="text-center py-10">Aucune demande de congé trouvée</TableCell>
           </TableRow>
         ) : (
-          <>
-            {/* Exemple de ligne pour la démo */}
-            <TableRow>
+          leaves.map((leave) => (
+            <TableRow key={leave.id}>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
-                    <span>?</span>
+                    <span>{leave.employeeId.substring(0, 1).toUpperCase()}</span>
                   </div>
                   <div>
-                    <div className="font-medium">Employé inconnu</div>
-                    <div className="text-xs text-gray-500">Non spécifié</div>
+                    <div className="font-medium">ID: {leave.employeeId}</div>
+                    <div className="text-xs text-gray-500">{leave.employeeId}</div>
                   </div>
                 </div>
               </TableCell>
-              <TableCell>Congés payés</TableCell>
+              <TableCell>{getLeaveTypeLabel(leave.type)}</TableCell>
               <TableCell>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <span>- 0 jour</span>
-                </div>
+                {leave.startDate && leave.endDate 
+                  ? formatDateRange(leave.startDate, leave.endDate)
+                  : <span>Dates manquantes</span>
+                }
               </TableCell>
-              <TableCell>{getStatusBadge("pending")}</TableCell>
+              <TableCell>{getStatusBadge(leave.status)}</TableCell>
               <TableCell>
                 <div className="flex items-center">
                   <span className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
@@ -89,17 +123,22 @@ const LeaveTable = ({ leaves, loading, onApprove, onReject }: LeaveTableProps) =
                 </div>
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" className="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 h-8" onClick={() => onApprove("1")}>
-                    <Check className="h-4 w-4 mr-1" /> Approuver
-                  </Button>
-                  <Button variant="ghost" className="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 h-8" onClick={() => onReject("1")}>
-                    <X className="h-4 w-4 mr-1" /> Refuser
-                  </Button>
-                </div>
+                {leave.status === 'pending' && (
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" className="text-green-600 hover:text-green-800 hover:bg-green-50 p-2 h-8" onClick={() => onApprove(leave.id || '')}>
+                      <Check className="h-4 w-4 mr-1" /> Approuver
+                    </Button>
+                    <Button variant="ghost" className="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 h-8" onClick={() => onReject(leave.id || '')}>
+                      <X className="h-4 w-4 mr-1" /> Refuser
+                    </Button>
+                  </div>
+                )}
+                {leave.status !== 'pending' && (
+                  <span className="text-gray-400 text-sm">Action déjà effectuée</span>
+                )}
               </TableCell>
             </TableRow>
-          </>
+          ))
         )}
       </TableBody>
     </Table>

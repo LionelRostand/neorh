@@ -18,9 +18,14 @@ import { useLeaveFormSubmit } from "./form/useLeaveFormSubmit";
 interface NewLeaveRequestFormProps {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({ open, onClose }) => {
+const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({ 
+  open, 
+  onClose, 
+  onSuccess 
+}) => {
   const form = useForm<LeaveFormValues>({
     defaultValues: {
       employeeId: "",
@@ -34,6 +39,10 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({ open, onClose
   const { handleSubmit, isSubmitting } = useLeaveFormSubmit(() => {
     form.reset();
     onClose();
+    // Appeler onSuccess si fourni pour rafraîchir la liste des congés
+    if (onSuccess) {
+      onSuccess();
+    }
   });
 
   return (
