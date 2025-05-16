@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Company } from "@/types/company";
 import { Building, Globe, Mail, Phone, MapPin, Calendar, Printer } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -56,12 +56,12 @@ const CompanyDetails = ({ company, onClose }: CompanyDetailsProps) => {
         <Card className="col-span-1 p-4">
           <div className="flex flex-col items-center gap-4">
             {company.logoUrl ? (
-              <div className="w-full">
-                <AspectRatio ratio={1} className="bg-gray-100 rounded-md overflow-hidden">
+              <div className="w-32 h-32">
+                <AspectRatio ratio={1} className="bg-gray-100 rounded-full overflow-hidden">
                   <img
                     src={company.logoUrl}
                     alt={`Logo ${company.name}`}
-                    className="object-contain h-full w-full p-2"
+                    className="object-cover h-full w-full"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/placeholder.svg';
                       console.error("Failed to load company logo:", company.logoUrl);
@@ -70,10 +70,10 @@ const CompanyDetails = ({ company, onClose }: CompanyDetailsProps) => {
                 </AspectRatio>
               </div>
             ) : (
-              <Avatar className="h-24 w-24 text-2xl">
-                <div className="flex items-center justify-center h-full w-full bg-gray-100 text-gray-500">
-                  {company.name?.charAt(0) || "?"}
-                </div>
+              <Avatar className="h-32 w-32">
+                <AvatarFallback className="bg-gray-100 text-gray-500 text-4xl">
+                  {company.name?.charAt(0).toUpperCase() || "?"}
+                </AvatarFallback>
               </Avatar>
             )}
             <h3 className="font-semibold text-center">{company.industry || "Secteur non spécifié"}</h3>
