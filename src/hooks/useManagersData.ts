@@ -3,6 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from '@/components/ui/use-toast';
+
+// Using the firebase type definition for Employee
 import { Employee } from '@/types/firebase';
 
 export const useManagersData = () => {
