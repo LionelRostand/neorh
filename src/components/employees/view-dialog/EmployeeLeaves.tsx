@@ -11,7 +11,7 @@ import LeaveAllocationManager from '@/components/leaves/allocation/LeaveAllocati
 import LoadingSkeleton from '@/components/leaves/allocation/LoadingSkeleton';
 import LeaveSummaryCards from '@/components/leaves/summary/LeaveSummaryCards';
 import { LeaveHistory, ErrorState } from '@/components/leaves/history/LeaveHistory';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 
 interface EmployeeLeavesProps {
@@ -73,7 +73,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
     allocation ? allocation.rttTotal - allocation.rttUsed : 0
   , [allocation]);
 
-  // Condition de rendu simple pour le loading
+  // Si loading, afficher un placeholder plus stylisé
   if (loading && allocationLoading) {
     return <LoadingSkeleton />;
   }
@@ -101,30 +101,36 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
         </div>
       </div>
 
-      <LeaveAllocationManager 
-        allocation={allocation}
-        isLoading={allocationLoading}
-        onUpdate={updateLeaveAllocation}
-        employeeId={employeeId}
-      />
+      {!loading && !allocationLoading && (
+        <>
+          <LeaveAllocationManager 
+            allocation={allocation}
+            isLoading={allocationLoading}
+            onUpdate={updateLeaveAllocation}
+            employeeId={employeeId}
+          />
 
-      <LeaveSummaryCards
-        totalDays={totalDays}
-        paidLeavesRemaining={paidLeavesRemaining}
-        paidLeavesTotal={allocation?.paidLeavesTotal || 0}
-        rttRemaining={rttRemaining}
-        rttTotal={allocation?.rttTotal || 0}
-      />
+          <LeaveSummaryCards
+            totalDays={totalDays}
+            paidLeavesRemaining={paidLeavesRemaining}
+            paidLeavesTotal={allocation?.paidLeavesTotal || 0}
+            rttRemaining={rttRemaining}
+            rttTotal={allocation?.rttTotal || 0}
+          />
 
-      {error ? (
-        <Card className="border rounded-lg shadow-sm">
-          <ErrorState />
-        </Card>
-      ) : (
-        <LeaveHistory 
-          leaves={leaves} 
-          formatDate={formatDate}
-        />
+          {error ? (
+            <Card className="border rounded-lg shadow-sm">
+              <CardContent className="p-4 py-6">
+                <ErrorState />
+              </CardContent>
+            </Card>
+          ) : (
+            <LeaveHistory 
+              leaves={leaves} 
+              formatDate={formatDate}
+            />
+          )}
+        </>
       )}
 
       <NewLeaveRequestForm 
