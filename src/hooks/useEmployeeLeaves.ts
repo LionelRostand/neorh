@@ -1,6 +1,6 @@
 
 import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
-import { useLeaveAllocation, useEmployeeLeaveData, useLeaveTypeLabels } from './leaves';
+import { useLeaveAllocation, useLeaveTypeLabels } from './leaves';
 
 // Re-export LeaveAllocation interface for backward compatibility
 export type { LeaveAllocation } from './leaves';
@@ -10,15 +10,6 @@ export const useEmployeeLeaves = (employeeId: string) => {
   const isMountedRef = useRef(true);
   // Reference to control data loading state
   const dataLoadedRef = useRef(false);
-
-  // Use our smaller hooks with stabilized inputs
-  const { 
-    leaves,
-    loading: leavesLoading,
-    error,
-    totalDays,
-    fetchLeaves
-  } = useEmployeeLeaveData(employeeId);
 
   const {
     allocation,
@@ -51,14 +42,11 @@ export const useEmployeeLeaves = (employeeId: string) => {
     console.log(`[useEmployeeLeaves] Manual refetch for employee: ${employeeId}`);
     dataLoadedRef.current = true;
     
-    // Load leaves and allocations in parallel
-    Promise.all([
-      fetchLeaves(),
-      fetchAllocation()
-    ]).catch(err => {
+    // Load only allocations
+    fetchAllocation().catch(err => {
       console.error(`[useEmployeeLeaves] Error during refetch:`, err);
     });
-  }, [employeeId, fetchLeaves, fetchAllocation]);
+  }, [employeeId, fetchAllocation]);
 
   // Memoize derived values to prevent unnecessary re-renders
   const paidLeavesRemaining = useMemo(() => {
@@ -70,10 +58,6 @@ export const useEmployeeLeaves = (employeeId: string) => {
   }, [allocation]);
 
   return {
-    leaves,
-    loading: leavesLoading || allocationLoading,
-    error,
-    totalDays,
     allocation,
     allocationLoading,
     getLeaveTypeLabel,
