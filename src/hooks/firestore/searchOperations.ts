@@ -45,9 +45,9 @@ export const createSearchOperations = <T extends Record<string, any>>(
         constraints.push(orderBy(options.sortField, sortDirection));
       }
       
-      // Build the query correctly by spreading the constraints array as individual arguments
-      // Fix: Ensure constraints is an array and use apply to pass each constraint as separate arg
-      const q = query(collectionRef, ...(constraints as QueryConstraint[]));
+      // Create the query with constraints
+      // Fix: Apply constraints directly without spreading
+      const q = query(collectionRef, ...constraints);
       const querySnapshot = await getDocs(q);
       
       const documents = querySnapshot.docs.map(doc => {
