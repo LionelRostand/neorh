@@ -4,10 +4,12 @@ import BadgesHeader from '@/components/badges/BadgesHeader';
 import BadgesContent from '@/components/badges/BadgesContent';
 import { AddBadgeDialog } from '@/components/badges/AddBadgeDialog';
 import { useBadges } from '@/hooks/badges/useBadges';
+import { useEmployeeData } from '@/hooks/useEmployeeData';
 
 const Badges = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const { badges, employees, loading, badgeStats, fetchBadges, employeesFirestore } = useBadges();
+  const { badges, loading, badgeStats, fetchBadges } = useBadges();
+  const { employees, isLoading: isLoadingEmployees } = useEmployeeData();
 
   const handleAddBadge = () => {
     setIsAddDialogOpen(true);
@@ -32,7 +34,7 @@ const Badges = () => {
         onOpenChange={setIsAddDialogOpen}
         employees={employees}
         onSuccess={handleRefreshBadges}
-        isLoadingEmployees={employeesFirestore.isLoading}
+        isLoadingEmployees={isLoadingEmployees}
       />
     </div>
   );
