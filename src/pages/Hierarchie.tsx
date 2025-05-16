@@ -2,16 +2,32 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Network, FileText, Plus } from "lucide-react";
+import { Network, FileText, Plus, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import EmployeesHierarchy from "@/components/hierarchy/EmployeesHierarchy";
 import HierarchyStatCard from "@/components/hierarchy/HierarchyStatCard";
 import { useDepartmentsData } from "@/hooks/useDepartmentsData";
+import { useEmployeeData } from "@/hooks/useEmployeeData";
 
 const Hierarchie = () => {
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const { toast } = useToast();
   const { departments, isLoading: isLoadingDepartments } = useDepartmentsData();
+  const { employees } = useEmployeeData();
+  
+  // Calculate statistics for the hierarchy view
+  const totalDepartments = departments?.length || 0;
+  
+  const managerCount = employees?.filter(emp => 
+    employees.some(other => other.managerId === emp.id)
+  ).length || 0;
+  
+  const employeeCount = employees?.length || 0;
+  
+  // Calculate vacant positions (if a department has no manager)
+  const vacantPositions = departments?.filter(dept => 
+    !employees?.some(emp => emp.id === dept.managerId)
+  ).length || 0;
 
   const handleExportImport = () => {
     toast({
@@ -27,15 +43,22 @@ const Hierarchie = () => {
     });
   };
 
+  const handlePrintHierarchy = () => {
+    toast({
+      title: "Impression de l'organigramme",
+      description: "L'impression de l'organigramme sera disponible prochainement.",
+    });
+  };
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Hiérarchie</h1>
+      <h1 className="text-2xl font-bold">Organigramme de l'Entreprise</h1>
 
       {/* Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <HierarchyStatCard 
           title="Total des départements" 
-          value={8} 
+          value={totalDepartments} 
           icon={<Network className="h-8 w-8" />} 
           bgColor="bg-blue-50"
           textColor="text-blue-700"
@@ -44,7 +67,7 @@ const Hierarchie = () => {
         />
         <HierarchyStatCard 
           title="Managers" 
-          value={12} 
+          value={managerCount} 
           icon={<Network className="h-8 w-8" />} 
           bgColor="bg-indigo-50"
           textColor="text-indigo-700"
@@ -53,7 +76,7 @@ const Hierarchie = () => {
         />
         <HierarchyStatCard 
           title="Employés" 
-          value={68} 
+          value={employeeCount} 
           icon={<Network className="h-8 w-8" />} 
           bgColor="bg-green-50"
           textColor="text-green-700"
@@ -62,7 +85,7 @@ const Hierarchie = () => {
         />
         <HierarchyStatCard 
           title="Postes vacants" 
-          value={4} 
+          value={vacantPositions} 
           icon={<Network className="h-8 w-8" />} 
           bgColor="bg-yellow-50"
           textColor="text-yellow-700"
@@ -95,6 +118,10 @@ const Hierarchie = () => {
         </div>
 
         <div className="flex space-x-2">
+          <Button variant="outline" onClick={handlePrintHierarchy}>
+            <Download className="h-4 w-4 mr-2" />
+            Imprimer
+          </Button>
           <Button variant="outline" onClick={handleExportImport}>
             <FileText className="h-4 w-4 mr-2" />
             Exporter / Importer
@@ -107,7 +134,7 @@ const Hierarchie = () => {
       </div>
 
       {/* Hierarchy Chart */}
-      <div className="border rounded-lg bg-white p-6">
+      <div className="border rounded-lg bg-white p-6 overflow-x-auto">
         <EmployeesHierarchy departmentFilter={selectedDepartment} />
       </div>
     </div>

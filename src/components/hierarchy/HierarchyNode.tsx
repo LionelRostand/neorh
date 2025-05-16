@@ -20,10 +20,17 @@ const HierarchyNode = ({ employee, employees, level, isLast = false }: Hierarchy
     setIsExpanded(!isExpanded);
   };
 
+  // Calculate width based on the hierarchy level for pyramidal effect
+  const getNodeWidth = () => {
+    const baseWidth = 100; // percentage
+    const reductionFactor = 8; // % narrower per level
+    return `${Math.max(baseWidth - (level * reductionFactor), 60)}%`; // minimum 60% width
+  };
+
   return (
-    <div className={`hierarchy-node ${level > 0 ? 'ml-6' : ''}`}>
+    <div className={`hierarchy-node ${level > 0 ? 'ml-6' : ''}`} style={{ width: level === 0 ? '100%' : getNodeWidth() }}>
       <div 
-        className="flex items-center p-2 rounded-md hover:bg-gray-50 transition-colors"
+        className={`flex items-center p-2 rounded-md hover:bg-gray-50 transition-colors ${level > 0 ? 'border border-gray-200' : 'bg-blue-50 border border-blue-200'}`}
         style={{ marginBottom: hasChildren && isExpanded ? '12px' : '0' }}
       >
         {hasChildren ? (
@@ -37,7 +44,7 @@ const HierarchyNode = ({ employee, employees, level, isLast = false }: Hierarchy
           <div className="w-[28px] mr-2"></div>
         )}
         
-        <div className="bg-primary/10 p-1 rounded-full">
+        <div className={`p-1 rounded-full ${level === 0 ? 'bg-blue-100' : 'bg-primary/10'}`}>
           {employee.photoUrl ? (
             <img 
               src={employee.photoUrl} 
@@ -45,12 +52,12 @@ const HierarchyNode = ({ employee, employees, level, isLast = false }: Hierarchy
               className="w-8 h-8 rounded-full"
             />
           ) : (
-            <User className="w-8 h-8 text-primary" />
+            <User className={`w-8 h-8 ${level === 0 ? 'text-blue-600' : 'text-primary'}`} />
           )}
         </div>
         
         <div className="ml-3 flex-1">
-          <p className="font-medium">{employee.name}</p>
+          <p className={`font-medium ${level === 0 ? 'text-lg' : ''}`}>{employee.name}</p>
           <div className="flex items-center text-xs text-gray-500">
             <span>{employee.position}</span>
             {employee.department && (
@@ -63,14 +70,22 @@ const HierarchyNode = ({ employee, employees, level, isLast = false }: Hierarchy
         </div>
         
         {directReports.length > 0 && (
-          <div className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+          <div className={`${level === 0 ? 'bg-blue-100 text-blue-800' : 'bg-primary/10 text-primary'} text-xs px-2 py-0.5 rounded-full`}>
             {directReports.length} {directReports.length === 1 ? 'membre' : 'membres'}
           </div>
         )}
       </div>
       
       {hasChildren && isExpanded && (
-        <div className="children-container border-l ml-4 pl-2">
+        <div 
+          className="children-container ml-4 pl-2"
+          style={{
+            borderLeft: '1px dashed #ccc',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}
+        >
           {directReports.map((report, index) => (
             <HierarchyNode
               key={report.id}

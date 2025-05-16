@@ -11,7 +11,7 @@ interface EmployeesHierarchyProps {
 const EmployeesHierarchy: React.FC<EmployeesHierarchyProps> = ({ departmentFilter = "all" }) => {
   const { employees, isLoading, error } = useEmployeeData();
 
-  // Filtrer les employés par département si nécessaire
+  // Filter employees by department if necessary
   const filteredEmployees = useMemo(() => {
     if (!employees || employees.length === 0) return [];
     
@@ -53,27 +53,27 @@ const EmployeesHierarchy: React.FC<EmployeesHierarchyProps> = ({ departmentFilte
     );
   }
 
-  // Trouver le CEO si on est en mode "all", sinon trouver le manager du département
+  // Find the CEO if in "all" mode, otherwise find the department manager
   let rootEmployee: Employee | undefined;
   
   if (departmentFilter === "all") {
-    // En mode global, on prend le CEO (sans manager)
+    // In global mode, take the CEO (without manager)
     rootEmployee = filteredEmployees.find(emp => emp.managerId === undefined);
   } else {
-    // Trouver le manager du département sélectionné
-    // D'abord chercher les employés du département qui sont managers
+    // Find the manager of the selected department
+    // First look for department employees who are managers
     const departmentManagers = filteredEmployees.filter(emp => 
       !filteredEmployees.some(other => other.id === emp.managerId)
     );
     
-    // Prendre le premier trouvé comme racine
+    // Take the first one found as root
     rootEmployee = departmentManagers.length > 0 ? departmentManagers[0] : filteredEmployees[0];
   }
 
   return (
-    <div className="flex flex-col items-center overflow-auto">
+    <div className="flex flex-col items-center overflow-auto py-8">
       {rootEmployee ? (
-        <div className="hierarchy-tree">
+        <div className="hierarchy-tree w-full max-w-5xl">
           <HierarchyNode 
             employee={rootEmployee} 
             employees={filteredEmployees} 
