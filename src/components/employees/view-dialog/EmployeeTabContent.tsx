@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Employee } from '@/types/employee';
 import { Button } from '@/components/ui/button';
@@ -181,7 +180,7 @@ export const HorairesTab: React.FC = () => (
 );
 
 export const CongesTab: React.FC<{ employee: Employee }> = ({ employee }) => (
-  <EmployeeLeaves employee={employee} />
+  <EmployeeLeaves employeeId={employee.id} />
 );
 
 export const EvaluationsTab: React.FC<{ employee: Employee }> = ({ employee }) => (
