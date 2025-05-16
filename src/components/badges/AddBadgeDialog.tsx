@@ -11,7 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AddBadgeForm } from "./AddBadgeForm";
+import { AddBadgeForm } from "./form/AddBadgeForm";
+import { BadgeFormValues } from "./form/FormSchema";
 
 interface AddBadgeDialogProps {
   open: boolean;
@@ -31,7 +32,7 @@ export function AddBadgeDialog({
   // Utilisation du hook Firestore pour la collection hr_badges
   const { add, isLoading } = useFirestore<Badge>("hr_badges");
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: BadgeFormValues) => {
     try {
       // Trouver l'employé sélectionné pour récupérer son nom
       const selectedEmployee = employees.find(
