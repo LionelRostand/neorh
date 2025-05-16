@@ -18,7 +18,12 @@ export function BasicInfoSection({ form }: BasicInfoSectionProps) {
         <FormItem>
           <FormLabel>Numéro de badge</FormLabel>
           <FormControl>
-            <Input placeholder="Ex: B-12345" {...field} />
+            <Input 
+              placeholder="Ex: B-12345" 
+              {...field} 
+              className="bg-gray-50"
+              readOnly
+            />
           </FormControl>
           <FormMessage />
         </FormItem>

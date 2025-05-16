@@ -2,7 +2,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Employee } from "@/types/firebase";
+import { Employee } from "@/types/employee";
 import { Form } from "@/components/ui/form";
 import { badgeFormSchema, BadgeFormValues } from "./FormSchema";
 import { BasicInfoSection } from "./BasicInfoSection";
@@ -18,6 +18,7 @@ interface AddBadgeFormProps {
   onCancel: () => void;
   employees: Employee[];
   isLoading: boolean;
+  generatedBadgeNumber: string;
 }
 
 export function AddBadgeForm({
@@ -25,14 +26,23 @@ export function AddBadgeForm({
   onCancel,
   employees,
   isLoading,
+  generatedBadgeNumber,
 }: AddBadgeFormProps) {
   const form = useForm<BadgeFormValues>({
     resolver: zodResolver(badgeFormSchema),
     defaultValues: {
+      number: generatedBadgeNumber,
       status: "active",
       issueDate: new Date(),
     },
   });
+
+  // Update the badge number field when the generated number changes
+  React.useEffect(() => {
+    if (generatedBadgeNumber) {
+      form.setValue("number", generatedBadgeNumber);
+    }
+  }, [generatedBadgeNumber, form]);
 
   const handleSubmit = (data: BadgeFormValues) => {
     onSubmit(data);

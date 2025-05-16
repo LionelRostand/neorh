@@ -36,7 +36,7 @@ export function EmployeeSection({ form, employees, isLoading }: EmployeeSectionP
                   key={employee.id}
                   value={employee.id || "employee-unknown"}
                 >
-                  {employee.name || `${employee.firstName || ''} ${employee.lastName || ''}`}
+                  {employee.name}
                 </SelectItem>
               ))}
             </SelectContent>

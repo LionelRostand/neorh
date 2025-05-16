@@ -1,8 +1,9 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { useFirestore } from "@/hooks/useFirestore";
-import { Employee, Badge } from "@/types/firebase";
+import { Employee } from "@/types/employee";
+import { Badge } from "@/types/firebase";
 import { toast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { AddBadgeForm } from "./form/AddBadgeForm";
 import { BadgeFormValues } from "./form/FormSchema";
+import { adaptAppEmployee } from "@/utils/employeeAdapter";
 
 interface AddBadgeDialogProps {
   open: boolean;
@@ -29,8 +31,41 @@ export function AddBadgeDialog({
   onSuccess,
   isLoadingEmployees,
 }: AddBadgeDialogProps) {
+  const [generatedBadgeNumber, setGeneratedBadgeNumber] = useState("");
+  
   // Utilisation du hook Firestore pour la collection hr_badges
-  const { add, isLoading } = useFirestore<Badge>("hr_badges");
+  const { add, isLoading, getAll } = useFirestore<Badge>("hr_badges");
+
+  // Generate badge number when dialog opens
+  useEffect(() => {
+    if (open) {
+      generateBadgeNumber();
+    }
+  }, [open]);
+
+  // Generate a badge number in the format B-XXXXX
+  const generateBadgeNumber = async () => {
+    try {
+      // Get existing badges to ensure uniqueness
+      const existingBadges = await getAll();
+      const existingNumbers = existingBadges.docs?.map(badge => badge.number) || [];
+      
+      // Generate a unique number
+      let newNumber;
+      do {
+        // Generate random 5-digit number
+        const randomNum = Math.floor(10000 + Math.random() * 90000);
+        newNumber = `B-${randomNum}`;
+      } while (existingNumbers.includes(newNumber));
+      
+      setGeneratedBadgeNumber(newNumber);
+    } catch (error) {
+      console.error("Error generating badge number:", error);
+      // Fallback to a timestamp-based number if there's an error
+      const timestamp = new Date().getTime().toString().slice(-5);
+      setGeneratedBadgeNumber(`B-${timestamp}`);
+    }
+  };
 
   const handleSubmit = async (data: BadgeFormValues) => {
     try {
@@ -39,13 +74,11 @@ export function AddBadgeDialog({
         (emp) => emp.id === data.employeeId
       );
       
-      const employeeName = selectedEmployee
-        ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}`
-        : "Employé inconnu";
+      const employeeName = selectedEmployee ? selectedEmployee.name : "Employé inconnu";
 
       // Préparer l'objet badge à ajouter dans Firestore
       const badge: Partial<Badge> = {
-        number: data.number,
+        number: data.number || generatedBadgeNumber,
         employeeId: data.employeeId,
         type: data.type,
         status: data.status as "active" | "inactive" | "lost" | "pending",
@@ -90,6 +123,7 @@ export function AddBadgeDialog({
           onCancel={() => onOpenChange(false)}
           employees={employees}
           isLoading={isLoading || isLoadingEmployees}
+          generatedBadgeNumber={generatedBadgeNumber}
         />
       </DialogContent>
     </Dialog>
