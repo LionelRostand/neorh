@@ -57,10 +57,10 @@ export function useEmployeeSkills(employeeId: string) {
       
       const resultId = await add(skillData);
       if (resultId) {
-        // Correction du typage pour éviter l'erreur TS2345
+        // Fix the typing issue by correctly typing the new skill
         const newSkill: Skill = {
           ...skillData,
-          id: resultId
+          id: resultId as string // Ensuring id is treated as string
         };
         
         setSkills(prevSkills => [...prevSkills, newSkill]);
