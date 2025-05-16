@@ -9,7 +9,7 @@ import {
 import { Form } from "@/components/ui/form";
 import { LeaveFormValues } from "./form/types";
 import { EmployeeField } from "./form/EmployeeField";
-import { LeaveTypeField, leaveTypes } from "./form/LeaveTypeField";
+import { LeaveTypeField, defaultLeaveTypes } from "./form/LeaveTypeField";
 import { DatePickerField } from "./form/DatePickerField";
 import { CommentField } from "./form/CommentField";
 import { LeaveFormActions } from "./form/LeaveFormActions";
@@ -95,12 +95,16 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
 
   // Générer le libellé du champ d'allocation en fonction du type
   const getAllocationLabel = () => {
-    if (isAllocation) {
-      return "Nombre de jours à attribuer";
-    }
+    if (!selectedType) return "Nombre de jours à attribuer";
     
-    const typeObj = leaveTypes.find(t => t.id === selectedType);
-    return `Nombre de jours de ${typeObj?.label || "congés"} à attribuer`;
+    switch (selectedType) {
+      case "paid":
+        return "Nombre de jours de Congé payé à attribuer";
+      case "rtt":
+        return "Nombre de jours de RTT à attribuer";
+      default:
+        return "Nombre de jours à attribuer";
+    }
   };
   
   // Déterminer le titre du formulaire
@@ -110,8 +114,13 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
   
   // Texte d'aide pour l'allocation
   const getAllocationHelperText = () => {
-    if (isAllocation && selectedType === "paid") {
-      return "Au-delà de 5 jours, les jours restants seront conservés pour la prochaine période";
+    if (isAllocation) {
+      if (selectedType === "paid") {
+        return "Au-delà de 5 jours, les jours restants seront conservés pour la prochaine période";
+      }
+      else if (selectedType === "rtt") {
+        return "Les jours de RTT doivent être utilisés dans la période courante";
+      }
     }
     return undefined;
   };
@@ -129,7 +138,7 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
             <LeaveTypeField 
               form={form} 
               onTypeChange={handleTypeChange} 
-              allowedTypes={isAllocation ? ["paid", "rtt"] : undefined}
+              allowedTypes={isAllocation ? defaultLeaveTypes : undefined}
             />
             
             {/* Champ d'allocation conditionnel */}

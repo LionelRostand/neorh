@@ -46,7 +46,7 @@ export const useLeaveAllocation = (employeeId: string) => {
     if (cachedData) {
       console.log(`[useLeaveAllocation] Using cached allocation data for employee ${employeeId}`);
       if (!allocation) {
-        setAllocation(cachedData);
+        setAllocation(cachedData as LeaveAllocation);
         setHasLoaded(true);
       }
       return cachedData;

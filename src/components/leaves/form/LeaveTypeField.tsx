@@ -26,17 +26,18 @@ export const leaveTypes = [
   { id: "paternity", label: "Congé Paternité" },
 ];
 
+// Types de congés à afficher par défaut dans le formulaire de nouvelle demande
+export const defaultLeaveTypes = ["paid", "rtt"];
+
 interface LeaveTypeFieldProps {
   form: UseFormReturn<LeaveFormValues>;
   onTypeChange?: (type: string) => void;
   allowedTypes?: string[];
 }
 
-export function LeaveTypeField({ form, onTypeChange, allowedTypes }: LeaveTypeFieldProps) {
+export function LeaveTypeField({ form, onTypeChange, allowedTypes = defaultLeaveTypes }: LeaveTypeFieldProps) {
   // Filter types if allowedTypes is provided
-  const filteredTypes = allowedTypes 
-    ? leaveTypes.filter(type => allowedTypes.includes(type.id)) 
-    : leaveTypes;
+  const filteredTypes = leaveTypes.filter(type => allowedTypes.includes(type.id));
 
   return (
     <FormField
