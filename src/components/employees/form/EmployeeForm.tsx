@@ -15,6 +15,8 @@ import { EmployeeAddressInfo } from './EmployeeAddressInfo';
 import { EmployeeProfessionalInfo } from './EmployeeProfessionalInfo';
 import { usePhotoUpload } from './usePhotoUpload';
 import { employeeFormSchema, EmployeeFormValues } from './types';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface EmployeeFormProps {
   onClose: () => void;
@@ -66,7 +68,7 @@ export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
         lastName: data.lastName,
         email: data.email,
         phone: data.phone,
-        birthDate: format(data.birthDate, 'yyyy-MM-dd'),
+        birthDate: data.birthDate ? format(data.birthDate, 'yyyy-MM-dd') : '',
         address: {
           streetNumber: data.streetNumber,
           streetName: data.streetName,
@@ -83,11 +85,9 @@ export function EmployeeForm({ onClose, onSuccess }: EmployeeFormProps) {
         hireDate: format(new Date(), 'yyyy-MM-dd'),
       };
 
-      // Utiliser l'API Firestore pour ajouter l'employé
-      const { db } = await import('@/lib/firebase');
-      const { collection, addDoc } = await import('firebase/firestore');
-      
-      const docRef = await addDoc(collection(db, 'hr_employees'), employeeData);
+      // Utiliser directement les imports de Firebase pour ajouter l'employé
+      const employeesCollection = collection(db, 'hr_employees');
+      const docRef = await addDoc(employeesCollection, employeeData);
       
       toast({
         title: "Succès",
