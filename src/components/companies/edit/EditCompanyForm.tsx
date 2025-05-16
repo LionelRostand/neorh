@@ -69,7 +69,18 @@ const EditCompanyForm = ({
 
   // Function to handle the file directly
   const handleFileChange = (file: File) => {
-    handleLogoChange({ target: { files: [file] } } as React.ChangeEvent<HTMLInputElement>);
+    // Create a new FileList containing just this file
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    
+    // Create a synthetic event
+    const syntheticEvent = {
+      target: {
+        files: dataTransfer.files
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    handleLogoChange(syntheticEvent);
   };
 
   return (

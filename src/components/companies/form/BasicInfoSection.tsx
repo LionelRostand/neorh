@@ -41,7 +41,7 @@ const BasicInfoSection = ({ form, logoPreview, onLogoChange, onResetLogo }: Basi
         <div className="w-full md:w-1/3">
           <FormLabel>Logo de l'entreprise</FormLabel>
           <CompanyLogoUpload 
-            logoPreview={logoPreview}
+            logoUrl={logoPreview}
             onLogoChange={onLogoChange}
             onReset={onResetLogo}
           />

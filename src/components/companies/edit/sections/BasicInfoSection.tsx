@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Control } from "react-hook-form";
 import {
@@ -28,7 +29,7 @@ const BasicInfoSection = ({
   onLogoChange,
   onResetLogo,
 }: BasicInfoSectionProps) => {
-  // Adaptateur pour convertir l'événement en File
+  // Adapter to convert the File to a ChangeEvent
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       onLogoChange(e.target.files[0]);
