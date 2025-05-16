@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { Employee } from '@/types/employee';
 import { Skill } from '@/types/skill';
 import { useEmployeeSkills } from '@/hooks/useEmployeeSkills';
@@ -15,6 +15,9 @@ interface EmployeeSkillsProps {
   employee: Employee;
 }
 
+// Utiliser memo pour éviter les rendus inutiles
+const SkillCard_Memoized = memo(SkillCard);
+
 const EmployeeSkills: React.FC<EmployeeSkillsProps> = ({ employee }) => {
   const { skills, loading, addSkill, updateSkill, deleteSkill } = useEmployeeSkills(employee.id);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -22,36 +25,38 @@ const EmployeeSkills: React.FC<EmployeeSkillsProps> = ({ employee }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentSkill, setCurrentSkill] = useState<Skill | null>(null);
 
-  const handleAddSkill = async (skill: Omit<Skill, 'id' | 'employeeId'>) => {
+  const handleAddSkill = useCallback(async (skill: Omit<Skill, 'id' | 'employeeId'>) => {
     await addSkill(skill);
-  };
+    setIsAddDialogOpen(false);
+  }, [addSkill]);
 
-  const handleUpdateSkill = async (id: string, skill: Partial<Skill>) => {
+  const handleUpdateSkill = useCallback(async (id: string, skill: Partial<Skill>) => {
     await updateSkill(id, skill);
-  };
+    setIsEditDialogOpen(false);
+  }, [updateSkill]);
 
-  const handleDeleteSkill = async () => {
+  const handleDeleteSkill = useCallback(async () => {
     if (currentSkill && currentSkill.id) {
       await deleteSkill(currentSkill.id);
       setIsDeleteDialogOpen(false);
     }
-  };
+  }, [currentSkill, deleteSkill]);
 
-  const openEditDialog = (skill: Skill) => {
+  const openEditDialog = useCallback((skill: Skill) => {
     setCurrentSkill(skill);
     setIsEditDialogOpen(true);
-  };
+  }, []);
   
-  const openDeleteDialog = (skillId: string) => {
+  const openDeleteDialog = useCallback((skillId: string) => {
     const skill = skills.find(s => s.id === skillId);
     if (skill) {
       setCurrentSkill(skill);
       setIsDeleteDialogOpen(true);
     }
-  };
+  }, [skills]);
 
   // Grouper les compétences par catégorie
-  const getCategorizedSkills = () => {
+  const getCategorizedSkills = useCallback(() => {
     const categorized: { [key: string]: Skill[] } = {};
     
     skills.forEach(skill => {
@@ -63,7 +68,7 @@ const EmployeeSkills: React.FC<EmployeeSkillsProps> = ({ employee }) => {
     });
     
     return categorized;
-  };
+  }, [skills]);
   
   const categorizedSkills = getCategorizedSkills();
   
@@ -116,7 +121,7 @@ const EmployeeSkills: React.FC<EmployeeSkillsProps> = ({ employee }) => {
                 <h4 className="text-lg font-medium mb-3">{category}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {categorySkills.map(skill => (
-                    <SkillCard 
+                    <SkillCard_Memoized 
                       key={skill.id} 
                       skill={skill}
                       onEdit={openEditDialog}
@@ -136,12 +141,14 @@ const EmployeeSkills: React.FC<EmployeeSkillsProps> = ({ employee }) => {
         onAddSkill={handleAddSkill}
       />
       
-      <EditSkillDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        skill={currentSkill}
-        onUpdateSkill={handleUpdateSkill}
-      />
+      {currentSkill && (
+        <EditSkillDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          skill={currentSkill}
+          onUpdateSkill={handleUpdateSkill}
+        />
+      )}
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
@@ -164,4 +171,4 @@ const EmployeeSkills: React.FC<EmployeeSkillsProps> = ({ employee }) => {
   );
 };
 
-export default EmployeeSkills;
+export default React.memo(EmployeeSkills);

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useFirestore } from './useFirestore';
 import { toast } from '@/components/ui/use-toast';
 import { Skill } from '@/types/skill';
@@ -8,12 +8,18 @@ export function useEmployeeSkills(employeeId: string) {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+  const isFetchingRef = useRef<boolean>(false);
 
   const { search, add, update, remove } = useFirestore<Skill>('hr_skills');
 
   const fetchEmployeeSkills = useCallback(async () => {
-    setLoading(true);
+    // Utiliser une référence pour éviter des appels multiples simultanés
+    if (isFetchingRef.current) return;
+    
     try {
+      isFetchingRef.current = true;
+      setLoading(true);
+      
       const result = await search('employeeId', employeeId, {
         sortField: 'name',
         sortDirection: 'asc'
@@ -26,17 +32,22 @@ export function useEmployeeSkills(employeeId: string) {
       }
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Une erreur est survenue'));
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les compétences de l'employé",
-        variant: "destructive"
-      });
+      console.error("Erreur lors du chargement des compétences:", err);
+      // Éviter de montrer des toasts multiples en cas d'erreurs répétées
+      if (!isFetchingRef.current) {
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les compétences de l'employé",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
   }, [employeeId, search]);
 
-  const addSkill = async (skill: Omit<Skill, 'id' | 'employeeId'>) => {
+  const addSkill = useCallback(async (skill: Omit<Skill, 'id' | 'employeeId'>) => {
     try {
       const newSkill = {
         ...skill,
@@ -46,7 +57,8 @@ export function useEmployeeSkills(employeeId: string) {
       
       const result = await add(newSkill);
       if (result) {
-        await fetchEmployeeSkills();
+        // Mettre à jour le state local au lieu de refaire un appel API complet
+        setSkills(prevSkills => [...prevSkills, { ...newSkill, id: result }]);
         return result;
       }
     } catch (err) {
@@ -57,13 +69,18 @@ export function useEmployeeSkills(employeeId: string) {
       });
       return null;
     }
-  };
+  }, [add, employeeId]);
 
-  const updateSkill = async (id: string, data: Partial<Skill>) => {
+  const updateSkill = useCallback(async (id: string, data: Partial<Skill>) => {
     try {
       const success = await update(id, data);
       if (success) {
-        await fetchEmployeeSkills();
+        // Mettre à jour le state local au lieu de refaire un appel API complet
+        setSkills(prevSkills => 
+          prevSkills.map(skill => 
+            skill.id === id ? { ...skill, ...data } : skill
+          )
+        );
       }
       return success;
     } catch (err) {
@@ -74,13 +91,14 @@ export function useEmployeeSkills(employeeId: string) {
       });
       return false;
     }
-  };
+  }, [update]);
 
-  const deleteSkill = async (id: string) => {
+  const deleteSkill = useCallback(async (id: string) => {
     try {
       const success = await remove(id);
       if (success) {
-        await fetchEmployeeSkills();
+        // Mettre à jour le state local au lieu de refaire un appel API complet
+        setSkills(prevSkills => prevSkills.filter(skill => skill.id !== id));
       }
       return success;
     } catch (err) {
@@ -91,11 +109,18 @@ export function useEmployeeSkills(employeeId: string) {
       });
       return false;
     }
-  };
+  }, [remove]);
 
   useEffect(() => {
-    fetchEmployeeSkills();
-  }, [fetchEmployeeSkills]);
+    if (employeeId) {
+      fetchEmployeeSkills();
+    }
+    
+    // Nettoyage lors du démontage du composant
+    return () => {
+      isFetchingRef.current = false;
+    };
+  }, [fetchEmployeeSkills, employeeId]);
 
   return {
     skills,
