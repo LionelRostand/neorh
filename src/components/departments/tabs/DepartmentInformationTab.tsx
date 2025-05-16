@@ -2,7 +2,7 @@
 import React from 'react';
 import DepartmentForm from './form/DepartmentForm';
 import { Department } from '@/types/firebase';
-import { DepartmentFormValues } from './schema/departmentSchema';
+import type { DepartmentFormValues } from './schema/departmentSchema';
 
 interface DepartmentInformationTabProps {
   department: Department | null;
@@ -27,5 +27,5 @@ const DepartmentInformationTab: React.FC<DepartmentInformationTabProps> = ({
   );
 };
 
-export { DepartmentFormValues };
+export type { DepartmentFormValues };
 export default DepartmentInformationTab;
