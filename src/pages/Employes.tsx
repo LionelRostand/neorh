@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { useEmployeeData } from '@/hooks/useEmployeeData';
@@ -14,20 +14,11 @@ const Employes = () => {
   const { employees, isLoading, error, departmentStats, statusStats, refetch } = useEmployeeData();
   const { activeEmployees, onLeaveEmployees, inactiveEmployees, totalEmployees } = useEmployeeStatusStats(employees);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  // Utilisez cette approche améliorée pour éviter les refetchs multiples
-  const [initialFetchDone, setInitialFetchDone] = useState(false);
   
-  useEffect(() => {
-    // Effectuer un seul fetchAll au chargement initial de la page
-    if (!initialFetchDone) {
-      console.log("Employes: Initial data fetch");
-      refetch();
-      setInitialFetchDone(true);
-    }
-  }, [initialFetchDone, refetch]);
-  
-  useEffect(() => {
+  // Report error if one occurs
+  React.useEffect(() => {
     if (error) {
+      console.error("Employee data fetch error:", error);
       toast({
         title: "Erreur de chargement",
         description: "Impossible de charger les données des employés",
@@ -36,6 +27,7 @@ const Employes = () => {
     }
   }, [error]);
 
+  // Define refresh callback
   const handleRefresh = useCallback(() => {
     console.log("Employes: Manual refresh requested");
     refetch();

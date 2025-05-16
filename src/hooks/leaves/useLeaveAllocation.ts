@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useFirestore } from '../firestore';
 import { toast } from '@/components/ui/use-toast';
 
@@ -18,7 +18,7 @@ export interface LeaveAllocation {
 export const useLeaveAllocation = (employeeId: string) => {
   const [allocation, setAllocation] = useState<LeaveAllocation | null>(null);
   const [loading, setLoading] = useState(true);
-  const [hasLoaded, setHasLoaded] = useState(false); // Pour éviter les chargements répétés
+  const [hasLoaded, setHasLoaded] = useState(false);
   
   const { 
     search: searchAllocation,
@@ -27,15 +27,22 @@ export const useLeaveAllocation = (employeeId: string) => {
   } = useFirestore<LeaveAllocation>('hr_leave_allocations');
 
   const fetchAllocation = useCallback(async () => {
-    // Si nous avons déjà chargé les allocations et que l'ID est inchangé, ne pas recharger
-    if (!employeeId || (hasLoaded && allocation !== null)) {
+    // Skip fetch if no employeeId
+    if (!employeeId) {
+      setLoading(false);
+      return null;
+    }
+    
+    // Return cached data if already loaded
+    if (hasLoaded && allocation !== null) {
+      console.log(`Using cached allocation data for employee ${employeeId}`);
       setLoading(false);
       return allocation;
     }
 
     setLoading(true);
     try {
-      // Récupérer l'allocation pour l'année en cours
+      // Get allocation for current year
       const currentYear = new Date().getFullYear();
       const result = await searchAllocation('employeeId', employeeId);
       
@@ -43,16 +50,16 @@ export const useLeaveAllocation = (employeeId: string) => {
       
       if (currentAllocation) {
         setAllocation(currentAllocation);
-        setHasLoaded(true); // Marquer comme chargé
+        setHasLoaded(true);
         return currentAllocation;
       } else {
-        // Créer une allocation par défaut si elle n'existe pas
+        // Create default allocation if none exists
         const defaultAllocation: Omit<LeaveAllocation, 'id'> = {
           employeeId,
           year: currentYear,
-          paidLeavesTotal: 25, // Valeur par défaut en France
+          paidLeavesTotal: 25, // Default value for France
           paidLeavesUsed: 0,
-          rttTotal: 12, // Valeur par défaut (à adapter)
+          rttTotal: 12, // Default value (adjust as needed)
           rttUsed: 0,
           updatedAt: new Date().toISOString()
         };
@@ -67,7 +74,7 @@ export const useLeaveAllocation = (employeeId: string) => {
               
             const newAllocation = { ...defaultAllocation, id: allocationId };
             setAllocation(newAllocation);
-            setHasLoaded(true); // Marquer comme chargé
+            setHasLoaded(true);
             return newAllocation;
           }
         } catch (err) {
@@ -88,7 +95,14 @@ export const useLeaveAllocation = (employeeId: string) => {
     }
   }, [employeeId, searchAllocation, addAllocation, allocation, hasLoaded]);
 
-  // Mettre à jour les allocations de congés
+  // Initial fetch when component mounts or employeeId changes
+  useEffect(() => {
+    if (employeeId && !hasLoaded) {
+      fetchAllocation();
+    }
+  }, [employeeId, fetchAllocation, hasLoaded]);
+
+  // Update leave allocations
   const updateLeaveAllocation = useCallback(async (updates: Partial<LeaveAllocation>) => {
     if (!allocation?.id) return false;
     
@@ -98,7 +112,7 @@ export const useLeaveAllocation = (employeeId: string) => {
         updatedAt: new Date().toISOString()
       });
       
-      // Mettre à jour l'état local
+      // Update local state
       setAllocation(prev => prev ? { ...prev, ...updates } : null);
       
       toast({

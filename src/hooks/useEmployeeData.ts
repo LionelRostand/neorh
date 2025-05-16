@@ -17,9 +17,13 @@ export const useEmployeeData = () => {
   // Get departments data to map department IDs to names
   const { departments } = useDepartmentsData();
 
+  // Create a memoized cache for departments to avoid redundant fetches
+  const [departmentCache, setDepartmentCache] = useState<Record<string, string>>({});
+
   const fetchEmployees = useCallback(async () => {
-    // Si les données sont déjà chargées, ne pas recharger
+    // If data is already loaded, don't reload unless explicitly requested
     if (hasLoaded && employees.length > 0) {
+      console.log('Using cached employee data, skipping fetch');
       return;
     }
     
@@ -33,38 +37,61 @@ export const useEmployeeData = () => {
       
       // Create a set to track unique employee IDs to prevent duplicates
       const processedEmployeeIds = new Set<string>();
+      
+      // Prepare department cache from already loaded departments
+      const deptCache: Record<string, string> = { ...departmentCache };
+      if (departments?.length) {
+        departments.forEach(dept => {
+          if (dept.id && dept.name) {
+            deptCache[dept.id] = dept.name;
+          }
+        });
+      }
+      
+      // Process all employees in one batch
       const employeesData: Employee[] = [];
       
-      // Traitements parallèles avec Promise.all pour les données des départements
-      const employeePromises = employeesSnapshot.docs.map(async (docSnapshot) => {
+      for (const docSnapshot of employeesSnapshot.docs) {
         // Skip if we've already processed this ID
-        if (processedEmployeeIds.has(docSnapshot.id)) return null;
+        if (processedEmployeeIds.has(docSnapshot.id)) continue;
         
         processedEmployeeIds.add(docSnapshot.id);
         const data = docSnapshot.data();
         
         // Find department name based on department ID
         let departmentName = data.department || '';
-        if (departments?.length && data.department) {
-          const dept = departments.find(d => d.id === data.department);
-          if (dept) {
-            departmentName = dept.name;
-          } else if (data.department) {
-            // Si on n'a pas trouvé le département dans la liste, essayons de le récupérer directement
-            try {
-              const deptDocRef = doc(db, 'hr_departments', data.department);
-              const deptDocSnap = await getDoc(deptDocRef);
-              if (deptDocSnap.exists()) {
-                const deptData = deptDocSnap.data();
-                departmentName = deptData.name || data.department;
+        if (data.department) {
+          // First check our cache
+          if (deptCache[data.department]) {
+            departmentName = deptCache[data.department];
+          } 
+          // If not in cache but departments are loaded, look there
+          else if (departments?.length) {
+            const dept = departments.find(d => d.id === data.department);
+            if (dept) {
+              departmentName = dept.name;
+              // Update cache
+              deptCache[data.department] = dept.name;
+            } 
+            // Last resort: fetch individually (should be rare)
+            else {
+              try {
+                const deptDocRef = doc(db, 'hr_departments', data.department);
+                const deptDocSnap = await getDoc(deptDocRef);
+                if (deptDocSnap.exists()) {
+                  const deptData = deptDocSnap.data();
+                  departmentName = deptData.name || data.department;
+                  // Update cache
+                  deptCache[data.department] = departmentName;
+                }
+              } catch (err) {
+                console.error("Error fetching department:", err);
               }
-            } catch (err) {
-              console.error("Erreur lors de la récupération du département:", err);
             }
           }
         }
         
-        return {
+        employeesData.push({
           id: docSnapshot.id,
           name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
           position: data.position || '',
@@ -78,18 +105,19 @@ export const useEmployeeData = () => {
           professionalEmail: data.professionalEmail || '',
           birthDate: data.birthDate || '',
           personalEmail: data.email || ''
-        } as Employee;
-      });
+        } as Employee);
+      }
       
-      const resolvedEmployees = await Promise.all(employeePromises);
-      const validEmployees = resolvedEmployees.filter((emp): emp is Employee => emp !== null);
+      // Update the department cache for future use
+      setDepartmentCache(deptCache);
       
-      setEmployees(validEmployees);
+      // Update employee data
+      setEmployees(employeesData);
       setHasLoaded(true);
 
       // Calculate department statistics
       const deptStats: Record<string, number> = {};
-      validEmployees.forEach(emp => {
+      employeesData.forEach(emp => {
         if (emp.department) {
           deptStats[emp.department] = (deptStats[emp.department] || 0) + 1;
         }
@@ -98,14 +126,14 @@ export const useEmployeeData = () => {
 
       // Calculate status statistics
       const statStats: Record<string, number> = {};
-      validEmployees.forEach(emp => {
+      employeesData.forEach(emp => {
         if (emp.status) {
           statStats[emp.status] = (statStats[emp.status] || 0) + 1;
         }
       });
       setStatusStats(statStats);
       
-      console.log("Fetched employees:", validEmployees.length);
+      console.log("Fetched employees:", employeesData.length);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
       setError(err instanceof Error ? err : new Error(errorMessage));
@@ -118,12 +146,14 @@ export const useEmployeeData = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [departments, employees.length, hasLoaded]);
+  }, [departments, employees.length, hasLoaded, departmentCache]);
 
-  // Charger les données une seule fois au montage du composant
+  // Load data only once when component mounts
   useEffect(() => {
-    fetchEmployees();
-  }, [fetchEmployees]);
+    if (!hasLoaded) {
+      fetchEmployees();
+    }
+  }, [fetchEmployees, hasLoaded]);
 
   return {
     employees,

@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Leave } from '@/lib/constants';
 import { useFirestore } from '../firestore';
 import { toast } from '@/components/ui/use-toast';
@@ -9,13 +9,19 @@ export const useEmployeeLeaveData = (employeeId: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [totalDays, setTotalDays] = useState(0);
-  const [hasLoaded, setHasLoaded] = useState(false); // Pour éviter les chargements répétés
+  const [hasLoaded, setHasLoaded] = useState(false);
   
   const { search } = useFirestore<Leave>('hr_leaves');
 
   const fetchEmployeeLeaves = useCallback(async () => {
-    // Si nous avons déjà chargé les données et que l'ID est inchangé, ne pas recharger
-    if (!employeeId || (hasLoaded && leaves.length > 0)) {
+    // Skip fetch if no employeeId or already loaded
+    if (!employeeId) {
+      setLoading(false);
+      return;
+    }
+    
+    if (hasLoaded && leaves.length > 0) {
+      console.log(`Using cached leave data for employee ${employeeId}`);
       setLoading(false);
       return;
     }
@@ -24,18 +30,18 @@ export const useEmployeeLeaveData = (employeeId: string) => {
     try {
       console.log("Fetching leaves for employee:", employeeId);
       
-      // Effectuer la recherche par employeeId sans options de tri
+      // Perform search by employeeId
       const result = await search('employeeId', employeeId);
       
       if (result.docs) {
-        // Tri manuel des résultats par date de début décroissante
+        // Sort results by start date in descending order
         const sortedLeaves = [...result.docs].sort((a, b) => {
           if (!a.startDate || !b.startDate) return 0;
           return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
         });
         
         setLeaves(sortedLeaves);
-        setHasLoaded(true); // Marquer comme chargé
+        setHasLoaded(true);
         
         // Calculate total leave days
         const total = sortedLeaves.reduce((acc, leave) => {
@@ -63,6 +69,13 @@ export const useEmployeeLeaveData = (employeeId: string) => {
       setLoading(false);
     }
   }, [employeeId, search, leaves.length, hasLoaded]);
+  
+  // Initial fetch when component mounts or employeeId changes
+  useEffect(() => {
+    if (employeeId && !hasLoaded) {
+      fetchEmployeeLeaves();
+    }
+  }, [employeeId, fetchEmployeeLeaves, hasLoaded]);
 
   return {
     leaves,
