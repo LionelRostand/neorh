@@ -1,199 +1,38 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEmployeeLeaves } from '@/hooks/useEmployeeLeaves';
-import { Employee } from '@/types/employee';
-import { Button } from '@/components/ui/button';
-import { Calendar, Plus } from 'lucide-react';
-import { format } from 'date-fns';
-import NewLeaveRequestForm from '@/components/leaves/NewLeaveRequestForm';
-import LeaveAllocationManager from '@/components/leaves/allocation/LeaveAllocationManager';
-import LoadingSkeleton from '@/components/leaves/allocation/LoadingSkeleton';
-import LeaveSummaryCards from '@/components/leaves/summary/LeaveSummaryCards';
-import { LeaveHistory, ErrorState } from '@/components/leaves/history/LeaveHistory';
-import { Card, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/hooks/useAuth';
-import LeaveAllocationForm from '@/components/leaves/allocation/LeaveAllocationForm';
+import { Calendar } from 'lucide-react';
+import LeaveAllocationManager from "@/components/leaves/allocation/LeaveAllocationManager";
 
 interface EmployeeLeavesProps {
-  employee: Employee;
+  employeeId: string;
 }
 
-const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
-  console.log("[EmployeeLeaves] Rendering for employee:", employee?.id);
-  
-  // Référence pour éviter les chargements multiples
-  const initialLoadCompletedRef = useRef(false);
-  
-  // Utilisation du hook avec un ID stable
-  const employeeId = employee?.id || '';
-  
+const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
   const { 
-    leaves, 
-    loading, 
-    error, 
-    totalDays, 
-    getLeaveTypeLabel,
-    allocation,
-    allocationLoading,
+    allocation, 
+    allocationLoading, 
     updateLeaveAllocation,
-    refetch,
     paidLeavesRemaining,
     paidLeavesTotal,
     rttRemaining,
     rttTotal
   } = useEmployeeLeaves(employeeId);
-  
-  const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
-  const [showNewAllocationForm, setShowNewAllocationForm] = useState(false);
-  const [showDirectAllocationForm, setShowDirectAllocationForm] = useState(false);
-  const { user } = useAuth();
-  
-  console.log("[EmployeeLeaves] State:", { 
-    leaves: leaves?.length, 
-    loading, 
-    hasAllocation: !!allocation,
-    totalDays,
-    paidLeavesRemaining,
-    paidLeavesTotal,
-    rttRemaining,
-    rttTotal
-  });
-  
-  // Chargement initial des données une seule fois au montage
-  useEffect(() => {
-    if (employeeId && !initialLoadCompletedRef.current) {
-      console.log("[EmployeeLeaves] Component initial mount, loading data");
-      initialLoadCompletedRef.current = true;
-      refetch();
-    }
-  }, [employeeId, refetch]);
-  
-  // Déterminer si l'utilisateur peut attribuer des congés (admin ou manager)
-  const canAllocateLeaves = Boolean((user && user.isAdmin) || (user && user.role === 'manager'));
-  
-  const handleNewLeaveRequest = () => {
-    setShowNewLeaveForm(true);
-  };
-
-  const handleNewAllocation = () => {
-    setShowNewAllocationForm(true);
-  };
-  
-  const handleDirectAllocation = () => {
-    setShowDirectAllocationForm(true);
-  };
-
-  const handleRequestSuccess = () => {
-    setShowNewLeaveForm(false);
-    refetch(); // Utiliser refetch pour mettre à jour les données
-  };
-
-  const handleAllocationSuccess = () => {
-    setShowNewAllocationForm(false);
-    setShowDirectAllocationForm(false);
-    refetch(); // Utiliser refetch pour mettre à jour les données
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), 'dd/MM/yyyy');
-    } catch (error) {
-      return dateString;
-    }
-  };
-
-  // Afficher un squelette pendant le chargement initial
-  if (loading && !leaves.length) {
-    return <LoadingSkeleton />;
-  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="text-xl font-semibold">Congés</h3>
-        <div className="flex gap-2">
-          {canAllocateLeaves && (
-            <>
-              <Button 
-                variant="outline" 
-                onClick={handleNewAllocation}
-                className="border-emerald-500 text-emerald-600 hover:bg-emerald-50 gap-2"
-              >
-                <Calendar className="h-4 w-4" /> Nouvelle attribution
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleDirectAllocation}
-                className="border-blue-500 text-blue-600 hover:bg-blue-50 gap-2"
-              >
-                <Calendar className="h-4 w-4" /> Attribuer congés période
-              </Button>
-            </>
-          )}
-          <Button 
-            onClick={handleNewLeaveRequest}
-            className="bg-emerald-500 hover:bg-emerald-600 gap-2"
-          >
-            <Plus className="h-4 w-4" /> Nouvelle demande
-          </Button>
-        </div>
-      </div>
-
-      {/* Gestionnaire d'allocation */}
-      <LeaveAllocationManager 
-        allocation={allocation}
-        isLoading={allocationLoading}
-        onUpdate={updateLeaveAllocation}
-        employeeId={employeeId}
-      />
-
-      {/* Cartes de résumé des congés */}
-      <LeaveSummaryCards
-        totalDays={totalDays}
-        paidLeavesRemaining={paidLeavesRemaining}
-        paidLeavesTotal={paidLeavesTotal}
-        rttRemaining={rttRemaining}
-        rttTotal={rttTotal}
-      />
-
-      {/* Historique des congés */}
-      {error ? (
-        <Card className="border rounded-lg shadow-sm">
-          <CardContent className="p-4 py-6">
-            <ErrorState />
-          </CardContent>
-        </Card>
-      ) : (
-        <LeaveHistory 
-          leaves={leaves} 
-          formatDate={formatDate}
+    <Card className="col-span-2">
+      <CardHeader>
+        <CardTitle className="text-lg">Congés</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <LeaveAllocationManager 
+          allocation={allocation}
+          isLoading={allocationLoading}
+          onUpdate={updateLeaveAllocation}
+          employeeId={employeeId}
         />
-      )}
-
-      {/* Formulaires de dialogue */}
-      <NewLeaveRequestForm 
-        open={showNewLeaveForm} 
-        onClose={() => setShowNewLeaveForm(false)}
-        onSuccess={handleRequestSuccess}
-        employeeId={employeeId}
-      />
-
-      <LeaveAllocationForm
-        open={showNewAllocationForm}
-        onClose={() => setShowNewAllocationForm(false)}
-        onSuccess={handleAllocationSuccess}
-        employeeId={employeeId}
-      />
-      
-      {/* Formulaire d'attribution directe de congés sur période */}
-      <NewLeaveRequestForm 
-        open={showDirectAllocationForm} 
-        onClose={() => setShowDirectAllocationForm(false)}
-        onSuccess={handleAllocationSuccess}
-        employeeId={employeeId}
-        isAllocation={true}
-      />
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

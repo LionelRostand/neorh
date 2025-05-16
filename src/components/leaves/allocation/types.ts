@@ -1,11 +1,20 @@
 
-import { LeaveAllocation } from "@/hooks/leaves";
+import { LeaveAllocation } from '@/hooks/leaves';
 
 export interface LeaveAllocationManagerProps {
   allocation: LeaveAllocation | null;
   isLoading: boolean;
   onUpdate: (updates: Partial<LeaveAllocation>) => Promise<boolean>;
   employeeId: string;
+}
+
+export interface ManagerActionsProps {
+  isEditing: boolean;
+  isSaving: boolean;
+  onSave: () => void;
+  onCancel: () => void;
+  setShowConfirmDialog: (state: boolean) => void;
+  showConfirmDialog: boolean;
 }
 
 export interface AllocationCounterProps {
@@ -19,15 +28,6 @@ export interface AllocationCounterProps {
   colorClass: string;
   iconBgClass: string;
   iconColorClass: string;
-}
-
-export interface ManagerActionsProps {
-  isEditing: boolean;
-  isSaving: boolean;
-  showConfirmDialog: boolean;
-  onSave: () => void;
-  onCancel: () => void;
-  setShowConfirmDialog: (show: boolean) => void;
 }
 
 export interface ConfirmDialogProps {
