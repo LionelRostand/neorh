@@ -87,7 +87,6 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
           paidLeavesUsed: existingAllocation?.paidLeavesUsed || 0,
           rttUsed: existingAllocation?.rttUsed || 0,
           updatedAt: new Date().toISOString(),
-          // Ne pas inclure updatedBy s'il est undefined
         };
 
         // Ajouter updatedBy seulement s'il est défini
@@ -119,6 +118,7 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
           const expiryDate = new Date(data.endDate);
           expiryDate.setHours(23, 59, 59, 999);
           
+          // Notification générale d'expiration
           await addDoc(collection(db, 'hr_notifications'), {
             userId: managerId,
             title: `Expiration des congés de ${employee?.name || 'un employé'}`,

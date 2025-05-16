@@ -46,10 +46,10 @@ export function LeaveRequestFormContent({
       <form onSubmit={onSubmit} className="space-y-6">
         {!employeeId && <EmployeeField form={form} />}
         
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 gap-4">
           <AllocationFields 
             form={form}
-            showPaidLeaveAllocation={true}
+            showPaidLeaveAllocation={showPaidLeaveAllocation}
             showRttAllocation={false}
             paidLeaveLabel={getPaidLeaveAllocationLabel()}
             rttLabel=""
@@ -61,7 +61,7 @@ export function LeaveRequestFormContent({
           <AllocationFields 
             form={form}
             showPaidLeaveAllocation={false}
-            showRttAllocation={true}
+            showRttAllocation={showRttAllocation}
             paidLeaveLabel=""
             rttLabel={getRttAllocationLabel()}
             paidLeaveHelperText=""

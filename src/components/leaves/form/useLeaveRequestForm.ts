@@ -18,8 +18,8 @@ export function useLeaveRequestForm(
     defaultValues: {
       employeeId: employeeId || "",
       type: "allocation", // Default type for allocation
-      startDate: undefined,
-      endDate: undefined,
+      startDate: new Date(),
+      endDate: new Date(),
       comment: "",
       daysAllocated: 0,
       paidDaysAllocated: 25, // Valeur par défaut pour la France
