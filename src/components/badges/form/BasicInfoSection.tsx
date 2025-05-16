@@ -23,6 +23,7 @@ export function BasicInfoSection({ form }: BasicInfoSectionProps) {
               {...field} 
               className="bg-gray-50"
               readOnly
+              disabled
             />
           </FormControl>
           <FormMessage />
