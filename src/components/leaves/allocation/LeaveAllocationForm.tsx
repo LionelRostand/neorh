@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { EmployeeField } from "../form/EmployeeField";
+import { EmployeeField, EmployeeSelectProps } from "../form/EmployeeField";
 import { Plus, Minus } from "lucide-react";
 
 interface LeaveAllocationFormProps {
@@ -30,8 +30,7 @@ interface LeaveAllocationFormProps {
   employeeId?: string;
 }
 
-interface AllocationFormValues {
-  employeeId: string;
+interface AllocationFormValues extends EmployeeSelectProps {
   paidLeavesTotal: number;
   rttTotal: number;
   comment?: string;

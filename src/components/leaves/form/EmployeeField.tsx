@@ -4,7 +4,6 @@ import { FormControl, FormField, FormItem, FormLabel } from "@/components/ui/for
 import { UseFormReturn } from "react-hook-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useManagersData } from "@/hooks/useManagersData";
-import { LeaveFormValues } from "./types";
 
 // Define a more generic type so we can reuse this component
 export interface EmployeeSelectProps {
@@ -17,19 +16,19 @@ interface EmployeeFieldProps<T extends EmployeeSelectProps> {
 }
 
 export function EmployeeField<T extends EmployeeSelectProps>({ form, disabled }: EmployeeFieldProps<T>) {
-  const { managers, loading } = useManagersData();
+  const { managers, isLoading } = useManagersData();
   
   return (
     <FormField
       control={form.control}
-      name="employeeId"
+      name="employeeId" as={`employeeId`}
       render={({ field }) => (
         <FormItem>
           <FormLabel>Employé</FormLabel>
           <Select 
             onValueChange={field.onChange} 
             value={field.value} 
-            disabled={disabled || loading}
+            disabled={disabled || isLoading}
           >
             <FormControl>
               <SelectTrigger>
@@ -39,7 +38,7 @@ export function EmployeeField<T extends EmployeeSelectProps>({ form, disabled }:
             <SelectContent>
               {managers.map((employee) => (
                 <SelectItem key={employee.id} value={employee.id}>
-                  {`${employee.firstName} ${employee.lastName}`}
+                  {`${employee.name}`}
                 </SelectItem>
               ))}
             </SelectContent>
