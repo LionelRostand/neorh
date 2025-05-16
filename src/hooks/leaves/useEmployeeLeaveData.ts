@@ -5,29 +5,21 @@ import { useFirestore } from '../firestore';
 
 export const useEmployeeLeaveData = (employeeId: string) => {
   const [leaves, setLeaves] = useState<Leave[]>([]);
-  const [loading, setLoading] = useState(true);  // Start with loading true
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [totalDays, setTotalDays] = useState(0);
-  const [hasLoaded, setHasLoaded] = useState(false);
   const requestInProgressRef = useRef(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const mountedRef = useRef(true); // Pour suivre si le composant est monté
+  const mountedRef = useRef(true);
+  const dataLoadedRef = useRef(false);
   const retryCountRef = useRef(0);
   const MAX_RETRIES = 3;
   
   const { search } = useFirestore<Leave>('hr_leaves');
 
   const fetchEmployeeLeaves = useCallback(async () => {
-    // Skip fetch if not mounted
-    if (!mountedRef.current) {
-      console.log('[useEmployeeLeaveData] Component unmounted, skipping fetch');
-      return;
-    }
-    
-    // Skip fetch if no employeeId
-    if (!employeeId) {
-      console.log('[useEmployeeLeaveData] No employeeId provided, skipping fetch');
-      setLoading(false);
+    // Skip if already loaded, not mounted, or no employeeId
+    if (dataLoadedRef.current || !mountedRef.current || !employeeId) {
       return;
     }
     
@@ -66,7 +58,6 @@ export const useEmployeeLeaveData = (employeeId: string) => {
         });
         
         setLeaves(sortedLeaves);
-        setHasLoaded(true);
         setError(null);
         
         // Calculate total leave days
@@ -87,6 +78,9 @@ export const useEmployeeLeaveData = (employeeId: string) => {
         setLeaves([]);
         setTotalDays(0);
       }
+      
+      // Mark data as loaded to prevent further fetches
+      dataLoadedRef.current = true;
     } catch (err) {
       // Skip if component unmounted during error
       if (!mountedRef.current) return;
@@ -117,47 +111,31 @@ export const useEmployeeLeaveData = (employeeId: string) => {
       if (mountedRef.current) {
         setLoading(false);
         requestInProgressRef.current = false;
-        
-        if (!debounceTimerRef.current) {
-          retryCountRef.current = 0;
-        }
       }
     }
   }, [employeeId, search]);
   
-  // Reset retry count when employeeId changes
+  // Reset state when employeeId changes
   useEffect(() => {
-    retryCountRef.current = 0;
+    if (employeeId) {
+      dataLoadedRef.current = false;
+      retryCountRef.current = 0;
+    }
   }, [employeeId]);
   
-  // Initial fetch and cleanup
+  // Setup mount tracking
   useEffect(() => {
-    // Reset mounted ref on mount
     mountedRef.current = true;
     
-    // Fetch data with small delay to ensure proper component mounting
-    if (employeeId) {
-      const timer = setTimeout(() => {
-        if (mountedRef.current) {
-          fetchEmployeeLeaves();
-        }
-      }, 200);
-      
-      return () => {
-        // Cleanup on unmount
-        clearTimeout(timer);
-        mountedRef.current = false;
-        
-        if (debounceTimerRef.current) {
-          clearTimeout(debounceTimerRef.current);
-        }
-      };
-    }
-    
     return () => {
+      // Cleanup on unmount
       mountedRef.current = false;
+      
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
     };
-  }, [employeeId, fetchEmployeeLeaves]);
+  }, []);
 
   return {
     leaves,

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEmployeeLeaves } from '@/hooks/useEmployeeLeaves';
 import LeaveAllocationManager from "@/components/leaves/allocation/LeaveAllocationManager";
@@ -17,6 +17,8 @@ interface EmployeeLeavesProps {
 
 const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
   const [showLeaveRequestForm, setShowLeaveRequestForm] = useState(false);
+  const initialLoadCompleted = useRef(false);
+  
   const { 
     allocation, 
     allocationLoading, 
@@ -26,28 +28,21 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
     refetch
   } = useEmployeeLeaves(employeeId);
 
-  // Force refetch on mount and when employeeId changes
+  // Effectue un seul refetch initial lorsque le composant est monté ou lorsque l'employeeId change
   useEffect(() => {
-    if (employeeId) {
-      console.log("EmployeeLeaves - initial force refetch for employee:", employeeId);
-      // Small delay to ensure component is fully mounted
-      const timer = setTimeout(() => {
-        refetch();
-      }, 200);
-      return () => clearTimeout(timer);
+    if (employeeId && !initialLoadCompleted.current) {
+      console.log("EmployeeLeaves - initial load for employee:", employeeId);
+      // Marquer le chargement initial comme complété
+      initialLoadCompleted.current = true;
+      // Effectuer le refetch
+      refetch();
     }
+    
+    // Réinitialiser le flag si l'employeeId change
+    return () => {
+      initialLoadCompleted.current = false;
+    };
   }, [employeeId, refetch]);
-
-  // Log data for debugging
-  useEffect(() => {
-    console.log("EmployeeLeaves - allocation data:", allocation);
-    console.log("EmployeeLeaves - loading state:", allocationLoading);
-    console.log("EmployeeLeaves - leaves data:", leaves);
-  }, [allocation, allocationLoading, leaves]);
-
-  const handleLeaveRequestSuccess = () => {
-    refetch();
-  };
 
   // Helper function to format dates
   const formatDate = (dateString: string) => {
@@ -58,6 +53,10 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
       console.error("Invalid date format:", dateString);
       return dateString;
     }
+  };
+
+  const handleLeaveRequestSuccess = () => {
+    refetch();
   };
 
   return (
