@@ -16,7 +16,7 @@ export const generateDocumentsTab = (doc: jsPDF, startY: number, documents?: Doc
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.text('Aucun document disponible pour cet employé.', 14, startY + 15);
-    return;
+    return startY + 25;
   }
   
   // Structure des données pour le tableau
@@ -38,7 +38,7 @@ export const generateDocumentsTab = (doc: jsPDF, startY: number, documents?: Doc
   ];
   
   // Génération du tableau
-  autoTable(doc, {
+  const finalY = autoTable(doc, {
     startY: startY + 10,
     head: [headers.map(h => h.header)],
     body: tableData,
@@ -52,4 +52,6 @@ export const generateDocumentsTab = (doc: jsPDF, startY: number, documents?: Doc
       fontStyle: 'bold'
     }
   });
+  
+  return finalY.lastAutoTable.finalY + 10;
 };

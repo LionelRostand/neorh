@@ -1,6 +1,5 @@
 
 import React, { useEffect, useState } from 'react';
-import { useFirestore } from '@/hooks/useFirestore';
 import { Document } from '@/lib/constants';
 import { Employee } from '@/types/employee';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,9 @@ import { File, Plus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import DocumentList from '@/components/documents/DocumentList';
 import { Skeleton } from '@/components/ui/skeleton';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { toast } from '@/components/ui/use-toast';
 
 interface EmployeeDocumentsProps {
   employee: Employee;
@@ -16,30 +18,44 @@ interface EmployeeDocumentsProps {
 const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
-  const documentsCollection = useFirestore<Document>('hr_documents');
 
   useEffect(() => {
     const fetchEmployeeDocuments = async () => {
+      if (!employee?.id) return;
+      
       setLoading(true);
       try {
-        // Fetch documents related to this employee
-        const result = await documentsCollection.search('employeeId', employee.id, {
-          sortField: 'uploadDate',
-          sortDirection: 'desc'
+        console.log(`Fetching documents for employee: ${employee.id}`);
+        
+        // Accès direct à Firestore pour éviter les problèmes d'indexation
+        const documentsRef = collection(db, 'hr_documents');
+        const q = query(documentsRef, where('employeeId', '==', employee.id));
+        const querySnapshot = await getDocs(q);
+        
+        const fetchedDocs: Document[] = [];
+        querySnapshot.forEach((doc) => {
+          fetchedDocs.push({
+            id: doc.id,
+            ...doc.data() as Omit<Document, 'id'>
+          });
         });
         
-        setDocuments(result.docs as Document[]);
+        console.log(`Found ${fetchedDocs.length} documents for employee ${employee.id}`);
+        setDocuments(fetchedDocs);
       } catch (error) {
         console.error('Error fetching employee documents:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de récupérer les documents de l'employé",
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }
     };
 
-    if (employee.id) {
-      fetchEmployeeDocuments();
-    }
-  }, [employee.id, documentsCollection]);
+    fetchEmployeeDocuments();
+  }, [employee.id]);
 
   if (loading) {
     return (

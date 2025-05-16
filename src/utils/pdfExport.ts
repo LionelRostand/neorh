@@ -1,4 +1,3 @@
-
 // Re-export from the new modular structure
 import { generateEmployeePdf, PdfOptions } from './pdf';
 import { PdfTab } from './pdf/types';
@@ -14,18 +13,22 @@ import { db } from '@/lib/firebase';
  */
 const fetchEmployeeDocuments = async (employeeId: string): Promise<Document[]> => {
   try {
+    console.log(`Fetching documents for employee ${employeeId} for PDF export`);
     const q = query(
       collection(db, 'hr_documents'),
       where('employeeId', '==', employeeId)
     );
     
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ 
+    const documents = snapshot.docs.map(doc => ({ 
       id: doc.id, 
       ...doc.data() 
     } as Document));
+    
+    console.log(`Found ${documents.length} documents for employee ${employeeId}`);
+    return documents;
   } catch (error) {
-    console.error('Error fetching employee documents:', error);
+    console.error('Error fetching employee documents for PDF:', error);
     return [];
   }
 };
