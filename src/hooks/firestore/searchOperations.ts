@@ -56,10 +56,21 @@ export const createSearchOperations = <T extends Record<string, any>>(
       } else if (constraints.length === 2) {
         q = query(collectionRef, constraints[0], constraints[1]);
       } else {
-        // For more than 2 constraints, we need to handle them individually
-        // Note: This is a simplification, in a real-world scenario, you'd need to create a composite index in Firebase
-        q = query(collectionRef, constraints[0], constraints[1]);
-        console.warn('Search only supports up to 2 constraints. Additional constraints were ignored.');
+        // Pour plus de 2 contraintes, nous devons créer un index composite dans Firebase
+        console.warn('Attention: La recherche avec tri nécessite un index composite dans Firebase.');
+        
+        if (options?.sortField) {
+          // Dans ce cas, nous effectuons uniquement la requête avec le filtre where, sans le tri
+          // pour éviter l'erreur d'index composite
+          q = query(collectionRef, constraints[0]);
+          toast({
+            title: "Erreur de recherche",
+            description: "La recherche avec tri nécessite un index composite. Le tri a été désactivé.",
+            variant: "destructive"
+          });
+        } else {
+          q = query(collectionRef, constraints[0]);
+        }
       }
       
       const querySnapshot = await getDocs(q);
