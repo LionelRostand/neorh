@@ -54,7 +54,7 @@ export function DaysAllocationField({
                   if (onChange) onChange(newValue);
                 }}
                 className="h-9 text-center w-16"
-                value={field.value === undefined || field.value === null ? 0 : Number(field.value)}
+                value={field.value || 0}
               />
             </FormControl>
             <Button
