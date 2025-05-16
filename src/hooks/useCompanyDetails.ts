@@ -15,7 +15,8 @@ interface UseCompanyDetailsResult {
 export const useCompanyDetails = (): UseCompanyDetailsResult => {
   const [company, setCompany] = useState<Company | null>(null);
   const [error, setError] = useState<Error | null>(null);
-  const { getById, isLoading } = useFirestore<Company>("hr_companies");
+  const [isLoadingLocal, setIsLoadingLocal] = useState(false);
+  const { getById, isLoading: isLoadingFirestore } = useFirestore<Company>("hr_companies");
 
   const resetState = useCallback(() => {
     console.log("useCompanyDetails: Resetting state to initial values");
@@ -31,6 +32,14 @@ export const useCompanyDetails = (): UseCompanyDetailsResult => {
     }
     
     console.log("useCompanyDetails: Tentative de récupération de l'entreprise avec ID:", id);
+    
+    // Éviter les appels multiples pendant le chargement
+    if (isLoadingLocal) {
+      console.log("useCompanyDetails: Déjà en cours de chargement, requête ignorée");
+      return;
+    }
+    
+    setIsLoadingLocal(true);
     
     try {
       const result = await getById(id);
@@ -78,8 +87,13 @@ export const useCompanyDetails = (): UseCompanyDetailsResult => {
         description: `Impossible de charger les informations de l'entreprise: ${errorMessage}`,
         variant: "destructive"
       });
+    } finally {
+      setIsLoadingLocal(false);
     }
   }, [getById]);
+
+  // Combiner l'état de chargement local et Firestore
+  const isLoading = isLoadingLocal || isLoadingFirestore;
 
   return {
     company,

@@ -36,15 +36,25 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
     registrationDate: new Date().toISOString().split('T')[0]
   });
   
+  // Pour éviter les requêtes multiples
+  const [dataFetched, setDataFetched] = useState(false);
+  
   const { getById, update, isLoading } = useFirestore<CompanyFormValues & { 
     logo?: { base64: string, type: string, name: string } 
   }>("hr_companies");
   
   // Load company data
   useEffect(() => {
+    // Si le dialogue est fermé, réinitialiser l'état
+    if (!open) {
+      setDataFetched(false);
+      return;
+    }
+    
+    // Si nous avons déjà récupéré les données, ne pas refaire l'appel
+    if (dataFetched || !companyId) return;
+    
     const fetchCompany = async () => {
-      if (!companyId || !open) return;
-      
       console.log("EditCompanyDialog: Fetching company with ID:", companyId);
       setIsLoadingCompany(true);
       setLoadError(null);
@@ -70,6 +80,7 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
             status: company.status || "active",
             registrationDate: company.registrationDate || new Date().toISOString().split('T')[0]
           });
+          setDataFetched(true);
         } else {
           throw new Error("Entreprise non trouvée");
         }
@@ -82,18 +93,12 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
           variant: "destructive"
         });
       } finally {
-        // Important: toujours mettre fin au chargement, que l'opération réussisse ou échoue
         setIsLoadingCompany(false);
       }
     };
 
-    if (open) {
-      fetchCompany();
-    } else {
-      // Réinitialiser l'état lorsque le dialogue est fermé
-      setIsLoadingCompany(true);
-    }
-  }, [companyId, open, getById]);
+    fetchCompany();
+  }, [companyId, open, getById, dataFetched]);
 
   const handleSubmit = async (data: CompanyFormValues, logoData: { base64: string | null, type: string | null, name: string | null } | null) => {
     try {

@@ -45,8 +45,21 @@ export const createReadOperations = <T extends Record<string, any>>(
     }
   };
 
-  // Récupérer un document par son ID
+  // Cache pour éviter les requêtes répétées pour le même ID
+  let cachedDocs: Record<string, { timestamp: number, data: (T & { id: string }) }> = {};
+  const CACHE_TTL = 10000; // 10 secondes en millisecondes
+
+  // Récupérer un document par son ID avec mise en cache
   const getById = async (id: string): Promise<(T & { id: string }) | null> => {
+    // Ne pas modifier l'état de chargement si on sert depuis le cache
+    const now = Date.now();
+    const cachedDoc = cachedDocs[id];
+    
+    if (cachedDoc && (now - cachedDoc.timestamp < CACHE_TTL)) {
+      console.info(`getDoc_firestore: Serving document ${id} from cache`);
+      return cachedDoc.data;
+    }
+    
     setIsLoading(true);
     setError(null);
     
@@ -63,6 +76,13 @@ export const createReadOperations = <T extends Record<string, any>>(
       if (docSnap.exists()) {
         console.info(`createReadOperations: Document found for ID ${id}`);
         const result = { id: docSnap.id, ...docSnap.data() as DocumentData } as T & { id: string };
+        
+        // Mettre en cache le résultat
+        cachedDocs[id] = {
+          timestamp: now,
+          data: result
+        };
+        
         return result;
       } else {
         console.warn(`createReadOperations: Document with ID ${id} not found in ${collectionName}`);
@@ -87,8 +107,15 @@ export const createReadOperations = <T extends Record<string, any>>(
     }
   };
 
+  // Réinitialiser le cache
+  const clearCache = () => {
+    cachedDocs = {};
+    console.info(`Cache cleared for ${collectionName}`);
+  };
+
   return {
     getAll,
-    getById
+    getById,
+    clearCache
   };
 };

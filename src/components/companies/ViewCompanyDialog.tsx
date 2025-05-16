@@ -1,5 +1,5 @@
 
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useCompanyDetails } from "@/hooks/useCompanyDetails";
 import CompanyDetailsSkeleton from "./view-dialog/CompanyDetailsSkeleton";
@@ -13,6 +13,8 @@ interface ViewCompanyDialogProps {
 }
 
 const ViewCompanyDialog = ({ companyId, open, onOpenChange }: ViewCompanyDialogProps) => {
+  // Utiliser un état local pour suivre si nous avons déjà chargé les données
+  const [dataFetched, setDataFetched] = useState(false);
   const { company, isLoading, error, fetchCompany, resetState } = useCompanyDetails();
 
   // Memoize the handleClose to avoid recreating on each render
@@ -22,27 +24,28 @@ const ViewCompanyDialog = ({ companyId, open, onOpenChange }: ViewCompanyDialogP
   }, [onOpenChange]);
 
   useEffect(() => {
-    // Only fetch when dialog is open and we have a valid ID
-    if (open && companyId) {
-      console.log("ViewCompanyDialog: Fetching company data for ID:", companyId);
-      fetchCompany(companyId);
+    // Si le dialogue est fermé, réinitialiser l'état
+    if (!open) {
+      setDataFetched(false);
+      resetState();
+      return;
     }
     
-    // Clean up state when dialog closes
-    return () => {
-      if (!open) {
-        console.log("ViewCompanyDialog: Resetting company details state");
-        resetState();
-      }
-    };
-  }, [open, companyId, fetchCompany, resetState]);
+    // Seulement charger les données lorsque la boîte de dialogue est ouverte, que nous avons un ID, et que nous n'avons pas déjà chargé
+    if (open && companyId && !dataFetched) {
+      console.log("ViewCompanyDialog: Fetching company data for ID:", companyId);
+      fetchCompany(companyId);
+      setDataFetched(true);
+    }
+  }, [open, companyId, fetchCompany, resetState, dataFetched]);
 
   console.log("ViewCompanyDialog: Current state:", { 
     companyId, 
     open, 
     isLoading, 
     hasError: !!error, 
-    hasCompany: !!company 
+    hasCompany: !!company,
+    dataFetched
   });
 
   if (!open) return null;
