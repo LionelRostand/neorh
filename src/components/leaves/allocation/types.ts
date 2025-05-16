@@ -8,15 +8,6 @@ export interface LeaveAllocationManagerProps {
   employeeId: string;
 }
 
-export interface ManagerActionsProps {
-  isEditing: boolean;
-  isSaving: boolean;
-  onSave: () => void;
-  onCancel: () => void;
-  setShowConfirmDialog: (show: boolean) => void;
-  showConfirmDialog: boolean;
-}
-
 export interface AllocationCounterProps {
   id: string;
   value: number;
@@ -30,11 +21,18 @@ export interface AllocationCounterProps {
   iconColorClass: string;
 }
 
+export interface ManagerActionsProps {
+  isEditing: boolean;
+  isSaving: boolean;
+  showConfirmDialog: boolean;
+  onSave: () => void;
+  onCancel: () => void;
+  setShowConfirmDialog: (show: boolean) => void;
+}
+
 export interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
   isSaving: boolean;
 }
-
-export { type AllocationFormValues } from "./hooks/useLeaveAllocationForm";
