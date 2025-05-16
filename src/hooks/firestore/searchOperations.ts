@@ -53,14 +53,13 @@ export const createSearchOperations = <T extends Record<string, any>>(
         q = query(collectionRef);
       } else if (constraints.length === 1) {
         q = query(collectionRef, constraints[0]);
-      } else {
-        // For multiple constraints, we need to handle them individually
+      } else if (constraints.length === 2) {
         q = query(collectionRef, constraints[0], constraints[1]);
-        
-        // If there are more constraints, log a warning as this simple approach only handles up to 2
-        if (constraints.length > 2) {
-          console.warn('Search only supports up to 2 constraints. Additional constraints were ignored.');
-        }
+      } else {
+        // For more than 2 constraints, we need to handle them individually
+        // Note: This is a simplification, in a real-world scenario, you'd need to handle more constraints
+        q = query(collectionRef, constraints[0], constraints[1]);
+        console.warn('Search only supports up to 2 constraints. Additional constraints were ignored.');
       }
           
       const querySnapshot = await getDocs(q);
