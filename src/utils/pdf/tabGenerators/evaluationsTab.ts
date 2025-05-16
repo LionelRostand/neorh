@@ -16,7 +16,7 @@ export const generateEvaluationsTab = (doc: jsPDF, startY: number, evaluations?:
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.text('Aucune évaluation disponible pour cet employé.', 14, startY + 15);
-    return;
+    return startY + 30; // Retourne la position Y mise à jour
   }
   
   // Display evaluations in a table
@@ -39,4 +39,8 @@ export const generateEvaluationsTab = (doc: jsPDF, startY: number, evaluations?:
     },
     margin: { left: 14, right: 14 }
   });
+  
+  // Récupérer la position finale du tableau
+  const finalY = (doc as any).lastAutoTable.finalY || startY + 30;
+  return finalY + 10; // Retourne la position Y mise à jour avec une marge
 };

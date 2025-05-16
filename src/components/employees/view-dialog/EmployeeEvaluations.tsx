@@ -4,8 +4,9 @@ import { Employee } from '@/types/employee';
 import { useEmployeeEvaluations, Evaluation } from '@/hooks/useEmployeeEvaluations';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Star } from "lucide-react";
+import { AlertCircle, Star } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface EmployeeEvaluationsProps {
   employee: Employee;
@@ -44,12 +45,20 @@ const EmployeeEvaluations: React.FC<EmployeeEvaluationsProps> = ({ employee }) =
     return (
       <div className="space-y-4">
         <h3 className="text-xl font-semibold mb-4">Évaluations</h3>
-        <p className="text-red-500">Erreur lors du chargement des évaluations.</p>
+        <Card className="border border-red-200 bg-red-50">
+          <CardContent className="p-4 flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-red-500" />
+            <div>
+              <p className="text-red-600 font-medium">Erreur lors du chargement des évaluations</p>
+              <p className="text-sm text-red-500">Veuillez réessayer plus tard ou contacter l'administrateur.</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  if (evaluations.length === 0) {
+  if (!evaluations || evaluations.length === 0) {
     return (
       <div className="space-y-4">
         <h3 className="text-xl font-semibold mb-4">Évaluations</h3>
