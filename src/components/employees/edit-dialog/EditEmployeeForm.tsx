@@ -33,6 +33,7 @@ export function EditEmployeeForm({ employee, onClose, onSuccess }: EditEmployeeF
       status: 'active' as const,
       managerId: "",
       photoUrl: "",
+      professionalEmail: "",
     },
   });
 
@@ -51,6 +52,7 @@ export function EditEmployeeForm({ employee, onClose, onSuccess }: EditEmployeeF
         startDate: startDate,
         photoUrl: employee.photoUrl || '',
         managerId: employee.managerId || '',
+        professionalEmail: employee.professionalEmail || '',
       });
     }
   }, [employee, form]);
@@ -73,7 +75,8 @@ export function EditEmployeeForm({ employee, onClose, onSuccess }: EditEmployeeF
         department: employee.departmentId || '', // Keep the original departmentId
         status: data.status,
         hireDate: data.startDate ? format(data.startDate, 'yyyy-MM-dd') : '',
-        photoUrl: data.photoUrl || ''
+        photoUrl: data.photoUrl || '',
+        professionalEmail: data.professionalEmail || ''
       };
 
       const success = await updateEmployee(employee.id, updatedEmployeeData);

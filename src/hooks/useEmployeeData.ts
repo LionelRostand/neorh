@@ -102,9 +102,9 @@ export const useEmployeeData = () => {
           photoUrl: data.photoUrl || '',
           startDate: data.hireDate || '',
           status: data.status || 'inactive',
-          professionalEmail: data.professionalEmail || '',
+          professionalEmail: data.professionalEmail || data.email || '',
           birthDate: data.birthDate || '',
-          personalEmail: data.email || ''
+          personalEmail: data.personalEmail || data.email || ''
         } as Employee);
       }
       
