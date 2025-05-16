@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useCollection } from "@/hooks/useCollection";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
@@ -5,6 +6,7 @@ import { LeaveFormValues } from "./types";
 import { doc, getDoc, updateDoc, addDoc, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/hooks/useAuth";
+import { LeaveAllocation } from "@/hooks/leaves";
 
 export const useLeaveFormSubmit = (onSuccess?: () => void) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,7 +86,7 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
           const currentYear = new Date().getFullYear();
           
           // Create base allocation data with proper typing
-          let allocationData: Record<string, any> = {
+          let allocationData: Partial<LeaveAllocation> = {
             employeeId: data.employeeId,
             year: currentYear,
             updatedAt: new Date().toISOString(),
@@ -113,7 +115,7 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
             const allocationId = existingAllocation.id;
             await updateDoc(doc(db, 'hr_leave_allocations', allocationId), allocationData);
           } else {
-            await addAllocation(allocationData as any);
+            await addAllocation(allocationData as LeaveAllocation);
           }
           
           // Programmer une notification pour le manager lorsque les congés expirent
