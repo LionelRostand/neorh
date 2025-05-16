@@ -17,6 +17,9 @@ interface EmployeeLeavesProps {
 }
 
 const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
+  // Utilisation du hook avec un ID stable
+  const employeeId = employee?.id || '';
+  
   const { 
     leaves, 
     loading, 
@@ -26,7 +29,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
     allocation,
     allocationLoading,
     updateLeaveAllocation
-  } = useEmployeeLeaves(employee?.id || '');
+  } = useEmployeeLeaves(employeeId);
   
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
   
@@ -46,7 +49,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
     }
   }, []);
 
-  // Only recalculate when allocation changes
+  // Calculer les valeurs dérivées une seule fois quand les dépendances changent
   const paidLeavesRemaining = useMemo(() => 
     allocation ? allocation.paidLeavesTotal - allocation.paidLeavesUsed : 0
   , [allocation]);
@@ -55,7 +58,8 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
     allocation ? allocation.rttTotal - allocation.rttUsed : 0
   , [allocation]);
 
-  if (loading || allocationLoading) {
+  // Condition de rendu simple pour le loading
+  if (loading && allocationLoading) {
     return <LoadingSkeleton />;
   }
 
@@ -75,7 +79,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
         allocation={allocation}
         isLoading={allocationLoading}
         onUpdate={updateLeaveAllocation}
-        employeeId={employee.id}
+        employeeId={employeeId}
       />
 
       <LeaveSummaryCards
@@ -101,7 +105,7 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
         open={showNewLeaveForm} 
         onClose={() => setShowNewLeaveForm(false)}
         onSuccess={handleRequestSuccess}
-        employeeId={employee.id}
+        employeeId={employeeId}
       />
     </div>
   );

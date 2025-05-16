@@ -1,12 +1,12 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Minus, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { AllocationCounterProps } from "./types";
 
-const AllocationCounter: React.FC<AllocationCounterProps> = ({
+const AllocationCounter: React.FC<AllocationCounterProps> = memo(({
   id,
   value,
   onChange,
@@ -87,6 +87,8 @@ const AllocationCounter: React.FC<AllocationCounterProps> = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+AllocationCounter.displayName = "AllocationCounter";
 
 export default AllocationCounter;

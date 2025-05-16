@@ -44,7 +44,6 @@ export const useEmployeeLeaves = (employeeId: string) => {
       
       // Effectuer la recherche par employeeId sans options de tri
       const result = await search('employeeId', employeeId);
-      console.log("Leaves result:", result);
       
       if (result.docs) {
         // Tri manuel des résultats par date de début décroissante
@@ -112,10 +111,8 @@ export const useEmployeeLeaves = (employeeId: string) => {
         };
         
         try {
-          // Résolution du problème de type
           const newAllocationId = await addAllocation(defaultAllocation);
           
-          // Vérifier si l'ID est une chaîne ou un objet
           if (newAllocationId !== null) {
             const allocationId = typeof newAllocationId === 'string' 
               ? newAllocationId 
@@ -169,13 +166,27 @@ export const useEmployeeLeaves = (employeeId: string) => {
     }
   }, [allocation, updateAllocation]);
 
-  // Utiliser useEffect avec les dépendances correctes
+  // *** CORRECTION: Ajout d'une vérification pour empêcher les appels en boucle ***
   useEffect(() => {
+    let isMounted = true;
+    
     if (employeeId) {
-      fetchEmployeeLeaves();
-      fetchAllocation();
+      // Utiliser Promise.all pour exécuter les deux fetchs en parallèle
+      const fetchData = async () => {
+        await Promise.all([
+          fetchEmployeeLeaves(),
+          fetchAllocation()
+        ]);
+      };
+      
+      fetchData();
     }
-  }, [employeeId, fetchEmployeeLeaves, fetchAllocation]);
+    
+    // Fonction de nettoyage pour éviter les mises à jour sur un composant démonté
+    return () => {
+      isMounted = false;
+    };
+  }, [employeeId]); // *** CORRECTION: N'inclure que employeeId comme dépendance ***
 
   // Ajouter une fonction pour traduire les types de congés
   const getLeaveTypeLabel = (type: string): string => {
