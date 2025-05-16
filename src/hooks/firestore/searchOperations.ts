@@ -46,8 +46,13 @@ export const createSearchOperations = <T extends Record<string, any>>(
       }
       
       // Create the query with constraints
-      // Fix: Apply constraints directly without spreading
-      const q = query(collectionRef, ...constraints);
+      // Fix: Apply constraints without spreading to avoid TypeScript error
+      const q = constraints.length === 1 
+        ? query(collectionRef, constraints[0])
+        : constraints.length === 2 
+          ? query(collectionRef, constraints[0], constraints[1])
+          : query(collectionRef);
+          
       const querySnapshot = await getDocs(q);
       
       const documents = querySnapshot.docs.map(doc => {
