@@ -14,15 +14,17 @@ const Employes = () => {
   const { employees, isLoading, error, departmentStats, statusStats, refetch } = useEmployeeData();
   const { activeEmployees, onLeaveEmployees, inactiveEmployees, totalEmployees } = useEmployeeStatusStats(employees);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [dataFetched, setDataFetched] = useState(false);
+  // Utilisez cette approche améliorée pour éviter les refetchs multiples
+  const [initialFetchDone, setInitialFetchDone] = useState(false);
   
   useEffect(() => {
-    // Appeler refetch seulement au premier rendu
-    if (!dataFetched) {
+    // Effectuer un seul fetchAll au chargement initial de la page
+    if (!initialFetchDone) {
+      console.log("Employes: Initial data fetch");
       refetch();
-      setDataFetched(true);
+      setInitialFetchDone(true);
     }
-  }, [dataFetched, refetch]);
+  }, [initialFetchDone, refetch]);
   
   useEffect(() => {
     if (error) {
@@ -35,6 +37,7 @@ const Employes = () => {
   }, [error]);
 
   const handleRefresh = useCallback(() => {
+    console.log("Employes: Manual refresh requested");
     refetch();
   }, [refetch]);
 

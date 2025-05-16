@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Employee } from '@/types/employee';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { toast } from '@/components/ui/use-toast';
 import { useDepartmentsData } from '@/hooks/useDepartmentsData';
@@ -27,6 +27,7 @@ export const useEmployeeData = () => {
     setError(null);
     
     try {
+      console.log('Fetching employees from Firestore');
       const employeesCollection = collection(db, 'hr_employees');
       const employeesSnapshot = await getDocs(employeesCollection);
       
@@ -34,9 +35,10 @@ export const useEmployeeData = () => {
       const processedEmployeeIds = new Set<string>();
       const employeesData: Employee[] = [];
       
-      employeesSnapshot.docs.forEach(doc => {
+      // Traitements parallèles avec Promise.all pour les données des départements
+      const employeePromises = employeesSnapshot.docs.map(async (doc) => {
         // Skip if we've already processed this ID
-        if (processedEmployeeIds.has(doc.id)) return;
+        if (processedEmployeeIds.has(doc.id)) return null;
         
         processedEmployeeIds.add(doc.id);
         const data = doc.data();
@@ -47,10 +49,20 @@ export const useEmployeeData = () => {
           const dept = departments.find(d => d.id === data.department);
           if (dept) {
             departmentName = dept.name;
+          } else if (data.department) {
+            // Si on n'a pas trouvé le département dans la liste, essayons de le récupérer directement
+            try {
+              const deptDoc = await getDoc(doc(db, 'hr_departments', data.department));
+              if (deptDoc.exists()) {
+                departmentName = deptDoc.data().name || data.department;
+              }
+            } catch (err) {
+              console.error("Erreur lors de la récupération du département:", err);
+            }
           }
         }
         
-        employeesData.push({
+        return {
           id: doc.id,
           name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
           position: data.position || '',
@@ -64,15 +76,18 @@ export const useEmployeeData = () => {
           professionalEmail: data.professionalEmail || '',
           birthDate: data.birthDate || '',
           personalEmail: data.email || ''
-        } as Employee);
+        } as Employee;
       });
       
-      setEmployees(employeesData);
+      const resolvedEmployees = await Promise.all(employeePromises);
+      const validEmployees = resolvedEmployees.filter((emp): emp is Employee => emp !== null);
+      
+      setEmployees(validEmployees);
       setHasLoaded(true);
 
       // Calculate department statistics
       const deptStats: Record<string, number> = {};
-      employeesData.forEach(emp => {
+      validEmployees.forEach(emp => {
         if (emp.department) {
           deptStats[emp.department] = (deptStats[emp.department] || 0) + 1;
         }
@@ -81,14 +96,14 @@ export const useEmployeeData = () => {
 
       // Calculate status statistics
       const statStats: Record<string, number> = {};
-      employeesData.forEach(emp => {
+      validEmployees.forEach(emp => {
         if (emp.status) {
           statStats[emp.status] = (statStats[emp.status] || 0) + 1;
         }
       });
       setStatusStats(statStats);
       
-      console.log("Fetched employees:", employeesData.length);
+      console.log("Fetched employees:", validEmployees.length);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
       setError(err instanceof Error ? err : new Error(errorMessage));

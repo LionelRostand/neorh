@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Employee } from '@/types/employee';
 import { Button } from '@/components/ui/button';
@@ -30,20 +31,23 @@ interface InformationTabProps {
 export const InformationsTab: React.FC<InformationTabProps> = ({ employee }) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [companyName, setCompanyName] = useState<string>('');
+  const [departmentName, setDepartmentName] = useState<string>(employee.department || '');
   
-  // Fetch company details
+  // Fetch company and department details
   useEffect(() => {
-    const fetchCompanyDetails = async () => {
+    const fetchDepartmentAndCompanyDetails = async () => {
       if (!employee.departmentId) return;
       
       try {
-        // First, get department to find company ID
+        // First, get department to find company ID and ensure we have the correct name
         const departmentRef = doc(db, 'hr_departments', employee.departmentId);
         const departmentSnap = await getDoc(departmentRef);
         
         if (!departmentSnap.exists()) return;
         
         const departmentData = departmentSnap.data();
+        setDepartmentName(departmentData?.name || employee.department);
+        
         const companyId = departmentData?.companyId;
         
         if (!companyId) return;
@@ -60,8 +64,8 @@ export const InformationsTab: React.FC<InformationTabProps> = ({ employee }) => 
       }
     };
     
-    fetchCompanyDetails();
-  }, [employee.departmentId]);
+    fetchDepartmentAndCompanyDetails();
+  }, [employee.departmentId, employee.department]);
 
   // Helper function to get initials from name
   const getInitials = (name: string) => {
@@ -125,7 +129,7 @@ export const InformationsTab: React.FC<InformationTabProps> = ({ employee }) => 
           <h4 className="text-lg font-medium mb-4">Informations professionnelles</h4>
           <div className="space-y-4">
             <PersonalInfoField label="Poste" value={employee.position} />
-            <PersonalInfoField label="Département" value={employee.department} />
+            <PersonalInfoField label="Département" value={departmentName} />
             <PersonalInfoField label="Entreprise" value={companyName} />
             <PersonalInfoField label="Date d'embauche" value={employee.startDate || '15 mai 2025'} />
             <PersonalInfoField 
