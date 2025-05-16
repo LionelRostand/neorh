@@ -34,7 +34,7 @@ export function ManagerField({ form, managers, isLoading }: ManagerFieldProps) {
           <FormLabel>Responsable</FormLabel>
           <Select 
             onValueChange={field.onChange} 
-            defaultValue={field.value}
+            defaultValue={field.value || "no-manager"}
             disabled={isLoading}
           >
             <FormControl>
@@ -43,8 +43,9 @@ export function ManagerField({ form, managers, isLoading }: ManagerFieldProps) {
               </SelectTrigger>
             </FormControl>
             <SelectContent>
+              <SelectItem value="no-manager">Aucun responsable</SelectItem>
               {managers.map((manager) => (
-                <SelectItem key={manager.id} value={manager.id}>
+                <SelectItem key={manager.id} value={manager.id || "manager-unknown"}>
                   {manager.name}
                 </SelectItem>
               ))}

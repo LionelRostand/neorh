@@ -34,7 +34,7 @@ export function CompanyField({ form, companies, isLoading }: CompanyFieldProps) 
           <FormLabel>Entreprise</FormLabel>
           <Select 
             onValueChange={field.onChange} 
-            defaultValue={field.value}
+            defaultValue={field.value || "no-company"}
             disabled={isLoading}
           >
             <FormControl>
@@ -43,8 +43,9 @@ export function CompanyField({ form, companies, isLoading }: CompanyFieldProps) 
               </SelectTrigger>
             </FormControl>
             <SelectContent>
+              <SelectItem value="no-company">Sélectionnez une entreprise</SelectItem>
               {companies.map((company) => (
-                <SelectItem key={company.id} value={company.id}>
+                <SelectItem key={company.id} value={company.id || "company-unknown"}>
                   {company.name}
                 </SelectItem>
               ))}

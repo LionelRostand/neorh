@@ -50,7 +50,7 @@ export function EditEmployeeStatusInfo({ form }: EditEmployeeStatusInfoProps) {
             {isDepartmentsLoading ? (
               <Skeleton className="h-10 w-full" />
             ) : (
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value || "no-department"}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez un département" />
@@ -58,7 +58,7 @@ export function EditEmployeeStatusInfo({ form }: EditEmployeeStatusInfoProps) {
                 </FormControl>
                 <SelectContent>
                   {departments.map((department) => (
-                    <SelectItem key={department.id} value={department.id}>
+                    <SelectItem key={department.id} value={department.id || "dept-unknown"}>
                       {department.name}
                     </SelectItem>
                   ))}
@@ -76,7 +76,7 @@ export function EditEmployeeStatusInfo({ form }: EditEmployeeStatusInfoProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Statut</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} defaultValue={field.value || "active"}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionnez un statut" />
@@ -127,6 +127,7 @@ export function EditEmployeeStatusInfo({ form }: EditEmployeeStatusInfoProps) {
                     date > new Date() || date < new Date("1900-01-01")
                   }
                   initialFocus
+                  className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
             </Popover>
@@ -144,7 +145,7 @@ export function EditEmployeeStatusInfo({ form }: EditEmployeeStatusInfoProps) {
             {isManagersLoading ? (
               <Skeleton className="h-10 w-full" />
             ) : (
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value || "no-manager"}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionnez un responsable" />
@@ -152,7 +153,7 @@ export function EditEmployeeStatusInfo({ form }: EditEmployeeStatusInfoProps) {
                 </FormControl>
                 <SelectContent>
                   {managers.map((manager) => (
-                    <SelectItem key={manager.id} value={manager.id}>
+                    <SelectItem key={manager.id} value={manager.id || "manager-unknown"}>
                       {manager.name}
                     </SelectItem>
                   ))}

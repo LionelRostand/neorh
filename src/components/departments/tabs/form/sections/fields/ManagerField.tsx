@@ -29,15 +29,15 @@ export const ManagerField: React.FC<ManagerFieldProps> = ({ control }) => {
           <FormControl>
             <Select 
               onValueChange={field.onChange} 
-              value={field.value || ''}
+              value={field.value || undefined}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Aucun responsable" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Aucun responsable</SelectItem>
+                <SelectItem value="no-manager">Aucun responsable</SelectItem>
                 {managers && managers.map(manager => (
-                  <SelectItem key={manager.id} value={manager.id}>
+                  <SelectItem key={manager.id} value={manager.id || "no-manager-id"}>
                     {manager.name}
                   </SelectItem>
                 ))}

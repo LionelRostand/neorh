@@ -29,15 +29,15 @@ export const CompanyField: React.FC<CompanyFieldProps> = ({ control }) => {
           <FormControl>
             <Select 
               onValueChange={field.onChange} 
-              value={field.value || ''}
+              value={field.value || undefined}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Sélectionner une entreprise" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sélectionner une entreprise</SelectItem>
+                <SelectItem value="no-company">Sélectionner une entreprise</SelectItem>
                 {companies.map(company => (
-                  <SelectItem key={company.id} value={company.id}>
+                  <SelectItem key={company.id} value={company.id || "no-company-id"}>
                     {company.name}
                   </SelectItem>
                 ))}

@@ -34,7 +34,7 @@ export function DepartmentField({ form, departments, isLoading }: DepartmentFiel
           <FormLabel>Département</FormLabel>
           <Select 
             onValueChange={field.onChange} 
-            defaultValue={field.value}
+            defaultValue={field.value || "no-department"}
             disabled={isLoading}
           >
             <FormControl>
@@ -43,8 +43,9 @@ export function DepartmentField({ form, departments, isLoading }: DepartmentFiel
               </SelectTrigger>
             </FormControl>
             <SelectContent>
+              <SelectItem value="no-department">Sélectionnez un département</SelectItem>
               {departments.map((dept) => (
-                <SelectItem key={dept.id} value={dept.id}>
+                <SelectItem key={dept.id} value={dept.id || "dept-unknown"}>
                   {dept.name}
                 </SelectItem>
               ))}

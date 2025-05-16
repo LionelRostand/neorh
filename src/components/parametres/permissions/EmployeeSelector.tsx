@@ -23,7 +23,7 @@ const EmployeeSelector = ({
         <UserCog className="h-4 w-4" /> Sélectionner un employé
       </label>
       <Select 
-        value={selectedEmployeeId} 
+        value={selectedEmployeeId || "no-selection"} 
         onValueChange={onEmployeeChange}
         disabled={isLoading || employees.length === 0}
       >
@@ -32,7 +32,7 @@ const EmployeeSelector = ({
         </SelectTrigger>
         <SelectContent>
           {employees.map((employee) => (
-            <SelectItem key={employee.id} value={employee.id || ""}>
+            <SelectItem key={employee.id} value={employee.id || "employee-unknown"}>
               {employee.firstName} {employee.lastName} - {employee.position || "Sans poste"}
             </SelectItem>
           ))}

@@ -60,7 +60,7 @@ const PayslipForm: React.FC = () => {
                 <FormLabel>Employé</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  defaultValue={field.value}
+                  defaultValue={field.value || "default-emp"}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -85,7 +85,7 @@ const PayslipForm: React.FC = () => {
                 <FormLabel>Entreprise</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  defaultValue={field.value}
+                  defaultValue={field.value || "default-comp"}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -111,7 +111,7 @@ const PayslipForm: React.FC = () => {
                 <FormLabel>Période</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  defaultValue={field.value}
+                  defaultValue={field.value || "default-period"}
                 >
                   <FormControl>
                     <SelectTrigger>
