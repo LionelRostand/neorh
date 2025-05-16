@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Control } from "react-hook-form";
 import {
@@ -176,7 +175,7 @@ const BasicInfoSection = ({
         <CompanyLogoUpload
           logoUrl={logoPreview}
           onLogoChange={handleLogoChange}
-          onResetLogo={onResetLogo}
+          onReset={onResetLogo}
         />
       </div>
     </div>

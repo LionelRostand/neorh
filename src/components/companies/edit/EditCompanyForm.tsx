@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
@@ -40,7 +40,7 @@ const EditCompanyForm = ({
   } = useLogoUpload();
   
   // Set initial logo if exists
-  React.useEffect(() => {
+  useEffect(() => {
     if (initialData.logoUrl) {
       console.log("EditCompanyForm: Setting initial logo preview:", initialData.logoUrl.substring(0, 30) + "...");
       setLogoPreview(initialData.logoUrl);
@@ -55,7 +55,7 @@ const EditCompanyForm = ({
     mode: "onChange"
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     console.log("EditCompanyForm: Form reset with initialData");
     form.reset(initialData);
   }, [initialData, form]);
@@ -67,13 +67,18 @@ const EditCompanyForm = ({
     await onSubmit(data, logoData);
   };
 
+  // Function to handle the file directly
+  const handleFileChange = (file: File) => {
+    handleLogoChange({ target: { files: [file] } } as React.ChangeEvent<HTMLInputElement>);
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <BasicInfoSection
           form={form}
-          logoPreview={logoPreview}
-          onLogoChange={handleLogoChange}
+          logoPreview={logoPreview || ""}
+          onLogoChange={handleFileChange}
           onResetLogo={resetLogo}
         />
         

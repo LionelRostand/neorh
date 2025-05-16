@@ -5,19 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Image, X, Upload } from "lucide-react";
 
 interface CompanyLogoUploadProps {
-  logoPreview: string | null;
+  logoUrl: string | null;
   onLogoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onReset: () => void;
 }
 
-const CompanyLogoUpload = ({ logoPreview, onLogoChange, onReset }: CompanyLogoUploadProps) => {
+const CompanyLogoUpload = ({ logoUrl, onLogoChange, onReset }: CompanyLogoUploadProps) => {
   return (
     <div className="flex flex-col items-center space-y-3">
       <div className="border rounded-md w-full max-w-[200px] h-[200px] flex items-center justify-center overflow-hidden bg-gray-50">
-        {logoPreview ? (
+        {logoUrl ? (
           <div className="relative w-full h-full">
             <img 
-              src={logoPreview} 
+              src={logoUrl} 
               alt="Logo d'entreprise" 
               className="w-full h-full object-contain"
             />
