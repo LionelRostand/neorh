@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,64 +9,43 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Calendar as CalendarIcon } from "lucide-react";
-
-// Interface pour les enregistrements de présence
-interface PresenceRecord {
-  id: string;
-  employeeId: string;
-  employeeName: string;
-  date: string;
-  timeIn: string;
-  timeOut: string | null;
-  duration: string | null;
-  status: 'present' | 'absent' | 'late' | 'early-leave';
-}
+import { Search, Calendar as CalendarIcon, RefreshCw } from "lucide-react";
+import { usePresenceData } from '@/hooks/usePresenceData';
+import { Presence } from '@/types/presence';
 
 export const PresenceRegistry = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedDepartment, setSelectedDepartment] = useState<string>("");
-  const [presenceRecords, setPresenceRecords] = useState<PresenceRecord[]>([]);
   
-  useEffect(() => {
-    // Ici, vous feriez normalement une requête à votre backend
-    // Pour l'exemple, nous utilisons des données fictives
-    const mockRecords: PresenceRecord[] = [
-      {
-        id: "1",
-        employeeId: "EMP001",
-        employeeName: "Thomas Dubois",
-        date: format(new Date(), "dd/MM/yyyy"),
-        timeIn: "08:30",
-        timeOut: "17:45",
-        duration: "9h15",
-        status: "present"
-      },
-      {
-        id: "2",
-        employeeId: "EMP002",
-        employeeName: "Sophie Martin",
-        date: format(new Date(), "dd/MM/yyyy"),
-        timeIn: "09:15",
-        timeOut: "16:30",
-        duration: "7h15",
-        status: "late"
-      },
-      {
-        id: "3",
-        employeeId: "EMP003",
-        employeeName: "Jean Bernard",
-        date: format(new Date(), "dd/MM/yyyy"),
-        timeIn: "08:00",
-        timeOut: null,
-        duration: null,
-        status: "present"
-      },
-    ];
+  const { presenceRecords, isLoading, error, refreshData } = usePresenceData();
+  
+  // Filtrer les enregistrements en fonction des critères
+  const filteredRecords = presenceRecords.filter(record => {
+    // Filtrer par date si une date est sélectionnée
+    if (selectedDate) {
+      const recordDate = record.date.split('/').reverse().join('-');
+      const formattedSelectedDate = format(selectedDate, "dd/MM/yyyy");
+      if (record.date !== formattedSelectedDate) {
+        return false;
+      }
+    }
     
-    setPresenceRecords(mockRecords);
-  }, []);
+    // Filtrer par terme de recherche
+    if (searchTerm && 
+        !record.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) && 
+        !record.employeeId.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        !(record.badgeId && record.badgeId.toLowerCase().includes(searchTerm.toLowerCase()))) {
+      return false;
+    }
+    
+    // Filtrer par département si sélectionné
+    if (selectedDepartment && record.department !== selectedDepartment) {
+      return false;
+    }
+    
+    return true;
+  });
   
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -88,11 +67,16 @@ export const PresenceRegistry = () => {
     }
   };
   
+  // Fonction pour rafraîchir les données
+  const handleRefresh = () => {
+    refreshData();
+  };
+  
   return (
     <div className="space-y-4">
       <Card>
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Recherche</label>
               <div className="relative">
@@ -124,6 +108,7 @@ export const PresenceRegistry = () => {
                     selected={selectedDate}
                     onSelect={setSelectedDate}
                     initialFocus
+                    className="pointer-events-auto p-3"
                   />
                 </PopoverContent>
               </Popover>
@@ -131,7 +116,7 @@ export const PresenceRegistry = () => {
             
             <div className="space-y-2">
               <label className="text-sm font-medium">Département</label>
-              <Select onValueChange={setSelectedDepartment}>
+              <Select onValueChange={setSelectedDepartment} value={selectedDepartment}>
                 <SelectTrigger>
                   <SelectValue placeholder="Tous les départements" />
                 </SelectTrigger>
@@ -144,13 +129,27 @@ export const PresenceRegistry = () => {
                 </SelectContent>
               </Select>
             </div>
+            
+            <div className="flex items-end">
+              <Button 
+                variant="outline" 
+                className="w-full flex items-center gap-2" 
+                onClick={handleRefresh}
+              >
+                <RefreshCw className="h-4 w-4" />
+                Actualiser
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
       
       <Card>
-        <CardHeader>
-          <CardTitle>Registre du {selectedDate ? format(selectedDate, "dd MMMM yyyy", { locale: fr }) : "aujourd'hui"}</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>
+            Registre du {selectedDate ? format(selectedDate, "dd MMMM yyyy", { locale: fr }) : "aujourd'hui"}
+          </CardTitle>
+          {isLoading && <div className="text-sm text-muted-foreground">Chargement...</div>}
         </CardHeader>
         <CardContent className="p-0">
           <Table>
@@ -158,6 +157,7 @@ export const PresenceRegistry = () => {
               <TableRow>
                 <TableHead>Employé</TableHead>
                 <TableHead>ID</TableHead>
+                <TableHead>Badge</TableHead>
                 <TableHead>Heure d'entrée</TableHead>
                 <TableHead>Heure de sortie</TableHead>
                 <TableHead>Durée</TableHead>
@@ -165,32 +165,40 @@ export const PresenceRegistry = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {presenceRecords.length === 0 ? (
+              {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
+                  <TableCell colSpan={7} className="text-center py-4">
+                    Chargement des données...
+                  </TableCell>
+                </TableRow>
+              ) : error ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-4 text-red-500">
+                    Erreur lors du chargement des données
+                  </TableCell>
+                </TableRow>
+              ) : filteredRecords.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-4">
                     Aucun enregistrement de présence pour cette journée
                   </TableCell>
                 </TableRow>
               ) : (
-                presenceRecords
-                  .filter(record => 
-                    record.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                    record.employeeId.toLowerCase().includes(searchTerm.toLowerCase())
-                  )
-                  .map(record => (
-                    <TableRow key={record.id}>
-                      <TableCell className="font-medium">{record.employeeName}</TableCell>
-                      <TableCell>{record.employeeId}</TableCell>
-                      <TableCell>{record.timeIn}</TableCell>
-                      <TableCell>{record.timeOut || "-"}</TableCell>
-                      <TableCell>{record.duration || "-"}</TableCell>
-                      <TableCell>
-                        <span className={`py-1 px-2 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
-                          {getStatusText(record.status)}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                filteredRecords.map(record => (
+                  <TableRow key={record.id}>
+                    <TableCell className="font-medium">{record.employeeName}</TableCell>
+                    <TableCell>{record.employeeId}</TableCell>
+                    <TableCell>{record.badgeId || "-"}</TableCell>
+                    <TableCell>{record.timeIn || "-"}</TableCell>
+                    <TableCell>{record.timeOut || "-"}</TableCell>
+                    <TableCell>{record.duration || "-"}</TableCell>
+                    <TableCell>
+                      <span className={`py-1 px-2 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
+                        {getStatusText(record.status)}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
             </TableBody>
           </Table>

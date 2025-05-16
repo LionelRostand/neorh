@@ -6,6 +6,7 @@ import { Clock, Calendar, LogIn, LogOut } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "@/hooks/use-toast";
+import { usePresenceData } from '@/hooks/usePresenceData';
 
 export const PresenceKiosk = () => {
   const [badgeId, setBadgeId] = useState<string>("");
@@ -13,7 +14,9 @@ export const PresenceKiosk = () => {
   const formattedDate = format(currentDate, "dd/MM/yyyy");
   const formattedTime = format(currentDate, "HH:mm");
   
-  const handleEntry = () => {
+  const { addPresenceRecord } = usePresenceData();
+  
+  const handleEntry = async () => {
     if (!badgeId.trim()) {
       toast({
         title: "Erreur",
@@ -23,15 +26,36 @@ export const PresenceKiosk = () => {
       return;
     }
     
-    // Logique pour enregistrer l'entrée
-    toast({
-      title: "Entrée enregistrée",
-      description: `Entrée enregistrée pour le badge ${badgeId} à ${formattedTime}`,
-    });
-    setBadgeId("");
+    // Extraction de l'ID employé à partir du badge (format: B-12345)
+    const employeeId = badgeId.startsWith('B-') ? badgeId.substring(2) : badgeId;
+    
+    // Créer et enregistrer l'entrée
+    const record = {
+      employeeId,
+      badgeId: badgeId.startsWith('B-') ? badgeId : `B-${badgeId}`,
+      employeeName: `Employé ${employeeId}`, // Idéalement, récupérer le nom réel depuis la base de données
+      timestamp: new Date().toISOString(), // Format ISO pour stockage
+      eventType: 'entry' as const
+    };
+    
+    const success = await addPresenceRecord(record);
+    
+    if (success) {
+      toast({
+        title: "Entrée enregistrée",
+        description: `Entrée enregistrée pour le badge ${badgeId} à ${formattedTime}`,
+      });
+      setBadgeId("");
+    } else {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'enregistrer l'entrée. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    }
   };
   
-  const handleExit = () => {
+  const handleExit = async () => {
     if (!badgeId.trim()) {
       toast({
         title: "Erreur",
@@ -41,12 +65,33 @@ export const PresenceKiosk = () => {
       return;
     }
     
-    // Logique pour enregistrer la sortie
-    toast({
-      title: "Sortie enregistrée",
-      description: `Sortie enregistrée pour le badge ${badgeId} à ${formattedTime}`,
-    });
-    setBadgeId("");
+    // Extraction de l'ID employé à partir du badge (format: B-12345)
+    const employeeId = badgeId.startsWith('B-') ? badgeId.substring(2) : badgeId;
+    
+    // Créer et enregistrer la sortie
+    const record = {
+      employeeId,
+      badgeId: badgeId.startsWith('B-') ? badgeId : `B-${badgeId}`,
+      employeeName: `Employé ${employeeId}`, // Idéalement, récupérer le nom réel depuis la base de données
+      timestamp: new Date().toISOString(), // Format ISO pour stockage
+      eventType: 'exit' as const
+    };
+    
+    const success = await addPresenceRecord(record);
+    
+    if (success) {
+      toast({
+        title: "Sortie enregistrée",
+        description: `Sortie enregistrée pour le badge ${badgeId} à ${formattedTime}`,
+      });
+      setBadgeId("");
+    } else {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'enregistrer la sortie. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
