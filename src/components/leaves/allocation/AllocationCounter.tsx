@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import { Calendar, Calendar2 } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 
 interface AllocationCounterProps {
   id: string;
