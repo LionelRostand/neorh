@@ -8,6 +8,7 @@ import { ManagerActionsProps } from './types';
 const ManagerActions: React.FC<ManagerActionsProps> = ({
   isEditing,
   isSaving,
+  onSave,
   onCancel,
   setShowConfirmDialog,
   showConfirmDialog
@@ -25,7 +26,11 @@ const ManagerActions: React.FC<ManagerActionsProps> = ({
         </Button>
         
         <AlertDialogTrigger asChild>
-          <Button className="bg-emerald-500 hover:bg-emerald-600" disabled={isSaving}>
+          <Button 
+            className="bg-emerald-500 hover:bg-emerald-600" 
+            disabled={isSaving}
+            onClick={() => setShowConfirmDialog(true)}
+          >
             <Check className="mr-1 h-4 w-4" />
             Enregistrer
           </Button>

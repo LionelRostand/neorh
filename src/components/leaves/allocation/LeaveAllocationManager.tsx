@@ -106,19 +106,19 @@ const LeaveAllocationManager: React.FC<LeaveAllocationManagerProps> = ({
             />
             
             {isEditing ? (
-              <div className="flex w-full justify-end space-x-2">
-                <ManagerActions
-                  isEditing={isEditing}
-                  isSaving={isSaving}
-                  onCancel={resetForm}
-                  setShowConfirmDialog={setShowConfirmDialog}
-                  showConfirmDialog={showConfirmDialog}
-                />
-              </div>
+              <ManagerActions
+                isEditing={isEditing}
+                isSaving={isSaving}
+                onSave={handleSave}
+                onCancel={resetForm}
+                setShowConfirmDialog={setShowConfirmDialog}
+                showConfirmDialog={showConfirmDialog}
+              />
             ) : (
               <ManagerActions
                 isEditing={isEditing}
                 isSaving={isSaving}
+                onSave={handleSave}
                 onCancel={resetForm}
                 setShowConfirmDialog={() => setIsEditing(true)}
                 showConfirmDialog={showConfirmDialog}
