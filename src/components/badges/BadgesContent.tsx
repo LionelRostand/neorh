@@ -37,16 +37,19 @@ const BadgesContent = ({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleViewBadge = (badge: Badge) => {
+    console.log("View badge clicked:", badge);
     setSelectedBadge(badge);
     setViewDialogOpen(true);
   };
 
   const handleEditBadge = (badge: Badge) => {
+    console.log("Edit badge clicked:", badge);
     setSelectedBadge(badge);
     setEditDialogOpen(true);
   };
 
   const handleDeleteBadge = (badge: Badge) => {
+    console.log("Delete badge clicked:", badge);
     setSelectedBadge(badge);
     setDeleteDialogOpen(true);
   };

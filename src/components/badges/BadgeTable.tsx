@@ -31,6 +31,11 @@ const BadgeTable = ({ badges, loading, onView, onEdit, onDelete }: BadgeTablePro
     }
   };
 
+  const handleViewClick = (badge: Badge) => {
+    console.log("View button clicked for badge:", badge);
+    onView(badge);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-40">
@@ -53,45 +58,53 @@ const BadgeTable = ({ badges, loading, onView, onEdit, onDelete }: BadgeTablePro
         </TableRow>
       </TableHeader>
       <TableBody>
-        {badges.map((badge) => (
-          <TableRow key={badge.id}>
-            <TableCell>{badge.number}</TableCell>
-            <TableCell>{badge.employeeName}</TableCell>
-            <TableCell>{badge.type}</TableCell>
-            <TableCell>{getStatusBadge(badge.status)}</TableCell>
-            <TableCell>{badge.issueDate}</TableCell>
-            <TableCell>{badge.expiryDate || "Non définie"}</TableCell>
-            <TableCell className="text-right">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 mr-1" 
-                onClick={() => onView(badge)}
-                title="Voir"
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 mr-1" 
-                onClick={() => onEdit(badge)}
-                title="Modifier"
-              >
-                <PenLine className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 text-red-500" 
-                onClick={() => onDelete(badge)}
-                title="Supprimer"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+        {badges.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={7} className="text-center py-4">
+              Aucun badge trouvé
             </TableCell>
           </TableRow>
-        ))}
+        ) : (
+          badges.map((badge) => (
+            <TableRow key={badge.id}>
+              <TableCell>{badge.number}</TableCell>
+              <TableCell>{badge.employeeName}</TableCell>
+              <TableCell>{badge.type}</TableCell>
+              <TableCell>{getStatusBadge(badge.status)}</TableCell>
+              <TableCell>{badge.issueDate}</TableCell>
+              <TableCell>{badge.expiryDate || "Non définie"}</TableCell>
+              <TableCell className="text-right">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 mr-1" 
+                  onClick={() => handleViewClick(badge)}
+                  title="Voir"
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 mr-1" 
+                  onClick={() => onEdit(badge)}
+                  title="Modifier"
+                >
+                  <PenLine className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 text-red-500" 
+                  onClick={() => onDelete(badge)}
+                  title="Supprimer"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))
+        )}
       </TableBody>
     </Table>
   );

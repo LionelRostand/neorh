@@ -37,7 +37,13 @@ export function ViewBadgeDialog({
     }
   };
 
-  if (!badge) return null;
+  // Si aucun badge n'est sélectionné, ne rien afficher
+  if (!badge) {
+    console.log("ViewBadgeDialog: No badge selected");
+    return null;
+  }
+  
+  console.log("ViewBadgeDialog: Rendering dialog for badge", badge);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
