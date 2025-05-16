@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Department } from '@/types/firebase';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Eye, Users, Banknote } from 'lucide-react';
+import { useManagersData } from '@/hooks/useManagersData';
 
 interface ViewDepartmentDialogProps {
   open: boolean;
@@ -17,6 +18,22 @@ const ViewDepartmentDialog: React.FC<ViewDepartmentDialogProps> = ({
   onOpenChange,
   department
 }) => {
+  const { managers, isLoading } = useManagersData();
+  const [managerName, setManagerName] = useState<string>("Non assigné");
+
+  useEffect(() => {
+    if (department?.managerId && managers && managers.length > 0) {
+      const manager = managers.find(m => m.id === department.managerId);
+      if (manager) {
+        setManagerName(manager.name);
+      } else {
+        setManagerName("Responsable non trouvé");
+      }
+    } else {
+      setManagerName("Non assigné");
+    }
+  }, [department, managers]);
+
   if (!department) return null;
 
   return (
@@ -60,7 +77,9 @@ const ViewDepartmentDialog: React.FC<ViewDepartmentDialogProps> = ({
                 <Users className="h-5 w-5 mt-0.5 text-gray-500" />
                 <div>
                   <h4 className="font-medium">Responsable</h4>
-                  <p className="text-sm text-gray-600">{department.managerId || "Non assigné"}</p>
+                  <p className="text-sm text-gray-600">
+                    {isLoading ? "Chargement..." : managerName}
+                  </p>
                 </div>
               </div>
               
