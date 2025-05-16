@@ -61,7 +61,7 @@ export const createReadOperations = <T extends Record<string, any>>(
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
-        console.info(`createReadOperations: Result for document ${id}: Document found`);
+        console.info(`createReadOperations: Document found for ID ${id}`);
         const result = { id: docSnap.id, ...docSnap.data() as DocumentData } as T & { id: string };
         return result;
       } else {

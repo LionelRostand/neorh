@@ -89,6 +89,9 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
 
     if (open) {
       fetchCompany();
+    } else {
+      // Réinitialiser l'état lorsque le dialogue est fermé
+      setIsLoadingCompany(true);
     }
   }, [companyId, open, getById]);
 
