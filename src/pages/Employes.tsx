@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { useEmployeeData } from '@/hooks/useEmployeeData';
@@ -14,6 +14,15 @@ const Employes = () => {
   const { employees, isLoading, error, departmentStats, statusStats, refetch } = useEmployeeData();
   const { activeEmployees, onLeaveEmployees, inactiveEmployees, totalEmployees } = useEmployeeStatusStats(employees);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [dataFetched, setDataFetched] = useState(false);
+  
+  useEffect(() => {
+    // Appeler refetch seulement au premier rendu
+    if (!dataFetched) {
+      refetch();
+      setDataFetched(true);
+    }
+  }, [dataFetched, refetch]);
   
   useEffect(() => {
     if (error) {
@@ -25,9 +34,9 @@ const Employes = () => {
     }
   }, [error]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     refetch();
-  };
+  }, [refetch]);
 
   return (
     <div className="p-4 md:p-6">

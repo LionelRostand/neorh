@@ -18,6 +18,7 @@ export interface LeaveAllocation {
 export const useLeaveAllocation = (employeeId: string) => {
   const [allocation, setAllocation] = useState<LeaveAllocation | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false); // Pour éviter les chargements répétés
   
   const { 
     search: searchAllocation,
@@ -26,9 +27,10 @@ export const useLeaveAllocation = (employeeId: string) => {
   } = useFirestore<LeaveAllocation>('hr_leave_allocations');
 
   const fetchAllocation = useCallback(async () => {
-    if (!employeeId) {
+    // Si nous avons déjà chargé les allocations et que l'ID est inchangé, ne pas recharger
+    if (!employeeId || (hasLoaded && allocation !== null)) {
       setLoading(false);
-      return null;
+      return allocation;
     }
 
     setLoading(true);
@@ -41,6 +43,7 @@ export const useLeaveAllocation = (employeeId: string) => {
       
       if (currentAllocation) {
         setAllocation(currentAllocation);
+        setHasLoaded(true); // Marquer comme chargé
         return currentAllocation;
       } else {
         // Créer une allocation par défaut si elle n'existe pas
@@ -64,6 +67,7 @@ export const useLeaveAllocation = (employeeId: string) => {
               
             const newAllocation = { ...defaultAllocation, id: allocationId };
             setAllocation(newAllocation);
+            setHasLoaded(true); // Marquer comme chargé
             return newAllocation;
           }
         } catch (err) {
@@ -82,7 +86,7 @@ export const useLeaveAllocation = (employeeId: string) => {
     } finally {
       setLoading(false);
     }
-  }, [employeeId, searchAllocation, addAllocation]);
+  }, [employeeId, searchAllocation, addAllocation, allocation, hasLoaded]);
 
   // Mettre à jour les allocations de congés
   const updateLeaveAllocation = useCallback(async (updates: Partial<LeaveAllocation>) => {

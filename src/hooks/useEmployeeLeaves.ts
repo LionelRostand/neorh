@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useLeaveAllocation, useEmployeeLeaveData, useLeaveTypeLabels } from './leaves';
 
 // Re-export LeaveAllocation interface for backward compatibility
@@ -26,8 +26,8 @@ export const useEmployeeLeaves = (employeeId: string) => {
     getLeaveTypeLabel
   } = useLeaveTypeLabels();
 
-  // Load data when the component mounts or when employeeId changes
-  useEffect(() => {
+  // Utilisons useCallback pour la fonction fetchData afin d'éviter des rendus inutiles
+  const fetchData = useCallback(() => {
     if (employeeId) {
       // Load leaves and allocations in parallel
       Promise.all([
@@ -37,6 +37,15 @@ export const useEmployeeLeaves = (employeeId: string) => {
     }
   }, [employeeId, fetchLeaves, fetchAllocation]);
 
+  // Load data when the component mounts or when employeeId changes
+  useEffect(() => {
+    if (employeeId) {
+      fetchData();
+    }
+    // Nous utilisons fetchData comme dépendance au lieu de fetchLeaves et fetchAllocation
+    // pour éviter des appels répétés
+  }, [employeeId, fetchData]);
+
   return {
     leaves,
     loading: leavesLoading,
@@ -45,7 +54,7 @@ export const useEmployeeLeaves = (employeeId: string) => {
     allocation,
     allocationLoading,
     getLeaveTypeLabel,
-    refetch: fetchLeaves,
+    refetch: fetchData, // Utiliser fetchData au lieu de fetchLeaves
     updateLeaveAllocation
   };
 };

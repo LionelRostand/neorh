@@ -9,11 +9,13 @@ export const useEmployeeLeaveData = (employeeId: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [totalDays, setTotalDays] = useState(0);
+  const [hasLoaded, setHasLoaded] = useState(false); // Pour éviter les chargements répétés
   
   const { search } = useFirestore<Leave>('hr_leaves');
 
   const fetchEmployeeLeaves = useCallback(async () => {
-    if (!employeeId) {
+    // Si nous avons déjà chargé les données et que l'ID est inchangé, ne pas recharger
+    if (!employeeId || (hasLoaded && leaves.length > 0)) {
       setLoading(false);
       return;
     }
@@ -33,6 +35,7 @@ export const useEmployeeLeaveData = (employeeId: string) => {
         });
         
         setLeaves(sortedLeaves);
+        setHasLoaded(true); // Marquer comme chargé
         
         // Calculate total leave days
         const total = sortedLeaves.reduce((acc, leave) => {
@@ -59,7 +62,7 @@ export const useEmployeeLeaveData = (employeeId: string) => {
     } finally {
       setLoading(false);
     }
-  }, [employeeId, search]);
+  }, [employeeId, search, leaves.length, hasLoaded]);
 
   return {
     leaves,

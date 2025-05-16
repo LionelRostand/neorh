@@ -19,8 +19,8 @@ interface EmployeeLeavesProps {
 }
 
 const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
-  // Utilisation du hook avec un ID stable
-  const employeeId = employee?.id || '';
+  // Utilisation du hook avec un ID stable et mémorisé
+  const employeeId = useMemo(() => employee?.id || '', [employee?.id]);
   
   const { 
     leaves, 
@@ -30,7 +30,8 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
     getLeaveTypeLabel,
     allocation,
     allocationLoading,
-    updateLeaveAllocation
+    updateLeaveAllocation,
+    refetch
   } = useEmployeeLeaves(employeeId);
   
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
@@ -50,11 +51,13 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
 
   const handleRequestSuccess = useCallback(() => {
     setShowNewLeaveForm(false);
-  }, []);
+    refetch(); // Utiliser refetch pour mettre à jour les données
+  }, [refetch]);
 
   const handleAllocationSuccess = useCallback(() => {
     setShowNewAllocationForm(false);
-  }, []);
+    refetch(); // Utiliser refetch pour mettre à jour les données
+  }, [refetch]);
 
   const formatDate = useCallback((dateString: string) => {
     try {

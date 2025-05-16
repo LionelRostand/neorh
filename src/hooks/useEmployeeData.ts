@@ -12,11 +12,17 @@ export const useEmployeeData = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departmentStats, setDepartmentStats] = useState<Record<string, number>>({});
   const [statusStats, setStatusStats] = useState<Record<string, number>>({});
+  const [hasLoaded, setHasLoaded] = useState(false);
   
   // Get departments data to map department IDs to names
   const { departments } = useDepartmentsData();
 
   const fetchEmployees = useCallback(async () => {
+    // Si les données sont déjà chargées, ne pas recharger
+    if (hasLoaded && employees.length > 0) {
+      return;
+    }
+    
     setIsLoading(true);
     setError(null);
     
@@ -62,6 +68,7 @@ export const useEmployeeData = () => {
       });
       
       setEmployees(employeesData);
+      setHasLoaded(true);
 
       // Calculate department statistics
       const deptStats: Record<string, number> = {};
@@ -94,8 +101,9 @@ export const useEmployeeData = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [departments]);
+  }, [departments, employees.length, hasLoaded]);
 
+  // Charger les données une seule fois au montage du composant
   useEffect(() => {
     fetchEmployees();
   }, [fetchEmployees]);
