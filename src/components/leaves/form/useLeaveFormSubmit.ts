@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useCollection } from "@/hooks/useCollection";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
 import { LeaveFormValues } from "./types";
-import { doc, getDoc, updateDoc, addDoc, collection } from "firebase/firestore";
+import { doc, getDoc, updateDoc, addDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/hooks/useAuth";
 import { LeaveAllocation } from "@/hooks/leaves";
@@ -53,7 +53,7 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
       if (data.isAllocation) {
         // C'est une attribution de congés
         
-        // Rechercher l'allocation existante pour l'employé
+        // Définir l'année courante
         const currentYear = new Date().getFullYear();
         
         try {
@@ -73,16 +73,13 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
           
           // Rechercher l'allocation existante pour l'employé
           const allocationRef = collection(db, 'hr_leave_allocations');
-          const allocationQuery = allocationRef.where('employeeId', '==', data.employeeId).where('year', '==', currentYear);
-          const allocationDocs = await allocationRef.get();
+          const allocationQuery = query(allocationRef, where('employeeId', '==', data.employeeId), where('year', '==', currentYear));
+          const allocationSnapshot = await getDocs(allocationQuery);
           
           let existingAllocation = null;
-          if (!allocationDocs.empty) {
-            existingAllocation = { id: allocationDocs.docs[0].id, ...allocationDocs.docs[0].data() };
+          if (!allocationSnapshot.empty) {
+            existingAllocation = { id: allocationSnapshot.docs[0].id, ...allocationSnapshot.docs[0].data() };
           }
-          
-          // Mettre à jour l'allocation de l'employé
-          const currentYear = new Date().getFullYear();
           
           // Create base allocation data with proper typing
           let allocationData: Partial<LeaveAllocation> = {
