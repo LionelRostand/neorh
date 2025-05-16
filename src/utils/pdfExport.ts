@@ -5,7 +5,8 @@ import { PdfTab } from './pdf/types';
 import { Employee } from '@/types/employee';
 import { Document, Leave } from '@/lib/constants';
 import { Evaluation } from '@/hooks/useEmployeeEvaluations';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { Company } from '@/types/company';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 /**
@@ -72,6 +73,40 @@ const fetchEmployeeEvaluations = async (employeeId: string): Promise<Evaluation[
 };
 
 /**
+ * Récupère l'entreprise liée à un employé
+ */
+const fetchEmployeeCompany = async (departmentId?: string): Promise<Company | null> => {
+  if (!departmentId) return null;
+  
+  try {
+    // D'abord, récupérer le département pour avoir l'ID de l'entreprise
+    const departmentRef = doc(db, 'hr_departments', departmentId);
+    const departmentSnap = await getDoc(departmentRef);
+    
+    if (!departmentSnap.exists()) return null;
+    
+    const departmentData = departmentSnap.data();
+    const companyId = departmentData?.companyId;
+    
+    if (!companyId) return null;
+    
+    // Ensuite, récupérer l'entreprise
+    const companyRef = doc(db, 'hr_companies', companyId);
+    const companySnap = await getDoc(companyRef);
+    
+    if (!companySnap.exists()) return null;
+    
+    return { 
+      id: companySnap.id,
+      ...companySnap.data()
+    } as Company;
+  } catch (error) {
+    console.error('Error fetching employee company:', error);
+    return null;
+  }
+};
+
+/**
  * Génère un PDF pour l'employé avec ses documents si nécessaire
  */
 export const generateEmployeePdfWithDocuments = async (employee: Employee, activeTab: string) => {
@@ -93,6 +128,12 @@ export const generateEmployeePdfWithDocuments = async (employee: Employee, activ
   if (activeTab === 'evaluations') {
     const evaluations = await fetchEmployeeEvaluations(employee.id);
     options.evaluations = evaluations;
+  }
+  
+  // Récupérer l'entreprise de l'employé
+  const company = await fetchEmployeeCompany(employee.departmentId);
+  if (company) {
+    options.company = company;
   }
   
   // Générer le PDF avec les options appropriées

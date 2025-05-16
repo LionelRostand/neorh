@@ -21,11 +21,13 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
   onRefresh
 }) => {
   const [activeTab, setActiveTab] = useState("informations");
+  const [isExporting, setIsExporting] = useState(false);
   
   if (!employee) return null;
   
   const handleExportPDF = async () => {
     try {
+      setIsExporting(true);
       await generateEmployeePdfWithDocuments(employee, activeTab);
       toast({
         title: "Exportation réussie",
@@ -38,6 +40,8 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
         description: "Impossible de générer le document PDF",
         variant: "destructive"
       });
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -48,6 +52,7 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
           employee={employee} 
           onClose={() => onOpenChange(false)} 
           onExportPDF={handleExportPDF}
+          isExporting={isExporting}
         />
         <EmployeeTabs 
           employee={employee}

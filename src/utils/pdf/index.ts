@@ -1,6 +1,7 @@
 
 import jsPDF from 'jspdf';
 import { Employee } from '@/types/employee';
+import { Company } from '@/types/company';
 import { setupDocument, addPageFooter } from './documentSetup';
 import { formatEmployeeStatus } from './statusFormatter';
 import { 
@@ -21,6 +22,7 @@ export interface PdfOptions {
   documents?: any[];
   leaves?: any[];
   evaluations?: Evaluation[];
+  company?: Company;
   // Autres options possibles à ajouter dans le futur
 }
 
@@ -35,7 +37,14 @@ export const generateEmployeePdf = (employee: Employee, activeTab: string, optio
   const status = formatEmployeeStatus(employee);
   
   // Configure le document avec les informations de base
-  setupDocument(doc, 'Fiche Employé', employee.name || 'Sans nom', status.text, status.color);
+  setupDocument(
+    doc, 
+    'Fiche Employé', 
+    employee.name || 'Sans nom', 
+    status.text, 
+    status.color, 
+    options?.company
+  );
   
   // Contenu en fonction de l'onglet actif
   const startY = 85;

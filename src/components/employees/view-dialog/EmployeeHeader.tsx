@@ -2,13 +2,14 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, FileText } from 'lucide-react';
+import { X, FileText, Loader2 } from 'lucide-react';
 import { Employee } from '@/types/employee';
 
 interface EmployeeHeaderProps {
   employee: Employee;
   onClose: () => void;
   onExportPDF: () => void;
+  isExporting?: boolean;
 }
 
 // Utility function to get status badge
@@ -25,7 +26,12 @@ export const getStatusBadge = (status: Employee['status']) => {
   }
 };
 
-const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onClose, onExportPDF }) => {
+const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ 
+  employee, 
+  onClose, 
+  onExportPDF,
+  isExporting = false
+}) => {
   return (
     <div className="flex justify-between items-start p-4 bg-gray-50">
       <div className="flex items-center">
@@ -35,13 +41,26 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({ employee, onClose, onEx
         </div>
       </div>
       <div className="flex space-x-2">
-        <Button variant="outline" onClick={onClose}>
+        <Button variant="outline" onClick={onClose} disabled={isExporting}>
           <X className="h-4 w-4 mr-2" />
           Fermer
         </Button>
-        <Button variant="outline" onClick={onExportPDF}>
-          <FileText className="h-4 w-4 mr-2" />
-          Exporter PDF
+        <Button 
+          variant="outline" 
+          onClick={onExportPDF} 
+          disabled={isExporting}
+        >
+          {isExporting ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Export...
+            </>
+          ) : (
+            <>
+              <FileText className="h-4 w-4 mr-2" />
+              Exporter PDF
+            </>
+          )}
         </Button>
       </div>
     </div>

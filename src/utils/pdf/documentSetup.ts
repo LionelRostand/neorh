@@ -1,10 +1,18 @@
 
 import jsPDF from 'jspdf';
+import { Company } from '@/types/company';
 
 /**
  * Configure basic document settings like header, company info, etc.
  */
-export const setupDocument = (doc: jsPDF, title: string, subtitle?: string, statusText?: string, statusColor?: string) => {
+export const setupDocument = (
+  doc: jsPDF, 
+  title: string, 
+  subtitle?: string, 
+  statusText?: string, 
+  statusColor?: string, 
+  company?: Company
+) => {
   // Définir les couleurs et styles
   const primaryColor = '#000000';
   const secondaryColor = '#666666';
@@ -12,11 +20,62 @@ export const setupDocument = (doc: jsPDF, title: string, subtitle?: string, stat
   // Informations de l'entreprise (en-tête)
   doc.setFontSize(10);
   doc.setTextColor(secondaryColor);
-  doc.text('ENTREPRISE SARL', 14, 15);
-  doc.text('123 Rue des Entreprises', 14, 20);
-  doc.text('75000 Paris, France', 14, 25);
-  doc.text('Tel: +33 1 23 45 67 89', 14, 30);
-  doc.text('Email: contact@entreprise.fr', 14, 35);
+  
+  if (company) {
+    // Use actual company data if provided
+    doc.text(company.name || 'ENTREPRISE', 14, 15);
+    doc.text(company.address || '', 14, 20);
+    
+    const locationParts = [];
+    if (company.postalCode) locationParts.push(company.postalCode);
+    if (company.city) locationParts.push(company.city);
+    if (company.country) locationParts.push(company.country);
+    const locationText = locationParts.join(', ');
+    
+    if (locationText) doc.text(locationText, 14, 25);
+    if (company.phone) doc.text(`Tel: ${company.phone}`, 14, 30);
+    if (company.email) doc.text(`Email: ${company.email}`, 14, 35);
+    
+    // Add company logo if available
+    if (company.logoUrl) {
+      try {
+        doc.addImage(
+          company.logoUrl, 
+          'JPEG', 
+          doc.internal.pageSize.width - 50, 
+          10, 
+          40, 
+          20, 
+          undefined, 
+          'FAST'
+        );
+      } catch (err) {
+        console.error('Error adding logo to PDF:', err);
+      }
+    } else if (company.logo?.base64) {
+      try {
+        doc.addImage(
+          company.logo.base64,
+          'JPEG',
+          doc.internal.pageSize.width - 50, 
+          10, 
+          40, 
+          20, 
+          undefined, 
+          'FAST'
+        );
+      } catch (err) {
+        console.error('Error adding base64 logo to PDF:', err);
+      }
+    }
+  } else {
+    // Default company info if none provided
+    doc.text('ENTREPRISE SARL', 14, 15);
+    doc.text('123 Rue des Entreprises', 14, 20);
+    doc.text('75000 Paris, France', 14, 25);
+    doc.text('Tel: +33 1 23 45 67 89', 14, 30);
+    doc.text('Email: contact@entreprise.fr', 14, 35);
+  }
   
   // Ligne de séparation
   doc.setDrawColor(200, 200, 200);
