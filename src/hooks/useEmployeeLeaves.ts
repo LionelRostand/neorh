@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { useLeaveAllocation, useEmployeeLeaveData, useLeaveTypeLabels } from './leaves';
 
 // Re-export LeaveAllocation interface for backward compatibility
-export type { LeaveAllocation } from './leaves/useLeaveAllocation';
+export type { LeaveAllocation } from './leaves';
 
 export const useEmployeeLeaves = (employeeId: string) => {
   // Reference to track if the hook is mounted
@@ -60,6 +60,9 @@ export const useEmployeeLeaves = (employeeId: string) => {
   const refetch = useCallback(() => {
     if (employeeId && isMountedRef.current) {
       console.log(`[useEmployeeLeaves] Manual refetch for employee: ${employeeId}`);
+      // Reset data loaded flag to force refetch
+      dataLoadedRef.current = false;
+      
       // Load leaves and allocations in parallel
       fetchLeaves();
       fetchAllocation().then(data => {

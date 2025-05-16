@@ -21,25 +21,34 @@ export function useAllocationService() {
     console.log(`[allocationService] Fetching leave allocations for employee ${employeeId}, year ${currentYear}`);
     
     try {
+      // Add more detailed logging
+      console.log(`[allocationService] Searching in collection 'hr_leave_allocations' for employeeId=${employeeId}`);
+      
       const result = await searchAllocation('employeeId', employeeId);
       console.log(`[allocationService] Search result for employee ${employeeId}:`, result);
       
       if (result.docs && result.docs.length > 0) {
+        console.log(`[allocationService] Found ${result.docs.length} allocations for employee ${employeeId}`);
+        
         const yearAllocation = result.docs.find(doc => doc.year === currentYear);
         
         if (yearAllocation) {
           console.log(`[allocationService] Found allocation for employee ${employeeId}, year ${currentYear}`, yearAllocation);
           return yearAllocation;
         } else {
-          console.log(`[allocationService] No allocation for employee ${employeeId} for year ${currentYear}`);
-          return null;
+          console.log(`[allocationService] No allocation for employee ${employeeId} for year ${currentYear}, creating default`);
+          // If no allocation found for the current year but employee has other allocations,
+          // create a default one for the current year
+          return await createDefaultAllocation(employeeId, currentYear);
         }
       } else {
-        console.log(`[allocationService] No allocations found for employee ${employeeId}`);
-        return null;
+        console.log(`[allocationService] No allocations found for employee ${employeeId}, creating default`);
+        // Create default allocation since none exists
+        return await createDefaultAllocation(employeeId, currentYear);
       }
     } catch (error) {
       console.error(`[allocationService] Error fetching allocation for employee ${employeeId}:`, error);
+      // Return null instead of throwing so the UI can still render
       return null;
     }
   };

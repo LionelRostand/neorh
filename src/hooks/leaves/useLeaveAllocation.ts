@@ -10,8 +10,10 @@ export { type LeaveAllocation } from './types';
 
 export const useLeaveAllocation = (employeeId: string) => {
   const [allocation, setAllocation] = useState<LeaveAllocation | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);  // Start with loading true
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 2;
   
   const { 
     isRequestInProgress, 
@@ -43,6 +45,12 @@ export const useLeaveAllocation = (employeeId: string) => {
     
     console.log(`[useLeaveAllocation] Starting fetch for employee ${employeeId}`);
     
+    // Clear any existing debounce timer
+    clearDebounceTimer();
+    
+    // Set loading state
+    setLoading(true);
+    
     // Check cache first
     const cachedData = allocationCache.get(employeeId);
     if (cachedData) {
@@ -50,6 +58,7 @@ export const useLeaveAllocation = (employeeId: string) => {
       if (!allocation) {
         setAllocation(cachedData as LeaveAllocation);
         setHasLoaded(true);
+        setLoading(false);
       }
       return cachedData;
     }
@@ -57,23 +66,21 @@ export const useLeaveAllocation = (employeeId: string) => {
     // Return already loaded data if available
     if (hasLoaded && allocation !== null) {
       console.log(`[useLeaveAllocation] Using loaded allocation data for employee ${employeeId}`, allocation);
+      setLoading(false);
       return allocation;
     }
-
-    // Clear any existing debounce timer
-    clearDebounceTimer();
     
     // Use debounce to prevent rapid successive calls
     return new Promise<LeaveAllocation | null>((resolve) => {
       debounceTimerRef.current = setTimeout(async () => {
         // Skip if component unmounted during debounce
         if (!isMounted()) {
+          setLoading(false);
           resolve(null);
           return;
         }
         
-        // Set loading state and mark request as in progress
-        setLoading(true);
+        // Mark request as in progress
         setRequestInProgress(true);
 
         try {
@@ -95,33 +102,23 @@ export const useLeaveAllocation = (employeeId: string) => {
             
             setAllocation(currentAllocation);
             setHasLoaded(true);
+            setLoading(false);
             resolve(currentAllocation);
           } else {
-            console.log(`[useLeaveAllocation] No allocation found for employee ${employeeId}, creating default`);
-            // Create default allocation if none exists
-            try {
-              const newAllocation = await createDefaultAllocation(employeeId);
+            console.log(`[useLeaveAllocation] No allocation found for employee ${employeeId}, will retry: ${retryCount}`);
+            
+            // Implement retry logic
+            if (retryCount < MAX_RETRIES) {
+              setRetryCount(prev => prev + 1);
+              setTimeout(() => {
+                setRequestInProgress(false);
+                fetchAllocation();
+              }, 1000); // Wait 1 second before retry
               
-              // Skip if component unmounted during add
-              if (!isMounted()) {
-                resolve(null);
-                return;
-              }
-              
-              if (newAllocation) {
-                console.log(`[useLeaveAllocation] Created default allocation for employee ${employeeId}`, newAllocation);
-                // Update cache
-                allocationCache.set(employeeId, newAllocation);
-                
-                setAllocation(newAllocation);
-                setHasLoaded(true);
-                resolve(newAllocation);
-              } else {
-                console.log(`[useLeaveAllocation] Failed to create default allocation for employee ${employeeId}`);
-                resolve(null);
-              }
-            } catch (err) {
-              console.error("[useLeaveAllocation] Error creating allocation:", err);
+              resolve(null);
+            } else {
+              setLoading(false);
+              setHasLoaded(true);
               resolve(null);
             }
           }
@@ -133,18 +130,30 @@ export const useLeaveAllocation = (employeeId: string) => {
           }
           
           console.error("[useLeaveAllocation] Error fetching leave allocations:", err);
+          setLoading(false);
+          
+          // Implement retry logic
+          if (retryCount < MAX_RETRIES) {
+            setRetryCount(prev => prev + 1);
+            setTimeout(() => {
+              setRequestInProgress(false);
+              fetchAllocation();
+            }, 1000); // Wait 1 second before retry
+          } else {
+            setHasLoaded(true);
+          }
+          
           resolve(null);
         } finally {
           // Skip if component unmounted
           if (isMounted()) {
-            setLoading(false);
             setRequestInProgress(false);
           }
         }
-      }, 300); // Reduced from 500ms to 300ms for faster response
+      }, 300); // 300ms debounce
     });
-  }, [employeeId, isMounted, isRequestInProgress, allocation, hasLoaded, 
-      clearDebounceTimer, debounceTimerRef, fetchEmployeeAllocation, createDefaultAllocation]);
+  }, [employeeId, isMounted, isRequestInProgress, allocation, hasLoaded, retryCount,
+      clearDebounceTimer, debounceTimerRef, fetchEmployeeAllocation]);
 
   // Update leave allocations
   const updateLeaveAllocation = useCallback(async (updates: Partial<LeaveAllocation>) => {
@@ -180,10 +189,15 @@ export const useLeaveAllocation = (employeeId: string) => {
     }
   }, [allocation, updateAllocationData, employeeId]);
 
-  // Reset mounted ref on mount and clear on unmount
+  // Initial fetch when the component mounts
   useEffect(() => {
+    if (employeeId) {
+      console.log(`[useLeaveAllocation] Initial useEffect fetch for employee: ${employeeId}`);
+      fetchAllocation();
+    }
+    
     return setupMountState();
-  }, [setupMountState]);
+  }, [employeeId, setupMountState, fetchAllocation]);
 
   return {
     allocation,

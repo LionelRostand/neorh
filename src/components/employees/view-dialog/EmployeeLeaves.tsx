@@ -24,6 +24,14 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employeeId }) => {
     refetch
   } = useEmployeeLeaves(employeeId);
 
+  // Force refetch on initial load to ensure we get the latest data
+  useEffect(() => {
+    if (employeeId) {
+      console.log("EmployeeLeaves - initial force refetch for employee:", employeeId);
+      refetch();
+    }
+  }, [employeeId, refetch]);
+
   // Log allocation data for debugging
   useEffect(() => {
     console.log("EmployeeLeaves - allocation data:", allocation);
