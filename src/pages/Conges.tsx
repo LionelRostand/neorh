@@ -148,6 +148,7 @@ const Conges = () => {
         open={showNewLeaveForm} 
         onClose={() => setShowNewLeaveForm(false)}
         onSuccess={handleRequestSuccess}
+        isAllocation={true}
       />
 
       {/* Formulaire d'attribution de congés */}
@@ -158,6 +159,6 @@ const Conges = () => {
       />
     </div>
   );
-};
+}
 
 export default Conges;

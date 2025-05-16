@@ -55,19 +55,8 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
         
         // Rechercher l'allocation existante pour l'employé
         const currentYear = new Date().getFullYear();
-        const allocationRef = collection(db, 'hr_leave_allocations');
-        const allocations = await addDoc(allocationRef, {});
         
         try {
-          // Chercher l'allocation existante
-          const allocationQuery = collection(db, 'hr_leave_allocations');
-          const allocationsSnap = await getDoc(doc(allocationQuery, data.employeeId));
-          
-          let existingAllocation = null;
-          if (allocationsSnap.exists()) {
-            existingAllocation = allocationsSnap.data();
-          }
-          
           // Créer une entrée dans hr_leaves pour enregistrer l'allocation
           await addLeave({
             employeeId: data.employeeId,
@@ -81,6 +70,16 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
             daysAllocated: data.daysAllocated || 0,
             isAllocation: true
           });
+          
+          // Rechercher l'allocation existante pour l'employé
+          const allocationRef = collection(db, 'hr_leave_allocations');
+          const allocationQuery = allocationRef.where('employeeId', '==', data.employeeId).where('year', '==', currentYear);
+          const allocationDocs = await allocationRef.get();
+          
+          let existingAllocation = null;
+          if (!allocationDocs.empty) {
+            existingAllocation = { id: allocationDocs.docs[0].id, ...allocationDocs.docs[0].data() };
+          }
           
           // Mettre à jour l'allocation de l'employé
           const currentYear = new Date().getFullYear();
@@ -112,8 +111,7 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
           
           // Créer ou mettre à jour l'allocation
           if (existingAllocation) {
-            const allocationId = existingAllocation.id;
-            await updateDoc(doc(db, 'hr_leave_allocations', allocationId), allocationData);
+            await updateDoc(doc(db, 'hr_leave_allocations', existingAllocation.id), allocationData);
           } else {
             await addAllocation(allocationData as LeaveAllocation);
           }
