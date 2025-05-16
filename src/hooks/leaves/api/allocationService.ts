@@ -1,6 +1,7 @@
 
 import { useFirestore } from '@/hooks/firestore';
 import { LeaveAllocation } from '../types';
+import { useAuth } from '@/hooks/useAuth';
 
 export function useAllocationService() {
   const { 
@@ -8,6 +9,8 @@ export function useAllocationService() {
     add: addAllocation,
     update: updateAllocation
   } = useFirestore<LeaveAllocation>('hr_leave_allocations');
+  
+  const { user } = useAuth();
   
   /**
    * Fetches an allocation for a specific employee and year
@@ -34,7 +37,9 @@ export function useAllocationService() {
       paidLeavesUsed: 0,
       rttTotal: 12, // Default value
       rttUsed: 0,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      // Seulement ajouter updatedBy s'il est défini
+      ...(user?.uid ? { updatedBy: user.uid } : {})
     };
     
     const newAllocationId = await addAllocation(defaultAllocation);
@@ -56,10 +61,17 @@ export function useAllocationService() {
     allocationId: string, 
     updates: Partial<LeaveAllocation>
   ) => {
-    return await updateAllocation(allocationId, {
+    const updatesWithTimestamp = {
       ...updates,
       updatedAt: new Date().toISOString()
-    });
+    };
+    
+    // Ajouter updatedBy seulement s'il est défini
+    if (user?.uid) {
+      updatesWithTimestamp.updatedBy = user.uid;
+    }
+    
+    return await updateAllocation(allocationId, updatesWithTimestamp);
   };
   
   return {

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useCollection } from "@/hooks/useCollection";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
@@ -86,15 +87,20 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
           paidLeavesUsed: existingAllocation?.paidLeavesUsed || 0,
           rttUsed: existingAllocation?.rttUsed || 0,
           updatedAt: new Date().toISOString(),
-          updatedBy: user?.uid
+          // Ne pas inclure updatedBy s'il est undefined
         };
+
+        // Ajouter updatedBy seulement s'il est défini
+        if (user?.uid) {
+          allocationData.updatedBy = user.uid;
+        }
         
         // Créer ou mettre à jour l'allocation
         if (existingAllocation && existingAllocation.id) {
           await updateDoc(doc(db, 'hr_leave_allocations', existingAllocation.id), allocationData);
         } else {
           // Pour une nouvelle allocation, initialiser tous les champs
-          const newAllocation: LeaveAllocation = {
+          const newAllocation: Omit<LeaveAllocation, 'id'> = {
             employeeId: data.employeeId,
             year: currentYear,
             paidLeavesTotal: data.paidDaysAllocated || 0,
@@ -102,7 +108,8 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
             rttTotal: data.rttDaysAllocated || 0,
             rttUsed: 0,
             updatedAt: new Date().toISOString(),
-            updatedBy: user?.uid
+            // Seulement ajouter updatedBy s'il est défini
+            ...(user?.uid ? { updatedBy: user.uid } : {})
           };
           await addAllocation(newAllocation);
         }

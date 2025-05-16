@@ -88,8 +88,12 @@ export function useLeaveAllocationForm(employeeId?: string, onSuccess?: () => vo
         rttTotal: data.rttTotal,
         rttUsed: existingAllocation?.rttUsed || 0,
         updatedAt: new Date().toISOString(),
-        updatedBy: user?.uid,
       };
+      
+      // Seulement ajouter updatedBy s'il est défini
+      if (user?.uid) {
+        allocationData.updatedBy = user.uid;
+      }
 
       if (existingAllocation?.id) {
         // Update existing allocation
