@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   Card, 
@@ -13,12 +14,14 @@ import { Calendar, Filter, Plus, Check, X } from "lucide-react";
 import { useCollection } from "@/hooks/useCollection";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
 import LeaveStatusCards from "@/components/leaves/LeaveStatusCards";
-import { Leave } from "@/lib/constants"; // Import the Leave type from constants instead
+import { Leave } from "@/lib/constants";
+import NewLeaveRequestForm from "@/components/leaves/NewLeaveRequestForm";
 
 const Conges = () => {
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(true);
-  const { getAll, isLoading, error } = useCollection<'hr_leaves'>(); // Use the correct collection key
+  const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
+  const { getAll, isLoading, error } = useCollection<'hr_leaves'>();
 
   useEffect(() => {
     fetchLeaves();
@@ -71,7 +74,7 @@ const Conges = () => {
   };
 
   const handleNewRequest = () => {
-    showSuccessToast("Cette fonctionnalité sera bientôt disponible");
+    setShowNewLeaveForm(true);
   };
 
   const formatDateRange = (startDate?: string, endDate?: string) => {
@@ -204,6 +207,12 @@ const Conges = () => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Formulaire de nouvelle demande */}
+      <NewLeaveRequestForm 
+        open={showNewLeaveForm} 
+        onClose={() => setShowNewLeaveForm(false)}
+      />
     </div>
   );
 };

@@ -27,10 +27,12 @@ export interface CollectionTypes {
 export type Leave = {
   id?: string;
   employeeId: string;
-  type: string;
+  type: string;  // paid, rtt, sick, family, maternity, paternity
   startDate: string;
   endDate: string;
   status: string;
+  comment?: string;
+  createdAt?: string;
 }
 
 export type Badge = {
@@ -41,7 +43,7 @@ export type Badge = {
   type: string;
   status: 'active' | 'inactive' | 'lost' | 'pending';
   issueDate: string;
-  expiryDate?: string; // Changed to optional to match the Firebase type
+  expiryDate?: string;
 }
 
 export type Timesheet = {
