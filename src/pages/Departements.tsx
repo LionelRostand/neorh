@@ -14,10 +14,12 @@ import {
 import ContractStatusCards from "@/components/contracts/ContractStatusCards";
 import { Department } from "@/types/firebase";
 import { useDepartmentsData } from "@/hooks/useDepartmentsData";
+import NewDepartmentDialog from "@/components/departments/NewDepartmentDialog";
 
 const Departements = () => {
   const { toast } = useToast();
   const { departments, isLoading, error, refetch } = useDepartmentsData();
+  const [isNewDialogOpen, setIsNewDialogOpen] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -38,10 +40,7 @@ const Departements = () => {
   }, [departments]);
 
   const handleNewDepartment = () => {
-    toast({
-      title: "Nouveau département",
-      description: "La création d'un nouveau département sera disponible prochainement."
-    });
+    setIsNewDialogOpen(true);
   };
 
   const handleEdit = (departmentId: string) => {
@@ -170,6 +169,13 @@ const Departements = () => {
       <div className="text-xs text-gray-500 mt-4">
         Nombre de départements: {departments.length}
       </div>
+
+      {/* New Department Dialog */}
+      <NewDepartmentDialog
+        open={isNewDialogOpen}
+        onOpenChange={setIsNewDialogOpen}
+        onSuccess={refetch}
+      />
     </div>
   );
 };
