@@ -21,7 +21,7 @@ export function EmployeeField<T extends EmployeeSelectProps>({ form, disabled }:
   return (
     <FormField
       control={form.control}
-      name="employeeId" as={`employeeId`}
+      name="employeeId" 
       render={({ field }) => (
         <FormItem>
           <FormLabel>Employé</FormLabel>
