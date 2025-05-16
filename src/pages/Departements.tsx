@@ -105,26 +105,25 @@ const Departements = () => {
                 <TableHead>ID</TableHead>
                 <TableHead>Nom</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead>Entreprise</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
+                  <TableCell colSpan={4} className="text-center py-4">
                     Chargement des départements...
                   </TableCell>
                 </TableRow>
               ) : error ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4 text-red-500">
+                  <TableCell colSpan={4} className="text-center py-4 text-red-500">
                     Erreur: {error.message}
                   </TableCell>
                 </TableRow>
               ) : departments.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
+                  <TableCell colSpan={4} className="text-center py-4">
                     Aucun département trouvé
                   </TableCell>
                 </TableRow>
@@ -134,7 +133,6 @@ const Departements = () => {
                     <TableCell className="font-mono text-xs">{department.id}</TableCell>
                     <TableCell className="font-medium">{department.name}</TableCell>
                     <TableCell>{department.description || '-'}</TableCell>
-                    <TableCell>{department.company || '-'}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
                         <Button 
