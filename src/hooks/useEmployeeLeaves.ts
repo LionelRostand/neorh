@@ -26,14 +26,13 @@ export const useEmployeeLeaves = (employeeId: string) => {
     getLeaveTypeLabel
   } = useLeaveTypeLabels();
 
-  // Utilisons useCallback pour la fonction fetchData afin d'éviter des rendus inutiles
+  // Utiliser useCallback pour la fonction fetchData afin d'éviter des rendus inutiles
   const fetchData = useCallback(() => {
     if (employeeId) {
+      console.log(`Fetching leave data for employee: ${employeeId}`);
       // Load leaves and allocations in parallel
-      Promise.all([
-        fetchLeaves(),
-        fetchAllocation()
-      ]);
+      fetchLeaves();
+      fetchAllocation();
     }
   }, [employeeId, fetchLeaves, fetchAllocation]);
 
@@ -42,19 +41,17 @@ export const useEmployeeLeaves = (employeeId: string) => {
     if (employeeId) {
       fetchData();
     }
-    // Nous utilisons fetchData comme dépendance au lieu de fetchLeaves et fetchAllocation
-    // pour éviter des appels répétés
   }, [employeeId, fetchData]);
 
   return {
     leaves,
-    loading: leavesLoading,
+    loading: leavesLoading || allocationLoading,
     error,
     totalDays,
     allocation,
     allocationLoading,
     getLeaveTypeLabel,
-    refetch: fetchData, // Utiliser fetchData au lieu de fetchLeaves
+    refetch: fetchData,
     updateLeaveAllocation
   };
 };

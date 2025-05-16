@@ -14,12 +14,13 @@ export const useEmployeeLeaveData = (employeeId: string) => {
   const { search } = useFirestore<Leave>('hr_leaves');
 
   const fetchEmployeeLeaves = useCallback(async () => {
-    // Skip fetch if no employeeId or already loaded
+    // Skip fetch if no employeeId
     if (!employeeId) {
       setLoading(false);
       return;
     }
     
+    // Skip fetch if already loaded
     if (hasLoaded && leaves.length > 0) {
       console.log(`Using cached leave data for employee ${employeeId}`);
       setLoading(false);
@@ -72,10 +73,8 @@ export const useEmployeeLeaveData = (employeeId: string) => {
   
   // Initial fetch when component mounts or employeeId changes
   useEffect(() => {
-    if (employeeId && !hasLoaded) {
-      fetchEmployeeLeaves();
-    }
-  }, [employeeId, fetchEmployeeLeaves, hasLoaded]);
+    fetchEmployeeLeaves();
+  }, [employeeId, fetchEmployeeLeaves]);
 
   return {
     leaves,

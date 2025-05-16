@@ -46,7 +46,7 @@ const LeaveHistoryRow: React.FC<LeaveHistoryRowProps> = ({ leave, formatDate }) 
       case 'family': return 'Congé Familial';
       case 'maternity': return 'Congé Maternité';
       case 'paternity': return 'Congé Paternité';
-      default: return type;
+      default: return type || 'Autre';
     }
   };
 
@@ -56,7 +56,7 @@ const LeaveHistoryRow: React.FC<LeaveHistoryRowProps> = ({ leave, formatDate }) 
       case 'approved': return 'Approuvé';
       case 'rejected': return 'Refusé';
       case 'pending': return 'En attente';
-      default: return status;
+      default: return status || 'Inconnu';
     }
   };
 
@@ -81,7 +81,7 @@ const LeaveHistoryRow: React.FC<LeaveHistoryRowProps> = ({ leave, formatDate }) 
           </div>
           <div className="flex items-center text-sm text-gray-500 mt-1">
             <Calendar className="h-3 w-3 mr-1" />
-            {formatDate(leave.startDate)} - {formatDate(leave.endDate)} ({days} jour{days > 1 ? 's' : ''})
+            {formatDate(leave.startDate || '')} - {formatDate(leave.endDate || '')} ({days} jour{days > 1 ? 's' : ''})
           </div>
           {leave.comment && (
             <p className="text-sm text-gray-500 mt-1">"{leave.comment}"</p>

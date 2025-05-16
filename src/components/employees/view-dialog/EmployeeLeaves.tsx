@@ -6,21 +6,21 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import NewLeaveRequestForm from '@/components/leaves/NewLeaveRequestForm';
-import LeaveAllocationForm from '@/components/leaves/allocation/LeaveAllocationForm';
 import LeaveAllocationManager from '@/components/leaves/allocation/LeaveAllocationManager';
 import LoadingSkeleton from '@/components/leaves/allocation/LoadingSkeleton';
 import LeaveSummaryCards from '@/components/leaves/summary/LeaveSummaryCards';
 import { LeaveHistory, ErrorState } from '@/components/leaves/history/LeaveHistory';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
+import LeaveAllocationForm from '@/components/leaves/allocation/LeaveAllocationForm';
 
 interface EmployeeLeavesProps {
   employee: Employee;
 }
 
 const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
-  // Utilisation du hook avec un ID stable et mémorisé
-  const employeeId = useMemo(() => employee?.id || '', [employee?.id]);
+  // Utilisation du hook avec un ID stable
+  const employeeId = employee?.id || '';
   
   const { 
     leaves, 
@@ -41,46 +41,41 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
   // Déterminer si l'utilisateur peut attribuer des congés (admin ou manager)
   const canAllocateLeaves = Boolean((user && user.isAdmin) || (user && user.role === 'manager'));
   
-  const handleNewLeaveRequest = useCallback(() => {
+  const handleNewLeaveRequest = () => {
     setShowNewLeaveForm(true);
-  }, []);
+  };
 
-  const handleNewAllocation = useCallback(() => {
+  const handleNewAllocation = () => {
     setShowNewAllocationForm(true);
-  }, []);
+  };
 
-  const handleRequestSuccess = useCallback(() => {
+  const handleRequestSuccess = () => {
     setShowNewLeaveForm(false);
     refetch(); // Utiliser refetch pour mettre à jour les données
-  }, [refetch]);
+  };
 
-  const handleAllocationSuccess = useCallback(() => {
+  const handleAllocationSuccess = () => {
     setShowNewAllocationForm(false);
     refetch(); // Utiliser refetch pour mettre à jour les données
-  }, [refetch]);
+  };
 
-  const formatDate = useCallback((dateString: string) => {
+  const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), 'dd/MM/yyyy');
     } catch (error) {
       return dateString;
     }
-  }, []);
+  };
 
-  // Calculer les valeurs dérivées une seule fois quand les dépendances changent
-  const paidLeavesRemaining = useMemo(() => 
-    allocation ? allocation.paidLeavesTotal - allocation.paidLeavesUsed : 0
-  , [allocation]);
+  // Calculer les valeurs dérivées
+  const paidLeavesRemaining = allocation ? allocation.paidLeavesTotal - allocation.paidLeavesUsed : 0;
+  const rttRemaining = allocation ? allocation.rttTotal - allocation.rttUsed : 0;
 
-  const rttRemaining = useMemo(() => 
-    allocation ? allocation.rttTotal - allocation.rttUsed : 0
-  , [allocation]);
-
-  // Si loading, afficher un placeholder plus stylisé
-  if (loading && allocationLoading) {
+  if (loading && !leaves.length) {
     return <LoadingSkeleton />;
   }
 
+  // Même en cas de chargement, afficher un contenu minimal
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-2">
@@ -104,36 +99,33 @@ const EmployeeLeaves: React.FC<EmployeeLeavesProps> = ({ employee }) => {
         </div>
       </div>
 
-      {!loading && !allocationLoading && (
-        <>
-          <LeaveAllocationManager 
-            allocation={allocation}
-            isLoading={allocationLoading}
-            onUpdate={updateLeaveAllocation}
-            employeeId={employeeId}
-          />
+      {/* Toujours afficher le gestionnaire d'allocation pour éviter les erreurs de rendu */}
+      <LeaveAllocationManager 
+        allocation={allocation}
+        isLoading={allocationLoading}
+        onUpdate={updateLeaveAllocation}
+        employeeId={employeeId}
+      />
 
-          <LeaveSummaryCards
-            totalDays={totalDays}
-            paidLeavesRemaining={paidLeavesRemaining}
-            paidLeavesTotal={allocation?.paidLeavesTotal || 0}
-            rttRemaining={rttRemaining}
-            rttTotal={allocation?.rttTotal || 0}
-          />
+      <LeaveSummaryCards
+        totalDays={totalDays}
+        paidLeavesRemaining={paidLeavesRemaining}
+        paidLeavesTotal={allocation?.paidLeavesTotal || 0}
+        rttRemaining={rttRemaining}
+        rttTotal={allocation?.rttTotal || 0}
+      />
 
-          {error ? (
-            <Card className="border rounded-lg shadow-sm">
-              <CardContent className="p-4 py-6">
-                <ErrorState />
-              </CardContent>
-            </Card>
-          ) : (
-            <LeaveHistory 
-              leaves={leaves} 
-              formatDate={formatDate}
-            />
-          )}
-        </>
+      {error ? (
+        <Card className="border rounded-lg shadow-sm">
+          <CardContent className="p-4 py-6">
+            <ErrorState />
+          </CardContent>
+        </Card>
+      ) : (
+        <LeaveHistory 
+          leaves={leaves} 
+          formatDate={formatDate}
+        />
       )}
 
       <NewLeaveRequestForm 

@@ -67,7 +67,7 @@ export const useLeaveAllocation = (employeeId: string) => {
         try {
           const newAllocationId = await addAllocation(defaultAllocation);
           
-          if (newAllocationId !== null) {
+          if (newAllocationId) {
             const allocationId = typeof newAllocationId === 'string' 
               ? newAllocationId 
               : (newAllocationId as any).id || String(newAllocationId);
@@ -75,6 +75,7 @@ export const useLeaveAllocation = (employeeId: string) => {
             const newAllocation = { ...defaultAllocation, id: allocationId };
             setAllocation(newAllocation);
             setHasLoaded(true);
+            setLoading(false);
             return newAllocation;
           }
         } catch (err) {
@@ -97,10 +98,8 @@ export const useLeaveAllocation = (employeeId: string) => {
 
   // Initial fetch when component mounts or employeeId changes
   useEffect(() => {
-    if (employeeId && !hasLoaded) {
-      fetchAllocation();
-    }
-  }, [employeeId, fetchAllocation, hasLoaded]);
+    fetchAllocation();
+  }, [employeeId, fetchAllocation]);
 
   // Update leave allocations
   const updateLeaveAllocation = useCallback(async (updates: Partial<LeaveAllocation>) => {

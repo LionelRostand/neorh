@@ -40,24 +40,31 @@ const LeaveSummaryCards: React.FC<LeaveSummaryCardsProps> = ({
   rttRemaining,
   rttTotal
 }) => {
+  // Ensure we have valid values
+  const safeTotalDays = isNaN(totalDays) ? 0 : totalDays;
+  const safePaidRemaining = isNaN(paidLeavesRemaining) ? 0 : paidLeavesRemaining;
+  const safePaidTotal = isNaN(paidLeavesTotal) ? 0 : paidLeavesTotal;
+  const safeRttRemaining = isNaN(rttRemaining) ? 0 : rttRemaining;
+  const safeRttTotal = isNaN(rttTotal) ? 0 : rttTotal;
+
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <LeaveSummaryCard
         title="Total jours posés"
-        value={totalDays}
-        total={totalDays}
+        value={safeTotalDays}
+        total={safeTotalDays}
         color="text-gray-700"
       />
       <LeaveSummaryCard
         title="Congés payés restants"
-        value={paidLeavesRemaining}
-        total={paidLeavesTotal}
+        value={safePaidRemaining}
+        total={safePaidTotal}
         color="text-blue-600"
       />
       <LeaveSummaryCard
         title="RTT restants"
-        value={rttRemaining}
-        total={rttTotal}
+        value={safeRttRemaining}
+        total={safeRttTotal}
         color="text-emerald-600"
       />
     </div>
