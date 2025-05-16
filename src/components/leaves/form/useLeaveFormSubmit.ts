@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { useCollection } from "@/hooks/useCollection";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
 import { LeaveFormValues } from "./types";
-import { doc, getDoc, updateDoc, Timestamp, addDoc, collection } from "firebase/firestore";
+import { doc, getDoc, updateDoc, addDoc, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -83,7 +82,9 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
           
           // Mettre à jour l'allocation de l'employé
           const currentYear = new Date().getFullYear();
-          let allocationData = {
+          
+          // Create base allocation data with proper typing
+          let allocationData: Record<string, any> = {
             employeeId: data.employeeId,
             year: currentYear,
             updatedAt: new Date().toISOString(),
@@ -92,7 +93,7 @@ export const useLeaveFormSubmit = (onSuccess?: () => void) => {
           
           if (data.type === 'paid') {
             // Pour les congés payés, gérer la règle des 5 jours
-            let paidLeavesTotal = data.daysAllocated || 0;
+            const paidLeavesTotal = data.daysAllocated || 0;
             allocationData = {
               ...allocationData,
               paidLeavesTotal,
