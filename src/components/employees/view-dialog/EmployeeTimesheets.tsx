@@ -28,7 +28,7 @@ interface EmployeeTimesheetsProps {
   employeeId: string;
 }
 
-const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = memo(({ employeeId }) => {
+const EmployeeTimesheets = memo(({ employeeId }: EmployeeTimesheetsProps) => {
   console.log('EmployeeTimesheets component rendering for employeeId:', employeeId);
   
   // Use the useTimesheets hook for data fetching

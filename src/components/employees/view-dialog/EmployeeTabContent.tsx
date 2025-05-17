@@ -10,7 +10,7 @@ export { default as DocumentsTab } from './EmployeeDocuments';
 export { default as CompetencesTab } from './EmployeeSkills';
 export { default as EvaluationsTab } from './EmployeeEvaluations';
 
-export const HorairesTab = () => {
+export const HorairesTab: React.FC = () => {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-semibold">Horaires de travail</h3>
