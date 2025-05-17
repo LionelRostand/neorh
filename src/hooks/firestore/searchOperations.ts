@@ -36,49 +36,11 @@ export const createSearchOperations = <T extends Record<string, any>>(
     
     try {
       const collectionRef = getCollection();
-      const constraints: QueryConstraint[] = [];
       
-      // Add field equality constraint
-      constraints.push(where(field, "==", value));
-      
-      // Add sorting if specified
-      if (options?.sortField) {
-        const sortDirection: OrderByDirection = options.sortDirection || 'asc';
-        constraints.push(orderBy(options.sortField, sortDirection));
-      }
-      
-      // Add limit if specified
-      if (options?.limit && options.limit > 0) {
-        constraints.push(limit(options.limit));
-      }
-      
-      // Create and execute query based on number of constraints
-      let querySnapshot;
-      
-      // Explicitly handle different numbers of constraints to avoid spread operator
-      if (constraints.length === 0) {
-        querySnapshot = await getDocs(query(collectionRef));
-      } else if (constraints.length === 1) {
-        querySnapshot = await getDocs(query(collectionRef, constraints[0]));
-      } else if (constraints.length === 2) {
-        querySnapshot = await getDocs(query(collectionRef, constraints[0], constraints[1]));
-      } else if (constraints.length === 3) {
-        querySnapshot = await getDocs(query(collectionRef, constraints[0], constraints[1], constraints[2]));
-      } else {
-        // For more than 3 constraints, we need a composite index in Firebase
-        console.warn('Warning: Search with multiple constraints requires a composite index in Firebase.');
-        
-        // Use only the first constraint (where) to avoid composite index error
-        querySnapshot = await getDocs(query(collectionRef, constraints[0]));
-        
-        if (options?.sortField || options?.limit) {
-          toast({
-            title: "Recherche",
-            description: "La recherche avec plusieurs contraintes nécessite un index composite. Certaines contraintes ont été désactivées.",
-            variant: "destructive"
-          });
-        }
-      }
+      // Utilisation simplifiée sans options de tri ou limite pour éviter 
+      // les problèmes d'index composite
+      const q = query(collectionRef, where(field, "==", value));
+      const querySnapshot = await getDocs(q);
       
       const documents = querySnapshot.docs.map(doc => {
         return { id: doc.id, ...doc.data() } as T & { id: string };

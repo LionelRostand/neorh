@@ -14,6 +14,7 @@ import { FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFirestore } from '@/hooks/useFirestore';
 import { Timesheet } from '@/lib/constants';
+import { toast } from '@/components/ui/use-toast';
 
 // Helper function to format date
 const formatDate = (date: string): string => {
@@ -47,20 +48,31 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
       setIsLoading(true);
       try {
         // Search for timesheets related to this employee
+        // Sans tri pour éviter l'erreur d'index composite
         const result = await timesheetsCollection.search(
           'employeeId', 
-          employeeId, 
-          { 
-            sortField: 'submittedAt', 
-            sortDirection: 'desc',
-            limit: 100 
-          }
+          employeeId
         );
-        console.log(`Fetched ${result.docs.length} timesheets for employee ${employeeId}`);
-        setTimesheets(result.docs);
+        
+        // Trier côté client à la place
+        const sortedDocs = [...result.docs].sort((a, b) => {
+          // Tri par date de soumission décroissante
+          const dateA = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
+          const dateB = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
+          return dateB - dateA;
+        });
+        
+        console.log(`Fetched ${sortedDocs.length} timesheets for employee ${employeeId}`);
+        setTimesheets(sortedDocs);
       } catch (err) {
         console.error('Erreur lors de la récupération des feuilles de temps:', err);
         setError(err instanceof Error ? err : new Error('Erreur inconnue'));
+        // Affichage d'un toast pour informer l'utilisateur
+        toast({
+          title: "Erreur de recherche",
+          description: "Impossible de récupérer les feuilles de temps. Un index composite pourrait être nécessaire.",
+          variant: "destructive"
+        });
       } finally {
         setIsLoading(false);
       }

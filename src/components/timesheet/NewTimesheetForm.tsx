@@ -84,14 +84,18 @@ const NewTimesheetForm: React.FC<NewTimesheetFormProps> = ({ open, onClose, onSu
       const weekStartDate = firstDay.toISOString().split('T')[0];
       const weekEndDate = lastDay.toISOString().split('T')[0];
       
-      const newTimesheet: Partial<Timesheet> = {
+      // S'assurer que tous les champs requis sont fournis pour satisfaire le type Timesheet
+      const newTimesheet: Omit<Timesheet, "id"> = {
         employeeId: data.employeeId,
         taskDescription: data.comment || "",
         weekStartDate,
         weekEndDate,
-        hours: 0, // À définir par l'employé
+        hours: 0,
         status: "draft",
         submittedAt: new Date().toISOString(),
+        // Ajoutons d'autres champs requis avec des valeurs par défaut
+        hoursWorked: 0,
+        date: weekStartDate
       };
       
       await timesheetCollection.add(newTimesheet);
