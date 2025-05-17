@@ -5,52 +5,46 @@ import { Timesheet } from '@/lib/constants';
 
 export const useTimesheets = (employeeId?: string) => {
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const isMounted = useRef(true);
-  
-  // Store the employeeId in a ref to prevent unnecessary effect triggers
-  const employeeIdRef = useRef(employeeId);
   const fetchAttempted = useRef(false);
   
   const timesheetsCollection = useFirestore<Timesheet>('hr_timesheet');
   
   useEffect(() => {
-    // Update the ref when employeeId changes
-    employeeIdRef.current = employeeId;
-    
-    // Mark component as mounted and reset fetch flag
+    // Mark component as mounted
     isMounted.current = true;
     fetchAttempted.current = false;
     
     const fetchTimesheets = async () => {
-      // Skip if already fetched or unmounted
+      // Éviter de récupérer à nouveau si déjà tenté ou si démonté
       if (!isMounted.current || fetchAttempted.current) return;
       
+      console.log(`Attempting to fetch timesheets for employee: ${employeeId || 'all'}`);
       fetchAttempted.current = true;
-      setIsLoading(true);
       
       try {
         let result;
-        if (!employeeIdRef.current) {
-          // If no employeeId is provided, get all timesheets
+        if (!employeeId) {
+          // Si aucun employeeId n'est fourni, obtenir toutes les feuilles de temps
           result = await timesheetsCollection.getAll();
         } else {
-          // Otherwise get timesheets for the specific employee
-          result = await timesheetsCollection.search('employeeId', employeeIdRef.current);
+          // Sinon, obtenir les feuilles de temps pour l'employé spécifique
+          result = await timesheetsCollection.search('employeeId', employeeId);
         }
         
         if (isMounted.current) {
           if (result.docs && result.docs.length > 0) {
+            console.log(`Fetched ${result.docs.length} timesheets for employee ${employeeId || 'all'}`);
             setTimesheets(result.docs);
-            console.log(`Fetched ${result.docs.length} timesheets for ${employeeIdRef.current ? `employee ${employeeIdRef.current}` : 'all employees'}`);
           } else {
-            console.log('No timesheets found, using mock data');
-            // If no data is found, provide mock data for visibility
-            setTimesheets([
+            console.log('No timesheets found in database, using mock data');
+            // Si aucune donnée n'est trouvée, fournir des données fictives pour la visibilité
+            const mockData: Timesheet[] = [
               {
                 id: "mock1",
-                employeeId: employeeIdRef.current || "1",
+                employeeId: employeeId || "unknown",
                 weekStartDate: "2025-05-01",
                 weekEndDate: "2025-05-07",
                 hours: 40,
@@ -60,7 +54,7 @@ export const useTimesheets = (employeeId?: string) => {
               },
               {
                 id: "mock2",
-                employeeId: employeeIdRef.current || "1",
+                employeeId: employeeId || "unknown",
                 weekStartDate: "2025-05-08",
                 weekEndDate: "2025-05-14",
                 hours: 38,
@@ -68,7 +62,8 @@ export const useTimesheets = (employeeId?: string) => {
                 submittedAt: "2025-05-14T17:30:00",
                 projectId: "PROJ-002"
               }
-            ]);
+            ];
+            setTimesheets(mockData);
           }
         }
       } catch (err) {
@@ -85,7 +80,7 @@ export const useTimesheets = (employeeId?: string) => {
     
     fetchTimesheets();
     
-    // Cleanup to prevent updates on unmounted components
+    // Cleanup pour éviter les mises à jour sur les composants démontés
     return () => {
       isMounted.current = false;
     };
