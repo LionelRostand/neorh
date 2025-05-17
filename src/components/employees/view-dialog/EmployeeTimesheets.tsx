@@ -48,13 +48,12 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
       setIsLoading(true);
       try {
         // Search for timesheets related to this employee
-        // Sans tri pour éviter l'erreur d'index composite
         const result = await timesheetsCollection.search(
           'employeeId', 
           employeeId
         );
         
-        // Trier côté client à la place
+        // Trier côté client
         const sortedDocs = [...result.docs].sort((a, b) => {
           // Tri par date de soumission décroissante
           const dateA = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
@@ -70,7 +69,7 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
         // Affichage d'un toast pour informer l'utilisateur
         toast({
           title: "Erreur de recherche",
-          description: "Impossible de récupérer les feuilles de temps. Un index composite pourrait être nécessaire.",
+          description: "Impossible de récupérer les feuilles de temps.",
           variant: "destructive"
         });
       } finally {
