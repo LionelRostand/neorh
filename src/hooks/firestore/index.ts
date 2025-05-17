@@ -4,8 +4,8 @@ import { createReadOperations } from "./readOperations";
 import { createWriteOperations } from "./writeOperations";
 import { createSearchOperations, SearchOptions } from "./searchOperations";
 
-// Export the SearchOptions interface
-export { SearchOptions };
+// Export the SearchOptions interface with correct 'export type' syntax
+export type { SearchOptions };
 
 // Main hook that combines all firestore operations
 export const useFirestore = <T extends Record<string, any>>(collectionName: string) => {

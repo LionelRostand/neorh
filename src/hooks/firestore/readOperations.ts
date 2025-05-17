@@ -1,4 +1,3 @@
-
 import { 
   doc, 
   getDocs, 
@@ -10,7 +9,8 @@ import {
   collection,
   query,
   where,
-  orderBy
+  orderBy,
+  CollectionReference
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "@/components/ui/use-toast";
@@ -137,9 +137,11 @@ export const createReadOperations = <T extends Record<string, any>>(
         console.log(`Searching documents in ${collectionName} with criteria:`, criteria);
       }
       
-      const collRef = collection(db, collectionName);
+      // Create a collection reference first
+      const collRef: CollectionReference = collection(db, collectionName);
+      
       // Construire la requête en fonction des critères
-      let q = collRef;
+      let q: Query = collRef;
       
       Object.entries(criteria).forEach(([field, value]) => {
         if (value !== undefined && value !== null && value !== '') {
