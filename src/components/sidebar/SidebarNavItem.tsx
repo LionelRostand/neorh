@@ -3,6 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { NavItem } from "./types";
+import { AlertTriangle } from "lucide-react";
 
 interface SidebarNavItemProps {
   item: NavItem;
@@ -21,6 +22,9 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
   onMouseEnter,
   onMouseLeave
 }) => {
+  // Vérifier si l'icône est disponible ou si nous devons afficher une icône de remplacement
+  const iconToRender = item.icon || <AlertTriangle className="text-yellow-400" />;
+  
   return (
     <li>
       <Link
@@ -34,7 +38,7 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
-        <div className="min-w-6">{item.icon}</div>
+        <div className="min-w-6">{iconToRender}</div>
         {isOpen && <span className="ml-2">{item.title}</span>}
       </Link>
       
