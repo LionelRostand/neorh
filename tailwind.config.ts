@@ -68,6 +68,12 @@ export default {
 					light: '#3b82f6',
 					dark: '#1e40af',
 					text: '#1e293b'
+				},
+				neorh: {
+					green: '#0D8641',
+					'light-green': '#15A553',
+					'dark-green': '#076830',
+					white: '#FFFFFF'
 				}
 			},
 			borderRadius: {

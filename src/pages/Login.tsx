@@ -53,16 +53,15 @@ const Login = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
+        <CardHeader className="space-y-1 bg-neorh-green text-white rounded-t-lg">
           <CardTitle className="text-2xl font-bold text-center">
-            <span className="text-hr">HR</span>
-            <span className="text-hr-text">NeoTech</span>
+            <span className="text-white">NEORH</span>
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-neorh-white/80">
             Connexion à la plateforme de gestion des ressources humaines
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -128,7 +127,7 @@ const Login = () => {
               
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full bg-neorh-green hover:bg-neorh-light-green text-white"
                 disabled={isLoading}
               >
                 {isLoading ? "Connexion en cours..." : "Se connecter"}

@@ -35,14 +35,14 @@
 
     --radius: 0.5rem;
 
-    --sidebar-background: 142 70% 29%;
+    --sidebar-background: 138 74% 29%; /* Updated to match the new NEORH green */
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 142 70% 24%;
+    --sidebar-primary: 138 74% 24%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 142 70% 34%;
+    --sidebar-accent: 138 74% 34%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 142 70% 19%;
-    --sidebar-ring: 142 70% 39%;
+    --sidebar-border: 138 74% 19%;
+    --sidebar-ring: 138 74% 39%;
   }
 
   .dark {
