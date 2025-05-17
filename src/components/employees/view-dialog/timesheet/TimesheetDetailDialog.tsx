@@ -3,6 +3,7 @@ import React, { memo } from 'react';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Clock } from 'lucide-react';
+import { ScrollArea } from "@/components/ui/scroll-area";
 import TimesheetDetailForm from '@/components/timesheet/TimesheetDetailForm';
 import { Timesheet } from '@/lib/constants';
 
@@ -44,12 +45,14 @@ const TimesheetDetailDialog = memo(({
           </DialogDescription>
         </DialogHeader>
         
-        {timesheet && (
-          <TimesheetDetailForm 
-            timesheet={timesheet}
-            onClose={onClose}
-          />
-        )}
+        <ScrollArea className="h-[60vh] pr-4">
+          {timesheet && (
+            <TimesheetDetailForm 
+              timesheet={timesheet}
+              onClose={onClose}
+            />
+          )}
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
