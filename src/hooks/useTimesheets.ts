@@ -2,13 +2,15 @@
 import { useState, useEffect } from 'react';
 import { useFirestore } from './firestore';
 import { Timesheet } from '@/lib/constants';
+import { SearchOptions } from './firestore/searchOperations';
+import { showErrorToast } from '@/utils/toastUtils';
 
 export const useTimesheets = (employeeId: string) => {
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   
-  const { search } = useFirestore<Timesheet>('hr_timesheet'); // Corriger le nom de la collection
+  const { search } = useFirestore<Timesheet>('hr_timesheet');
   
   useEffect(() => {
     if (!employeeId) {
@@ -22,12 +24,19 @@ export const useTimesheets = (employeeId: string) => {
       console.log(`Attempting to fetch timesheets for employee: ${employeeId}`);
       
       try {
-        const result = await search('employeeId', employeeId);
+        const searchOptions: SearchOptions = {
+          orderByField: 'weekStartDate',
+          orderDirection: 'desc'
+        };
+        
+        const result = await search('employeeId', employeeId, searchOptions);
         console.log('Timesheet search results:', result);
         setTimesheets(result.docs);
       } catch (err) {
         console.error('Error fetching timesheets:', err);
-        setError(err instanceof Error ? err : new Error('Failed to fetch timesheets'));
+        const fetchError = err instanceof Error ? err : new Error('Failed to fetch timesheets');
+        setError(fetchError);
+        showErrorToast(`Error loading timesheets: ${fetchError.message}`);
         
         // En cas d'erreur, charger des données fictives pour le développement
         console.log('Loading mock data due to error');

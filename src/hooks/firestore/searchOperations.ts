@@ -1,6 +1,20 @@
 
-import { DocumentData, Query, collection, getDocs, limit, orderBy, query, where, QueryConstraint } from "firebase/firestore";
+import { DocumentData, Query, collection, getDocs, limit, orderBy, query, where, QueryConstraint, DocumentSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { showErrorToast } from "@/utils/toastUtils";
+
+// Define interfaces for search options and results
+export interface SearchOptions {
+  limitTo?: number;
+  orderByField?: string;
+  orderDirection?: 'asc' | 'desc';
+}
+
+export interface SearchResult<T> {
+  docs: Array<T & { id: string }>;
+  count: number;
+  lastDoc: DocumentSnapshot | null;
+}
 
 // Create search operations to find documents that match specific criteria
 export const createSearchOperations = <T extends Record<string, any>>(
@@ -19,24 +33,24 @@ export const createSearchOperations = <T extends Record<string, any>>(
   const search = async (
     field: string,
     value: any,
-    options?: {
-      limitTo?: number;
-      orderByField?: string;
-      orderDirection?: 'asc' | 'desc';
-    }
-  ) => {
+    options?: SearchOptions
+  ): Promise<SearchResult<T>> => {
     try {
       setIsLoading(true);
       
       // Get the collection path as a string
       const collectionPath = getCollection();
+      if (!collectionPath) {
+        throw new Error('Invalid collection path: empty string');
+      }
+      
       console.log('Search in collection path:', collectionPath);
       
       // Create a collection reference using the path string
       const collectionRef = collection(db, collectionPath);
       
       // Start building the query with the where clause
-      let constraints: QueryConstraint[] = [where(field, "==", value)];
+      const constraints: QueryConstraint[] = [where(field, "==", value)];
       
       // Add ordering if specified
       if (options?.orderByField) {
@@ -58,9 +72,10 @@ export const createSearchOperations = <T extends Record<string, any>>(
       
       // Parse documents and add to results array
       querySnapshot.forEach((doc) => {
+        const data = doc.data() as T;
         docs.push({ 
           id: doc.id, 
-          ...doc.data() as T
+          ...data 
         });
       });
       
@@ -74,8 +89,10 @@ export const createSearchOperations = <T extends Record<string, any>>(
       
     } catch (err) {
       console.error('Search operation error:', err);
-      setError(err as Error);
-      throw err;
+      const error = err instanceof Error ? err : new Error('Unknown search error');
+      setError(error);
+      showErrorToast(`Search failed: ${error.message}`);
+      throw error;
     } finally {
       setIsLoading(false);
     }

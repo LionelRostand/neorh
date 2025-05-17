@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useFirestore } from './firestore';
-import { toast } from '@/components/ui/use-toast';
+import { SearchOptions } from './firestore/searchOperations';
+import { showErrorToast } from '@/utils/toastUtils';
 
 export interface Evaluation {
   id: string;
@@ -46,10 +47,12 @@ export const useEmployeeEvaluations = (employeeId: string) => {
       try {
         console.log(`Fetching evaluations for employee ID: ${employeeId}`);
         
-        const result = await search('employeeId', employeeId, {
+        const searchOptions: SearchOptions = {
           orderByField: 'date',
           orderDirection: 'desc'
-        });
+        };
+        
+        const result = await search('employeeId', employeeId, searchOptions);
         
         if (result.docs) {
           console.log(`Found ${result.docs.length} evaluations`);
@@ -60,8 +63,9 @@ export const useEmployeeEvaluations = (employeeId: string) => {
         }
       } catch (err) {
         console.error("Error fetching employee evaluations:", err);
-        setError(err instanceof Error ? err : new Error('Erreur inconnue'));
-        // Éviter d'afficher des toasts excessifs en cas d'erreurs répétées
+        const fetchError = err instanceof Error ? err : new Error('Erreur inconnue');
+        setError(fetchError);
+        showErrorToast(`Impossible de charger les évaluations: ${fetchError.message}`);
         setEvaluations([]);
       } finally {
         setLoading(false);
