@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { 
   Table, 
@@ -34,10 +34,14 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const isMounted = useRef(true);
   
   const timesheetsCollection = useFirestore<Timesheet>('hr_timesheet');
   
   useEffect(() => {
+    // Marque le composant comme monté
+    isMounted.current = true;
+    
     const fetchTimesheets = async () => {
       if (!employeeId) {
         setTimesheets([]);
@@ -48,36 +52,45 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
       setIsLoading(true);
       try {
         // Search for timesheets related to this employee
-        const result = await timesheetsCollection.search(
-          'employeeId', 
-          employeeId
-        );
+        const result = await timesheetsCollection.search('employeeId', employeeId);
         
-        // Trier côté client
-        const sortedDocs = [...result.docs].sort((a, b) => {
-          // Tri par date de soumission décroissante
-          const dateA = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
-          const dateB = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
-          return dateB - dateA;
-        });
-        
-        console.log(`Fetched ${sortedDocs.length} timesheets for employee ${employeeId}`);
-        setTimesheets(sortedDocs);
+        // Ne met à jour l'état que si le composant est toujours monté
+        if (isMounted.current) {
+          // Trier côté client
+          const sortedDocs = [...result.docs].sort((a, b) => {
+            // Tri par date de soumission décroissante
+            const dateA = a.submittedAt ? new Date(a.submittedAt).getTime() : 0;
+            const dateB = b.submittedAt ? new Date(b.submittedAt).getTime() : 0;
+            return dateB - dateA;
+          });
+          
+          console.log(`Fetched ${sortedDocs.length} timesheets for employee ${employeeId}`);
+          setTimesheets(sortedDocs);
+        }
       } catch (err) {
         console.error('Erreur lors de la récupération des feuilles de temps:', err);
-        setError(err instanceof Error ? err : new Error('Erreur inconnue'));
-        // Affichage d'un toast pour informer l'utilisateur
-        toast({
-          title: "Erreur de recherche",
-          description: "Impossible de récupérer les feuilles de temps.",
-          variant: "destructive"
-        });
+        if (isMounted.current) {
+          setError(err instanceof Error ? err : new Error('Erreur inconnue'));
+          // Affichage d'un toast pour informer l'utilisateur
+          toast({
+            title: "Erreur de recherche",
+            description: "Impossible de récupérer les feuilles de temps.",
+            variant: "destructive"
+          });
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted.current) {
+          setIsLoading(false);
+        }
       }
     };
     
     fetchTimesheets();
+    
+    // Nettoyage pour éviter les mises à jour sur des composants démontés
+    return () => {
+      isMounted.current = false;
+    };
   }, [employeeId, timesheetsCollection]);
   
   if (isLoading) {
