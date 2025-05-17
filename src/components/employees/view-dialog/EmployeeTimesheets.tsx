@@ -47,9 +47,15 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
       setIsLoading(true);
       try {
         // Search for timesheets related to this employee
+        // Updated to match the expected parameter format of the search function
         const result = await timesheetsCollection.search(
-          { field: 'employeeId', operator: '==', value: employeeId },
-          { limit: 100 }
+          'employeeId', 
+          employeeId, 
+          { 
+            sortField: 'submittedAt', 
+            sortDirection: 'desc',
+            limit: 100 
+          }
         );
         console.log(`Fetched ${result.docs.length} timesheets for employee ${employeeId}`);
         setTimesheets(result.docs);
