@@ -5,6 +5,7 @@ import {
   Users as UsersGroup, BarChart3, Settings
 } from "lucide-react";
 import { NavItem } from "./types";
+import React from "react";
 
 export const navItems: NavItem[] = [
   {
