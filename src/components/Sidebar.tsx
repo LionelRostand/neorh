@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -132,15 +133,16 @@ const Sidebar = () => {
 
   return (
     <div className={cn(
-      "h-screen fixed z-20 bg-sidebar text-sidebar-foreground transition-all duration-300 flex flex-col justify-between",
-      isOpen ? "w-64" : "w-16"
+      "h-screen fixed z-20 flex flex-col justify-between transition-all duration-300",
+      isOpen ? "w-64" : "w-16",
+      "bg-green-500 text-white" // Couleur verte comme dans l'image
     )}>
       <div>
         <div className="p-4 flex justify-between items-center">
-          {isOpen && <h2 className="font-bold text-xl text-sidebar-foreground">NEORH</h2>}
+          {isOpen && <h2 className="font-bold text-xl text-white">NEORH</h2>}
           <button 
             onClick={() => setIsOpen(!isOpen)} 
-            className="text-sidebar-foreground hover:bg-sidebar-accent rounded-md p-1"
+            className="text-white hover:bg-green-600 rounded-md p-1"
           >
             {isOpen ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -154,8 +156,8 @@ const Sidebar = () => {
           </button>
         </div>
 
-        <nav className="mt-6 h-[calc(100vh-10rem)] overflow-y-auto">
-          <ul className="space-y-1 px-2">
+        <nav className="mt-2 h-[calc(100vh-10rem)] overflow-y-auto">
+          <ul className="space-y-0 px-2">
             {navItems.map((item) => (
               <li key={item.href}>
                 <Link
@@ -163,8 +165,8 @@ const Sidebar = () => {
                   className={cn(
                     "flex items-center p-2 rounded-md transition-colors relative",
                     location.pathname === item.href
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      ? "bg-green-600 text-white"
+                      : "text-white hover:bg-green-600"
                   )}
                   onMouseEnter={() => setHoveredItem(item.href)}
                   onMouseLeave={() => setHoveredItem(null)}
@@ -186,7 +188,7 @@ const Sidebar = () => {
       </div>
       
       <div className={cn(
-        "p-4 text-center text-sidebar-foreground/90 border-t border-sidebar-border",
+        "p-4 text-center border-t border-green-400 bg-green-500 text-white",
         isOpen ? "" : "text-xs -rotate-90 whitespace-nowrap"
       )}>
         <p className={cn("font-medium", !isOpen && "mt-12")}>
