@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Project } from '@/types/project';
 import { formatDate } from '@/utils/formatters';
-import { ProjectStatusBadge } from './ProjectStatusBadge';
+import ProjectStatusBadge from './ProjectStatusBadge';
 
 interface ViewProjectDialogProps {
   open: boolean;
