@@ -9,10 +9,17 @@ import {
   DocumentReference,
   collection,
   query,
-  where
+  where,
+  orderBy
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "@/components/ui/use-toast";
+
+// Interface for search options
+export interface SearchOptions {
+  orderByField?: string;
+  orderDirection?: 'asc' | 'desc';
+}
 
 // Read operations for Firestore
 export const createReadOperations = <T extends Record<string, any>>(
@@ -112,7 +119,7 @@ export const createReadOperations = <T extends Record<string, any>>(
 
   // Rechercher des documents par une valeur de champ
   // Note: ajout d'une fonction search pour remplacer la fonctionnalité qui utilisait l'opérateur 'in'
-  const search = async (field: string, value: any) => {
+  const search = async (field: string, value: any, options: SearchOptions = {}) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -120,7 +127,12 @@ export const createReadOperations = <T extends Record<string, any>>(
       
       const collRef = collection(db, collectionName);
       // Utiliser l'opérateur d'égalité '==' au lieu de 'in'
-      const q = query(collRef, where(field, "==", value));
+      let q = query(collRef, where(field, "==", value));
+      
+      // Ajout du tri si spécifié dans les options
+      if (options.orderByField) {
+        q = query(q, orderBy(options.orderByField, options.orderDirection || 'asc'));
+      }
       
       const querySnapshot = await getDocs(q);
       const documents = querySnapshot.docs.map(doc => {

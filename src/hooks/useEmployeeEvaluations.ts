@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useFirestore } from './firestore';
 import { SearchOptions } from './firestore/searchOperations';

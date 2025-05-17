@@ -3,6 +3,7 @@ import { useFirestore } from "@/hooks/firestore";
 import { Employee } from "@/types/firebase";
 import { Permission, MENU_ITEMS } from "./types";
 import { toast } from "@/components/ui/use-toast";
+import { SearchOptions } from "@/hooks/firestore/searchOperations";
 
 export const usePermissionsManager = () => {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
@@ -46,10 +47,12 @@ export const usePermissionsManager = () => {
     const loadPermissions = async () => {
       try {
         setIsLoading(true);
-        const permissionsResult = await search("employeeId", selectedEmployeeId, {
+        const searchOptions: SearchOptions = {
           orderByField: "menuName",
           orderDirection: "asc"
-        });
+        };
+        
+        const permissionsResult = await search("employeeId", selectedEmployeeId, searchOptions);
         
         if (permissionsResult.docs.length > 0) {
           setPermissions(permissionsResult.docs);
