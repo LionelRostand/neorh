@@ -51,9 +51,9 @@ const Login = () => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 bg-neorh-green text-white rounded-t-lg">
+    <div className="flex min-h-screen items-center justify-center bg-neorh-soft-green py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="space-y-1 bg-neorh-light-green text-white rounded-t-lg">
           <CardTitle className="text-2xl font-bold text-center">
             <span className="text-white">NEORH</span>
           </CardTitle>
@@ -127,7 +127,7 @@ const Login = () => {
               
               <Button
                 type="submit"
-                className="w-full bg-neorh-green hover:bg-neorh-light-green text-white"
+                className="w-full bg-neorh-light-green hover:bg-neorh-green text-white"
                 disabled={isLoading}
               >
                 {isLoading ? "Connexion en cours..." : "Se connecter"}
