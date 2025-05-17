@@ -50,11 +50,11 @@ export const createSearchOperations = <T extends Record<string, any>>(
       const collectionRef = collection(db, collectionPath);
       
       // Start building the query with the where clause
-      // Fix: ensure we're not using 'in' operator incorrectly
+      // Use equality operator instead of 'in' operator
       const constraints: QueryConstraint[] = [where(field, "==", value)];
       
-      // Add ordering if specified - mais seulement si explicitement demandé
-      // afin d'éviter les erreurs d'index Firebase
+      // Add ordering if specified - only if explicitly requested
+      // to avoid Firebase index errors
       if (options?.orderByField) {
         console.log(`Adding orderBy constraint: ${options.orderByField}, ${options.orderDirection || 'asc'}`);
         constraints.push(
@@ -76,7 +76,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
         
         // Parse documents and add to results array
         querySnapshot.forEach((doc) => {
-          // Fix: Properly handle the document data to avoid _delegate issues
+          // Extract document data safely
           const data = doc.data() as T;
           docs.push({ 
             id: doc.id, 
@@ -105,7 +105,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
           const fallbackDocs = [] as Array<T & { id: string }>;
           
           fallbackSnapshot.forEach((doc) => {
-            // Fix: Properly handle the document data to avoid _delegate issues
+            // Extract document data safely
             const data = doc.data() as T;
             fallbackDocs.push({ 
               id: doc.id, 
@@ -131,11 +131,9 @@ export const createSearchOperations = <T extends Record<string, any>>(
       const error = err instanceof Error ? err : new Error('Unknown search error');
       setError(error);
       
-      // More user-friendly error message
+      // User-friendly error messages
       if (error.message.includes('index')) {
         showErrorToast(`La recherche nécessite un index Firebase. Veuillez contacter l'administrateur.`);
-      } else if (error.message.includes('_delegate')) {
-        showErrorToast(`Erreur de format de données. Veuillez réessayer ou contacter l'assistance.`);
       } else {
         showErrorToast(`Erreur de recherche: ${error.message}`);
       }
