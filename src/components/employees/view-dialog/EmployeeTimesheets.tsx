@@ -1,5 +1,5 @@
 
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { format } from 'date-fns';
 import { 
   Table, 
@@ -10,9 +10,13 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { FileText } from 'lucide-react';
+import { FileText, Calendar, Clock } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTimesheets } from '@/hooks/useTimesheets';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import TimesheetDetailForm from '@/components/timesheet/TimesheetDetailForm';
+import { Timesheet } from '@/lib/constants';
 
 // Helper function to format date
 const formatDate = (date: string): string => {
@@ -30,11 +34,22 @@ interface EmployeeTimesheetsProps {
 
 const EmployeeTimesheets = memo(({ employeeId }: EmployeeTimesheetsProps) => {
   console.log('EmployeeTimesheets component rendering for employeeId:', employeeId);
+  const [selectedTimesheet, setSelectedTimesheet] = useState<Timesheet | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   // Use the useTimesheets hook for data fetching
   const { timesheets, isLoading, error } = useTimesheets(employeeId);
   
   console.log('Timesheets data:', { isLoading, error, count: timesheets?.length, data: timesheets });
+
+  const handleOpenTimesheet = (timesheet: Timesheet) => {
+    setSelectedTimesheet(timesheet);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+  };
 
   if (isLoading) {
     return (
@@ -85,11 +100,12 @@ const EmployeeTimesheets = memo(({ employeeId }: EmployeeTimesheetsProps) => {
             <TableHead>Heures</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead>Soumis le</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {timesheets.map((timesheet) => (
-            <TableRow key={timesheet.id}>
+            <TableRow key={timesheet.id} className="cursor-pointer hover:bg-gray-50" onClick={() => handleOpenTimesheet(timesheet)}>
               <TableCell>
                 {timesheet.weekStartDate && timesheet.weekEndDate 
                   ? `${formatDate(timesheet.weekStartDate)} - ${formatDate(timesheet.weekEndDate)}` 
@@ -111,10 +127,42 @@ const EmployeeTimesheets = memo(({ employeeId }: EmployeeTimesheetsProps) => {
               <TableCell>
                 {timesheet.submittedAt ? formatDate(timesheet.submittedAt) : 'Non soumis'}
               </TableCell>
+              <TableCell className="text-right">
+                <Button variant="ghost" size="sm" onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenTimesheet(timesheet);
+                }}>
+                  <Calendar className="h-4 w-4 mr-1" />
+                  Modifier
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Clock className="h-5 w-5 mr-2" />
+              Détails de la feuille de temps
+            </DialogTitle>
+            <DialogDescription>
+              Période: {selectedTimesheet?.weekStartDate && selectedTimesheet?.weekEndDate 
+                ? `${formatDate(selectedTimesheet.weekStartDate)} - ${formatDate(selectedTimesheet.weekEndDate)}` 
+                : 'Non définie'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedTimesheet && (
+            <TimesheetDetailForm 
+              timesheet={selectedTimesheet}
+              onClose={handleCloseDialog}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 });

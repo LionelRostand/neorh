@@ -1,81 +1,81 @@
 
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs,
-  orderBy,
-  QueryOrderByConstraint,
-  OrderByDirection,
-  QueryConstraint,
-  WhereFilterOp,
-  limit as firestoreLimit
-} from "firebase/firestore";
+import { DocumentData, Query, collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { toast } from "@/components/ui/use-toast";
 
+type WhereFilterOp = '<' | '<=' | '==' | '!=' | '>=' | '>' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in';
+
+// Create search operations to find documents that match specific criteria
 export const createSearchOperations = <T extends Record<string, any>>(
-  setIsLoading: (loading: boolean) => void,
-  setError: (error: Error | null) => void,
-  getCollection: () => any
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setError: React.Dispatch<React.SetStateAction<Error | null>>,
+  getCollection: () => string
 ) => {
-  // Search documents by field and value
+  
+  /**
+   * Search documents where field equals value
+   * @param field The document field to search on
+   * @param value The value to match
+   * @param options Additional query options like limit
+   * @returns Promise with results array
+   */
   const search = async (
-    field: string, 
-    value: string | number | boolean,
+    field: string,
+    value: any,
     options?: {
-      sortField?: string;
-      sortDirection?: OrderByDirection;
-      limit?: number;
+      limitTo?: number;
+      orderByField?: string;
+      orderDirection?: 'asc' | 'desc';
     }
   ) => {
-    setIsLoading(true);
-    setError(null);
-    
-    console.log(`Searching with criteria: ${field} = ${value}`, options);
-    
     try {
-      const collectionRef = getCollection();
+      setIsLoading(true);
       
-      // Construct query constraints
-      const constraints: QueryConstraint[] = [where(field, "==", value)];
+      const collectionRef = collection(db, getCollection());
       
-      // Add sorting if specified
-      if (options?.sortField && options?.sortDirection) {
-        constraints.push(orderBy(options.sortField, options.sortDirection));
+      // Start building the query with the where clause
+      let constraints: any[] = [where(field, "==", value)];
+      
+      // Add ordering if specified
+      if (options?.orderByField) {
+        constraints.push(
+          orderBy(options.orderByField, options.orderDirection || 'asc')
+        );
       }
       
       // Add limit if specified
-      if (options?.limit && options.limit > 0) {
-        constraints.push(firestoreLimit(options.limit));
+      if (options?.limitTo && options.limitTo > 0) {
+        constraints.push(limit(options.limitTo));
       }
       
-      // Execute the query with all constraints
+      // Create the query with all constraints
       const q = query(collectionRef, ...constraints);
+      
       const querySnapshot = await getDocs(q);
+      const docs = [] as Array<T & { id: string }>;
       
-      const documents = querySnapshot.docs.map(doc => {
-        return { id: doc.id, ...doc.data() } as T & { id: string };
+      // Parse documents and add to results array
+      querySnapshot.forEach((doc) => {
+        docs.push({ 
+          id: doc.id, 
+          ...doc.data() as T
+        });
       });
       
-      console.log(`Found ${documents.length} documents matching search criteria ${field} = ${value}`);
+      return {
+        docs,
+        count: docs.length,
+        lastDoc: querySnapshot.docs[querySnapshot.docs.length - 1] || null
+      };
       
-      return { docs: documents };
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Une erreur est survenue lors de la recherche");
-      console.error("Error during search operation:", error, "Field:", field, "Value:", value);
-      setError(error);
-      toast({
-        title: "Erreur de recherche",
-        description: `Impossible de rechercher les documents: ${error.message}`,
-        variant: "destructive"
-      });
-      return { docs: [] };
+      console.error('Search operation error:', err);
+      setError(err as Error);
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   return {
     search
   };

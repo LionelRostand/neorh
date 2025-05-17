@@ -1,6 +1,6 @@
 
 import { Employee } from '@/types/employee';
-import { Timesheet } from '@/lib/constants';
+import { Timesheet, DailyEntry } from '@/lib/constants';
 import JsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { setupDocument } from '../documentSetup';
@@ -66,6 +66,46 @@ export const generateFeuillesDeTempsTab = (doc: JsPDF, employee: Employee, times
       body: data,
       theme: 'grid',
       headStyles: { fillColor: [66, 139, 202], textColor: 255 }
+    });
+    
+    // Pour chaque feuille de temps, ajouter le détail des entrées quotidiennes si elles existent
+    let yPosition = doc.lastAutoTable?.finalY || 150;
+    
+    timesheets.forEach((ts, index) => {
+      if (ts.dailyEntries && ts.dailyEntries.length > 0) {
+        yPosition += 20;
+        
+        // Titre pour les détails de cette feuille de temps
+        doc.setFontSize(14);
+        doc.setTextColor(44, 62, 80);
+        doc.text(`Détails de la période: ${formatDate(ts.weekStartDate)} - ${formatDate(ts.weekEndDate)}`, 15, yPosition);
+        
+        // En-têtes et données des entrées quotidiennes
+        const dailyHeaders = [['Date', 'Projet', 'Heures', 'Notes']];
+        const dailyData = ts.dailyEntries.map(entry => [
+          formatDate(entry.date),
+          entry.projectId || 'Non assigné',
+          `${entry.hours}`,
+          entry.notes || ''
+        ]);
+        
+        // Générer la table des entrées quotidiennes
+        autoTable(doc, {
+          startY: yPosition + 5,
+          head: dailyHeaders,
+          body: dailyData,
+          theme: 'grid',
+          headStyles: { fillColor: [100, 160, 220], textColor: 255 }
+        });
+        
+        yPosition = doc.lastAutoTable?.finalY || yPosition + 60;
+        
+        // Si on a besoin d'une nouvelle page
+        if (yPosition > 250 && index < timesheets.length - 1) {
+          doc.addPage();
+          yPosition = 20;
+        }
+      }
     });
   }
 };
