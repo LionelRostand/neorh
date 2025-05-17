@@ -14,6 +14,7 @@ import { ArrowLeft, Save, X, AlertCircle, Loader2, RefreshCw } from "lucide-reac
 import { useFirestore } from '@/hooks/firestore';
 import { Timesheet } from "@/lib/constants";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
 
 interface Project {
   id: string;
@@ -59,12 +60,36 @@ const WeeklyProjectsTimesheet = () => {
   const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
   const [activeTab, setActiveTab] = useState<string>('');
   const timesheetCollection = useFirestore<Timesheet>('hr_timesheet');
+  // Flag to track if initial fetch has been attempted
+  const [fetchAttempted, setFetchAttempted] = useState(false);
+  // Progress animation for loading state
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
+  // Progress animation effect
+  useEffect(() => {
+    if (loading && !error) {
+      const interval = setInterval(() => {
+        setLoadingProgress(prev => {
+          // Only incrementally increase to 90% max to show it's still loading
+          if (prev < 90) {
+            return prev + 10;
+          }
+          return prev;
+        });
+      }, 500);
+
+      return () => clearInterval(interval);
+    } else {
+      setLoadingProgress(100); // Complete the progress when loaded or error
+    }
+  }, [loading, error]);
 
   // Fetch the timesheet data
   const fetchTimesheet = async () => {
     if (!id) {
       setError(new Error("ID de feuille de temps non fourni"));
       setLoading(false);
+      setFetchAttempted(true);
       return;
     }
     
@@ -73,6 +98,9 @@ const WeeklyProjectsTimesheet = () => {
       setError(null);
       console.log("Fetching timesheet with ID:", id);
       const result = await timesheetCollection.getById(id);
+      
+      // Mark fetch as attempted regardless of result
+      setFetchAttempted(true);
       
       if (!result) {
         throw new Error("Feuille de temps non trouvée");
@@ -124,10 +152,12 @@ const WeeklyProjectsTimesheet = () => {
     }
   };
 
-  // Initial fetch on mount
+  // Initial fetch on mount - only run once
   useEffect(() => {
-    fetchTimesheet();
-  }, [id, timesheetCollection]);
+    if (!fetchAttempted && id) {
+      fetchTimesheet();
+    }
+  }, [id, fetchAttempted]);
 
   const handleAddProject = (weekIndex: number) => {
     if (!selectedProject) {
@@ -233,6 +263,7 @@ const WeeklyProjectsTimesheet = () => {
 
   const handleRetry = () => {
     setRetrying(true);
+    setFetchAttempted(false); // Reset fetch attempt flag to allow a new fetch
     fetchTimesheet();
   };
   
@@ -240,7 +271,7 @@ const WeeklyProjectsTimesheet = () => {
     navigate(-1);
   };
 
-  if (loading) {
+  if (loading && !fetchAttempted) {
     return (
       <div className="p-4 md:p-6">
         <div className="flex items-center mb-6">
@@ -259,10 +290,11 @@ const WeeklyProjectsTimesheet = () => {
             <CardDescription>Veuillez patienter pendant le chargement des données de la feuille de temps</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col items-center justify-center py-8 space-y-4">
+            <div className="flex flex-col items-center justify-center py-8 space-y-6">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
               <p className="text-muted-foreground text-center">Récupération des données de la feuille de temps...</p>
               <div className="w-full max-w-md">
+                <Progress value={loadingProgress} className="h-2 mb-2" />
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-3/4" />
