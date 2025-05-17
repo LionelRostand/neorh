@@ -69,7 +69,7 @@ export const generateFeuillesDeTempsTab = (doc: JsPDF, employee: Employee, times
     });
     
     // Pour chaque feuille de temps, ajouter le détail des entrées quotidiennes si elles existent
-    let yPosition = doc.lastAutoTable?.finalY || 150;
+    let yPosition = (doc as any).lastAutoTable?.finalY || 150;
     
     timesheets.forEach((ts, index) => {
       if (ts.dailyEntries && ts.dailyEntries.length > 0) {
@@ -98,7 +98,7 @@ export const generateFeuillesDeTempsTab = (doc: JsPDF, employee: Employee, times
           headStyles: { fillColor: [100, 160, 220], textColor: 255 }
         });
         
-        yPosition = doc.lastAutoTable?.finalY || yPosition + 60;
+        yPosition = (doc as any).lastAutoTable?.finalY || yPosition + 60;
         
         // Si on a besoin d'une nouvelle page
         if (yPosition > 250 && index < timesheets.length - 1) {

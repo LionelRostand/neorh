@@ -47,8 +47,8 @@ export const useEmployeeEvaluations = (employeeId: string) => {
         console.log(`Fetching evaluations for employee ID: ${employeeId}`);
         
         const result = await search('employeeId', employeeId, {
-          sortField: 'date',
-          sortDirection: 'desc'
+          orderByField: 'date',
+          orderDirection: 'desc'
         });
         
         if (result.docs) {

@@ -1,5 +1,5 @@
 
-import { DocumentData, Query, collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
+import { DocumentData, Query, collection, getDocs, limit, orderBy, query, where, QueryConstraint } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 type WhereFilterOp = '<' | '<=' | '==' | '!=' | '>=' | '>' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in';
@@ -25,6 +25,8 @@ export const createSearchOperations = <T extends Record<string, any>>(
       limitTo?: number;
       orderByField?: string;
       orderDirection?: 'asc' | 'desc';
+      sortField?: string;
+      sortDirection?: 'asc' | 'desc';
     }
   ) => {
     try {
@@ -33,12 +35,19 @@ export const createSearchOperations = <T extends Record<string, any>>(
       const collectionRef = collection(db, getCollection());
       
       // Start building the query with the where clause
-      let constraints: any[] = [where(field, "==", value)];
+      let constraints: QueryConstraint[] = [where(field, "==", value)];
       
       // Add ordering if specified
       if (options?.orderByField) {
         constraints.push(
           orderBy(options.orderByField, options.orderDirection || 'asc')
+        );
+      }
+      
+      // Add sorting if specified (for backward compatibility)
+      if (options?.sortField) {
+        constraints.push(
+          orderBy(options.sortField, options.sortDirection || 'asc')
         );
       }
       
