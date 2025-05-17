@@ -1,5 +1,5 @@
 
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { 
   Table, 
@@ -10,13 +10,14 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Calendar, Clock } from 'lucide-react';
+import { FileText, Calendar, Clock, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTimesheets } from '@/hooks/useTimesheets';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import TimesheetDetailForm from '@/components/timesheet/TimesheetDetailForm';
 import { Timesheet } from '@/lib/constants';
+import { toast } from '@/components/ui/use-toast';
 
 // Helper function to format date
 const formatDate = (date: string): string => {
@@ -36,11 +37,22 @@ const EmployeeTimesheets = memo(({ employeeId }: EmployeeTimesheetsProps) => {
   console.log('EmployeeTimesheets component rendering for employeeId:', employeeId);
   const [selectedTimesheet, setSelectedTimesheet] = useState<Timesheet | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   
   // Use the useTimesheets hook for data fetching
-  const { timesheets, isLoading, error } = useTimesheets(employeeId);
+  const { timesheets, isLoading, error, refreshTimesheets } = useTimesheets(employeeId);
   
-  console.log('Timesheets data:', { isLoading, error, count: timesheets?.length, data: timesheets });
+  console.log('Timesheets data:', { isLoading, error, count: timesheets?.length });
+
+  // Fonction pour forcer un rafraîchissement des données
+  const handleRefresh = async () => {
+    toast({
+      title: "Rafraîchissement en cours",
+      description: "Chargement des feuilles de temps...",
+    });
+    await refreshTimesheets();
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const handleOpenTimesheet = (timesheet: Timesheet) => {
     setSelectedTimesheet(timesheet);
@@ -49,12 +61,16 @@ const EmployeeTimesheets = memo(({ employeeId }: EmployeeTimesheetsProps) => {
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
+    // Rafraîchir les données après fermeture du dialogue
+    refreshTimesheets();
   };
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h3 className="text-xl font-semibold">Feuilles de temps</h3>
+        <div className="flex justify-between items-center">
+          <h3 className="text-xl font-semibold">Feuilles de temps</h3>
+        </div>
         <div className="space-y-2">
           {[...Array(3)].map((_, i) => (
             <Skeleton key={i} className="h-12 w-full" />
@@ -67,7 +83,13 @@ const EmployeeTimesheets = memo(({ employeeId }: EmployeeTimesheetsProps) => {
   if (error) {
     return (
       <div className="space-y-4">
-        <h3 className="text-xl font-semibold">Feuilles de temps</h3>
+        <div className="flex justify-between items-center">
+          <h3 className="text-xl font-semibold">Feuilles de temps</h3>
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Réessayer
+          </Button>
+        </div>
         <div className="p-4 text-red-500 border border-red-300 rounded-md">
           Erreur: {error.message}
         </div>
@@ -77,21 +99,37 @@ const EmployeeTimesheets = memo(({ employeeId }: EmployeeTimesheetsProps) => {
 
   if (!timesheets || timesheets.length === 0) {
     return (
-      <div className="space-y-6 text-center py-10">
-        <div className="flex justify-center">
-          <FileText className="h-16 w-16 text-gray-300" />
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-xl font-semibold">Feuilles de temps</h3>
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Rafraîchir
+          </Button>
         </div>
-        <h3 className="text-xl font-semibold">Aucune feuille de temps</h3>
-        <p className="text-gray-500">
-          Aucune feuille de temps n'est disponible pour cet employé.
-        </p>
+        <div className="space-y-6 text-center py-10">
+          <div className="flex justify-center">
+            <FileText className="h-16 w-16 text-gray-300" />
+          </div>
+          <h3 className="text-xl font-semibold">Aucune feuille de temps</h3>
+          <p className="text-gray-500">
+            Aucune feuille de temps n'est disponible pour cet employé.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h3 className="text-xl font-semibold">Feuilles de temps</h3>
+      <div className="flex justify-between items-center">
+        <h3 className="text-xl font-semibold">Feuilles de temps</h3>
+        <Button variant="outline" size="sm" onClick={handleRefresh}>
+          <RefreshCw className="h-4 w-4 mr-1" />
+          Rafraîchir
+        </Button>
+      </div>
+      
       <Table>
         <TableHeader>
           <TableRow>

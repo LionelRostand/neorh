@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useFirestore } from './firestore';
 import { Timesheet } from '@/lib/constants';
 import { SearchOptions } from './firestore/searchOperations';
@@ -12,56 +12,53 @@ export const useTimesheets = (employeeId: string) => {
   
   const { search } = useFirestore<Timesheet>('hr_timesheet');
   
-  useEffect(() => {
+  // Fonction de chargement des données, exposée pour permettre le rafraîchissement
+  const fetchTimesheets = useCallback(async () => {
     if (!employeeId) {
       setIsLoading(false);
+      setTimesheets([]);
       return;
     }
     
-    const fetchTimesheets = async () => {
-      setIsLoading(true);
-      setError(null);
-      console.log(`Attempting to fetch timesheets for employee: ${employeeId}`);
+    setIsLoading(true);
+    setError(null);
+    console.log(`Tentative de récupération des feuilles de temps pour l'employé: ${employeeId}`);
+    
+    try {
+      // Utiliser une recherche simple sans tri pour éviter les erreurs d'index
+      const searchOptions: SearchOptions = {};
       
-      try {
-        // Essayer la recherche avec un tri plus simple d'abord
-        const searchOptions: SearchOptions = {
-          // Ne pas utiliser de tri pour éviter les erreurs d'index dans un premier temps
-        };
+      const result = await search('employeeId', employeeId, searchOptions);
+      console.log('Résultats de recherche des feuilles de temps:', result);
+      
+      if (result.docs && result.docs.length > 0) {
+        // Trier côté client pour éviter les erreurs d'index Firebase
+        const sortedDocs = [...result.docs].sort((a, b) => {
+          if (a.weekStartDate && b.weekStartDate) {
+            return new Date(b.weekStartDate).getTime() - new Date(a.weekStartDate).getTime();
+          }
+          return 0;
+        });
+        setTimesheets(sortedDocs);
+      } else {
+        // Si aucun résultat, utiliser un tableau vide plutôt que des données fictives
+        // pour mieux refléter l'état réel des données
+        console.log('Aucune feuille de temps trouvée pour cet employé');
+        setTimesheets([]);
+      }
+    } catch (err) {
+      console.error('Erreur lors de la récupération des feuilles de temps:', err);
+      const fetchError = err instanceof Error ? err : new Error('Échec de récupération des feuilles de temps');
+      
+      // Vérifier si l'erreur concerne un index manquant
+      const errorMessage = fetchError.message || '';
+      const isIndexError = errorMessage.includes('index') || errorMessage.includes('composite');
+      
+      if (isIndexError) {
+        console.warn("Erreur d'index Firebase détectée, chargement des données de secours");
+        showErrorToast(`Erreur d'index Firebase. Chargement des données temporaires.`);
         
-        const result = await search('employeeId', employeeId, searchOptions);
-        console.log('Timesheet search results:', result);
-        
-        if (result.docs && result.docs.length > 0) {
-          // Trier côté client si nécessaire
-          const sortedDocs = [...result.docs].sort((a, b) => {
-            if (a.weekStartDate && b.weekStartDate) {
-              return new Date(b.weekStartDate).getTime() - new Date(a.weekStartDate).getTime();
-            }
-            return 0;
-          });
-          setTimesheets(sortedDocs);
-        } else {
-          setTimesheets([]);
-        }
-      } catch (err) {
-        console.error('Error fetching timesheets:', err);
-        const fetchError = err instanceof Error ? err : new Error('Failed to fetch timesheets');
-        
-        // Vérifier si l'erreur concerne un index manquant
-        const errorMessage = fetchError.message || '';
-        const isIndexError = errorMessage.includes('index') || errorMessage.includes('composite');
-        
-        if (isIndexError) {
-          console.warn('Firebase index error detected, loading mock data');
-          showErrorToast(`Erreur d'index Firebase. Chargement des données temporaires.`);
-        } else {
-          setError(fetchError);
-          showErrorToast(`Error loading timesheets: ${fetchError.message}`);
-        }
-        
-        // En cas d'erreur, charger des données fictives pour le développement
-        console.log('Loading mock data due to error');
+        // Charger des données fictives pour le développement seulement en cas d'erreur d'index
         setTimesheets([
           {
             id: "1",
@@ -87,17 +84,26 @@ export const useTimesheets = (employeeId: string) => {
             submittedAt: "2025-05-09T17:00:00"
           }
         ]);
-      } finally {
-        setIsLoading(false);
+      } else {
+        setError(fetchError);
+        showErrorToast(`Erreur de chargement des feuilles de temps: ${fetchError.message}`);
+        // Même en cas d'erreur, afficher un tableau vide plutôt qu'un état null
+        setTimesheets([]);
       }
-    };
-    
-    fetchTimesheets();
+    } finally {
+      setIsLoading(false);
+    }
   }, [employeeId, search]);
+  
+  // Charger les données au chargement du composant
+  useEffect(() => {
+    fetchTimesheets();
+  }, [fetchTimesheets]);
   
   return {
     timesheets,
     isLoading,
-    error
+    error,
+    refreshTimesheets: fetchTimesheets // Exposer la fonction pour permettre le rafraîchissement
   };
 };
