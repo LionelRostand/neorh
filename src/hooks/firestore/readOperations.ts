@@ -6,7 +6,8 @@ import {
   DocumentData,
   FirestoreError,
   Query,
-  DocumentReference
+  DocumentReference,
+  CollectionReference
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "@/components/ui/use-toast";
@@ -16,7 +17,7 @@ export const createReadOperations = <T extends Record<string, any>>(
   collectionName: string,
   setIsLoading: (loading: boolean) => void,
   setError: (error: Error | null) => void,
-  getCollection: () => any
+  getCollection: () => CollectionReference<T>
 ) => {
   // Récupérer tous les documents
   const getAll = async () => {
@@ -70,7 +71,7 @@ export const createReadOperations = <T extends Record<string, any>>(
         throw new Error("ID non fourni");
       }
       
-      const docRef = doc(db, collectionName, id);
+      const docRef = doc(db, collectionName, id) as DocumentReference<T>;
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {

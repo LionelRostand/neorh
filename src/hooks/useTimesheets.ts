@@ -32,7 +32,10 @@ export const useTimesheets = (employeeId?: string) => {
           result = await timesheetsCollection.getAll();
         } else {
           // Otherwise get timesheets for the specific employee
-          result = await timesheetsCollection.search('employeeId', employeeIdRef.current);
+          result = await timesheetsCollection.search({
+            field: 'employeeId',
+            value: employeeIdRef.current
+          });
         }
         
         if (isMounted.current) {

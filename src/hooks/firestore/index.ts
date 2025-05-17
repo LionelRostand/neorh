@@ -2,7 +2,7 @@
 import { useBaseFirestore } from "./baseFirestore";
 import { createReadOperations } from "./readOperations";
 import { createWriteOperations } from "./writeOperations";
-import { createSearchOperations } from "./searchOperations";
+import { createSearchOperations, type SearchCriteria, type SearchOptions } from "./searchOperations";
 
 // Main hook that combines all firestore operations
 export const useFirestore = <T extends Record<string, any>>(collectionName: string) => {
@@ -63,3 +63,6 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
 
 // Export the main hook as default
 export default useFirestore;
+
+// Re-export types
+export type { SearchCriteria, SearchOptions } from './searchOperations';

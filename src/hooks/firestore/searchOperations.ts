@@ -1,75 +1,82 @@
 
 import { 
-  collection, 
   query, 
   where, 
   getDocs,
-  orderBy,
-  QueryOrderByConstraint,
-  OrderByDirection,
+  DocumentData,
   QueryConstraint,
+  Query,
   WhereFilterOp,
-  limit as firestoreLimit
+  collection,
+  CollectionReference
 } from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { toast } from "@/components/ui/use-toast";
 
+// Define type for search options
+export interface SearchOptions {
+  orderBy?: string;
+  limit?: number;
+  direction?: 'asc' | 'desc';
+}
+
+export interface SearchCriteria {
+  field: string;
+  value: any;
+  operator?: WhereFilterOp;
+}
+
+// Create search operations
 export const createSearchOperations = <T extends Record<string, any>>(
   setIsLoading: (loading: boolean) => void,
   setError: (error: Error | null) => void,
-  getCollection: () => any
+  getCollection: () => CollectionReference<T>
 ) => {
-  // Search documents by field and value
-  const search = async (
-    field: string, 
-    value: string | number | boolean,
-    options?: {
-      sortField?: string;
-      sortDirection?: OrderByDirection;
-      limit?: number;
-    }
-  ) => {
+  // Search for documents based on a field value
+  const search = async (criteria: SearchCriteria | string, value?: any, options?: SearchOptions) => {
     setIsLoading(true);
     setError(null);
     
-    console.log(`Searching with criteria: ${field} = ${value}`, options);
-    
     try {
-      const collectionRef = getCollection();
+      // Handle both new object format and old string/value format
+      let field: string;
+      let searchValue: any;
+      let operator: WhereFilterOp = "==";
+      let searchOptions: SearchOptions = {};
       
-      // Construct query constraints
-      const constraints: QueryConstraint[] = [where(field, "==", value)];
-      
-      // Add sorting if specified
-      if (options?.sortField && options?.sortDirection) {
-        constraints.push(orderBy(options.sortField, options.sortDirection));
+      // Determine which format is being used
+      if (typeof criteria === 'object' && criteria !== null) {
+        // New format with SearchCriteria object
+        field = criteria.field;
+        searchValue = criteria.value;
+        if (criteria.operator) operator = criteria.operator;
+        if (options) searchOptions = options;
+      } else {
+        // Old format with separate field and value
+        field = criteria as string;
+        searchValue = value;
+        if (options) searchOptions = options;
       }
+
+      console.log(`Searching in collection with criteria: ${field} ${operator} ${searchValue}`);
       
-      // Add limit if specified
-      if (options?.limit && options.limit > 0) {
-        constraints.push(firestoreLimit(options.limit));
-      }
+      // Create query constraints
+      const constraints: QueryConstraint[] = [where(field, operator, searchValue)];
       
-      // Execute the query with all constraints
-      const q = query(collectionRef, ...constraints);
+      // Apply the query
+      const q: Query<T> = query(getCollection(), ...constraints);
       const querySnapshot = await getDocs(q);
       
+      // Process the results
       const documents = querySnapshot.docs.map(doc => {
-        return { id: doc.id, ...doc.data() } as T & { id: string };
+        return { id: doc.id, ...doc.data() as DocumentData } as T & { id: string };
       });
       
-      console.log(`Found ${documents.length} documents matching search criteria ${field} = ${value}`);
+      console.log(`Search found ${documents.length} documents matching ${field} ${operator} ${searchValue}`);
       
       return { docs: documents };
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Une erreur est survenue lors de la recherche");
-      console.error("Error during search operation:", error, "Field:", field, "Value:", value);
+      console.error('Search error:', err);
+      const error = err instanceof Error ? err : new Error('Unknown search error');
       setError(error);
-      toast({
-        title: "Erreur de recherche",
-        description: `Impossible de rechercher les documents: ${error.message}`,
-        variant: "destructive"
-      });
       return { docs: [] };
     } finally {
       setIsLoading(false);
