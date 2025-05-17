@@ -12,7 +12,10 @@ interface TimesheetsTableProps {
 }
 
 const TimesheetsTable = ({ timesheets, loading }: TimesheetsTableProps) => {
-  console.log('TimesheetsTable rendering with:', {timesheets, loading});
+  console.log('TimesheetsTable rendering with:', {
+    timesheetsCount: timesheets?.length || 0,
+    loading
+  });
 
   const getStatusBadge = (status: string) => {
     switch (status) {

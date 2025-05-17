@@ -8,23 +8,30 @@ export const useTimesheetData = () => {
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
   const [loading, setLoading] = useState(true);
   const isMounted = useRef(true);
+  const hasInitialFetch = useRef(false);
   
   // Using useFirestore to directly access the hr_timesheet collection
   const timesheetCollection = useFirestore<Timesheet>('hr_timesheet');
 
   // Memoize the fetch function to avoid recreation on each render
   const fetchTimesheets = useCallback(async () => {
-    if (!isMounted.current) return;
+    // Skip if already fetched or not mounted
+    if (!isMounted.current || hasInitialFetch.current) return;
     
+    console.log('[useTimesheetData] Starting fetch, setting loading state');
     setLoading(true);
+    
     try {
       console.log('Fetching all timesheets in useTimesheetData');
       // Get all timesheets from the hr_timesheet collection
       const result = await timesheetCollection.getAll();
       
+      // Mark as fetched to prevent future fetches
+      hasInitialFetch.current = true;
+      
       if (isMounted.current) {
         if (result.docs && result.docs.length > 0) {
-          console.log('Fetched timesheets in useTimesheetData:', result.docs);
+          console.log('Fetched timesheets in useTimesheetData:', result.docs.length);
           
           // Filter out incomplete timesheet objects
           const validTimesheets = result.docs.filter(doc => {
@@ -90,6 +97,7 @@ export const useTimesheetData = () => {
       }
     } finally {
       if (isMounted.current) {
+        console.log('[useTimesheetData] Fetch complete, setting loading to false');
         setLoading(false);
       }
     }
@@ -98,15 +106,17 @@ export const useTimesheetData = () => {
   useEffect(() => {
     // Set isMounted to true when the component mounts
     isMounted.current = true;
+    console.log('[useTimesheetData] Component mounted');
     
     // Fetch timesheets only once at mount
     fetchTimesheets();
     
     // Clean up function to prevent memory leaks
     return () => {
+      console.log('[useTimesheetData] Component unmounted');
       isMounted.current = false;
     };
-  }, [fetchTimesheets]); // Only depend on the memoized fetchTimesheets
+  }, []); // Remove fetchTimesheets from dependencies to avoid re-running
 
   // Calculate counts by status
   const countByStatus = {
@@ -117,6 +127,9 @@ export const useTimesheetData = () => {
   };
 
   const refreshTimesheets = useCallback(async () => {
+    // Reset fetch flag to allow a new fetch
+    hasInitialFetch.current = false;
+    
     if (isMounted.current) {
       await fetchTimesheets();
     }

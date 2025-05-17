@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { format } from 'date-fns';
 import { 
   Table, 
@@ -31,15 +31,16 @@ interface EmployeeTimesheetsProps {
 }
 
 const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) => {
-  console.log('EmployeeTimesheets component rendering for employeeId:', employeeId);
+  console.log('EmployeeTimesheets rendering for employeeId:', employeeId);
   
   // Use the useTimesheets hook for data fetching
   const { timesheets, isLoading, error } = useTimesheets(employeeId);
   
-  // Log component data for debugging
-  useEffect(() => {
-    console.log('Timesheets data in EmployeeTimesheets component:', { isLoading, error, count: timesheets?.length, data: timesheets });
-  }, [timesheets, isLoading, error]);
+  console.log('Timesheets data in EmployeeTimesheets component:', { 
+    isLoading, 
+    hasError: !!error, 
+    count: timesheets?.length 
+  });
 
   if (isLoading) {
     return (
