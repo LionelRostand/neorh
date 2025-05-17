@@ -51,7 +51,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
       }
       
       // Execute the query with all constraints
-      const q = query(collectionRef, ...constraints as QueryConstraint[]);
+      const q = query(collectionRef, ...constraints);
       const querySnapshot = await getDocs(q);
       
       const documents = querySnapshot.docs.map(doc => {
