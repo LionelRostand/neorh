@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { format } from 'date-fns';
 import { 
   Table, 
@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import { FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTimesheets } from '@/hooks/useTimesheets';
-import { Timesheet } from '@/lib/constants';
 
 // Helper function to format date
 const formatDate = (date: string): string => {
@@ -30,8 +29,12 @@ interface EmployeeTimesheetsProps {
 }
 
 const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) => {
+  console.log('EmployeeTimesheets component rendering for employeeId:', employeeId);
+  
   // Use the useTimesheets hook for data fetching
   const { timesheets, isLoading, error } = useTimesheets(employeeId);
+  
+  console.log('Timesheets data:', { isLoading, error, count: timesheets?.length, data: timesheets });
 
   if (isLoading) {
     return (
