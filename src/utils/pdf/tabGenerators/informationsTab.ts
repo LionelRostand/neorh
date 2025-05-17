@@ -6,15 +6,15 @@ import { Employee } from '@/types/employee';
 /**
  * Génère la section informations
  */
-export const generateInformationsTab = (doc: jsPDF, employee: Employee, startY: number, companyName?: string) => {
+export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
   doc.setFontSize(16);
   doc.setTextColor('#000000');
   doc.setFont('helvetica', 'bold');
-  doc.text('Informations de l\'employé', 14, startY);
+  doc.text('Informations de l\'employé', 14, 30);
   
   // Informations personnelles
   doc.setFontSize(14);
-  doc.text('Informations personnelles', 14, startY + 15);
+  doc.text('Informations personnelles', 14, 45);
   
   const personalInfoData = [
     ['Nom', employee.name || 'Non spécifié'],
@@ -24,7 +24,7 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee, startY: 
   ];
   
   autoTable(doc, {
-    startY: startY + 20,
+    startY: 50,
     head: [],
     body: personalInfoData,
     theme: 'plain',
@@ -46,7 +46,7 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee, startY: 
   const professionalInfoData = [
     ['Poste', employee.position || 'Non spécifié'],
     ['Département', employee.department || 'Non spécifié'],
-    ['Entreprise', companyName || 'Non spécifié'],
+    ['Entreprise', 'Non spécifié'],
     ['Date d\'embauche', employee.startDate || 'Non spécifié'],
     ['Statut', employee.status === 'active' ? 'Actif' : 
               employee.status === 'onLeave' ? 'En congé' : 

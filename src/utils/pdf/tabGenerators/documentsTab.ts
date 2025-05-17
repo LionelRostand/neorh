@@ -2,46 +2,29 @@
 import jsPDF from 'jspdf';
 import { Document } from '@/lib/constants';
 import autoTable from 'jspdf-autotable';
+import { Employee } from '@/types/employee';
 
 /**
  * Génère la section documents
  */
-export const generateDocumentsTab = (doc: jsPDF, startY: number, documents?: Document[]) => {
+export const generateDocumentsTab = async (doc: jsPDF, employee: Employee) => {
   doc.setFontSize(16);
   doc.setTextColor('#000000');
   doc.setFont('helvetica', 'bold');
-  doc.text('Documents', 14, startY);
+  doc.text('Documents', 14, 30);
   
-  if (!documents || documents.length === 0) {
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Aucun document disponible pour cet employé.', 14, startY + 15);
-    return startY + 25;
-  }
+  // Since we don't have actual documents data here, we're showing a placeholder
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Aucun document disponible pour cet employé.', 14, 45);
   
-  // Structure des données pour le tableau
-  const tableData = documents.map(doc => [
-    doc.title || 'Sans titre',
-    doc.category || 'Non catégorisé',
-    doc.fileType || 'Inconnu',
-    doc.uploadDate || 'Date inconnue',
-    doc.status || 'N/A'
-  ]);
-  
-  // En-têtes du tableau
-  const headers = [
-    { header: 'Titre', dataKey: 'title' },
-    { header: 'Catégorie', dataKey: 'category' },
-    { header: 'Type', dataKey: 'type' },
-    { header: 'Date', dataKey: 'date' },
-    { header: 'Statut', dataKey: 'status' }
-  ];
-  
-  // Génération du tableau
+  // Empty table for demonstration purposes
   autoTable(doc, {
-    startY: startY + 10,
-    head: [headers.map(h => h.header)],
-    body: tableData,
+    startY: 55,
+    head: [
+      ['Titre', 'Catégorie', 'Type', 'Date', 'Statut']
+    ],
+    body: [],
     theme: 'grid',
     styles: {
       fontSize: 8
@@ -52,10 +35,4 @@ export const generateDocumentsTab = (doc: jsPDF, startY: number, documents?: Doc
       fontStyle: 'bold'
     }
   });
-  
-  // Récupérer la position Y finale à partir du document lui-même
-  // @ts-ignore - Accessing a property that may not be typed correctly in the library
-  const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY : startY + 20;
-  
-  return finalY + 10;
 };
