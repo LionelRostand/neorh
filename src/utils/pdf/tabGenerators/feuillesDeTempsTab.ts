@@ -2,11 +2,11 @@
 import { Employee } from '@/types/employee';
 import JsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { documentSetup } from '../documentSetup';
+import { setupDocument } from '../documentSetup';
 
 export const generateFeuillesDeTempsTab = (doc: JsPDF, employee: Employee) => {
   // Configuration du document
-  documentSetup(doc, 'Feuilles de temps');
+  setupDocument(doc, 'Feuilles de temps');
   
   // Titre
   doc.setFontSize(20);
@@ -16,7 +16,7 @@ export const generateFeuillesDeTempsTab = (doc: JsPDF, employee: Employee) => {
   // Information sur l'employé
   doc.setFontSize(12);
   doc.setTextColor(108, 117, 125);
-  doc.text(`Employé: ${employee.firstName} ${employee.lastName}`, 15, 40);
+  doc.text(`Employé: ${employee.name}`, 15, 40);
   
   // Message pas de feuilles de temps
   doc.setFontSize(14);

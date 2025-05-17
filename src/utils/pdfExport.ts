@@ -41,7 +41,7 @@ export const generateEmployeePdfWithDocuments = async (employee: Employee, activ
   }
 
   // Sauvegarder le PDF avec le nom de l'employé
-  const fileName = `${employee.firstName}_${employee.lastName}_${activeTab}.pdf`;
+  const fileName = `${employee.name}_${activeTab}.pdf`;
   doc.save(fileName);
 
   return fileName;

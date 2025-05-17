@@ -73,7 +73,7 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
               <TableCell>{timesheet.hours || 0}h</TableCell>
               <TableCell>
                 <Badge 
-                  variant={timesheet.status === 'approved' ? 'success' : 
+                  variant={timesheet.status === 'approved' ? 'default' : 
                           timesheet.status === 'rejected' ? 'destructive' : 
                           'outline'}
                 >
