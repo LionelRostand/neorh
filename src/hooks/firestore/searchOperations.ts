@@ -50,7 +50,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
       const collectionRef = collection(db, collectionPath);
       
       // Start building the query with the where clause
-      // Use equality operator instead of 'in' operator
+      // Modifié: Utiliser l'opérateur d'égalité "==" au lieu de "in"
       const constraints: QueryConstraint[] = [where(field, "==", value)];
       
       // Add ordering if specified - only if explicitly requested
