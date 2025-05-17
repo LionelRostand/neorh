@@ -47,7 +47,10 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
       setIsLoading(true);
       try {
         // Search for timesheets related to this employee
-        const result = await timesheetsCollection.search({ field: 'employeeId', operator: '==', value: employeeId });
+        const result = await timesheetsCollection.search(
+          { field: 'employeeId', operator: '==', value: employeeId },
+          { limit: 100 }
+        );
         console.log(`Fetched ${result.docs.length} timesheets for employee ${employeeId}`);
         setTimesheets(result.docs);
       } catch (err) {

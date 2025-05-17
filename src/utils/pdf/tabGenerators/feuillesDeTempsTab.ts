@@ -29,7 +29,7 @@ export const generateFeuillesDeTempsTab = (doc: JsPDF, employee: Employee, times
   // Information sur l'employé
   doc.setFontSize(12);
   doc.setTextColor(108, 117, 125);
-  doc.text(`Employé: ${employee.firstName} ${employee.lastName}`, 15, 40);
+  doc.text(`Employé: ${employee.name}`, 15, 40);
   
   const headers = [['Période', 'Projet', 'Heures', 'Statut', 'Soumis le']];
   
