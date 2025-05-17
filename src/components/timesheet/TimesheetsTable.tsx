@@ -45,6 +45,19 @@ const TimesheetsTable = ({ timesheets, loading }: TimesheetsTableProps) => {
     );
   }
 
+  // Filter out incomplete timesheets that don't have required fields
+  const validTimesheets = timesheets.filter(timesheet => 
+    timesheet && timesheet.id && (timesheet.status || timesheet.weekStartDate || timesheet.employeeId)
+  );
+
+  if (validTimesheets.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <p>Aucune feuille de temps valide trouvée.</p>
+      </div>
+    );
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -59,9 +72,9 @@ const TimesheetsTable = ({ timesheets, loading }: TimesheetsTableProps) => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {timesheets.map((timesheet) => (
+        {validTimesheets.map((timesheet) => (
           <TableRow key={timesheet.id}>
-            <TableCell>{timesheet.date || (timesheet.weekStartDate ? `${timesheet.weekStartDate} - ${timesheet.weekEndDate}` : 'Non défini')}</TableCell>
+            <TableCell>{timesheet.date || (timesheet.weekStartDate ? `${timesheet.weekStartDate} - ${timesheet.weekEndDate || ''}` : 'Non défini')}</TableCell>
             <TableCell>{timesheet.employeeId || 'Non défini'}</TableCell>
             <TableCell>{timesheet.projectId || '-'}</TableCell>
             <TableCell>{timesheet.taskDescription || '-'}</TableCell>

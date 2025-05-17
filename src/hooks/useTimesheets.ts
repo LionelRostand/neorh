@@ -45,11 +45,18 @@ export const useTimesheets = (employeeId?: string) => {
         }
         
         if (isMounted.current) {
-          if (result.docs && result.docs.length > 0) {
+          if (result && result.docs && result.docs.length > 0) {
             console.log(`Fetched ${result.docs.length} timesheets for ${employeeIdRef.current ? `employee ${employeeIdRef.current}` : 'all employees'}`, result.docs);
-            setTimesheets(result.docs);
+            
+            // Filter out incomplete timesheet objects
+            const validTimesheets = result.docs.filter((doc: any) => {
+              return doc && doc.id && (doc.status || doc.weekStartDate || doc.employeeId);
+            });
+            
+            setTimesheets(validTimesheets);
+            console.log(`After filtering, found ${validTimesheets.length} valid timesheets`);
           } else {
-            console.log('No timesheets found, using mock data');
+            console.log('No timesheets found or response is invalid, using mock data');
             // Si aucune donnée n'est trouvée, fournir des données de test pour la visibilité
             setTimesheets([
               {

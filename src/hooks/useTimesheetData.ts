@@ -26,7 +26,14 @@ export const useTimesheetData = () => {
         if (isMounted.current) {
           if (result.docs && result.docs.length > 0) {
             console.log('Fetched timesheets in useTimesheetData:', result.docs);
-            setTimesheets(result.docs as Timesheet[]);
+            
+            // Filter out incomplete timesheet objects
+            const validTimesheets = result.docs.filter(doc => {
+              // Check if the timesheet has at least some basic required fields
+              return doc && doc.id && (doc.status || doc.weekStartDate || doc.employeeId);
+            });
+            
+            setTimesheets(validTimesheets as Timesheet[]);
           } else {
             console.log('No timesheets found in useTimesheetData, using mock data');
             // If no data is found, fall back to mock data
@@ -111,7 +118,11 @@ export const useTimesheetData = () => {
       try {
         const result = await timesheetCollection.getAll();
         if (result.docs && isMounted.current) {
-          setTimesheets(result.docs as Timesheet[]);
+          // Filter out incomplete timesheets
+          const validTimesheets = result.docs.filter(doc => {
+            return doc && doc.id && (doc.status || doc.weekStartDate || doc.employeeId);
+          });
+          setTimesheets(validTimesheets as Timesheet[]);
         }
       } catch (error) {
         console.error("Erreur lors du rafraîchissement des feuilles de temps:", error);

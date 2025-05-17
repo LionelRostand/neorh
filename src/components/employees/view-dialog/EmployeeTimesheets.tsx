@@ -16,6 +16,8 @@ import { useTimesheets } from '@/hooks/useTimesheets';
 
 // Helper function to format date
 const formatDate = (date: string): string => {
+  if (!date) return 'Date non définie';
+  
   try {
     return format(new Date(date), 'dd/MM/yyyy');
   } catch (e) {
@@ -63,7 +65,12 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
     );
   }
 
-  if (!timesheets || timesheets.length === 0) {
+  // Filter out incomplete timesheet objects
+  const validTimesheets = timesheets?.filter(timesheet => 
+    timesheet && timesheet.id && (timesheet.status || timesheet.weekStartDate || timesheet.employeeId)
+  );
+
+  if (!validTimesheets || validTimesheets.length === 0) {
     return (
       <div className="space-y-6 text-center py-10">
         <div className="flex justify-center">
@@ -91,15 +98,15 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
           </TableRow>
         </TableHeader>
         <TableBody>
-          {timesheets.map((timesheet) => (
+          {validTimesheets.map((timesheet) => (
             <TableRow key={timesheet.id}>
               <TableCell>
                 {timesheet.weekStartDate && timesheet.weekEndDate 
                   ? `${formatDate(timesheet.weekStartDate)} - ${formatDate(timesheet.weekEndDate)}` 
-                  : 'Non défini'}
+                  : timesheet.date ? formatDate(timesheet.date) : 'Non défini'}
               </TableCell>
               <TableCell>{timesheet.projectId || 'Non assigné'}</TableCell>
-              <TableCell>{timesheet.hours || 0}h</TableCell>
+              <TableCell>{timesheet.hours || timesheet.hoursWorked || 0}h</TableCell>
               <TableCell>
                 <Badge 
                   variant={timesheet.status === 'approved' ? 'default' : 
