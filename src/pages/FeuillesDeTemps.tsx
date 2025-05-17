@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Clock, FileText, Plus, Edit, Check, X } from "lucide-react";
-import { useCollection } from "@/hooks/useCollection";
+import { useFirestore } from "@/hooks/useFirestore";
 import { Timesheet } from "@/lib/constants";
 import TimesheetStatusCards from "@/components/timesheet/TimesheetStatusCards";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
@@ -14,17 +14,21 @@ const FeuillesDeTemps = () => {
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Utilisation du hook useCollection pour accéder à la collection des feuilles de temps
-  const timesheetCollection = useCollection<'hr_timesheets'>();
+  // Using useFirestore to directly access the hr_timesheet collection
+  const timesheetCollection = useFirestore<Timesheet>('hr_timesheet');
 
   useEffect(() => {
     const fetchTimesheets = async () => {
+      setLoading(true);
       try {
+        // Get all timesheets from the hr_timesheet collection
         const result = await timesheetCollection.getAll();
-        const data = result.docs || []; // Extract docs array from QueryResult with fallback
-        
-        if (data.length === 0) {
-          // Si aucune feuille de temps n'existe encore, utilisons des données fictives
+        if (result.docs && result.docs.length > 0) {
+          console.log('Fetched timesheets:', result.docs);
+          setTimesheets(result.docs as Timesheet[]);
+        } else {
+          console.log('No timesheets found, using mock data');
+          // If no data is found, fall back to mock data
           setTimesheets([
             {
               id: "1",
@@ -66,8 +70,6 @@ const FeuillesDeTemps = () => {
               status: "draft"
             }
           ]);
-        } else {
-          setTimesheets(data as Timesheet[]);
         }
       } catch (error) {
         console.error("Erreur lors du chargement des feuilles de temps:", error);
@@ -81,7 +83,6 @@ const FeuillesDeTemps = () => {
   }, []);
 
   const handleAddTimesheet = () => {
-    // Cette fonction sera implémentée plus tard
     showSuccessToast("Cette fonctionnalité sera bientôt disponible");
   };
 

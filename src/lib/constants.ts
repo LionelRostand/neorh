@@ -1,9 +1,10 @@
+
 // Define the mapping between routes and Firestore collections
 export const ROUTE_TO_COLLECTION_MAP = {
   '/employes': 'hr_employees',
   '/badges': 'hr_badges',
   '/hierarchie': 'hr_hierarchy',
-  '/feuilles-de-temps': 'hr_timesheets',
+  '/feuilles-de-temps': 'hr_timesheet',
   '/presences': 'hr_presence',
   '/conges': 'hr_leaves',
   '/contrats': 'hr_contracts',
@@ -16,7 +17,7 @@ export interface CollectionTypes {
   hr_employees: any;
   hr_badges: any;
   hr_hierarchy: any;
-  hr_timesheets: any;
+  hr_timesheet: any;
   hr_presence: any;
   hr_leaves: any;
   hr_contracts: any;

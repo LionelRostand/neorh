@@ -1,10 +1,23 @@
 
 import { Employee } from '@/types/employee';
+import { Timesheet } from '@/lib/constants';
 import JsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { setupDocument } from '../documentSetup';
+import { format } from 'date-fns';
 
-export const generateFeuillesDeTempsTab = (doc: JsPDF, employee: Employee) => {
+// Helper function to format dates
+const formatDate = (dateStr?: string) => {
+  if (!dateStr) return 'Non défini';
+  try {
+    return format(new Date(dateStr), 'dd/MM/yyyy');
+  } catch (e) {
+    console.error('Error formatting date:', e);
+    return 'Date invalide';
+  }
+};
+
+export const generateFeuillesDeTempsTab = (doc: JsPDF, employee: Employee, timesheets?: Timesheet[]) => {
   // Configuration du document
   setupDocument(doc, 'Feuilles de temps');
   
@@ -16,42 +29,43 @@ export const generateFeuillesDeTempsTab = (doc: JsPDF, employee: Employee) => {
   // Information sur l'employé
   doc.setFontSize(12);
   doc.setTextColor(108, 117, 125);
-  doc.text(`Employé: ${employee.name}`, 15, 40);
+  doc.text(`Employé: ${employee.firstName} ${employee.lastName}`, 15, 40);
   
-  // Message pas de feuilles de temps
-  doc.setFontSize(14);
-  doc.setTextColor(108, 117, 125);
-  doc.text('Aucune feuille de temps n\'est disponible pour cet employé.', 15, 60);
-  
-  // Dans une version plus complète, on pourrait récupérer les vraies données
-  // et les afficher dans un tableau avec autoTable
-  // Exemple:
-  /*
   const headers = [['Période', 'Projet', 'Heures', 'Statut', 'Soumis le']];
   
-  const data = timesheets.map(ts => [
-    `${formatDate(ts.startDate)} - ${formatDate(ts.endDate)}`,
-    ts.project || 'Non assigné',
-    `${ts.hours}h`,
-    ts.status,
-    ts.submittedAt ? formatDate(ts.submittedAt) : 'Non soumis'
-  ]);
-  
-  autoTable(doc, {
-    startY: 65,
-    head: headers,
-    body: data,
-    theme: 'grid',
-    headStyles: { fillColor: [66, 139, 202], textColor: 255 }
-  });
-  */
-  
-  // Pour le moment, seulement un espace vide avec un message
-  autoTable(doc, {
-    startY: 65,
-    head: [['Période', 'Projet', 'Heures', 'Statut', 'Soumis le']],
-    body: [],
-    theme: 'grid',
-    headStyles: { fillColor: [66, 139, 202], textColor: 255 }
-  });
+  if (!timesheets || timesheets.length === 0) {
+    // Message pas de feuilles de temps
+    doc.setFontSize(14);
+    doc.setTextColor(108, 117, 125);
+    doc.text('Aucune feuille de temps n\'est disponible pour cet employé.', 15, 60);
+    
+    // Table vide avec en-têtes
+    autoTable(doc, {
+      startY: 65,
+      head: headers,
+      body: [],
+      theme: 'grid',
+      headStyles: { fillColor: [66, 139, 202], textColor: 255 }
+    });
+  } else {
+    // Générer les données de la table
+    const data = timesheets.map(ts => [
+      `${formatDate(ts.weekStartDate)} - ${formatDate(ts.weekEndDate)}`,
+      ts.projectId || 'Non assigné',
+      `${ts.hours || 0}h`,
+      ts.status === 'approved' ? 'Approuvé' : 
+        ts.status === 'submitted' ? 'En attente' : 
+        ts.status === 'rejected' ? 'Rejeté' : 'Brouillon',
+      ts.submittedAt ? formatDate(ts.submittedAt) : 'Non soumis'
+    ]);
+    
+    // Générer la table avec autoTable
+    autoTable(doc, {
+      startY: 55,
+      head: headers,
+      body: data,
+      theme: 'grid',
+      headStyles: { fillColor: [66, 139, 202], textColor: 255 }
+    });
+  }
 };

@@ -1,6 +1,5 @@
 
-import React from 'react';
-import { useTimesheets } from '@/hooks/useTimesheets';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { 
   Table, 
@@ -13,10 +12,17 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useFirestore } from '@/hooks/useFirestore';
+import { Timesheet } from '@/lib/constants';
 
 // Helper function to format date
-const formatDate = (date: Date): string => {
-  return format(date, 'dd/MM/yyyy');
+const formatDate = (date: string): string => {
+  try {
+    return format(new Date(date), 'dd/MM/yyyy');
+  } catch (e) {
+    console.error('Error formatting date:', e);
+    return 'Date invalide';
+  }
 };
 
 interface EmployeeTimesheetsProps {
@@ -24,8 +30,37 @@ interface EmployeeTimesheetsProps {
 }
 
 const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) => {
-  const { timesheets, isLoading } = useTimesheets(employeeId);
+  const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  const timesheetsCollection = useFirestore<Timesheet>('hr_timesheet');
+  
+  useEffect(() => {
+    const fetchTimesheets = async () => {
+      if (!employeeId) {
+        setTimesheets([]);
+        setIsLoading(false);
+        return;
+      }
 
+      setIsLoading(true);
+      try {
+        // Search for timesheets related to this employee
+        const result = await timesheetsCollection.search({ field: 'employeeId', operator: '==', value: employeeId });
+        console.log(`Fetched ${result.docs.length} timesheets for employee ${employeeId}`);
+        setTimesheets(result.docs);
+      } catch (err) {
+        console.error('Erreur lors de la récupération des feuilles de temps:', err);
+        setError(err instanceof Error ? err : new Error('Erreur inconnue'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchTimesheets();
+  }, [employeeId, timesheetsCollection]);
+  
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -34,6 +69,17 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
           {[...Array(3)].map((_, i) => (
             <Skeleton key={i} className="h-12 w-full" />
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold">Feuilles de temps</h3>
+        <div className="p-4 text-red-500 border border-red-300 rounded-md">
+          Erreur: {error.message}
         </div>
       </div>
     );
@@ -70,11 +116,11 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
           {timesheets.map((timesheet) => (
             <TableRow key={timesheet.id}>
               <TableCell>
-                {timesheet.startDate && timesheet.endDate 
-                  ? `${formatDate(new Date(timesheet.startDate))} - ${formatDate(new Date(timesheet.endDate))}` 
+                {timesheet.weekStartDate && timesheet.weekEndDate 
+                  ? `${formatDate(timesheet.weekStartDate)} - ${formatDate(timesheet.weekEndDate)}` 
                   : 'Non défini'}
               </TableCell>
-              <TableCell>{timesheet.project || 'Non assigné'}</TableCell>
+              <TableCell>{timesheet.projectId || 'Non assigné'}</TableCell>
               <TableCell>{timesheet.hours || 0}h</TableCell>
               <TableCell>
                 <Badge 
@@ -82,13 +128,13 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
                           timesheet.status === 'rejected' ? 'destructive' : 
                           'outline'}
                 >
-                  {timesheet.status === 'pending' ? 'En attente' : 
+                  {timesheet.status === 'submitted' ? 'En attente' : 
                    timesheet.status === 'approved' ? 'Approuvé' : 
                    timesheet.status === 'rejected' ? 'Rejeté' : 'Brouillon'}
                 </Badge>
               </TableCell>
               <TableCell>
-                {timesheet.submittedAt ? formatDate(new Date(timesheet.submittedAt)) : 'Non soumis'}
+                {timesheet.submittedAt ? formatDate(timesheet.submittedAt) : 'Non soumis'}
               </TableCell>
             </TableRow>
           ))}
