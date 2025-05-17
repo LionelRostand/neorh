@@ -14,7 +14,7 @@ import { FileText, PlusCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTimesheets } from '@/hooks/useTimesheets';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 // Helper function to format date
 const formatDate = (date: string): string => {
@@ -34,7 +34,7 @@ interface EmployeeTimesheetsProps {
 
 const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) => {
   console.log('EmployeeTimesheets rendering for employeeId:', employeeId);
-  const router = useRouter();
+  const navigate = useNavigate();
   
   // Use the useTimesheets hook for data fetching
   const { timesheets, isLoading, error } = useTimesheets(employeeId);
@@ -46,7 +46,7 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
   });
 
   const handleManageWeeklyProjects = (timesheetId: string) => {
-    router.push(`/feuilles-de-temps/weekly-projects/${timesheetId}`);
+    navigate(`/feuilles-de-temps/weekly-projects/${timesheetId}`);
   };
 
   if (isLoading) {

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Check, X, PlusCircle } from "lucide-react";
 import { Timesheet } from "@/lib/constants";
-import { useRouter } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 interface TimesheetsTableProps {
   timesheets: Timesheet[];
@@ -13,7 +13,7 @@ interface TimesheetsTableProps {
 }
 
 const TimesheetsTable = ({ timesheets, loading }: TimesheetsTableProps) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   
   console.log('TimesheetsTable rendering with:', {
     timesheetsCount: timesheets?.length || 0,
@@ -36,11 +36,11 @@ const TimesheetsTable = ({ timesheets, loading }: TimesheetsTableProps) => {
   };
 
   const handleEditTimesheet = (timesheetId: string) => {
-    router.push(`/feuilles-de-temps/edit/${timesheetId}`);
+    navigate(`/feuilles-de-temps/edit/${timesheetId}`);
   };
 
   const handleManageWeeklyProjects = (timesheetId: string) => {
-    router.push(`/feuilles-de-temps/weekly-projects/${timesheetId}`);
+    navigate(`/feuilles-de-temps/weekly-projects/${timesheetId}`);
   };
 
   if (loading) {

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Index from "./pages/Index";
@@ -31,7 +31,13 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Layout>
+              <Outlet />
+            </Layout>
+          </ProtectedRoute>
+        }>
           <Route index element={<Index />} />
           <Route path="employes" element={<Employes />} />
           <Route path="badges" element={<Badges />} />
