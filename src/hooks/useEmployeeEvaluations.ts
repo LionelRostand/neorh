@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useFirestore } from './firestore';
 import { SearchOptions } from './firestore/searchOperations';
@@ -58,10 +59,8 @@ export const useEmployeeEvaluations = (employeeId: string) => {
       try {
         console.log(`Fetching evaluations for employee ID: ${employeeId}`);
         
-        // Éviter les problèmes d'index en ne spécifiant pas le tri
-        const searchOptions: SearchOptions = {};
-        
-        const result = await search('employeeId', employeeId, searchOptions);
+        // Modification ici: utiliser la fonction search avec 2 paramètres au lieu de 3
+        const result = await search({ employeeId });
         
         // Vérifier que le composant est toujours monté
         if (!isMounted.current) return;

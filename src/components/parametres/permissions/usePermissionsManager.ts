@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useFirestore } from "@/hooks/firestore";
 import { Employee } from "@/types/firebase";
@@ -52,7 +53,8 @@ export const usePermissionsManager = () => {
           orderDirection: "asc"
         };
         
-        const permissionsResult = await search("employeeId", selectedEmployeeId, searchOptions);
+        // Modification ici: utiliser la fonction search avec le bon format de paramètres
+        const permissionsResult = await search({ employeeId: selectedEmployeeId }, searchOptions);
         
         if (permissionsResult.docs.length > 0) {
           setPermissions(permissionsResult.docs);

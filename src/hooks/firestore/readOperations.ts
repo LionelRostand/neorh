@@ -14,12 +14,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "@/components/ui/use-toast";
-
-// Interface for search options
-export interface SearchOptions {
-  orderByField?: string;
-  orderDirection?: 'asc' | 'desc';
-}
+import { SearchOptions } from "./searchOperations";
 
 // Read operations for Firestore
 export const createReadOperations = <T extends Record<string, any>>(
@@ -118,20 +113,43 @@ export const createReadOperations = <T extends Record<string, any>>(
   };
 
   // Rechercher des documents par une valeur de champ
-  // Note: ajout d'une fonction search pour remplacer la fonctionnalité qui utilisait l'opérateur 'in'
-  const search = async (field: string, value: any, options: SearchOptions = {}) => {
+  // Mise à jour pour accepter deux formats: ancien (field, value) et nouveau (criteria, options)
+  const search = async (fieldOrCriteria: string | Record<string, any>, valueOrOptions?: any | SearchOptions, options: SearchOptions = {}) => {
     setIsLoading(true);
     setError(null);
+    
     try {
-      console.log(`Searching documents in ${collectionName} where ${field} = ${value}`);
+      // Déterminer si nous utilisons le nouveau format (objet criteria) ou l'ancien format (field, value)
+      let criteria: Record<string, any> = {};
+      let searchOptions: SearchOptions = {};
+      
+      if (typeof fieldOrCriteria === 'string') {
+        // Ancien format: field, value
+        const field = fieldOrCriteria;
+        const value = valueOrOptions;
+        criteria[field] = value;
+        searchOptions = options;
+        console.log(`Searching documents in ${collectionName} where ${field} = ${value}`);
+      } else {
+        // Nouveau format: criteria object, options
+        criteria = fieldOrCriteria;
+        searchOptions = valueOrOptions || {};
+        console.log(`Searching documents in ${collectionName} with criteria:`, criteria);
+      }
       
       const collRef = collection(db, collectionName);
-      // Utiliser l'opérateur d'égalité '==' au lieu de 'in'
-      let q = query(collRef, where(field, "==", value));
+      // Construire la requête en fonction des critères
+      let q = collRef;
+      
+      Object.entries(criteria).forEach(([field, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          q = query(q, where(field, "==", value));
+        }
+      });
       
       // Ajout du tri si spécifié dans les options
-      if (options.orderByField) {
-        q = query(q, orderBy(options.orderByField, options.orderDirection || 'asc'));
+      if (searchOptions.orderByField) {
+        q = query(q, orderBy(searchOptions.orderByField, searchOptions.orderDirection || 'asc'));
       }
       
       const querySnapshot = await getDocs(q);
@@ -145,11 +163,13 @@ export const createReadOperations = <T extends Record<string, any>>(
       const error = err instanceof Error ? err : new Error("Une erreur est survenue lors de la recherche");
       console.error(`Error searching documents in ${collectionName}:`, error);
       setError(error);
+      
       toast({
         title: "Erreur de recherche",
         description: `Impossible de rechercher les documents: ${error.message}`,
         variant: "destructive"
       });
+      
       return { docs: [] };
     } finally {
       setIsLoading(false);

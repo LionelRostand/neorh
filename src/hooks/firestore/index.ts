@@ -2,7 +2,10 @@
 import { useBaseFirestore } from "./baseFirestore";
 import { createReadOperations } from "./readOperations";
 import { createWriteOperations } from "./writeOperations";
-import { createSearchOperations } from "./searchOperations";
+import { createSearchOperations, SearchOptions } from "./searchOperations";
+
+// Export the SearchOptions interface
+export { SearchOptions };
 
 // Main hook that combines all firestore operations
 export const useFirestore = <T extends Record<string, any>>(collectionName: string) => {
