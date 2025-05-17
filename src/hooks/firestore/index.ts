@@ -64,5 +64,5 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
 // Export the main hook as default
 export default useFirestore;
 
-// Re-export types
+// Re-export types using 'export type'
 export type { SearchCriteria, SearchOptions } from './searchOperations';

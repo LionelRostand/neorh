@@ -8,7 +8,8 @@ import {
   Query,
   WhereFilterOp,
   collection,
-  CollectionReference
+  CollectionReference,
+  orderBy
 } from "firebase/firestore";
 
 // Define type for search options
@@ -16,6 +17,8 @@ export interface SearchOptions {
   orderBy?: string;
   limit?: number;
   direction?: 'asc' | 'desc';
+  sortField?: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
 export interface SearchCriteria {
@@ -60,6 +63,13 @@ export const createSearchOperations = <T extends Record<string, any>>(
       
       // Create query constraints
       const constraints: QueryConstraint[] = [where(field, operator, searchValue)];
+      
+      // Add orderBy constraint if sortField or orderBy is specified
+      if (searchOptions.sortField) {
+        constraints.push(orderBy(searchOptions.sortField, searchOptions.sortDirection || 'asc'));
+      } else if (searchOptions.orderBy) {
+        constraints.push(orderBy(searchOptions.orderBy, searchOptions.direction || 'asc'));
+      }
       
       // Apply the query
       const q: Query<T> = query(getCollection(), ...constraints);
