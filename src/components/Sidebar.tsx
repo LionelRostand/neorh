@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, Users, Key, Network, Clock, Calendar, FileText, Briefcase,
   FolderOpen, Building2, LineChart, Award, GraduationCap, Wallet, 
-  Users as UsersGroup, BarChart3, Settings
+  Users as UsersGroup, BarChart3, Settings, Projector
 } from "lucide-react";
 
 type NavItem = {
@@ -75,6 +75,12 @@ const navItems: NavItem[] = [
     href: "/departements",
     icon: <Building2 className="h-5 w-5" />,
     description: "Administration des unités organisationnelles avec définition des responsables, budgets alloués et objectifs. Permet l'affectation d'employés et le suivi des performances par département."
+  },
+  {
+    title: "Projets",
+    href: "/projets",
+    icon: <Projector className="h-5 w-5" />,
+    description: "Gestion des projets de l'entreprise avec suivi des ressources allouées, des délais et des budgets. Permet d'assigner des employés aux projets et de suivre l'avancement."
   },
   {
     title: "Évaluations",

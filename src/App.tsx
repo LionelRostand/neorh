@@ -20,6 +20,7 @@ import Entreprises from "./pages/Entreprises";
 import Departements from "./pages/Departements";
 import Salaires from "./pages/Salaires";
 import Recrutement from "./pages/Recrutement";
+import Projets from "./pages/Projets";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import WeeklyProjectsTimesheet from './pages/WeeklyProjectsTimesheet';
@@ -44,6 +45,7 @@ function App() {
           <Route path="hierarchie" element={<Hierarchie />} />
           <Route path="feuilles-de-temps" element={<FeuillesDeTemps />} />
           <Route path="feuilles-de-temps/weekly-projects/:id" element={<WeeklyProjectsTimesheet />} />
+          <Route path="projets" element={<Projets />} />
           <Route path="presences" element={<Presences />} />
           <Route path="conges" element={<Conges />} />
           <Route path="rapports" element={<Rapports />} />
