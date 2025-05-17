@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Navigate } from "react-router-dom";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Mail, Lock, ArrowRight } from "lucide-react";
 import { showErrorToast } from "@/utils/toastUtils";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
@@ -51,91 +51,102 @@ const Login = () => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#e5f9e0] py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md shadow-lg border-0">
-        <CardHeader className="space-y-1 bg-[#40c057] text-white rounded-t-lg">
-          <CardTitle className="text-2xl font-bold text-center">
-            <span className="text-white">NEORH</span>
-          </CardTitle>
-          <CardDescription className="text-center text-neorh-white/80">
-            Connexion à la plateforme de gestion des ressources humaines
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          {...field}
-                          type="email"
-                          className="pl-10"
-                          placeholder="Entrez votre email"
-                          autoComplete="email"
-                        />
+    <div className="flex min-h-screen items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center space-x-2">
+            <div className="text-[#2ECC71] text-4xl">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 5.83L31.67 12.5V25.83L20 32.5L8.33 25.83V12.5L20 5.83Z" stroke="#2ECC71" strokeWidth="3" fill="#2ECC71" />
+              </svg>
+            </div>
+            <span className="text-2xl font-bold text-gray-800">NEORH</span>
+          </div>
+        </div>
+        
+        <Card className="shadow-md border border-gray-200">
+          <CardHeader className="pb-2 text-center">
+            <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
+            <CardDescription>
+              Entrez vos identifiants pour accéder à votre compte
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input
+                            {...field}
+                            type="email"
+                            className="pl-10"
+                            placeholder="Votre email"
+                            autoComplete="email"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex justify-between">
+                        <FormLabel>Mot de passe</FormLabel>
+                        <a href="#" className="text-sm text-blue-600 hover:underline">
+                          Mot de passe oublié?
+                        </a>
                       </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mot de passe</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          {...field}
-                          type={showPassword ? "text" : "password"}
-                          className="pl-10"
-                          placeholder="Entrez votre mot de passe"
-                          autoComplete="current-password"
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-0 top-0 h-full px-3"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4 text-gray-400" />
-                          ) : (
-                            <Eye className="h-4 w-4 text-gray-400" />
-                          )}
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              {error && <p className="text-sm font-medium text-destructive">{error}</p>}
-              
-              <Button
-                type="submit"
-                className="w-full bg-[#40c057] hover:bg-[#2b9348] text-white"
-                disabled={isLoading}
-              >
-                {isLoading ? "Connexion en cours..." : "Se connecter"}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                      <FormControl>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input
+                            {...field}
+                            type={showPassword ? "text" : "password"}
+                            className="pl-10"
+                            placeholder="Votre mot de passe"
+                            autoComplete="current-password"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+                
+                <Button
+                  type="submit"
+                  className="w-full bg-[#2ECC71] hover:bg-[#27AE60] text-white font-medium flex items-center justify-center py-2"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    "Connexion en cours..."
+                  ) : (
+                    <>
+                      Se connecter
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
