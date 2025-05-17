@@ -38,7 +38,7 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
   
   // Log component data for debugging
   useEffect(() => {
-    console.log('Timesheets data:', { isLoading, error, count: timesheets?.length, data: timesheets });
+    console.log('Timesheets data in EmployeeTimesheets component:', { isLoading, error, count: timesheets?.length, data: timesheets });
   }, [timesheets, isLoading, error]);
 
   if (isLoading) {
