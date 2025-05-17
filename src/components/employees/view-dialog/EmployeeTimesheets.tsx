@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { format } from 'date-fns';
 import { 
   Table, 
@@ -28,7 +28,7 @@ interface EmployeeTimesheetsProps {
   employeeId: string;
 }
 
-const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) => {
+const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = memo(({ employeeId }) => {
   console.log('EmployeeTimesheets component rendering for employeeId:', employeeId);
   
   // Use the useTimesheets hook for data fetching
@@ -117,6 +117,8 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
       </Table>
     </div>
   );
-};
+});
+
+EmployeeTimesheets.displayName = 'EmployeeTimesheets';
 
 export default EmployeeTimesheets;

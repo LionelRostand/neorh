@@ -1,15 +1,17 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useFirestore } from './useFirestore';
 import { Timesheet } from '@/lib/constants';
 
 export const useTimesheets = (employeeId?: string) => {
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const isMounted = useRef(true);
   
   // Store the employeeId in a ref to prevent unnecessary effect triggers
   const employeeIdRef = useRef(employeeId);
+  const fetchAttempted = useRef(false);
   
   const timesheetsCollection = useFirestore<Timesheet>('hr_timesheet');
   
@@ -17,12 +19,15 @@ export const useTimesheets = (employeeId?: string) => {
     // Update the ref when employeeId changes
     employeeIdRef.current = employeeId;
     
-    // Mark component as mounted
+    // Mark component as mounted and reset fetch flag
     isMounted.current = true;
+    fetchAttempted.current = false;
     
     const fetchTimesheets = async () => {
-      if (!isMounted.current) return;
+      // Skip if already fetched or unmounted
+      if (!isMounted.current || fetchAttempted.current) return;
       
+      fetchAttempted.current = true;
       setIsLoading(true);
       
       try {
