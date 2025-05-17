@@ -7,8 +7,7 @@ import { File, Plus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import DocumentList from '@/components/documents/DocumentList';
 import { Skeleton } from '@/components/ui/skeleton';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { useFirestore } from '@/hooks/firestore';
 import { toast } from '@/components/ui/use-toast';
 
 interface EmployeeDocumentsProps {
@@ -18,6 +17,10 @@ interface EmployeeDocumentsProps {
 const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  // Utiliser le hook useFirestore pour accéder à la fonction de recherche
+  const documentsCollection = useFirestore<Document>('hr_documents');
 
   useEffect(() => {
     const fetchEmployeeDocuments = async () => {
@@ -27,23 +30,21 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
       try {
         console.log(`Fetching documents for employee: ${employee.id}`);
         
-        // Accès direct à Firestore pour éviter les problèmes d'indexation
-        const documentsRef = collection(db, 'hr_documents');
-        const q = query(documentsRef, where('employeeId', '==', employee.id));
-        const querySnapshot = await getDocs(q);
+        // Utiliser la fonction search pour éviter les problèmes d'opérateur 'in'
+        const result = await documentsCollection.search('employeeId', employee.id);
         
-        const fetchedDocs: Document[] = [];
-        querySnapshot.forEach((doc) => {
-          fetchedDocs.push({
-            id: doc.id,
-            ...doc.data() as Omit<Document, 'id'>
-          });
-        });
-        
-        console.log(`Found ${fetchedDocs.length} documents for employee ${employee.id}`);
-        setDocuments(fetchedDocs);
+        if (result && result.docs) {
+          console.log(`Found ${result.docs.length} documents for employee ${employee.id}`);
+          setDocuments(result.docs);
+        } else {
+          console.log('No documents found or invalid result');
+          setDocuments([]);
+        }
       } catch (error) {
         console.error('Error fetching employee documents:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+        setError(error instanceof Error ? error : new Error(errorMessage));
+        
         toast({
           title: "Erreur",
           description: "Impossible de récupérer les documents de l'employé",
@@ -55,7 +56,7 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
     };
 
     fetchEmployeeDocuments();
-  }, [employee.id]);
+  }, [employee.id, documentsCollection]);
 
   if (loading) {
     return (

@@ -49,8 +49,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
       // Create a collection reference using the path string
       const collectionRef = collection(db, collectionPath);
       
-      // Determine the appropriate operator
-      // IMPORTANT: We use "==" instead of "in" to avoid the error
+      // Always use the equality operator - NEVER use 'in' operator
       const operator: WhereFilterOp = "==";
       
       // Start building the query with the where clause
