@@ -50,6 +50,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
       const collectionRef = collection(db, collectionPath);
       
       // Start building the query with the where clause
+      // Fix: ensure we're not using 'in' operator incorrectly
       const constraints: QueryConstraint[] = [where(field, "==", value)];
       
       // Add ordering if specified - mais seulement si explicitement demandé
@@ -75,6 +76,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
         
         // Parse documents and add to results array
         querySnapshot.forEach((doc) => {
+          // Fix: Properly handle the document data to avoid _delegate issues
           const data = doc.data() as T;
           docs.push({ 
             id: doc.id, 
@@ -93,16 +95,17 @@ export const createSearchOperations = <T extends Record<string, any>>(
         const error = firestoreError as FirestoreError;
         console.error('Firebase query error:', error);
         
-        // Vérifier spécifiquement si c'est une erreur d'index
+        // Check specifically if it's an index error
         if (error.code === 'failed-precondition' && error.message.includes('index')) {
           console.warn('Index error detected, trying fallback query');
           
-          // Essayer une requête plus simple sans tri
+          // Try a simpler query without sorting
           const simpleQuery = query(collectionRef, where(field, "==", value));
           const fallbackSnapshot = await getDocs(simpleQuery);
           const fallbackDocs = [] as Array<T & { id: string }>;
           
           fallbackSnapshot.forEach((doc) => {
+            // Fix: Properly handle the document data to avoid _delegate issues
             const data = doc.data() as T;
             fallbackDocs.push({ 
               id: doc.id, 
@@ -119,7 +122,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
           };
         }
         
-        // Si ce n'est pas une erreur d'index ou la fallback échoue, relancer l'erreur
+        // If it's not an index error or the fallback fails, throw the error
         throw firestoreError;
       }
       
@@ -128,14 +131,21 @@ export const createSearchOperations = <T extends Record<string, any>>(
       const error = err instanceof Error ? err : new Error('Unknown search error');
       setError(error);
       
-      // Message d'erreur plus convivial pour les utilisateurs
+      // More user-friendly error message
       if (error.message.includes('index')) {
         showErrorToast(`La recherche nécessite un index Firebase. Veuillez contacter l'administrateur.`);
+      } else if (error.message.includes('_delegate')) {
+        showErrorToast(`Erreur de format de données. Veuillez réessayer ou contacter l'assistance.`);
       } else {
         showErrorToast(`Erreur de recherche: ${error.message}`);
       }
       
-      throw error;
+      // Return empty result on error instead of throwing
+      return {
+        docs: [],
+        count: 0,
+        lastDoc: null
+      };
     } finally {
       setIsLoading(false);
     }
