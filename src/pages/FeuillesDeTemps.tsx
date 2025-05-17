@@ -9,6 +9,8 @@ const FeuillesDeTemps = () => {
   const [isNewTimesheetOpen, setIsNewTimesheetOpen] = useState(false);
   const { timesheets, loading, countByStatus, refreshTimesheets } = useTimesheetData();
 
+  console.log('FeuillesDeTemps page rendering with:', {timesheets, loading, countByStatus});
+
   const handleOpenNewTimesheet = () => {
     setIsNewTimesheetOpen(true);
   };

@@ -21,6 +21,9 @@ const TimesheetsContent = ({
   loading, 
   countByStatus 
 }: TimesheetsContentProps) => {
+  // Afficher un message de débogage pour voir les données reçues
+  console.log('TimesheetsContent rendering with:', {timesheets, loading, countByStatus});
+  
   return (
     <>
       <TimesheetStatusCards 

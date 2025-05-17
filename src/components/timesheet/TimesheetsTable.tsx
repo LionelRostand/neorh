@@ -12,6 +12,8 @@ interface TimesheetsTableProps {
 }
 
 const TimesheetsTable = ({ timesheets, loading }: TimesheetsTableProps) => {
+  console.log('TimesheetsTable rendering with:', {timesheets, loading});
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
@@ -35,6 +37,14 @@ const TimesheetsTable = ({ timesheets, loading }: TimesheetsTableProps) => {
     );
   }
 
+  if (!timesheets || timesheets.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <p>Aucune feuille de temps trouvée.</p>
+      </div>
+    );
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -51,12 +61,12 @@ const TimesheetsTable = ({ timesheets, loading }: TimesheetsTableProps) => {
       <TableBody>
         {timesheets.map((timesheet) => (
           <TableRow key={timesheet.id}>
-            <TableCell>{timesheet.date}</TableCell>
-            <TableCell>{timesheet.employeeId}</TableCell>
+            <TableCell>{timesheet.date || (timesheet.weekStartDate ? `${timesheet.weekStartDate} - ${timesheet.weekEndDate}` : 'Non défini')}</TableCell>
+            <TableCell>{timesheet.employeeId || 'Non défini'}</TableCell>
             <TableCell>{timesheet.projectId || '-'}</TableCell>
-            <TableCell>{timesheet.taskDescription}</TableCell>
-            <TableCell>{timesheet.hoursWorked}h</TableCell>
-            <TableCell>{getStatusBadge(timesheet.status)}</TableCell>
+            <TableCell>{timesheet.taskDescription || '-'}</TableCell>
+            <TableCell>{timesheet.hoursWorked || timesheet.hours || 0}h</TableCell>
+            <TableCell>{getStatusBadge(timesheet.status || 'draft')}</TableCell>
             <TableCell className="text-right">
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                 <Edit className="h-4 w-4" />

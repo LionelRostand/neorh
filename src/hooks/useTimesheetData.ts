@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useFirestore } from "@/hooks/useFirestore";
 import { Timesheet } from "@/lib/constants";
-import { showErrorToast } from "@/utils/toastUtils";
+import { toast } from "@/components/ui/use-toast";
 
 export const useTimesheetData = () => {
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
@@ -19,14 +19,16 @@ export const useTimesheetData = () => {
     const fetchTimesheets = async () => {
       setLoading(true);
       try {
+        console.log('Fetching all timesheets in useTimesheetData');
         // Get all timesheets from the hr_timesheet collection
         const result = await timesheetCollection.getAll();
+        
         if (isMounted.current) {
           if (result.docs && result.docs.length > 0) {
-            console.log('Fetched timesheets:', result.docs);
+            console.log('Fetched timesheets in useTimesheetData:', result.docs);
             setTimesheets(result.docs as Timesheet[]);
           } else {
-            console.log('No timesheets found, using mock data');
+            console.log('No timesheets found in useTimesheetData, using mock data');
             // If no data is found, fall back to mock data
             setTimesheets([
               {
@@ -74,7 +76,11 @@ export const useTimesheetData = () => {
       } catch (error) {
         console.error("Erreur lors du chargement des feuilles de temps:", error);
         if (isMounted.current) {
-          showErrorToast("Impossible de charger les feuilles de temps");
+          toast({
+            title: "Erreur de chargement",
+            description: "Impossible de charger les feuilles de temps",
+            variant: "destructive"
+          });
         }
       } finally {
         if (isMounted.current) {
@@ -101,9 +107,18 @@ export const useTimesheetData = () => {
 
   const refreshTimesheets = async () => {
     if (isMounted.current) {
-      const result = await timesheetCollection.getAll();
-      if (result.docs && isMounted.current) {
-        setTimesheets(result.docs as Timesheet[]);
+      setLoading(true);
+      try {
+        const result = await timesheetCollection.getAll();
+        if (result.docs && isMounted.current) {
+          setTimesheets(result.docs as Timesheet[]);
+        }
+      } catch (error) {
+        console.error("Erreur lors du rafraîchissement des feuilles de temps:", error);
+      } finally {
+        if (isMounted.current) {
+          setLoading(false);
+        }
       }
     }
   };
