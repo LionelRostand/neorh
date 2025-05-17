@@ -9,7 +9,7 @@ import {
   OrderByDirection,
   QueryConstraint,
   WhereFilterOp,
-  limit
+  limit as firestoreLimit
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "@/components/ui/use-toast";
@@ -37,9 +37,21 @@ export const createSearchOperations = <T extends Record<string, any>>(
     try {
       const collectionRef = getCollection();
       
-      // Utilisation simplifiée sans options de tri ou limite pour éviter 
-      // les problèmes d'index composite
-      const q = query(collectionRef, where(field, "==", value));
+      // Construct query constraints
+      const constraints: QueryConstraint[] = [where(field, "==", value)];
+      
+      // Add sorting if specified
+      if (options?.sortField && options?.sortDirection) {
+        constraints.push(orderBy(options.sortField, options.sortDirection));
+      }
+      
+      // Add limit if specified
+      if (options?.limit && options.limit > 0) {
+        constraints.push(firestoreLimit(options.limit));
+      }
+      
+      // Execute the query with all constraints
+      const q = query(collectionRef, ...constraints);
       const querySnapshot = await getDocs(q);
       
       const documents = querySnapshot.docs.map(doc => {

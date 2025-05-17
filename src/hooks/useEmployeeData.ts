@@ -59,7 +59,7 @@ export const useEmployeeData = () => {
         const data = docSnapshot.data();
         
         // Find department name based on department ID
-        let departmentName = data.department || '';
+        let departmentName = '';
         if (data.department) {
           // First check our cache
           if (deptCache[data.department]) {
@@ -86,8 +86,13 @@ export const useEmployeeData = () => {
                 }
               } catch (err) {
                 console.error("Error fetching department:", err);
+                // If we can't get the department name, use the ID as fallback
+                departmentName = data.department || '';
               }
             }
+          } else {
+            // If no departments are loaded yet, use the ID as a fallback
+            departmentName = data.department || '';
           }
         }
         

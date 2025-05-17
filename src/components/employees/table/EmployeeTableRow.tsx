@@ -56,7 +56,7 @@ const EmployeeTableRow: React.FC<EmployeeTableRowProps> = ({
       <TableCell className="hidden md:table-cell">
         <div className="flex items-center">
           <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
-          {employee.department}
+          {employee.department || 'Non assigné'}
         </div>
       </TableCell>
       <TableCell className="hidden md:table-cell">
