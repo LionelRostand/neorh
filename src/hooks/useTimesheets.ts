@@ -1,6 +1,8 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useFirestore } from './useFirestore';
 import { Timesheet } from '@/lib/constants';
+import { toast } from '@/components/ui/use-toast';
 
 export const useTimesheets = (employeeId?: string) => {
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
@@ -24,27 +26,31 @@ export const useTimesheets = (employeeId?: string) => {
       if (!isMounted.current) return;
       
       setIsLoading(true);
+      console.log(`Fetching timesheets for employeeId: ${employeeIdRef.current}`);
       
       try {
         let result;
         if (!employeeIdRef.current) {
           // If no employeeId is provided, get all timesheets
           result = await timesheetsCollection.getAll();
+          console.log("Fetching all timesheets");
         } else {
           // Otherwise get timesheets for the specific employee
           result = await timesheetsCollection.search({
             field: 'employeeId',
-            value: employeeIdRef.current
+            value: employeeIdRef.current,
+            operator: '=='
           });
+          console.log(`Searching for timesheets with employeeId: ${employeeIdRef.current}`);
         }
         
         if (isMounted.current) {
           if (result.docs && result.docs.length > 0) {
+            console.log(`Fetched ${result.docs.length} timesheets for ${employeeIdRef.current ? `employee ${employeeIdRef.current}` : 'all employees'}`, result.docs);
             setTimesheets(result.docs);
-            console.log(`Fetched ${result.docs.length} timesheets for ${employeeIdRef.current ? `employee ${employeeIdRef.current}` : 'all employees'}`);
           } else {
             console.log('No timesheets found, using mock data');
-            // If no data is found, provide mock data for visibility
+            // Si aucune donnée n'est trouvée, fournir des données de test pour la visibilité
             setTimesheets([
               {
                 id: "mock1",
@@ -73,6 +79,11 @@ export const useTimesheets = (employeeId?: string) => {
         console.error('Error fetching timesheets:', err);
         if (isMounted.current) {
           setError(err instanceof Error ? err : new Error('Unknown error'));
+          toast({
+            title: "Erreur de chargement",
+            description: "Impossible de charger les feuilles de temps",
+            variant: "destructive"
+          });
         }
       } finally {
         if (isMounted.current) {
