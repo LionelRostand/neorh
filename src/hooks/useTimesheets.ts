@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useFirestore } from './firestore';
 import { Timesheet } from '@/lib/constants';
 import { SearchOptions } from './firestore/searchOperations';
@@ -9,11 +9,24 @@ export const useTimesheets = (employeeId: string) => {
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const isMounted = useRef(true);
+  const hasLoadedRef = useRef(false);
+  const previousEmployeeId = useRef(employeeId);
   
   const { search } = useFirestore<Timesheet>('hr_timesheet');
   
   // Fonction de chargement des données, exposée pour permettre le rafraîchissement
-  const fetchTimesheets = useCallback(async () => {
+  const fetchTimesheets = useCallback(async (forceRefresh = false) => {
+    // Si l'ID employé est le même et qu'on a déjà chargé les données une fois, ne pas recharger
+    // sauf si on force le rafraîchissement
+    if (!forceRefresh && 
+        hasLoadedRef.current && 
+        employeeId === previousEmployeeId.current && 
+        timesheets.length > 0) {
+      console.log('Utilisation du cache pour les feuilles de temps, ID employé inchangé:', employeeId);
+      return;
+    }
+    
     if (!employeeId) {
       setIsLoading(false);
       setTimesheets([]);
@@ -23,6 +36,7 @@ export const useTimesheets = (employeeId: string) => {
     setIsLoading(true);
     setError(null);
     console.log(`Tentative de récupération des feuilles de temps pour l'employé: ${employeeId}`);
+    previousEmployeeId.current = employeeId;
     
     try {
       // Utiliser une recherche simple sans tri pour éviter les erreurs d'index
@@ -30,6 +44,9 @@ export const useTimesheets = (employeeId: string) => {
       
       const result = await search('employeeId', employeeId, searchOptions);
       console.log('Résultats de recherche des feuilles de temps:', result);
+      
+      // Vérifier que le composant est toujours monté avant de mettre à jour l'état
+      if (!isMounted.current) return;
       
       if (result.docs && result.docs.length > 0) {
         // Trier côté client pour éviter les erreurs d'index Firebase
@@ -46,9 +63,16 @@ export const useTimesheets = (employeeId: string) => {
         console.log('Aucune feuille de temps trouvée pour cet employé');
         setTimesheets([]);
       }
+      
+      // Marquer comme chargé pour éviter les requêtes redondantes
+      hasLoadedRef.current = true;
+      
     } catch (err) {
       console.error('Erreur lors de la récupération des feuilles de temps:', err);
       const fetchError = err instanceof Error ? err : new Error('Échec de récupération des feuilles de temps');
+      
+      // Vérifier si le composant est toujours monté avant de mettre à jour l'état
+      if (!isMounted.current) return;
       
       // Vérifier si l'erreur concerne un index manquant
       const errorMessage = fetchError.message || '';
@@ -91,19 +115,36 @@ export const useTimesheets = (employeeId: string) => {
         setTimesheets([]);
       }
     } finally {
-      setIsLoading(false);
+      // Vérifier que le composant est toujours monté avant de mettre à jour l'état
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
     }
-  }, [employeeId, search]);
+  }, [employeeId, search, timesheets.length]);
+  
+  // Nettoyer lors du démontage du composant
+  useEffect(() => {
+    isMounted.current = true;
+    
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
   
   // Charger les données au chargement du composant
   useEffect(() => {
     fetchTimesheets();
   }, [fetchTimesheets]);
   
+  // Fonction pour forcer le rafraîchissement
+  const refreshTimesheets = useCallback(() => {
+    return fetchTimesheets(true);
+  }, [fetchTimesheets]);
+  
   return {
     timesheets,
     isLoading,
     error,
-    refreshTimesheets: fetchTimesheets // Exposer la fonction pour permettre le rafraîchissement
+    refreshTimesheets
   };
 };

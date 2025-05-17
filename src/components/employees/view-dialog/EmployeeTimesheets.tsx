@@ -1,5 +1,5 @@
 
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { format } from 'date-fns';
 import { 
   Table, 
@@ -45,25 +45,34 @@ const EmployeeTimesheets = memo(({ employeeId }: EmployeeTimesheetsProps) => {
   console.log('Timesheets data:', { isLoading, error, count: timesheets?.length });
 
   // Fonction pour forcer un rafraîchissement des données
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     toast({
       title: "Rafraîchissement en cours",
       description: "Chargement des feuilles de temps...",
     });
-    await refreshTimesheets();
-    setRefreshTrigger(prev => prev + 1);
-  };
+    try {
+      await refreshTimesheets();
+      setRefreshTrigger(prev => prev + 1);
+    } catch (err) {
+      console.error("Erreur lors du rafraîchissement:", err);
+      toast({
+        title: "Erreur de rafraîchissement",
+        description: "Impossible de rafraîchir les données. Veuillez réessayer.",
+        variant: "destructive"
+      });
+    }
+  }, [refreshTimesheets]);
 
-  const handleOpenTimesheet = (timesheet: Timesheet) => {
+  const handleOpenTimesheet = useCallback((timesheet: Timesheet) => {
     setSelectedTimesheet(timesheet);
     setIsDialogOpen(true);
-  };
+  }, []);
 
-  const handleCloseDialog = () => {
+  const handleCloseDialog = useCallback(() => {
     setIsDialogOpen(false);
     // Rafraîchir les données après fermeture du dialogue
     refreshTimesheets();
-  };
+  }, [refreshTimesheets]);
 
   if (isLoading) {
     return (

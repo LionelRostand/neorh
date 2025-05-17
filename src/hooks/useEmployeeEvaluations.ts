@@ -20,9 +20,19 @@ export const useEmployeeEvaluations = (employeeId: string) => {
   const [error, setError] = useState<Error | null>(null);
   const { search } = useFirestore<Evaluation>('hr_evaluations');
   
-  // Pour éviter les requêtes en boucle si l'employeeId est vide
+  // Pour éviter les requêtes en boucle
   const isInitialRender = useRef(true);
   const prevEmployeeId = useRef(employeeId);
+  const hasLoadedData = useRef(false);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     // Ne pas exécuter la recherche si l'employeeId est vide
@@ -33,7 +43,9 @@ export const useEmployeeEvaluations = (employeeId: string) => {
     }
     
     // Éviter de lancer plusieurs requêtes avec le même ID
-    if (!isInitialRender.current && prevEmployeeId.current === employeeId) {
+    if (!isInitialRender.current && 
+        prevEmployeeId.current === employeeId && 
+        hasLoadedData.current) {
       return;
     }
     
@@ -52,6 +64,9 @@ export const useEmployeeEvaluations = (employeeId: string) => {
         
         const result = await search('employeeId', employeeId, searchOptions);
         
+        // Vérifier que le composant est toujours monté
+        if (!isMounted.current) return;
+        
         if (result.docs) {
           console.log(`Found ${result.docs.length} evaluations`);
           // Trier côté client
@@ -66,7 +81,13 @@ export const useEmployeeEvaluations = (employeeId: string) => {
           console.log('No evaluations found or empty result');
           setEvaluations([]);
         }
+        
+        // Marquer comme chargé
+        hasLoadedData.current = true;
       } catch (err) {
+        // Vérifier que le composant est toujours monté
+        if (!isMounted.current) return;
+        
         console.error("Error fetching employee evaluations:", err);
         const fetchError = err instanceof Error ? err : new Error('Erreur inconnue');
         setError(fetchError);
@@ -80,7 +101,10 @@ export const useEmployeeEvaluations = (employeeId: string) => {
         
         setEvaluations([]);
       } finally {
-        setLoading(false);
+        // Vérifier que le composant est toujours monté
+        if (isMounted.current) {
+          setLoading(false);
+        }
       }
     };
 
