@@ -24,19 +24,41 @@ export const useTimesheets = (employeeId: string) => {
       console.log(`Attempting to fetch timesheets for employee: ${employeeId}`);
       
       try {
+        // Essayer la recherche avec un tri plus simple d'abord
         const searchOptions: SearchOptions = {
-          orderByField: 'weekStartDate',
-          orderDirection: 'desc'
+          // Ne pas utiliser de tri pour éviter les erreurs d'index dans un premier temps
         };
         
         const result = await search('employeeId', employeeId, searchOptions);
         console.log('Timesheet search results:', result);
-        setTimesheets(result.docs);
+        
+        if (result.docs && result.docs.length > 0) {
+          // Trier côté client si nécessaire
+          const sortedDocs = [...result.docs].sort((a, b) => {
+            if (a.weekStartDate && b.weekStartDate) {
+              return new Date(b.weekStartDate).getTime() - new Date(a.weekStartDate).getTime();
+            }
+            return 0;
+          });
+          setTimesheets(sortedDocs);
+        } else {
+          setTimesheets([]);
+        }
       } catch (err) {
         console.error('Error fetching timesheets:', err);
         const fetchError = err instanceof Error ? err : new Error('Failed to fetch timesheets');
-        setError(fetchError);
-        showErrorToast(`Error loading timesheets: ${fetchError.message}`);
+        
+        // Vérifier si l'erreur concerne un index manquant
+        const errorMessage = fetchError.message || '';
+        const isIndexError = errorMessage.includes('index') || errorMessage.includes('composite');
+        
+        if (isIndexError) {
+          console.warn('Firebase index error detected, loading mock data');
+          showErrorToast(`Erreur d'index Firebase. Chargement des données temporaires.`);
+        } else {
+          setError(fetchError);
+          showErrorToast(`Error loading timesheets: ${fetchError.message}`);
+        }
         
         // En cas d'erreur, charger des données fictives pour le développement
         console.log('Loading mock data due to error');

@@ -47,16 +47,21 @@ export const useEmployeeEvaluations = (employeeId: string) => {
       try {
         console.log(`Fetching evaluations for employee ID: ${employeeId}`);
         
-        const searchOptions: SearchOptions = {
-          orderByField: 'date',
-          orderDirection: 'desc'
-        };
+        // Éviter les problèmes d'index en ne spécifiant pas le tri
+        const searchOptions: SearchOptions = {};
         
         const result = await search('employeeId', employeeId, searchOptions);
         
         if (result.docs) {
           console.log(`Found ${result.docs.length} evaluations`);
-          setEvaluations(result.docs);
+          // Trier côté client
+          const sortedDocs = [...result.docs].sort((a, b) => {
+            if (a.date && b.date) {
+              return new Date(b.date).getTime() - new Date(a.date).getTime();
+            }
+            return 0;
+          });
+          setEvaluations(sortedDocs);
         } else {
           console.log('No evaluations found or empty result');
           setEvaluations([]);
@@ -65,7 +70,14 @@ export const useEmployeeEvaluations = (employeeId: string) => {
         console.error("Error fetching employee evaluations:", err);
         const fetchError = err instanceof Error ? err : new Error('Erreur inconnue');
         setError(fetchError);
-        showErrorToast(`Impossible de charger les évaluations: ${fetchError.message}`);
+        
+        // Message d'erreur plus convivial pour les erreurs d'index
+        if (fetchError.message.includes('index')) {
+          showErrorToast(`Erreur d'index Firebase. Veuillez contacter l'administrateur.`);
+        } else {
+          showErrorToast(`Impossible de charger les évaluations: ${fetchError.message}`);
+        }
+        
         setEvaluations([]);
       } finally {
         setLoading(false);
