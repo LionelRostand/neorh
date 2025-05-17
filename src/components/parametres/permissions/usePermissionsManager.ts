@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useFirestore } from "@/hooks/firestore";
 import { Employee } from "@/types/firebase";
@@ -58,7 +57,7 @@ export const usePermissionsManager = () => {
           // Create default permissions for new employee
           const defaultPermissions = MENU_ITEMS.map(menu => ({
             menuName: menu,
-            canView: menu === "Tableau de bord", // Only dashboard view by default
+            canView: true, // Changed from "menu === 'Tableau de bord'" to allow access to all menus by default
             canCreate: false,
             canEdit: false,
             canDelete: false,

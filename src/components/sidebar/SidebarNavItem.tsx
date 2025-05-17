@@ -22,7 +22,7 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
   onMouseLeave
 }) => {
   return (
-    <li key={item.href}>
+    <li>
       <Link
         to={item.href}
         className={cn(
