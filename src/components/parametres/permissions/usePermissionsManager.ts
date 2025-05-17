@@ -4,7 +4,6 @@ import { useFirestore } from "@/hooks/firestore";
 import { Employee } from "@/types/firebase";
 import { Permission, MENU_ITEMS } from "./types";
 import { toast } from "@/components/ui/use-toast";
-import { SearchOptions } from "@/hooks/firestore/searchOperations";
 
 export const usePermissionsManager = () => {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
@@ -48,13 +47,10 @@ export const usePermissionsManager = () => {
     const loadPermissions = async () => {
       try {
         setIsLoading(true);
-        const searchOptions: SearchOptions = {
-          orderByField: "menuName",
-          orderDirection: "asc"
-        };
-        
-        // Modification ici: utiliser la fonction search avec le bon format de paramètres
-        const permissionsResult = await search({ employeeId: selectedEmployeeId }, searchOptions);
+        const permissionsResult = await search("employeeId", selectedEmployeeId, {
+          sortField: "menuName",
+          sortDirection: "asc"
+        });
         
         if (permissionsResult.docs.length > 0) {
           setPermissions(permissionsResult.docs);
@@ -62,7 +58,7 @@ export const usePermissionsManager = () => {
           // Create default permissions for new employee
           const defaultPermissions = MENU_ITEMS.map(menu => ({
             menuName: menu,
-            canView: true, // Changed from "menu === 'Tableau de bord'" to allow access to all menus by default
+            canView: menu === "Tableau de bord", // Only dashboard view by default
             canCreate: false,
             canEdit: false,
             canDelete: false,

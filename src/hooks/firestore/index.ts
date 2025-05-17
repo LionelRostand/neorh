@@ -2,10 +2,7 @@
 import { useBaseFirestore } from "./baseFirestore";
 import { createReadOperations } from "./readOperations";
 import { createWriteOperations } from "./writeOperations";
-import { createSearchOperations, SearchOptions } from "./searchOperations";
-
-// Export the SearchOptions interface with correct 'export type' syntax
-export type { SearchOptions };
+import { createSearchOperations } from "./searchOperations";
 
 // Main hook that combines all firestore operations
 export const useFirestore = <T extends Record<string, any>>(collectionName: string) => {
@@ -20,9 +17,7 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
   // Get read operations
   const { 
     getAll, 
-    getById,
-    search,
-    clearCache
+    getById 
   } = createReadOperations<T>(
     collectionName, 
     setIsLoading, 
@@ -44,7 +39,7 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
 
   // Get search operations
   const { 
-    search: advancedSearch
+    search 
   } = createSearchOperations<T>(
     setIsLoading, 
     setError, 
@@ -62,9 +57,7 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
     add,
     update,
     remove,
-    search,
-    advancedSearch,
-    clearCache
+    search
   };
 };
 

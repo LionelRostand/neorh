@@ -63,13 +63,6 @@ export type Badge = {
   expiryDate?: string;
 }
 
-export type DailyEntry = {
-  date: string;
-  hours: number;
-  projectId: string;
-  notes?: string;
-}
-
 export type Timesheet = {
   id?: string;
   employeeId: string;
@@ -85,7 +78,6 @@ export type Timesheet = {
   approvedAt?: string;
   approvedBy?: string;
   approvalDate?: string;
-  dailyEntries?: DailyEntry[];
 }
 
 export type Contract = {

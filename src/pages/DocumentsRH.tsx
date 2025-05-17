@@ -29,41 +29,30 @@ const DocumentsRH = () => {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        setLoading(true);
-        
-        // Utiliser notre service Firestore pour récupérer les documents
-        if (documentsCollection.getAll) {
-          const result = await documentsCollection.getAll();
-          if (result?.docs) {
-            console.log("Documents récupérés:", result.docs);
-            setDocuments(result.docs);
+        // In a real scenario, we would fetch from Firestore
+        // For now, we'll use mock data
+        setDocuments([
+          {
+            id: "1",
+            title: "Bulletin de paie - mai 2025",
+            category: "paystubs",
+            fileUrl: "/documents/1",
+            fileType: "application/pdf",
+            uploadDate: "2025-05-15",
+            status: "active",
+            employeeId: "emp1",
+            employeeName: "Lionel DJOSSA"
+          },
+          {
+            id: "2",
+            title: "Document sans titre",
+            category: "other",
+            fileUrl: "/documents/2",
+            fileType: "unknown",
+            uploadDate: "2025-05-14",
+            status: "active"
           }
-        } else {
-          // Fallback sur les données de test si le service n'est pas encore prêt
-          setDocuments([
-            {
-              id: "1",
-              title: "Bulletin de paie - mai 2025",
-              category: "paystubs",
-              fileUrl: "/documents/1",
-              fileType: "application/pdf",
-              uploadDate: "2025-05-15",
-              status: "active",
-              employeeId: "emp1",
-              employeeName: "Lionel DJOSSA"
-            },
-            {
-              id: "2",
-              title: "Document sans titre",
-              category: "other",
-              fileUrl: "/documents/2",
-              fileType: "unknown",
-              uploadDate: "2025-05-14",
-              status: "active"
-            }
-          ]);
-        }
-        
+        ]);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching documents:", error);
@@ -77,7 +66,7 @@ const DocumentsRH = () => {
     };
 
     fetchDocuments();
-  }, [documentsCollection]);
+  }, []);
 
   // Filter documents based on search term and active tab
   const filteredDocuments = documents.filter(doc => {

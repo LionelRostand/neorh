@@ -1,8 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { useFirestore } from './firestore';
-import { SearchOptions } from './firestore/searchOperations';
-import { showErrorToast } from '@/utils/toastUtils';
+import { useFirestore } from './useFirestore';
+import { toast } from '@/components/ui/use-toast';
 
 export interface Evaluation {
   id: string;
@@ -20,19 +19,9 @@ export const useEmployeeEvaluations = (employeeId: string) => {
   const [error, setError] = useState<Error | null>(null);
   const { search } = useFirestore<Evaluation>('hr_evaluations');
   
-  // Pour éviter les requêtes en boucle
+  // Pour éviter les requêtes en boucle si l'employeeId est vide
   const isInitialRender = useRef(true);
   const prevEmployeeId = useRef(employeeId);
-  const hasLoadedData = useRef(false);
-  const isMounted = useRef(true);
-
-  useEffect(() => {
-    isMounted.current = true;
-    
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
 
   useEffect(() => {
     // Ne pas exécuter la recherche si l'employeeId est vide
@@ -43,9 +32,7 @@ export const useEmployeeEvaluations = (employeeId: string) => {
     }
     
     // Éviter de lancer plusieurs requêtes avec le même ID
-    if (!isInitialRender.current && 
-        prevEmployeeId.current === employeeId && 
-        hasLoadedData.current) {
+    if (!isInitialRender.current && prevEmployeeId.current === employeeId) {
       return;
     }
     
@@ -59,50 +46,25 @@ export const useEmployeeEvaluations = (employeeId: string) => {
       try {
         console.log(`Fetching evaluations for employee ID: ${employeeId}`);
         
-        // Modification ici: utiliser la fonction search avec 2 paramètres au lieu de 3
-        const result = await search({ employeeId });
-        
-        // Vérifier que le composant est toujours monté
-        if (!isMounted.current) return;
+        const result = await search('employeeId', employeeId, {
+          sortField: 'date',
+          sortDirection: 'desc'
+        });
         
         if (result.docs) {
           console.log(`Found ${result.docs.length} evaluations`);
-          // Trier côté client
-          const sortedDocs = [...result.docs].sort((a, b) => {
-            if (a.date && b.date) {
-              return new Date(b.date).getTime() - new Date(a.date).getTime();
-            }
-            return 0;
-          });
-          setEvaluations(sortedDocs);
+          setEvaluations(result.docs);
         } else {
           console.log('No evaluations found or empty result');
           setEvaluations([]);
         }
-        
-        // Marquer comme chargé
-        hasLoadedData.current = true;
       } catch (err) {
-        // Vérifier que le composant est toujours monté
-        if (!isMounted.current) return;
-        
         console.error("Error fetching employee evaluations:", err);
-        const fetchError = err instanceof Error ? err : new Error('Erreur inconnue');
-        setError(fetchError);
-        
-        // Message d'erreur plus convivial pour les erreurs d'index
-        if (fetchError.message.includes('index')) {
-          showErrorToast(`Erreur d'index Firebase. Veuillez contacter l'administrateur.`);
-        } else {
-          showErrorToast(`Impossible de charger les évaluations: ${fetchError.message}`);
-        }
-        
+        setError(err instanceof Error ? err : new Error('Erreur inconnue'));
+        // Éviter d'afficher des toasts excessifs en cas d'erreurs répétées
         setEvaluations([]);
       } finally {
-        // Vérifier que le composant est toujours monté
-        if (isMounted.current) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 

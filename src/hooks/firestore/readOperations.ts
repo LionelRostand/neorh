@@ -1,3 +1,4 @@
+
 import { 
   doc, 
   getDocs, 
@@ -5,16 +6,10 @@ import {
   DocumentData,
   FirestoreError,
   Query,
-  DocumentReference,
-  collection,
-  query,
-  where,
-  orderBy,
-  CollectionReference
+  DocumentReference
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "@/components/ui/use-toast";
-import { SearchOptions } from "./searchOperations";
 
 // Read operations for Firestore
 export const createReadOperations = <T extends Record<string, any>>(
@@ -112,72 +107,6 @@ export const createReadOperations = <T extends Record<string, any>>(
     }
   };
 
-  // Rechercher des documents par une valeur de champ
-  // Mise à jour pour accepter deux formats: ancien (field, value) et nouveau (criteria, options)
-  const search = async (fieldOrCriteria: string | Record<string, any>, valueOrOptions?: any | SearchOptions, options: SearchOptions = {}) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // Déterminer si nous utilisons le nouveau format (objet criteria) ou l'ancien format (field, value)
-      let criteria: Record<string, any> = {};
-      let searchOptions: SearchOptions = {};
-      
-      if (typeof fieldOrCriteria === 'string') {
-        // Ancien format: field, value
-        const field = fieldOrCriteria;
-        const value = valueOrOptions;
-        criteria[field] = value;
-        searchOptions = options;
-        console.log(`Searching documents in ${collectionName} where ${field} = ${value}`);
-      } else {
-        // Nouveau format: criteria object, options
-        criteria = fieldOrCriteria;
-        searchOptions = valueOrOptions || {};
-        console.log(`Searching documents in ${collectionName} with criteria:`, criteria);
-      }
-      
-      // Create a collection reference first
-      const collRef: CollectionReference = collection(db, collectionName);
-      
-      // Construire la requête en fonction des critères
-      let q: Query = collRef;
-      
-      Object.entries(criteria).forEach(([field, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          q = query(q, where(field, "==", value));
-        }
-      });
-      
-      // Ajout du tri si spécifié dans les options
-      if (searchOptions.orderByField) {
-        q = query(q, orderBy(searchOptions.orderByField, searchOptions.orderDirection || 'asc'));
-      }
-      
-      const querySnapshot = await getDocs(q);
-      const documents = querySnapshot.docs.map(doc => {
-        return { id: doc.id, ...doc.data() as DocumentData } as T & { id: string };
-      });
-      
-      console.log(`Found ${documents.length} documents in ${collectionName}`);
-      return { docs: documents };
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error("Une erreur est survenue lors de la recherche");
-      console.error(`Error searching documents in ${collectionName}:`, error);
-      setError(error);
-      
-      toast({
-        title: "Erreur de recherche",
-        description: `Impossible de rechercher les documents: ${error.message}`,
-        variant: "destructive"
-      });
-      
-      return { docs: [] };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // Réinitialiser le cache
   const clearCache = () => {
     cachedDocs = {};
@@ -187,7 +116,6 @@ export const createReadOperations = <T extends Record<string, any>>(
   return {
     getAll,
     getById,
-    search,
     clearCache
   };
 };
