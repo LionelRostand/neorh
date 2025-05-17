@@ -3,7 +3,6 @@ import { useBaseFirestore } from "./baseFirestore";
 import { createReadOperations } from "./readOperations";
 import { createWriteOperations } from "./writeOperations";
 import { createSearchOperations } from "./searchOperations";
-import { CollectionReference, DocumentData } from "firebase/firestore";
 
 // Main hook that combines all firestore operations
 export const useFirestore = <T extends Record<string, any>>(collectionName: string) => {
@@ -23,7 +22,7 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
     collectionName, 
     setIsLoading, 
     setError, 
-    () => getCollection().path
+    getCollection
   );
 
   // Get write operations
@@ -35,7 +34,7 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
     collectionName, 
     setIsLoading, 
     setError, 
-    () => getCollection().path
+    getCollection
   );
 
   // Get search operations
@@ -44,7 +43,7 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
   } = createSearchOperations<T>(
     setIsLoading, 
     setError, 
-    () => getCollection().path
+    getCollection
   );
 
   return {
