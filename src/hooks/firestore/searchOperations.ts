@@ -8,7 +8,8 @@ import {
   QueryOrderByConstraint,
   OrderByDirection,
   QueryConstraint,
-  WhereFilterOp
+  WhereFilterOp,
+  limit
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "@/components/ui/use-toast";
@@ -25,6 +26,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
     options?: {
       sortField?: string;
       sortDirection?: OrderByDirection;
+      limit?: number;
     }
   ) => {
     setIsLoading(true);
@@ -45,6 +47,11 @@ export const createSearchOperations = <T extends Record<string, any>>(
         constraints.push(orderBy(options.sortField, sortDirection));
       }
       
+      // Add limit if specified
+      if (options?.limit && options.limit > 0) {
+        constraints.push(limit(options.limit));
+      }
+      
       // Create and execute query based on number of constraints
       let querySnapshot;
       
@@ -55,17 +62,19 @@ export const createSearchOperations = <T extends Record<string, any>>(
         querySnapshot = await getDocs(query(collectionRef, constraints[0]));
       } else if (constraints.length === 2) {
         querySnapshot = await getDocs(query(collectionRef, constraints[0], constraints[1]));
+      } else if (constraints.length === 3) {
+        querySnapshot = await getDocs(query(collectionRef, constraints[0], constraints[1], constraints[2]));
       } else {
-        // For more than 2 constraints, we need a composite index in Firebase
-        console.warn('Warning: Search with sorting requires a composite index in Firebase.');
+        // For more than 3 constraints, we need a composite index in Firebase
+        console.warn('Warning: Search with multiple constraints requires a composite index in Firebase.');
         
-        // Use only the first constraint (where) without sorting to avoid composite index error
+        // Use only the first constraint (where) to avoid composite index error
         querySnapshot = await getDocs(query(collectionRef, constraints[0]));
         
-        if (options?.sortField) {
+        if (options?.sortField || options?.limit) {
           toast({
             title: "Recherche",
-            description: "La recherche avec tri nécessite un index composite. Le tri a été désactivé.",
+            description: "La recherche avec plusieurs contraintes nécessite un index composite. Certaines contraintes ont été désactivées.",
             variant: "destructive"
           });
         }
