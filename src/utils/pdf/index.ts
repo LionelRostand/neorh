@@ -51,25 +51,25 @@ export const generateEmployeePdf = (employee: Employee, activeTab: string, optio
   
   switch (activeTab as PdfTab) {
     case 'informations':
-      generateInformationsTab(doc, employee, startY, options?.company?.name);
+      generateInformationsTab(doc, employee);
       break;
     case 'documents':
-      generateDocumentsTab(doc, startY, options?.documents);
+      generateDocumentsTab(doc, employee);
       break;
     case 'competences':
-      generateCompetencesTab(doc, startY, employee);
+      generateCompetencesTab(doc, employee);
       break;
     case 'horaires':
-      generateHorairesTab(doc, startY);
+      generateHorairesTab(doc, employee);
       break;
     case 'conges':
-      generateCongesTab(doc, startY, options?.leaves);
+      generateCongesTab(doc, employee);
       break;
     case 'evaluations':
-      generateEvaluationsTab(doc, startY, options?.evaluations);
+      generateEvaluationsTab(doc, employee);
       break;
     default:
-      generateInformationsTab(doc, employee, startY, options?.company?.name);
+      generateInformationsTab(doc, employee);
   }
   
   // Ajoute les numéros de page

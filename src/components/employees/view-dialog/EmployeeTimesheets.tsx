@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useTimesheets } from '@/hooks/useTimesheets';
-import { formatDate } from '@/lib/utils';
+import { format } from 'date-fns';
 import { 
   Table, 
   TableBody, 
@@ -13,6 +13,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+
+// Helper function to format date
+const formatDate = (date: Date): string => {
+  return format(date, 'dd/MM/yyyy');
+};
 
 interface EmployeeTimesheetsProps {
   employeeId: string;
