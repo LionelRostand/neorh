@@ -32,7 +32,10 @@ export const createSearchOperations = <T extends Record<string, any>>(
     try {
       setIsLoading(true);
       
-      const collectionRef = collection(db, getCollection());
+      // Get the collection path as a string
+      const collectionPath = getCollection();
+      // Create a collection reference using the path string
+      const collectionRef = collection(db, collectionPath);
       
       // Start building the query with the where clause
       let constraints: QueryConstraint[] = [where(field, "==", value)];

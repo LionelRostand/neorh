@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { useFirestore } from './useFirestore';
+import { useFirestore } from './firestore';
 import { toast } from '@/components/ui/use-toast';
 
 export interface Evaluation {
