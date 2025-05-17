@@ -114,7 +114,7 @@ const navItems: NavItem[] = [
   },
   {
     title: "Paramètres",
-    href: "/parametres", // Changed from /parametres to make it match the route case
+    href: "/parametres", 
     icon: <Settings className="h-5 w-5" />,
     description: "Configuration du module RH avec personnalisation des workflows, droits d'accès et règles spécifiques à l'organisation. Permet d'adapter le système aux processus internes."
   },
@@ -180,7 +180,6 @@ const Sidebar = () => {
         </nav>
       </div>
       
-      {/* Footer avec le texte NEOTECH-CONSULTING 2025 */}
       <div className={cn(
         "p-4 text-center text-sidebar-foreground/90 border-t border-sidebar-border",
         isOpen ? "" : "text-xs -rotate-90 whitespace-nowrap"

@@ -77,7 +77,8 @@ export default {
 					'mint-green': '#e5f9e0',
 					'bright-green': '#40c057',
 					'hover-green': '#2b9348',
-					white: '#FFFFFF'
+					white: '#FFFFFF',
+					'neofreight-green': '#24D16C' // Adding the bright green from NEOFREIGHT
 				}
 			},
 			borderRadius: {

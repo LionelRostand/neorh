@@ -35,14 +35,14 @@
 
     --radius: 0.5rem;
 
-    --sidebar-background: 138 74% 29%; /* Updated to match the new NEORH green */
+    --sidebar-background: 145 76% 48%; /* Updated to match the NEOFREIGHT green */
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 138 74% 24%;
+    --sidebar-primary: 145 76% 38%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 138 74% 34%;
+    --sidebar-accent: 145 76% 58%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 138 74% 19%;
-    --sidebar-ring: 138 74% 39%;
+    --sidebar-border: 145 76% 33%;
+    --sidebar-ring: 145 76% 63%;
   }
 
   .dark {
@@ -74,14 +74,14 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
     
-    --sidebar-background: 142 70% 19%;
+    --sidebar-background: 145 76% 28%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 142 70% 14%;
+    --sidebar-primary: 145 76% 18%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 142 70% 24%;
+    --sidebar-accent: 145 76% 38%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 142 70% 9%;
-    --sidebar-ring: 142 70% 29%;
+    --sidebar-border: 145 76% 13%;
+    --sidebar-ring: 145 76% 43%;
   }
 }
 
