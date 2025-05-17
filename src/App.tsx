@@ -24,6 +24,7 @@ import Recrutement from "./pages/Recrutement";
 import Entreprises from "./pages/Entreprises";
 import Rapports from "./pages/Rapports";
 import Parametres from "./pages/Parametres";
+import Projets from "./pages/Projets";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 
@@ -113,6 +114,11 @@ const App = () => (
             <Route path="/entreprises" element={
               <ProtectedRoute>
                 <Layout><Entreprises /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/projets" element={
+              <ProtectedRoute>
+                <Layout><Projets /></Layout>
               </ProtectedRoute>
             } />
             <Route path="/rapports" element={

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -27,6 +26,12 @@ const navItems: NavItem[] = [
     href: "/employes",
     icon: <Users className="h-5 w-5" />,
     description: "Gestion complète des profils des employés incluant informations personnelles, professionnelles, compétences, et documents associés. Permet d'ajouter, modifier et archiver des profils avec historique complet des changements."
+  },
+  {
+    title: "Projets",
+    href: "/projets",
+    icon: <FolderOpen className="h-5 w-5" />,
+    description: "Gestion des projets de l'entreprise avec suivi des ressources, des délais, des budgets et des membres d'équipe. Visualisation de l'avancement et des indicateurs de performance clés."
   },
   {
     title: "Badges et accès",
