@@ -6,7 +6,10 @@ import {
   DocumentData,
   FirestoreError,
   Query,
-  DocumentReference
+  DocumentReference,
+  collection,
+  query,
+  where
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "@/components/ui/use-toast";
@@ -107,6 +110,40 @@ export const createReadOperations = <T extends Record<string, any>>(
     }
   };
 
+  // Rechercher des documents par une valeur de champ
+  // Note: ajout d'une fonction search pour remplacer la fonctionnalité qui utilisait l'opérateur 'in'
+  const search = async (field: string, value: any) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      console.log(`Searching documents in ${collectionName} where ${field} = ${value}`);
+      
+      const collRef = collection(db, collectionName);
+      // Utiliser l'opérateur d'égalité '==' au lieu de 'in'
+      const q = query(collRef, where(field, "==", value));
+      
+      const querySnapshot = await getDocs(q);
+      const documents = querySnapshot.docs.map(doc => {
+        return { id: doc.id, ...doc.data() as DocumentData } as T & { id: string };
+      });
+      
+      console.log(`Found ${documents.length} documents in ${collectionName}`);
+      return { docs: documents };
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Une erreur est survenue lors de la recherche");
+      console.error(`Error searching documents in ${collectionName}:`, error);
+      setError(error);
+      toast({
+        title: "Erreur de recherche",
+        description: `Impossible de rechercher les documents: ${error.message}`,
+        variant: "destructive"
+      });
+      return { docs: [] };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Réinitialiser le cache
   const clearCache = () => {
     cachedDocs = {};
@@ -116,6 +153,7 @@ export const createReadOperations = <T extends Record<string, any>>(
   return {
     getAll,
     getById,
+    search,
     clearCache
   };
 };

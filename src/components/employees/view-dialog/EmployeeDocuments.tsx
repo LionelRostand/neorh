@@ -7,7 +7,7 @@ import { File, Plus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import DocumentList from '@/components/documents/DocumentList';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useFirestore } from '@/hooks/firestore';
+import { useFirestore } from '@/hooks/useFirestore';
 import { toast } from '@/components/ui/use-toast';
 
 interface EmployeeDocumentsProps {
@@ -30,7 +30,7 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
       try {
         console.log(`Fetching documents for employee: ${employee.id}`);
         
-        // Utiliser la fonction search pour éviter les problèmes d'opérateur 'in'
+        // Utiliser explicitement la fonction search au lieu d'un appel qui utiliserait l'opérateur 'in'
         const result = await documentsCollection.search('employeeId', employee.id);
         
         if (result && result.docs) {

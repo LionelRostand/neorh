@@ -17,7 +17,9 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
   // Get read operations
   const { 
     getAll, 
-    getById 
+    getById,
+    search,
+    clearCache
   } = createReadOperations<T>(
     collectionName, 
     setIsLoading, 
@@ -39,7 +41,7 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
 
   // Get search operations
   const { 
-    search 
+    search: advancedSearch
   } = createSearchOperations<T>(
     setIsLoading, 
     setError, 
@@ -57,7 +59,9 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
     add,
     update,
     remove,
-    search
+    search,
+    advancedSearch,
+    clearCache
   };
 };
 
