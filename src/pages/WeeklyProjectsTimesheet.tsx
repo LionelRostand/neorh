@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { format, addDays, startOfWeek, endOfWeek, parseISO, differenceInCalendarDays } from 'date-fns';
+import { format, addDays, parseISO, differenceInCalendarDays } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Save, X } from "lucide-react";
+import { ArrowLeft, Save, X, AlertCircle, Loader2 } from "lucide-react";
 import { useFirestore } from '@/hooks/firestore';
 import { Timesheet } from "@/lib/constants";
 
@@ -50,6 +50,8 @@ const WeeklyProjectsTimesheet = () => {
   const navigate = useNavigate();
   const [timesheet, setTimesheet] = useState<Timesheet | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [saving, setSaving] = useState(false);
   const [projects] = useState<Project[]>(mockProjects);
   const [selectedProject, setSelectedProject] = useState<string>('');
   const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
@@ -59,45 +61,57 @@ const WeeklyProjectsTimesheet = () => {
   // Fetch the timesheet data
   useEffect(() => {
     const fetchTimesheet = async () => {
-      if (!id) return;
+      if (!id) {
+        setError(new Error("ID de feuille de temps non fourni"));
+        setLoading(false);
+        return;
+      }
       
       try {
         setLoading(true);
+        setError(null);
+        console.log("Fetching timesheet with ID:", id);
         const result = await timesheetCollection.getById(id);
         
-        if (result) {
-          setTimesheet(result);
+        if (!result) {
+          throw new Error("Feuille de temps non trouvée");
+        }
+        
+        console.log("Timesheet data received:", result);
+        setTimesheet(result);
+        
+        // Generate weekly data based on the timesheet period
+        if (result.weekStartDate && result.weekEndDate) {
+          const start = parseISO(result.weekStartDate);
+          const end = parseISO(result.weekEndDate);
+          const daysInPeriod = differenceInCalendarDays(end, start) + 1;
+          const numberOfWeeks = Math.ceil(daysInPeriod / 7);
           
-          // Generate weekly data based on the timesheet period
-          if (result.weekStartDate && result.weekEndDate) {
-            const start = parseISO(result.weekStartDate);
-            const end = parseISO(result.weekEndDate);
-            const daysInPeriod = differenceInCalendarDays(end, start) + 1;
-            const numberOfWeeks = Math.ceil(daysInPeriod / 7);
+          console.log(`Period spans ${daysInPeriod} days and ${numberOfWeeks} weeks`);
+          
+          const weeks: WeeklyData[] = [];
+          for (let i = 0; i < numberOfWeeks; i++) {
+            const weekStartDate = addDays(start, i * 7);
+            const weekEndDate = i === numberOfWeeks - 1 ? end : addDays(weekStartDate, 6);
             
-            const weeks: WeeklyData[] = [];
-            for (let i = 0; i < numberOfWeeks; i++) {
-              const weekStartDate = addDays(start, i * 7);
-              const weekEndDate = i === numberOfWeeks - 1 ? end : addDays(weekStartDate, 6);
-              
-              weeks.push({
-                week: getWeekNumber(weekStartDate),
-                startDate: format(weekStartDate, 'yyyy-MM-dd'),
-                endDate: format(weekEndDate, 'yyyy-MM-dd'),
-                projects: result.weeklyProjects && result.weeklyProjects[i] 
-                  ? result.weeklyProjects[i].projects 
-                  : []
-              });
-            }
-            
-            setWeeklyData(weeks);
-            if (weeks.length > 0) {
-              setActiveTab(weeks[0].week.toString());
-            }
+            weeks.push({
+              week: getWeekNumber(weekStartDate),
+              startDate: format(weekStartDate, 'yyyy-MM-dd'),
+              endDate: format(weekEndDate, 'yyyy-MM-dd'),
+              projects: result.weeklyProjects && result.weeklyProjects[i] 
+                ? result.weeklyProjects[i].projects 
+                : []
+            });
+          }
+          
+          setWeeklyData(weeks);
+          if (weeks.length > 0) {
+            setActiveTab(weeks[0].week.toString());
           }
         }
-      } catch (error) {
-        console.error("Error fetching timesheet:", error);
+      } catch (err) {
+        console.error("Error fetching timesheet:", err);
+        setError(err instanceof Error ? err : new Error("Erreur lors du chargement des données"));
         toast({
           title: "Erreur",
           description: "Impossible de charger les données de la feuille de temps",
@@ -182,6 +196,7 @@ const WeeklyProjectsTimesheet = () => {
     if (!timesheet || !timesheet.id) return;
     
     try {
+      setSaving(true);
       // Format data for saving
       const weeklyProjects = weeklyData.map(week => ({
         week: week.week,
@@ -207,6 +222,8 @@ const WeeklyProjectsTimesheet = () => {
         description: "Impossible d'enregistrer les données",
         variant: "destructive"
       });
+    } finally {
+      setSaving(false);
     }
   };
   
@@ -222,8 +239,42 @@ const WeeklyProjectsTimesheet = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
-          <h1 className="text-2xl md:text-3xl font-bold">Chargement...</h1>
+          <div className="flex items-center">
+            <Loader2 className="h-5 w-5 mr-2 animate-spin text-primary" />
+            <h1 className="text-2xl md:text-3xl font-bold">Chargement des données...</h1>
+          </div>
         </div>
+        <Card className="p-8">
+          <div className="flex justify-center items-center h-40">
+            <p className="text-gray-500">Récupération des données de la feuille de temps...</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="p-4 md:p-6">
+        <div className="flex items-center mb-6">
+          <Button variant="ghost" onClick={handleBack} className="mr-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour
+          </Button>
+          <h1 className="text-2xl md:text-3xl font-bold text-red-600">Erreur</h1>
+        </div>
+        <Card className="border-red-200">
+          <CardContent className="p-8">
+            <div className="flex flex-col items-center space-y-4 text-center">
+              <AlertCircle className="h-12 w-12 text-red-500" />
+              <h2 className="text-xl font-semibold">Impossible de charger les données</h2>
+              <p className="text-gray-500">{error.message}</p>
+              <Button onClick={() => window.location.reload()} variant="outline">
+                Réessayer
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -238,6 +289,14 @@ const WeeklyProjectsTimesheet = () => {
           </Button>
           <h1 className="text-2xl md:text-3xl font-bold">Feuille de temps non trouvée</h1>
         </div>
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p className="text-gray-500">La feuille de temps demandée n'existe pas ou a été supprimée.</p>
+            <Button onClick={handleBack} className="mt-4">
+              Retourner aux feuilles de temps
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -273,9 +332,22 @@ const WeeklyProjectsTimesheet = () => {
       </div>
       
       <div className="mb-6">
-        <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
-          <Save className="h-4 w-4 mr-2" />
-          Enregistrer les modifications
+        <Button 
+          onClick={handleSave} 
+          className="bg-green-600 hover:bg-green-700"
+          disabled={saving}
+        >
+          {saving ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Enregistrement...
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4 mr-2" />
+              Enregistrer les modifications
+            </>
+          )}
         </Button>
       </div>
       
@@ -299,9 +371,9 @@ const WeeklyProjectsTimesheet = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex mb-4 gap-4">
+                  <div className="flex flex-col md:flex-row mb-4 gap-4">
                     <Select value={selectedProject} onValueChange={setSelectedProject}>
-                      <SelectTrigger className="w-[280px]">
+                      <SelectTrigger className="w-full md:w-[280px]">
                         <SelectValue placeholder="Sélectionner un projet" />
                       </SelectTrigger>
                       <SelectContent>
@@ -315,7 +387,7 @@ const WeeklyProjectsTimesheet = () => {
                     <Button onClick={() => handleAddProject(weekIndex)}>Ajouter le projet</Button>
                   </div>
                   
-                  <div>
+                  <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow>
