@@ -47,7 +47,6 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
       setIsLoading(true);
       try {
         // Search for timesheets related to this employee
-        // Updated to match the expected parameter format of the search function
         const result = await timesheetsCollection.search(
           'employeeId', 
           employeeId, 

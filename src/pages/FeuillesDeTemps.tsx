@@ -8,11 +8,13 @@ import { Clock, FileText, Plus, Edit, Check, X } from "lucide-react";
 import { useFirestore } from "@/hooks/useFirestore";
 import { Timesheet } from "@/lib/constants";
 import TimesheetStatusCards from "@/components/timesheet/TimesheetStatusCards";
+import NewTimesheetForm from "@/components/timesheet/NewTimesheetForm";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
 
 const FeuillesDeTemps = () => {
   const [timesheets, setTimesheets] = useState<Timesheet[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isNewTimesheetOpen, setIsNewTimesheetOpen] = useState(false);
   
   // Using useFirestore to directly access the hr_timesheet collection
   const timesheetCollection = useFirestore<Timesheet>('hr_timesheet');
@@ -82,8 +84,21 @@ const FeuillesDeTemps = () => {
     fetchTimesheets();
   }, []);
 
-  const handleAddTimesheet = () => {
-    showSuccessToast("Cette fonctionnalité sera bientôt disponible");
+  const handleOpenNewTimesheet = () => {
+    setIsNewTimesheetOpen(true);
+  };
+
+  const handleCloseNewTimesheet = () => {
+    setIsNewTimesheetOpen(false);
+  };
+
+  const handleTimesheetCreated = () => {
+    // Refresh the timesheet list
+    timesheetCollection.getAll().then(result => {
+      if (result.docs) {
+        setTimesheets(result.docs as Timesheet[]);
+      }
+    });
   };
 
   const getStatusBadge = (status: string) => {
@@ -121,7 +136,7 @@ const FeuillesDeTemps = () => {
             <FileText className="mr-2 h-4 w-4" />
             Exporter
           </Button>
-          <Button size="sm" onClick={handleAddTimesheet}>
+          <Button size="sm" onClick={handleOpenNewTimesheet}>
             <Plus className="mr-2 h-4 w-4" />
             Nouvelle feuille
           </Button>
@@ -191,6 +206,12 @@ const FeuillesDeTemps = () => {
           )}
         </CardContent>
       </Card>
+
+      <NewTimesheetForm 
+        open={isNewTimesheetOpen} 
+        onClose={handleCloseNewTimesheet} 
+        onSuccess={handleTimesheetCreated} 
+      />
     </div>
   );
 };
