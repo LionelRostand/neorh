@@ -10,9 +10,11 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { FileText } from 'lucide-react';
+import { FileText, PlusCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTimesheets } from '@/hooks/useTimesheets';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'react-router-dom';
 
 // Helper function to format date
 const formatDate = (date: string): string => {
@@ -32,6 +34,7 @@ interface EmployeeTimesheetsProps {
 
 const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) => {
   console.log('EmployeeTimesheets rendering for employeeId:', employeeId);
+  const router = useRouter();
   
   // Use the useTimesheets hook for data fetching
   const { timesheets, isLoading, error } = useTimesheets(employeeId);
@@ -41,6 +44,10 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
     hasError: !!error, 
     count: timesheets?.length 
   });
+
+  const handleManageWeeklyProjects = (timesheetId: string) => {
+    router.push(`/feuilles-de-temps/weekly-projects/${timesheetId}`);
+  };
 
   if (isLoading) {
     return (
@@ -96,6 +103,7 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
             <TableHead>Heures</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead>Soumis le</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -121,6 +129,17 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
               </TableCell>
               <TableCell>
                 {timesheet.submittedAt ? formatDate(timesheet.submittedAt) : 'Non soumis'}
+              </TableCell>
+              <TableCell>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 text-xs flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-2"
+                  onClick={() => handleManageWeeklyProjects(timesheet.id || '')}
+                >
+                  <PlusCircle className="h-3 w-3" />
+                  Projets
+                </Button>
               </TableCell>
             </TableRow>
           ))}

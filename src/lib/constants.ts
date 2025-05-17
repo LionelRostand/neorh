@@ -78,6 +78,15 @@ export type Timesheet = {
   approvedAt?: string;
   approvedBy?: string;
   approvalDate?: string;
+  weeklyProjects?: {
+    week: number;
+    startDate: string;
+    endDate: string;
+    projects: {
+      projectId: string;
+      days: number;
+    }[];
+  }[];
 }
 
 export type Contract = {

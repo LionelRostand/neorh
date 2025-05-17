@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Check, X } from "lucide-react";
+import { Edit, Check, X, PlusCircle } from "lucide-react";
 import { Timesheet } from "@/lib/constants";
+import { useRouter } from 'react-router-dom';
 
 interface TimesheetsTableProps {
   timesheets: Timesheet[];
@@ -12,6 +13,8 @@ interface TimesheetsTableProps {
 }
 
 const TimesheetsTable = ({ timesheets, loading }: TimesheetsTableProps) => {
+  const router = useRouter();
+  
   console.log('TimesheetsTable rendering with:', {
     timesheetsCount: timesheets?.length || 0,
     loading
@@ -30,6 +33,14 @@ const TimesheetsTable = ({ timesheets, loading }: TimesheetsTableProps) => {
       default:
         return <Badge>Inconnu</Badge>;
     }
+  };
+
+  const handleEditTimesheet = (timesheetId: string) => {
+    router.push(`/feuilles-de-temps/edit/${timesheetId}`);
+  };
+
+  const handleManageWeeklyProjects = (timesheetId: string) => {
+    router.push(`/feuilles-de-temps/weekly-projects/${timesheetId}`);
   };
 
   if (loading) {
@@ -83,9 +94,23 @@ const TimesheetsTable = ({ timesheets, loading }: TimesheetsTableProps) => {
             <TableCell>{timesheet.taskDescription || '-'}</TableCell>
             <TableCell>{timesheet.hoursWorked || timesheet.hours || 0}h</TableCell>
             <TableCell>{getStatusBadge(timesheet.status || 'draft')}</TableCell>
-            <TableCell className="text-right">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <TableCell className="text-right flex justify-end items-center space-x-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0"
+                onClick={() => handleEditTimesheet(timesheet.id || '')}
+              >
                 <Edit className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 text-xs flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-2"
+                onClick={() => handleManageWeeklyProjects(timesheet.id || '')}
+              >
+                <PlusCircle className="h-3 w-3" />
+                Projets
               </Button>
               {timesheet.status === 'submitted' && (
                 <>
