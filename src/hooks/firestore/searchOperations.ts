@@ -1,5 +1,5 @@
 
-import { DocumentData, Query, collection, getDocs, limit, orderBy, query, where, QueryConstraint, DocumentSnapshot, FirestoreError } from "firebase/firestore";
+import { DocumentData, Query, collection, getDocs, limit, orderBy, query, where, QueryConstraint, DocumentSnapshot, FirestoreError, WhereFilterOp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { showErrorToast } from "@/utils/toastUtils";
 
@@ -49,9 +49,12 @@ export const createSearchOperations = <T extends Record<string, any>>(
       // Create a collection reference using the path string
       const collectionRef = collection(db, collectionPath);
       
+      // Determine the appropriate operator
+      // IMPORTANT: We use "==" instead of "in" to avoid the error
+      const operator: WhereFilterOp = "==";
+      
       // Start building the query with the where clause
-      // Modifié: Utiliser l'opérateur d'égalité "==" au lieu de "in"
-      const constraints: QueryConstraint[] = [where(field, "==", value)];
+      const constraints: QueryConstraint[] = [where(field, operator, value)];
       
       // Add ordering if specified - only if explicitly requested
       // to avoid Firebase index errors
@@ -100,7 +103,7 @@ export const createSearchOperations = <T extends Record<string, any>>(
           console.warn('Index error detected, trying fallback query');
           
           // Try a simpler query without sorting
-          const simpleQuery = query(collectionRef, where(field, "==", value));
+          const simpleQuery = query(collectionRef, where(field, operator, value));
           const fallbackSnapshot = await getDocs(simpleQuery);
           const fallbackDocs = [] as Array<T & { id: string }>;
           
@@ -134,6 +137,8 @@ export const createSearchOperations = <T extends Record<string, any>>(
       // User-friendly error messages
       if (error.message.includes('index')) {
         showErrorToast(`La recherche nécessite un index Firebase. Veuillez contacter l'administrateur.`);
+      } else if (error.message.includes("in' operator") || error.message.includes("_delegate")) {
+        showErrorToast(`Erreur de syntaxe de requête. Utilisez des valeurs simples pour la recherche.`);
       } else {
         showErrorToast(`Erreur de recherche: ${error.message}`);
       }
