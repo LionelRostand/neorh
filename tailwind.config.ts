@@ -73,7 +73,10 @@ export default {
 					green: '#0D8641',
 					'light-green': '#15A553',
 					'dark-green': '#076830',
-					'soft-green': '#F2FCE2', // Added light green pastel color
+					'soft-green': '#F2FCE2',
+					'mint-green': '#e5f9e0',
+					'bright-green': '#40c057',
+					'hover-green': '#2b9348',
 					white: '#FFFFFF'
 				}
 			},
