@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { User, Upload } from 'lucide-react';
 
 interface EmployeePhotoUploadProps {
@@ -27,8 +27,8 @@ export function EmployeePhotoUpload({ photoPreview, onChange }: EmployeePhotoUpl
       </div>
       
       <div>
-        <label htmlFor="photo-upload">
-          <div className="flex items-center justify-center cursor-pointer">
+        <label htmlFor="photo-upload" className="cursor-pointer">
+          <div className="flex items-center justify-center">
             <Upload className="w-4 h-4 mr-2" />
             <span className="text-sm">Choisir une photo</span>
           </div>

@@ -7,13 +7,8 @@ export function usePhotoUpload() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Charger la photo depuis le localStorage lors de l'initialisation
-  useEffect(() => {
-    const savedPhoto = localStorage.getItem('employeePhotoPreview');
-    if (savedPhoto) {
-      setPhotoPreview(savedPhoto);
-    }
-  }, []);
+  // Ne pas charger automatiquement la photo depuis le localStorage
+  // L'effet a été retiré pour ne pas afficher de photo par défaut
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

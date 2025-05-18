@@ -27,6 +27,11 @@ export function useEmployeeFormSubmit({
     resetPhoto 
   } = usePhotoUpload();
 
+  // Nettoyer les photos précédentes au chargement du formulaire
+  useState(() => {
+    resetPhoto();
+  });
+
   const onSubmit = async (data: EmployeeFormValues) => {
     setIsUploading(true);
     
