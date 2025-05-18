@@ -16,7 +16,9 @@ const WeeklyContent: React.FC<WeeklyContentProps> = ({
   setSelectedProject,
   handleAddProject,
   handleUpdateDays,
-  handleRemoveProject
+  handleRemoveProject,
+  handleSubmitWeek,
+  isSubmittable
 }) => {
   if (!timesheet) return null;
   
@@ -62,6 +64,9 @@ const WeeklyContent: React.FC<WeeklyContentProps> = ({
                 handleAddProject={handleAddProject}
                 handleUpdateDays={handleUpdateDays}
                 handleRemoveProject={handleRemoveProject}
+                handleSubmitWeek={handleSubmitWeek}
+                isSubmittable={isSubmittable}
+                timesheet={timesheet}
               />
             </TabsContent>
           ))}

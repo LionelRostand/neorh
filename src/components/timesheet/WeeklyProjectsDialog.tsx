@@ -21,6 +21,7 @@ const WeeklyProjectsDialog = ({ open, onOpenChange, timesheetId, onSuccess }: We
     loading,
     error,
     saving,
+    submitting,
     projects,
     selectedProject,
     setSelectedProject,
@@ -28,9 +29,11 @@ const WeeklyProjectsDialog = ({ open, onOpenChange, timesheetId, onSuccess }: We
     activeTab,
     setActiveTab,
     loadingProgress,
+    isSubmittable,
     handleAddProject,
     handleUpdateDays,
     handleRemoveProject,
+    handleSubmitWeek,
     handleSave,
     handleRetry
   } = useWeeklyProjectsDialog(open, timesheetId, onSuccess);
@@ -58,6 +61,8 @@ const WeeklyProjectsDialog = ({ open, onOpenChange, timesheetId, onSuccess }: We
             handleAddProject={handleAddProject}
             handleUpdateDays={handleUpdateDays}
             handleRemoveProject={handleRemoveProject}
+            handleSubmitWeek={handleSubmitWeek}
+            isSubmittable={isSubmittable}
           />
         )}
         
@@ -66,7 +71,7 @@ const WeeklyProjectsDialog = ({ open, onOpenChange, timesheetId, onSuccess }: We
           <Button 
             onClick={handleSave} 
             className="bg-green-600 hover:bg-green-700"
-            disabled={saving || loading || !!error}
+            disabled={saving || submitting || loading || !!error}
           >
             {saving ? (
               <>

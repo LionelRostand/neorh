@@ -11,9 +11,17 @@ interface TimesheetsTableProps {
   timesheets: Timesheet[];
   loading: boolean;
   onRefresh?: () => void;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
 }
 
-const TimesheetsTable = ({ timesheets, loading, onRefresh }: TimesheetsTableProps) => {
+const TimesheetsTable = ({ 
+  timesheets, 
+  loading, 
+  onRefresh,
+  onApprove,
+  onReject 
+}: TimesheetsTableProps) => {
   const navigate = useNavigate();
   
   console.log('TimesheetsTable rendering with:', {
@@ -38,6 +46,18 @@ const TimesheetsTable = ({ timesheets, loading, onRefresh }: TimesheetsTableProp
 
   const handleEditTimesheet = (timesheetId: string) => {
     navigate(`/feuilles-de-temps/edit/${timesheetId}`);
+  };
+
+  const handleApproveTimesheet = (timesheetId: string) => {
+    if (onApprove) {
+      onApprove(timesheetId);
+    }
+  };
+
+  const handleRejectTimesheet = (timesheetId: string) => {
+    if (onReject) {
+      onReject(timesheetId);
+    }
   };
 
   if (loading) {
@@ -98,10 +118,20 @@ const TimesheetsTable = ({ timesheets, loading, onRefresh }: TimesheetsTableProp
               </Button>
               {timesheet.status === 'submitted' && (
                 <>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-green-500">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0 text-green-500"
+                    onClick={() => handleApproveTimesheet(timesheet.id || '')}
+                  >
                     <Check className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0 text-red-500"
+                    onClick={() => handleRejectTimesheet(timesheet.id || '')}
+                  >
                     <X className="h-4 w-4" />
                   </Button>
                 </>

@@ -12,11 +12,13 @@ export const useWeeklyProjectsDialog = (open: boolean, timesheetId: string, onSu
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [projects] = useState(mockProjects);
   const [selectedProject, setSelectedProject] = useState<string>('');
   const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
   const [activeTab, setActiveTab] = useState<string>('');
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isSubmittable, setIsSubmittable] = useState(true);
   const timesheetCollection = useFirestore<Timesheet>('hr_timesheet');
   
   // Flag to track if initial fetch has been attempted
@@ -51,6 +53,7 @@ export const useWeeklyProjectsDialog = (open: boolean, timesheetId: string, onSu
       setActiveTab('');
       setError(null);
       setLoadingProgress(0);
+      setSubmitting(false);
       // Reset the fetching flag when dialog closes
       hasAttemptedFetch.current = false;
       prevTimesheetId.current = null;
@@ -122,6 +125,9 @@ export const useWeeklyProjectsDialog = (open: boolean, timesheetId: string, onSu
             if (weeks.length > 0) {
               setActiveTab(weeks[0].week.toString());
             }
+            
+            // Check if timesheet is submittable
+            setIsSubmittable(result.status === 'draft' || result.status === 'rejected');
           }
         } catch (err) {
           if (controller.signal.aborted) {
@@ -220,6 +226,69 @@ export const useWeeklyProjectsDialog = (open: boolean, timesheetId: string, onSu
       return updated;
     });
   };
+
+  const handleSubmitWeek = async (weekIndex: number) => {
+    if (!timesheet || !timesheet.id) return;
+    
+    try {
+      setSubmitting(true);
+      
+      // Validate days sum for this week
+      const weekData = weeklyData[weekIndex];
+      const totalDays = weekData.projects.reduce((sum, project) => sum + project.days, 0);
+      
+      if (totalDays === 0) {
+        toast({
+          title: "Attention",
+          description: "Veuillez ajouter au moins un projet avant de soumettre",
+          variant: "default"
+        });
+        return;
+      }
+      
+      if (totalDays > 5) {
+        toast({
+          title: "Attention",
+          description: "Le total des jours ne peut pas dépasser 5 jours par semaine",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Format data for saving
+      const updatedTimesheet = {
+        ...timesheet,
+        status: "submitted",
+        submittedAt: new Date().toISOString(),
+        weeklyProjects: [...weeklyData]
+      };
+      
+      await timesheetCollection.update(timesheet.id, updatedTimesheet);
+      
+      setTimesheet(updatedTimesheet);
+      setIsSubmittable(false);
+      
+      toast({
+        title: "Succès",
+        description: "La feuille de temps a été soumise avec succès",
+        variant: "default"
+      });
+      
+      if (onSuccess) {
+        onSuccess();
+      }
+      
+    } catch (error) {
+      console.error("Error submitting timesheet:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de soumettre la feuille de temps",
+        variant: "destructive"
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
   
   const handleSave = async () => {
     if (!timesheet || !timesheet.id) return;
@@ -273,6 +342,7 @@ export const useWeeklyProjectsDialog = (open: boolean, timesheetId: string, onSu
     loading,
     error,
     saving,
+    submitting,
     projects,
     selectedProject,
     setSelectedProject,
@@ -280,9 +350,11 @@ export const useWeeklyProjectsDialog = (open: boolean, timesheetId: string, onSu
     activeTab,
     setActiveTab,
     loadingProgress,
+    isSubmittable,
     handleAddProject,
     handleUpdateDays,
     handleRemoveProject,
+    handleSubmitWeek,
     handleSave,
     handleRetry
   };

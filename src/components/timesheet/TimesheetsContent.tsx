@@ -16,13 +16,17 @@ interface TimesheetsContentProps {
     rejected: number;
   };
   onRefresh?: () => void;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
 }
 
 const TimesheetsContent = ({ 
   timesheets, 
   loading, 
   countByStatus,
-  onRefresh
+  onRefresh,
+  onApprove,
+  onReject
 }: TimesheetsContentProps) => {
   const [filter, setFilter] = useState<"all" | "draft" | "submitted" | "approved" | "rejected">("all");
 
@@ -60,19 +64,49 @@ const TimesheetsContent = ({
           </TabsList>
 
           <TabsContent value="all" className="p-0 m-0">
-            <TimesheetsTable timesheets={filteredTimesheets} loading={loading} onRefresh={onRefresh} />
+            <TimesheetsTable 
+              timesheets={filteredTimesheets} 
+              loading={loading} 
+              onRefresh={onRefresh} 
+              onApprove={onApprove}
+              onReject={onReject}
+            />
           </TabsContent>
           <TabsContent value="draft" className="p-0 m-0">
-            <TimesheetsTable timesheets={filteredTimesheets} loading={loading} onRefresh={onRefresh} />
+            <TimesheetsTable 
+              timesheets={filteredTimesheets} 
+              loading={loading} 
+              onRefresh={onRefresh}
+              onApprove={onApprove}
+              onReject={onReject}
+            />
           </TabsContent>
           <TabsContent value="submitted" className="p-0 m-0">
-            <TimesheetsTable timesheets={filteredTimesheets} loading={loading} onRefresh={onRefresh} />
+            <TimesheetsTable 
+              timesheets={filteredTimesheets} 
+              loading={loading} 
+              onRefresh={onRefresh}
+              onApprove={onApprove}
+              onReject={onReject}
+            />
           </TabsContent>
           <TabsContent value="approved" className="p-0 m-0">
-            <TimesheetsTable timesheets={filteredTimesheets} loading={loading} onRefresh={onRefresh} />
+            <TimesheetsTable 
+              timesheets={filteredTimesheets} 
+              loading={loading} 
+              onRefresh={onRefresh}
+              onApprove={onApprove}
+              onReject={onReject}
+            />
           </TabsContent>
           <TabsContent value="rejected" className="p-0 m-0">
-            <TimesheetsTable timesheets={filteredTimesheets} loading={loading} onRefresh={onRefresh} />
+            <TimesheetsTable 
+              timesheets={filteredTimesheets} 
+              loading={loading} 
+              onRefresh={onRefresh}
+              onApprove={onApprove}
+              onReject={onReject}
+            />
           </TabsContent>
         </Tabs>
       </Card>

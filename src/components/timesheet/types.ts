@@ -50,6 +50,9 @@ export interface WeeklyTabContentProps {
   handleAddProject: (weekIndex: number) => void;
   handleUpdateDays: (weekIndex: number, projectIndex: number, days: number) => void;
   handleRemoveProject: (weekIndex: number, projectIndex: number) => void;
+  handleSubmitWeek: (weekIndex: number) => void;
+  isSubmittable: boolean;
+  timesheet: Timesheet | null;
 }
 
 export interface WeeklyContentProps {
@@ -63,6 +66,8 @@ export interface WeeklyContentProps {
   handleAddProject: (weekIndex: number) => void;
   handleUpdateDays: (weekIndex: number, projectIndex: number, days: number) => void;
   handleRemoveProject: (weekIndex: number, projectIndex: number) => void;
+  handleSubmitWeek: (weekIndex: number) => void;
+  isSubmittable: boolean;
 }
 
 export interface LoadingStateProps {
