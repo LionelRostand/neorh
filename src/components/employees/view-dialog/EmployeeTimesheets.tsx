@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { 
   Table, 
@@ -14,7 +14,7 @@ import { FileText, PlusCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTimesheets } from '@/hooks/useTimesheets';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import WeeklyProjectsDialog from '@/components/timesheet/WeeklyProjectsDialog';
 
 // Helper function to format date
 const formatDate = (date: string): string => {
@@ -34,10 +34,11 @@ interface EmployeeTimesheetsProps {
 
 const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) => {
   console.log('EmployeeTimesheets rendering for employeeId:', employeeId);
-  const navigate = useNavigate();
+  const [selectedTimesheetId, setSelectedTimesheetId] = useState<string | null>(null);
+  const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
   
   // Use the useTimesheets hook for data fetching
-  const { timesheets, isLoading, error } = useTimesheets(employeeId);
+  const { timesheets, isLoading, error, refreshData } = useTimesheets(employeeId);
   
   console.log('Timesheets data in EmployeeTimesheets component:', { 
     isLoading, 
@@ -46,7 +47,14 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
   });
 
   const handleManageWeeklyProjects = (timesheetId: string) => {
-    navigate(`/feuilles-de-temps/weekly-projects/${timesheetId}`);
+    setSelectedTimesheetId(timesheetId);
+    setIsProjectDialogOpen(true);
+  };
+
+  const handleProjectsDialogClose = () => {
+    setIsProjectDialogOpen(false);
+    setSelectedTimesheetId(null);
+    refreshData();
   };
 
   if (isLoading) {
@@ -143,6 +151,13 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
           ))}
         </TableBody>
       </Table>
+      
+      <WeeklyProjectsDialog 
+        open={isProjectDialogOpen} 
+        onOpenChange={setIsProjectDialogOpen} 
+        timesheetId={selectedTimesheetId || ''}
+        onSuccess={refreshData}
+      />
     </div>
   );
 };

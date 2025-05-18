@@ -32,6 +32,7 @@ const FeuillesDeTemps = () => {
         timesheets={timesheets}
         loading={loading}
         countByStatus={countByStatus}
+        onRefresh={refreshTimesheets}
       />
 
       <NewTimesheetForm 
