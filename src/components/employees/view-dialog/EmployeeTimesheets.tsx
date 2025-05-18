@@ -99,7 +99,6 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
         <TableHeader>
           <TableRow>
             <TableHead>Période</TableHead>
-            <TableHead>Projet</TableHead>
             <TableHead>Heures</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead>Soumis le</TableHead>
@@ -114,7 +113,6 @@ const EmployeeTimesheets: React.FC<EmployeeTimesheetsProps> = ({ employeeId }) =
                   ? `${formatDate(timesheet.weekStartDate)} - ${formatDate(timesheet.weekEndDate)}` 
                   : timesheet.date ? formatDate(timesheet.date) : 'Non défini'}
               </TableCell>
-              <TableCell>{timesheet.projectId || 'Non assigné'}</TableCell>
               <TableCell>{timesheet.hours || timesheet.hoursWorked || 0}h</TableCell>
               <TableCell>
                 <Badge 

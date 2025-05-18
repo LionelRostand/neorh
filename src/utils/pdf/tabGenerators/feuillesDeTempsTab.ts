@@ -31,7 +31,7 @@ export const generateFeuillesDeTempsTab = (doc: JsPDF, employee: Employee, times
   doc.setTextColor(108, 117, 125);
   doc.text(`Employé: ${employee.name}`, 15, 40);
   
-  const headers = [['Période', 'Projet', 'Heures', 'Statut', 'Soumis le']];
+  const headers = [['Période', 'Heures', 'Statut', 'Soumis le']];
   
   if (!timesheets || timesheets.length === 0) {
     // Message pas de feuilles de temps
@@ -51,7 +51,6 @@ export const generateFeuillesDeTempsTab = (doc: JsPDF, employee: Employee, times
     // Générer les données de la table
     const data = timesheets.map(ts => [
       `${formatDate(ts.weekStartDate)} - ${formatDate(ts.weekEndDate)}`,
-      ts.projectId || 'Non assigné',
       `${ts.hours || 0}h`,
       ts.status === 'approved' ? 'Approuvé' : 
         ts.status === 'submitted' ? 'En attente' : 
