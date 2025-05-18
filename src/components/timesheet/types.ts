@@ -41,6 +41,20 @@ export interface ProjectSelectorProps {
   onAddProject: () => void;
 }
 
+export interface ProjectsTableProps {
+  week?: WeeklyData;
+  weekIndex: number;
+  projects: Project[];
+  onUpdateDays: (weekIndex: number, projectIndex: number, days: number) => void;
+  onRemoveProject: (weekIndex: number, projectIndex: number) => void;
+}
+
+export interface TotalDaysDisplayProps {
+  projects?: WeeklyProjectTime[];
+  currentDays?: number;
+  maxDays?: number;
+}
+
 export interface WeeklyTabContentProps {
   week: WeeklyData;
   weekIndex: number;

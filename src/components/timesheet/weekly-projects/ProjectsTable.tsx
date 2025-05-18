@@ -8,7 +8,7 @@ import ProjectTableHeader from "./ProjectTableHeader";
 import { Project, WeeklyData } from "../types";
 
 interface ProjectsTableProps {
-  week: WeeklyData;
+  week?: WeeklyData;
   weekIndex: number;
   projects: Project[];
   onUpdateDays: (weekIndex: number, projectIndex: number, days: number) => void;
@@ -22,6 +22,10 @@ const ProjectsTable: React.FC<ProjectsTableProps> = ({
   onUpdateDays,
   onRemoveProject
 }) => {
+  if (!week) {
+    return null;
+  }
+
   return (
     <div className="overflow-x-auto">
       <Table>

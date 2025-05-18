@@ -54,7 +54,7 @@ const WeeklyTabContent: React.FC<WeeklyTabContentProps> = ({
         />
         
         <ProjectsTable 
-          weekData={week} 
+          week={week} 
           weekIndex={weekIndex}
           projects={projects}
           onUpdateDays={handleUpdateDays}

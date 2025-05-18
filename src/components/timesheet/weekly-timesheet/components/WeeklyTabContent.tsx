@@ -30,6 +30,9 @@ const WeeklyTabContent: React.FC<WeeklyTabContentProps> = ({
   handleUpdateDays,
   handleRemoveProject
 }) => {
+  // Calculate total days for this week
+  const totalDays = week.projects.reduce((sum, project) => sum + project.days, 0);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row mb-4 gap-4">
