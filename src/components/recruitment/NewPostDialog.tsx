@@ -113,12 +113,15 @@ const NewPostDialog: React.FC<NewPostDialogProps> = ({ open, onOpenChange, onSub
                     <SelectContent>
                       {departments && departments.length > 0 ? (
                         departments.map((dept) => (
-                          <SelectItem key={dept.id} value={dept.id || ""}>
+                          <SelectItem 
+                            key={dept.id} 
+                            value={dept.id || `dept_${dept.name || Date.now()}`} // Ensure value is never empty
+                          >
                             {dept.name}
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem value="" disabled>
+                        <SelectItem value="no_departments" disabled>
                           {loadingDepartments ? "Chargement..." : "Aucun département trouvé"}
                         </SelectItem>
                       )}
