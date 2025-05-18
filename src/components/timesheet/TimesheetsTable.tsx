@@ -93,7 +93,6 @@ const TimesheetsTable = ({ timesheets, loading, onRefresh }: TimesheetsTableProp
             <TableHead>Date</TableHead>
             <TableHead>Employé ID</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead>Heures</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -104,7 +103,6 @@ const TimesheetsTable = ({ timesheets, loading, onRefresh }: TimesheetsTableProp
               <TableCell>{timesheet.date || (timesheet.weekStartDate ? `${timesheet.weekStartDate} - ${timesheet.weekEndDate || ''}` : 'Non défini')}</TableCell>
               <TableCell>{timesheet.employeeId || 'Non défini'}</TableCell>
               <TableCell>{timesheet.taskDescription || '-'}</TableCell>
-              <TableCell>{timesheet.hoursWorked || timesheet.hours || 0}h</TableCell>
               <TableCell>{getStatusBadge(timesheet.status || 'draft')}</TableCell>
               <TableCell className="text-right flex justify-end items-center space-x-2">
                 <Button 
