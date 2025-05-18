@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Briefcase, 
   Clock, 
@@ -10,104 +10,97 @@ import {
   List, 
   PlusCircle 
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import RecruitmentStatusCard from "@/components/recruitment/RecruitmentStatusCard";
-import JobCard from "@/components/recruitment/JobCard";
+import { RecruitmentStatsData, RecruitmentPost } from "@/types/recruitment";
 
-interface RecruitmentStatus {
-  openPositions: number;
-  inProgress: number;
-  filledPositions: number;
-  applications: number;
-  interviews: number;
-}
-
-interface JobPosting {
-  id: string;
-  title: string;
-  department: string;
-  status: 'ouverte' | 'en_cours' | 'entretiens' | 'offre' | 'fermée';
-}
+import RecruitmentStats from "@/components/recruitment/RecruitmentStats";
+import RecruitmentKanban from "@/components/recruitment/RecruitmentKanban";
+import RecruitmentList from "@/components/recruitment/RecruitmentList";
+import NewPostDialog from "@/components/recruitment/NewPostDialog";
+import ViewPostDialog from "@/components/recruitment/ViewPostDialog";
+import useRecruitmentFirebaseData from "@/hooks/useRecruitmentFirebaseData";
+import useRecruitmentToEmployee from "@/hooks/useRecruitmentToEmployee";
 
 const Recrutement = () => {
-  const [status] = useState<RecruitmentStatus>({
+  const { posts, loading, error, updatePostStatus, createNewPost } = useRecruitmentFirebaseData();
+  const { converting, convertToEmployee } = useRecruitmentToEmployee();
+
+  const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
+  const [newPostDialogOpen, setNewPostDialogOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<RecruitmentPost | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  
+  const [stats, setStats] = useState<RecruitmentStatsData>({
     openPositions: 0,
-    inProgress: 1,
+    inProgress: 0,
     filledPositions: 0,
     applications: 0,
     interviews: 0
   });
-
-  const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
   
-  const [jobs] = useState<JobPosting[]>([
-    {
-      id: "1",
-      title: "RH",
-      department: "TEST",
-      status: "entretiens"
+  // Calculate stats based on posts
+  useEffect(() => {
+    if (posts.length > 0) {
+      const openPositions = posts.filter(post => post.status === 'ouverte').length;
+      const inProgress = posts.filter(post => post.status === 'en_cours').length;
+      const entretiens = posts.filter(post => post.status === 'entretiens').length;
+      const offres = posts.filter(post => post.status === 'offre').length;
+      const fermees = posts.filter(post => post.status === 'fermée').length;
+      
+      const totalApplications = posts.reduce((sum, post) => sum + (post.applications || 0), 0);
+      
+      setStats({
+        openPositions,
+        inProgress: inProgress + entretiens + offres,
+        filledPositions: fermees,
+        applications: totalApplications,
+        interviews: entretiens
+      });
     }
-  ]);
+  }, [posts]);
   
-  const getStatusCounts = (status: string) => {
-    return jobs.filter(job => job.status === status).length;
+  const handlePostClick = (postId: string) => {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      setSelectedPost(post);
+      setViewDialogOpen(true);
+    }
+  };
+  
+  const handleStatusChange = (postId: string, newStatus: string) => {
+    updatePostStatus(postId, newStatus as any);
+  };
+  
+  const handleCreatePost = async (data: Omit<RecruitmentPost, 'id' | 'createdAt'>) => {
+    const success = await createNewPost(data);
+    if (success) {
+      setNewPostDialogOpen(false);
+    }
   };
 
-  const handleJobClick = (jobId: string) => {
-    console.log(`Job ${jobId} clicked`);
-    // In a real application, this would open a modal or navigate to job details
+  const handleConvertToEmployee = (post: RecruitmentPost) => {
+    convertToEmployee(post).then((success) => {
+      if (success) {
+        setViewDialogOpen(false);
+      }
+    });
   };
 
   return (
     <div className="container py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Recrutement</h1>
-        <Button className="bg-emerald-600 hover:bg-emerald-700">
+        <Button 
+          className="bg-emerald-600 hover:bg-emerald-700"
+          onClick={() => setNewPostDialogOpen(true)}
+        >
           <PlusCircle className="mr-2 h-4 w-4" />
           Nouvelle offre
         </Button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <RecruitmentStatusCard 
-          title="Postes ouverts" 
-          count={status.openPositions} 
-          icon={<Briefcase className="h-5 w-5 text-blue-600" />} 
-          bgColor="bg-blue-100" 
-          subtitle="Offres publiées"
-        />
-        <RecruitmentStatusCard 
-          title="En cours" 
-          count={status.inProgress} 
-          icon={<Clock className="h-5 w-5 text-amber-600" />} 
-          bgColor="bg-amber-100" 
-          subtitle="Processus actifs"
-        />
-        <RecruitmentStatusCard 
-          title="Postes pourvus" 
-          count={status.filledPositions} 
-          icon={<Check className="h-5 w-5 text-green-600" />} 
-          bgColor="bg-green-100" 
-          subtitle="Recrutements terminés"
-        />
-        <RecruitmentStatusCard 
-          title="Candidatures" 
-          count={status.applications} 
-          icon={<Users className="h-5 w-5 text-purple-600" />} 
-          bgColor="bg-purple-100" 
-          subtitle="Reçues au total"
-        />
-        <RecruitmentStatusCard 
-          title="Entretiens" 
-          count={status.interviews} 
-          icon={<Calendar className="h-5 w-5 text-indigo-600" />} 
-          bgColor="bg-indigo-100" 
-          subtitle="Programmés"
-        />
-      </div>
+      <RecruitmentStats stats={stats} isLoading={loading} />
       
       <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'kanban' | 'list')}>
         <div className="flex items-center gap-2 mb-4">
@@ -123,140 +116,46 @@ const Recrutement = () => {
           </TabsList>
         </div>
         
-        <TabsContent value="kanban">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="bg-gray-100 rounded-md p-3">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium">Ouverte</h3>
-                <span className="bg-gray-200 text-gray-800 rounded-full px-2 py-0.5 text-xs">
-                  {getStatusCounts('ouverte')}
-                </span>
-              </div>
-              {jobs.filter(job => job.status === 'ouverte').map(job => (
-                <JobCard 
-                  key={job.id}
-                  id={job.id}
-                  title={job.title}
-                  department={job.department}
-                  onClick={() => handleJobClick(job.id)}
-                />
+        <TabsContent value="kanban" className="mt-4">
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-[70vh] bg-gray-100 animate-pulse rounded-md"></div>
               ))}
             </div>
-            
-            <div className="bg-gray-100 rounded-md p-3">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium">En cours</h3>
-                <span className="bg-gray-200 text-gray-800 rounded-full px-2 py-0.5 text-xs">
-                  {getStatusCounts('en_cours')}
-                </span>
-              </div>
-              {jobs.filter(job => job.status === 'en_cours').map(job => (
-                <JobCard 
-                  key={job.id}
-                  id={job.id}
-                  title={job.title}
-                  department={job.department}
-                  onClick={() => handleJobClick(job.id)}
-                />
-              ))}
-            </div>
-            
-            <div className="bg-gray-100 rounded-md p-3">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium">Entretiens</h3>
-                <span className="bg-gray-200 text-gray-800 rounded-full px-2 py-0.5 text-xs">
-                  {getStatusCounts('entretiens')}
-                </span>
-              </div>
-              {jobs.filter(job => job.status === 'entretiens').map(job => (
-                <JobCard 
-                  key={job.id}
-                  id={job.id}
-                  title={job.title}
-                  department={job.department}
-                  onClick={() => handleJobClick(job.id)}
-                />
-              ))}
-            </div>
-            
-            <div className="bg-gray-100 rounded-md p-3">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium">Offre</h3>
-                <span className="bg-gray-200 text-gray-800 rounded-full px-2 py-0.5 text-xs">
-                  {getStatusCounts('offre')}
-                </span>
-              </div>
-              {jobs.filter(job => job.status === 'offre').map(job => (
-                <JobCard 
-                  key={job.id}
-                  id={job.id}
-                  title={job.title}
-                  department={job.department}
-                  onClick={() => handleJobClick(job.id)}
-                />
-              ))}
-            </div>
-            
-            <div className="bg-gray-100 rounded-md p-3">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium">Fermée</h3>
-                <span className="bg-gray-200 text-gray-800 rounded-full px-2 py-0.5 text-xs">
-                  {getStatusCounts('fermée')}
-                </span>
-              </div>
-              {jobs.filter(job => job.status === 'fermée').map(job => (
-                <JobCard 
-                  key={job.id}
-                  id={job.id}
-                  title={job.title}
-                  department={job.department}
-                  onClick={() => handleJobClick(job.id)}
-                />
-              ))}
-            </div>
-          </div>
+          ) : (
+            <RecruitmentKanban 
+              posts={posts} 
+              onStatusChange={handleStatusChange} 
+              onPostClick={handlePostClick} 
+            />
+          )}
         </TabsContent>
         
         <TabsContent value="list">
-          <Card>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Titre</TableHead>
-                  <TableHead>Département</TableHead>
-                  <TableHead>Statut</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {jobs.map(job => (
-                  <TableRow 
-                    key={job.id} 
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleJobClick(job.id)}
-                  >
-                    <TableCell>{job.id}</TableCell>
-                    <TableCell>{job.title}</TableCell>
-                    <TableCell>{job.department}</TableCell>
-                    <TableCell>
-                      <span className={`
-                        inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
-                        ${job.status === 'ouverte' ? 'bg-blue-100 text-blue-800' : ''}
-                        ${job.status === 'en_cours' ? 'bg-amber-100 text-amber-800' : ''}
-                        ${job.status === 'entretiens' ? 'bg-purple-100 text-purple-800' : ''}
-                        ${job.status === 'offre' ? 'bg-green-100 text-green-800' : ''}
-                        ${job.status === 'fermée' ? 'bg-gray-100 text-gray-800' : ''}
-                      `}>
-                        {job.status.charAt(0).toUpperCase() + job.status.slice(1).replace('_', ' ')}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
+          {loading ? (
+            <div className="w-full h-96 bg-gray-100 animate-pulse rounded-md"></div>
+          ) : (
+            <RecruitmentList posts={posts} onPostClick={handlePostClick} />
+          )}
         </TabsContent>
       </Tabs>
+      
+      <NewPostDialog 
+        open={newPostDialogOpen}
+        onOpenChange={setNewPostDialogOpen}
+        onSubmit={handleCreatePost}
+        isLoading={loading}
+      />
+      
+      <ViewPostDialog 
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        post={selectedPost}
+        onStatusChange={handleStatusChange}
+        onConvertToEmployee={handleConvertToEmployee}
+        isConverting={converting}
+      />
     </div>
   );
 };
