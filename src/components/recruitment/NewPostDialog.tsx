@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +30,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { RecruitmentPost } from "@/types/recruitment";
+import { useDepartmentsData } from "@/hooks/useDepartmentsData";
 
 interface NewPostDialogProps {
   open: boolean;
@@ -49,6 +50,8 @@ const formSchema = z.object({
 });
 
 const NewPostDialog: React.FC<NewPostDialogProps> = ({ open, onOpenChange, onSubmit, isLoading }) => {
+  const { departments, isLoading: loadingDepartments } = useDepartmentsData();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -97,9 +100,30 @@ const NewPostDialog: React.FC<NewPostDialogProps> = ({ open, onOpenChange, onSub
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Département</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex: Informatique" {...field} />
-                  </FormControl>
+                  <Select 
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    disabled={loadingDepartments}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un département" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {departments && departments.length > 0 ? (
+                        departments.map((dept) => (
+                          <SelectItem key={dept.id} value={dept.id || ""}>
+                            {dept.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="" disabled>
+                          {loadingDepartments ? "Chargement..." : "Aucun département trouvé"}
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
