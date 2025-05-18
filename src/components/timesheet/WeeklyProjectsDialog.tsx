@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { format, addDays, parseISO, differenceInCalendarDays } from 'date-fns';
 import { 
   Dialog,
@@ -69,6 +68,11 @@ const WeeklyProjectsDialog = ({ open, onOpenChange, timesheetId, onSuccess }: We
   const [activeTab, setActiveTab] = useState<string>('');
   const timesheetCollection = useFirestore<Timesheet>('hr_timesheet');
   const [loadingProgress, setLoadingProgress] = useState(0);
+  
+  // Flag to track if initial fetch has been attempted
+  const hasAttemptedFetch = useRef(false);
+  // Track previous timesheet ID to avoid repeated fetches for the same ID
+  const prevTimesheetId = useRef<string | null>(null);
 
   // Progress animation effect
   useEffect(() => {
@@ -90,6 +94,7 @@ const WeeklyProjectsDialog = ({ open, onOpenChange, timesheetId, onSuccess }: We
 
   // Fetch the timesheet data
   useEffect(() => {
+    // Only fetch if dialog is open and we have a timesheet ID
     if (!open || !timesheetId) {
       // Reset states when dialog is closed
       if (!open) {
@@ -99,7 +104,16 @@ const WeeklyProjectsDialog = ({ open, onOpenChange, timesheetId, onSuccess }: We
         setActiveTab('');
         setError(null);
         setLoadingProgress(0);
+        // Reset the fetching flag when dialog closes
+        hasAttemptedFetch.current = false;
+        prevTimesheetId.current = null;
       }
+      return;
+    }
+    
+    // Skip fetch if it's the same timesheet ID and we've already attempted a fetch
+    if (hasAttemptedFetch.current && prevTimesheetId.current === timesheetId) {
+      console.log("Skipping duplicate fetch for timesheet ID:", timesheetId);
       return;
     }
     
@@ -109,74 +123,88 @@ const WeeklyProjectsDialog = ({ open, onOpenChange, timesheetId, onSuccess }: We
         setError(null);
         console.log("Fetching timesheet with ID:", timesheetId);
         
-        // Add a timeout to prevent infinite loading if fetch fails
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("Délai d'attente dépassé")), 10000)
-        );
+        // Update the tracking variables
+        hasAttemptedFetch.current = true;
+        prevTimesheetId.current = timesheetId;
         
-        const fetchPromise = timesheetCollection.getById(timesheetId);
+        // Create a controller to abort the fetch
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
         
-        // Race between fetch and timeout
-        const result = await Promise.race([fetchPromise, timeoutPromise]) as Timesheet | null;
-        
-        if (!result) {
-          console.log("No timesheet found with ID:", timesheetId);
-          // Use mock data if no result found
-          const mockTimesheet: Timesheet = {
-            id: timesheetId,
-            employeeId: "1",
-            weekStartDate: "2025-05-10",
-            weekEndDate: "2025-05-16",
-            hours: 40,
-            status: "draft",
-            weeklyProjects: []
-          };
-          setTimesheet(mockTimesheet);
+        try {
+          const result = await Promise.race([
+            timesheetCollection.getById(timesheetId),
+            new Promise<null>((_, reject) => 
+              setTimeout(() => reject(new Error("Délai d'attente dépassé")), 8000)
+            )
+          ]) as Timesheet | null;
           
-          // Generate weekly data based on the mock timesheet
-          const start = parseISO("2025-05-10");
-          const end = parseISO("2025-05-16");
-          const weeks: WeeklyData[] = [{
-            week: getWeekNumber(start),
-            startDate: "2025-05-10",
-            endDate: "2025-05-16",
-            projects: []
-          }];
-          setWeeklyData(weeks);
-          setActiveTab(weeks[0].week.toString());
-        } else {
-          console.log("Timesheet data received:", result);
-          setTimesheet(result);
+          clearTimeout(timeoutId);
           
-          // Generate weekly data based on the timesheet period
-          if (result.weekStartDate && result.weekEndDate) {
-            const start = parseISO(result.weekStartDate);
-            const end = parseISO(result.weekEndDate);
-            const daysInPeriod = differenceInCalendarDays(end, start) + 1;
-            const numberOfWeeks = Math.ceil(daysInPeriod / 7);
+          if (!result) {
+            console.log("No timesheet found with ID:", timesheetId);
+            // Use mock data if no result found
+            const mockTimesheet: Timesheet = {
+              id: timesheetId,
+              employeeId: "1",
+              weekStartDate: "2025-05-10",
+              weekEndDate: "2025-05-16",
+              hours: 40,
+              status: "draft",
+              weeklyProjects: []
+            };
+            setTimesheet(mockTimesheet);
             
-            console.log(`Period spans ${daysInPeriod} days and ${numberOfWeeks} weeks`);
-            
-            const weeks: WeeklyData[] = [];
-            for (let i = 0; i < numberOfWeeks; i++) {
-              const weekStartDate = addDays(start, i * 7);
-              const weekEndDate = i === numberOfWeeks - 1 ? end : addDays(weekStartDate, 6);
-              
-              weeks.push({
-                week: getWeekNumber(weekStartDate),
-                startDate: format(weekStartDate, 'yyyy-MM-dd'),
-                endDate: format(weekEndDate, 'yyyy-MM-dd'),
-                projects: result.weeklyProjects && result.weeklyProjects[i] 
-                  ? result.weeklyProjects[i].projects 
-                  : []
-              });
-            }
-            
+            // Generate weekly data based on the mock timesheet
+            const start = parseISO("2025-05-10");
+            const end = parseISO("2025-05-16");
+            const weeks: WeeklyData[] = [{
+              week: getWeekNumber(start),
+              startDate: "2025-05-10",
+              endDate: "2025-05-16",
+              projects: []
+            }];
             setWeeklyData(weeks);
-            if (weeks.length > 0) {
-              setActiveTab(weeks[0].week.toString());
+            setActiveTab(weeks[0].week.toString());
+          } else {
+            console.log("Timesheet data received:", result);
+            setTimesheet(result);
+            
+            // Generate weekly data based on the timesheet period
+            if (result.weekStartDate && result.weekEndDate) {
+              const start = parseISO(result.weekStartDate);
+              const end = parseISO(result.weekEndDate);
+              const daysInPeriod = differenceInCalendarDays(end, start) + 1;
+              const numberOfWeeks = Math.ceil(daysInPeriod / 7);
+              
+              console.log(`Period spans ${daysInPeriod} days and ${numberOfWeeks} weeks`);
+              
+              const weeks: WeeklyData[] = [];
+              for (let i = 0; i < numberOfWeeks; i++) {
+                const weekStartDate = addDays(start, i * 7);
+                const weekEndDate = i === numberOfWeeks - 1 ? end : addDays(weekStartDate, 6);
+                
+                weeks.push({
+                  week: getWeekNumber(weekStartDate),
+                  startDate: format(weekStartDate, 'yyyy-MM-dd'),
+                  endDate: format(weekEndDate, 'yyyy-MM-dd'),
+                  projects: result.weeklyProjects && result.weeklyProjects[i] 
+                    ? result.weeklyProjects[i].projects 
+                    : []
+                });
+              }
+              
+              setWeeklyData(weeks);
+              if (weeks.length > 0) {
+                setActiveTab(weeks[0].week.toString());
+              }
             }
           }
+        } catch (err) {
+          if (controller.signal.aborted) {
+            throw new Error("Délai d'attente dépassé lors du chargement des données");
+          }
+          throw err;
         }
       } catch (err) {
         console.error("Error fetching timesheet:", err);
@@ -189,12 +217,12 @@ const WeeklyProjectsDialog = ({ open, onOpenChange, timesheetId, onSuccess }: We
         
         // Create empty weekly data to allow user to add projects anyway
         setWeeklyData([{
-          week: new Date().getDay(),
+          week: getWeekNumber(new Date()),
           startDate: format(new Date(), 'yyyy-MM-dd'),
           endDate: format(addDays(new Date(), 6), 'yyyy-MM-dd'),
           projects: []
         }]);
-        setActiveTab(new Date().getDay().toString());
+        setActiveTab(getWeekNumber(new Date()).toString());
       } finally {
         setLoading(false);
       }
@@ -340,6 +368,8 @@ const WeeklyProjectsDialog = ({ open, onOpenChange, timesheetId, onSuccess }: We
                 onClick={() => {
                   setError(null);
                   setLoading(true);
+                  hasAttemptedFetch.current = false; // Reset fetch flag to allow retry
+                  prevTimesheetId.current = null;
                 }}
               >
                 Réessayer
