@@ -33,11 +33,10 @@ const TimesheetsContent = ({
   return (
     <>
       <TimesheetStatusCards 
-        draft={countByStatus.draft}
+        drafts={countByStatus.draft}
         submitted={countByStatus.submitted}
         approved={countByStatus.approved}
         rejected={countByStatus.rejected}
-        total={timesheets.length}
       />
 
       <Card className="mt-6">
