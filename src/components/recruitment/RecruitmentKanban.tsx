@@ -2,7 +2,7 @@
 import React from "react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { RecruitmentPost, KanbanColumn } from "@/types/recruitment";
+import { RecruitmentPost, RecruitmentStatus, KanbanColumn as KanbanColumnType } from "@/types/recruitment";
 import KanbanColumn from "./KanbanColumn";
 
 interface RecruitmentKanbanProps {
@@ -12,7 +12,7 @@ interface RecruitmentKanbanProps {
 }
 
 const RecruitmentKanban: React.FC<RecruitmentKanbanProps> = ({ posts, onStatusChange, onPostClick }) => {
-  const columns: KanbanColumn[] = [
+  const columns: KanbanColumnType[] = [
     { id: 'ouverte', title: 'Ouverte', items: [] },
     { id: 'en_cours', title: 'En cours', items: [] },
     { id: 'entretiens', title: 'Entretiens', items: [] },

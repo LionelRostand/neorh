@@ -1,24 +1,12 @@
 
 import React, { useState, useEffect } from "react";
-import { 
-  Briefcase, 
-  Clock, 
-  Check, 
-  Users, 
-  Calendar, 
-  Kanban, 
-  List, 
-  PlusCircle 
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RecruitmentStatsData, RecruitmentPost } from "@/types/recruitment";
 
+import RecruitmentHeader from "@/components/recruitment/RecruitmentHeader";
 import RecruitmentStats from "@/components/recruitment/RecruitmentStats";
-import RecruitmentKanban from "@/components/recruitment/RecruitmentKanban";
-import RecruitmentList from "@/components/recruitment/RecruitmentList";
-import NewPostDialog from "@/components/recruitment/NewPostDialog";
-import ViewPostDialog from "@/components/recruitment/ViewPostDialog";
+import RecruitmentViewTabs from "@/components/recruitment/RecruitmentViewTabs";
+import RecruitmentDialogs from "@/components/recruitment/RecruitmentDialogs";
+
 import useRecruitmentFirebaseData from "@/hooks/useRecruitmentFirebaseData";
 import useRecruitmentToEmployee from "@/hooks/useRecruitmentToEmployee";
 
@@ -80,80 +68,43 @@ const Recrutement = () => {
   };
 
   const handleConvertToEmployee = (post: RecruitmentPost) => {
-    convertToEmployee(post).then((success) => {
+    return convertToEmployee(post).then((success) => {
       if (success) {
         setViewDialogOpen(false);
       }
+      return success;
     });
+  };
+
+  const handleNewPostClick = () => {
+    setNewPostDialogOpen(true);
   };
 
   return (
     <div className="container py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Recrutement</h1>
-        <Button 
-          className="bg-emerald-600 hover:bg-emerald-700"
-          onClick={() => setNewPostDialogOpen(true)}
-        >
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Nouvelle offre
-        </Button>
-      </div>
+      <RecruitmentHeader onNewPostClick={handleNewPostClick} />
       
       <RecruitmentStats stats={stats} isLoading={loading} />
       
-      <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'kanban' | 'list')}>
-        <div className="flex items-center gap-2 mb-4">
-          <TabsList>
-            <TabsTrigger value="kanban">
-              <Kanban className="h-4 w-4 mr-2" />
-              Kanban
-            </TabsTrigger>
-            <TabsTrigger value="list">
-              <List className="h-4 w-4 mr-2" />
-              Liste
-            </TabsTrigger>
-          </TabsList>
-        </div>
-        
-        <TabsContent value="kanban" className="mt-4">
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-[70vh] bg-gray-100 animate-pulse rounded-md"></div>
-              ))}
-            </div>
-          ) : (
-            <RecruitmentKanban 
-              posts={posts} 
-              onStatusChange={handleStatusChange} 
-              onPostClick={handlePostClick} 
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="list">
-          {loading ? (
-            <div className="w-full h-96 bg-gray-100 animate-pulse rounded-md"></div>
-          ) : (
-            <RecruitmentList posts={posts} onPostClick={handlePostClick} />
-          )}
-        </TabsContent>
-      </Tabs>
-      
-      <NewPostDialog 
-        open={newPostDialogOpen}
-        onOpenChange={setNewPostDialogOpen}
-        onSubmit={handleCreatePost}
-        isLoading={loading}
+      <RecruitmentViewTabs 
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        posts={posts}
+        loading={loading}
+        onPostClick={handlePostClick}
+        onStatusChange={handleStatusChange}
       />
       
-      <ViewPostDialog 
-        open={viewDialogOpen}
-        onOpenChange={setViewDialogOpen}
-        post={selectedPost}
+      <RecruitmentDialogs 
+        newPostDialogOpen={newPostDialogOpen}
+        setNewPostDialogOpen={setNewPostDialogOpen}
+        viewDialogOpen={viewDialogOpen}
+        setViewDialogOpen={setViewDialogOpen}
+        selectedPost={selectedPost}
+        onCreatePost={handleCreatePost}
         onStatusChange={handleStatusChange}
         onConvertToEmployee={handleConvertToEmployee}
+        isLoading={loading}
         isConverting={converting}
       />
     </div>
