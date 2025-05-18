@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Check, X } from "lucide-react";
 import { Timesheet } from "@/lib/constants";
 import { useNavigate } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface TimesheetsTableProps {
   timesheets: Timesheet[];
@@ -23,11 +25,43 @@ const TimesheetsTable = ({
   onReject 
 }: TimesheetsTableProps) => {
   const navigate = useNavigate();
+  const [employeeNames, setEmployeeNames] = useState<Record<string, string>>({});
   
   console.log('TimesheetsTable rendering with:', {
     timesheetsCount: timesheets?.length || 0,
     loading
   });
+
+  // Fetch employee names when timesheets change
+  useEffect(() => {
+    const fetchEmployeeNames = async () => {
+      const uniqueEmployeeIds = [...new Set(timesheets.map(t => t.employeeId).filter(Boolean))];
+      const namesMap: Record<string, string> = {};
+      
+      for (const empId of uniqueEmployeeIds) {
+        if (!empId) continue;
+        
+        try {
+          const empDoc = await getDoc(doc(db, 'hr_employees', empId));
+          if (empDoc.exists()) {
+            const data = empDoc.data();
+            namesMap[empId] = `${data.firstName || ''} ${data.lastName || ''}`.trim() || empId;
+          } else {
+            namesMap[empId] = empId;
+          }
+        } catch (err) {
+          console.error(`Error fetching employee ${empId}:`, err);
+          namesMap[empId] = empId;
+        }
+      }
+      
+      setEmployeeNames(namesMap);
+    };
+    
+    if (timesheets?.length > 0) {
+      fetchEmployeeNames();
+    }
+  }, [timesheets]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -94,7 +128,7 @@ const TimesheetsTable = ({
       <TableHeader>
         <TableRow>
           <TableHead>Date</TableHead>
-          <TableHead>Employé ID</TableHead>
+          <TableHead>Employé</TableHead>
           <TableHead>Description</TableHead>
           <TableHead>Statut</TableHead>
           <TableHead className="text-right">Actions</TableHead>
@@ -104,7 +138,19 @@ const TimesheetsTable = ({
         {validTimesheets.map((timesheet) => (
           <TableRow key={timesheet.id}>
             <TableCell>{timesheet.date || (timesheet.weekStartDate ? `${timesheet.weekStartDate} - ${timesheet.weekEndDate || ''}` : 'Non défini')}</TableCell>
-            <TableCell>{timesheet.employeeId || 'Non défini'}</TableCell>
+            <TableCell>
+              {timesheet.employeeId ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
+                    <span>{(employeeNames[timesheet.employeeId] || timesheet.employeeId || '?').charAt(0).toUpperCase()}</span>
+                  </div>
+                  <div>
+                    <div className="font-medium">{employeeNames[timesheet.employeeId] || timesheet.employeeId}</div>
+                    <div className="text-xs text-gray-500">{timesheet.employeeId}</div>
+                  </div>
+                </div>
+              ) : 'Non défini'}
+            </TableCell>
             <TableCell>{timesheet.taskDescription || '-'}</TableCell>
             <TableCell>{getStatusBadge(timesheet.status || 'draft')}</TableCell>
             <TableCell className="text-right flex justify-end items-center space-x-2">
