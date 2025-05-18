@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import Layout from "./components/Layout";
@@ -23,6 +22,7 @@ import Recrutement from "./pages/Recrutement";
 import Projets from "./pages/Projets";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import WeeklyProjectsTimesheet from "./components/timesheet/weekly-timesheet/WeeklyProjectsTimesheet";
 
 import "./App.css";
 
