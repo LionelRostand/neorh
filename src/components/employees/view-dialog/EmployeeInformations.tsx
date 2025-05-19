@@ -13,12 +13,12 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
   const [departmentName, setDepartmentName] = useState<string>(employee.department || 'Non spécifié');
 
   useEffect(() => {
-    // Si nous avons déjà le nom du département, pas besoin de le récupérer
-    if (employee.department && !employee.department.includes('dCij')) {
+    // If we have a proper department name already, use it
+    if (employee.department && !employee.department.includes('QFW') && !employee.department.includes('dCij')) {
       return;
     }
     
-    // Si nous avons l'ID du département, récupérer son nom
+    // If we have the ID of the department, get its name
     if (employee.departmentId) {
       const fetchDepartmentName = async () => {
         try {
