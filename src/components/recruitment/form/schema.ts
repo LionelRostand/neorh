@@ -7,6 +7,10 @@ export const recruitmentFormSchema = z.object({
   description: z.string().optional(),
   location: z.string().optional(),
   contractType: z.string().optional(),
+  salary: z.string().optional(),
+  experience: z.string().optional(),
+  educationLevel: z.string().optional(),
+  remote: z.boolean().optional().default(false),
   priority: z.enum(['low', 'medium', 'high']).optional(),
   status: z.enum(['ouverte', 'en_cours', 'entretiens', 'offre', 'fermée'])
 });

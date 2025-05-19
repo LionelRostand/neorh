@@ -26,6 +26,27 @@ const EmployeesHierarchy: React.FC<EmployeesHierarchyProps> = ({
     return employees.filter(emp => emp.departmentId === departmentFilter);
   }, [employees, departmentFilter]);
 
+  // Build the hierarchical structure for display
+  const organizeEmployeesHierarchy = (allEmployees: Employee[]) => {
+    // First, identify the CEO/root employee
+    const rootEmployee = departmentFilter === "all" 
+      ? allEmployees.find(emp => !emp.managerId) 
+      : null;
+
+    if (rootEmployee || departmentFilter !== "all") {
+      return allEmployees;
+    }
+
+    // If no root employee is found but we need to display all,
+    // return all employees anyway to prevent empty display
+    return allEmployees;
+  };
+
+  // Get the organized list of employees
+  const organizedEmployees = useMemo(() => {
+    return organizeEmployeesHierarchy(filteredEmployees);
+  }, [filteredEmployees]);
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-96">
@@ -45,7 +66,7 @@ const EmployeesHierarchy: React.FC<EmployeesHierarchyProps> = ({
     );
   }
 
-  if (!filteredEmployees || filteredEmployees.length === 0) {
+  if (!organizedEmployees || organizedEmployees.length === 0) {
     return (
       <div className="flex justify-center items-center h-96">
         <p className="text-gray-500">
@@ -57,21 +78,26 @@ const EmployeesHierarchy: React.FC<EmployeesHierarchyProps> = ({
     );
   }
 
-  // Find the CEO if in "all" mode, otherwise find the department manager
+  // Find the CEO or department manager to use as root
   let rootEmployee: Employee | undefined;
   
   if (departmentFilter === "all") {
     // In global mode, take the CEO (without manager)
-    rootEmployee = filteredEmployees.find(emp => emp.managerId === undefined);
+    rootEmployee = organizedEmployees.find(emp => emp.managerId === undefined);
+    
+    // If no CEO is found, use the first employee as root
+    if (!rootEmployee && organizedEmployees.length > 0) {
+      rootEmployee = organizedEmployees[0];
+    }
   } else {
     // Find the manager of the selected department
     // First look for department employees who are managers
-    const departmentManagers = filteredEmployees.filter(emp => 
-      !filteredEmployees.some(other => other.id === emp.managerId)
+    const departmentManagers = organizedEmployees.filter(emp => 
+      !organizedEmployees.some(other => other.id === emp.managerId)
     );
     
     // Take the first one found as root
-    rootEmployee = departmentManagers.length > 0 ? departmentManagers[0] : filteredEmployees[0];
+    rootEmployee = departmentManagers.length > 0 ? departmentManagers[0] : organizedEmployees[0];
   }
 
   return (
@@ -80,7 +106,7 @@ const EmployeesHierarchy: React.FC<EmployeesHierarchyProps> = ({
         <div className="hierarchy-tree w-full max-w-5xl">
           <HierarchyNode 
             employee={rootEmployee} 
-            employees={filteredEmployees} 
+            employees={organizedEmployees} 
             level={0}
             showDepartments={showDepartments}
           />

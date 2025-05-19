@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   Card, 
   CardContent 
@@ -19,11 +19,8 @@ const Contrats = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { getAll, isLoading, error } = useCollection<'hr_contracts'>();
 
-  useEffect(() => {
-    fetchContracts();
-  }, []);
-
-  const fetchContracts = async () => {
+  // Fonction pour récupérer les contrats
+  const fetchContracts = useCallback(async () => {
     setLoading(true);
     try {
       const result = await getAll();
@@ -51,7 +48,12 @@ const Contrats = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getAll]);
+
+  // Charger les contrats au chargement de la page
+  useEffect(() => {
+    fetchContracts();
+  }, [fetchContracts]);
 
   // Count contracts by status
   const countByStatus = {
@@ -82,6 +84,11 @@ const Contrats = () => {
     });
   };
 
+  // Rafraîchir les contrats manuellement
+  const handleRefresh = useCallback(() => {
+    fetchContracts();
+  }, [fetchContracts]);
+
   // Filter contracts based on search term
   const filteredContracts = contracts.filter(contract => 
     contract.employeeName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -90,10 +97,11 @@ const Contrats = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">Gestion des contrats</h1>
+          <p className="text-muted-foreground">Gérez les contrats des employés</p>
         </div>
         <Button 
           onClick={handleNewContract} 
@@ -113,7 +121,16 @@ const Contrats = () => {
       <Card>
         <CardContent className="p-0">
           <div className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Liste des contrats</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Liste des contrats</h2>
+              <Button 
+                variant="outline" 
+                onClick={handleRefresh}
+                size="sm"
+              >
+                Rafraîchir
+              </Button>
+            </div>
             
             <ContractSearch 
               value={searchTerm}
