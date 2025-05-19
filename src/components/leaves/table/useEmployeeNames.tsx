@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Leave } from "@/lib/constants";
+import { Leave } from "@/types/firebase";
 
 export const useEmployeeNames = (leaves: Leave[]) => {
   const [employeeNames, setEmployeeNames] = useState<Record<string, string>>({});
