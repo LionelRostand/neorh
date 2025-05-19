@@ -11,24 +11,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Users } from "lucide-react";
-
-interface Evaluation {
-  id: string;
-  employee: string;
-  title: string;
-  date: string;
-  evaluator: string;
-  status: "planifiée" | "complétée" | "annulée";
-}
+import { Evaluation } from "@/hooks/useEmployeeEvaluations";
 
 interface EvaluationTableProps {
   evaluations: Evaluation[];
+  loading?: boolean;
   onDelete: (id: string) => void;
   onModify: (id: string) => void;
   onManage: (id: string) => void;
 }
 
-const EvaluationTable = ({ evaluations, onDelete, onModify, onManage }: EvaluationTableProps) => {
+const EvaluationTable = ({ evaluations, loading, onDelete, onModify, onManage }: EvaluationTableProps) => {
   const getStatusBadgeClass = (status: string) => {
     switch(status) {
       case "planifiée":
@@ -42,27 +35,47 @@ const EvaluationTable = ({ evaluations, onDelete, onModify, onManage }: Evaluati
     }
   };
 
+  if (loading) {
+    return (
+      <div className="py-8">
+        <div className="flex justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!evaluations || evaluations.length === 0) {
+    return (
+      <div className="border rounded-md p-8 text-center">
+        <p className="text-gray-500">Aucune évaluation trouvée</p>
+      </div>
+    );
+  }
+
   return (
     <div className="border rounded-md">
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-50">
-            <TableHead className="font-medium">ID</TableHead>
-            <TableHead className="font-medium">Nom</TableHead>
-            <TableHead className="font-medium">Description</TableHead>
-            <TableHead className="font-medium">Manager</TableHead>
-            <TableHead className="font-medium">Employés</TableHead>
+            <TableHead className="font-medium">Titre</TableHead>
+            <TableHead className="font-medium">Date</TableHead>
+            <TableHead className="font-medium">Évaluateur</TableHead>
+            <TableHead className="font-medium">Status</TableHead>
             <TableHead className="text-right font-medium">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {evaluations.map((evaluation) => (
             <TableRow key={evaluation.id}>
-              <TableCell className="font-mono text-xs">{evaluation.id}</TableCell>
               <TableCell>{evaluation.title}</TableCell>
+              <TableCell>{evaluation.date}</TableCell>
               <TableCell>{evaluation.evaluator}</TableCell>
-              <TableCell>{evaluation.employee}</TableCell>
-              <TableCell>0</TableCell>
+              <TableCell>
+                <Badge className={getStatusBadgeClass(evaluation.status)}>
+                  {evaluation.status}
+                </Badge>
+              </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button
@@ -70,7 +83,7 @@ const EvaluationTable = ({ evaluations, onDelete, onModify, onManage }: Evaluati
                     size="sm"
                     onClick={() => onModify(evaluation.id)}
                   >
-                    <Edit className="h-4 w-4" /> Modifier
+                    <Edit className="h-4 w-4 mr-1" /> Modifier
                   </Button>
                   <Button 
                     variant="outline"
@@ -78,14 +91,14 @@ const EvaluationTable = ({ evaluations, onDelete, onModify, onManage }: Evaluati
                     className="text-red-500 hover:text-red-700 hover:bg-red-50"
                     onClick={() => onDelete(evaluation.id)}
                   >
-                    <Trash2 className="h-4 w-4" /> Supprimer
+                    <Trash2 className="h-4 w-4 mr-1" /> Supprimer
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onManage(evaluation.id)}
                   >
-                    <Users className="h-4 w-4" /> Gérer
+                    <Users className="h-4 w-4 mr-1" /> Gérer
                   </Button>
                 </div>
               </TableCell>
