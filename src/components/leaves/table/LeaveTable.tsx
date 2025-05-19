@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Table } from "@/components/ui/table";
-import { Leave } from "@/lib/constants";
+import { Leave } from "@/types/firebase";
 import LeaveTableHeader from "./LeaveTableHeader";
 import LeaveTableBody from "./LeaveTableBody";
 import useEmployeeNames from "./useEmployeeNames";

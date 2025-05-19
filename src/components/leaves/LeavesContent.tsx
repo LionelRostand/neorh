@@ -5,7 +5,7 @@ import LeaveStatusCards from "./LeaveStatusCards";
 import LeaveFilters from "./LeaveFilters";
 import LeaveTable from "./table/LeaveTable";
 import LeaveTypesList from "./types/LeaveTypesList";
-import { Leave } from "@/lib/constants";
+import { Leave } from "@/types/firebase"; // Updated import
 
 interface LeavesContentProps {
   leaves: Leave[];

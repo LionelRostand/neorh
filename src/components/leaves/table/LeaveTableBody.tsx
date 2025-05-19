@@ -1,7 +1,7 @@
 
 import React from "react";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { Leave } from "@/lib/constants";
+import { Leave } from "@/types/firebase";
 import EmployeeCell from "./EmployeeCell";
 import LeaveTypeBadge from "./LeaveTypeBadge";
 import DateRangeDisplay from "./DateRangeDisplay";

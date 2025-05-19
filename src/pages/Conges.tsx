@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
 import { useCollection } from "@/hooks/useCollection";
-import { Leave } from "@/types/firebase"; // Updated import
+import { Leave } from "@/types/firebase"; // Using the firebase type consistently
 import NewLeaveRequestForm from "@/components/leaves/NewLeaveRequestForm";
 import LeaveAllocationForm from "@/components/leaves/allocation/LeaveAllocationForm";
 import LeavesHeader from "@/components/leaves/LeavesHeader";

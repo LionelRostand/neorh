@@ -16,6 +16,8 @@ const LeaveTypeBadge = ({ type }: LeaveTypeBadgeProps) => {
       case 'maternity': return 'Congé Maternité';
       case 'paternity': return 'Congé Paternité';
       case 'annual': return 'Congé annuel';
+      case 'other': return 'Autre congé';
+      case 'allocation': return 'Allocation';
       default: return type;
     }
   };
