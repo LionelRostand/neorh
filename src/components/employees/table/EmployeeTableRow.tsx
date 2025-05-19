@@ -2,10 +2,11 @@
 import React from 'react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Mail, Phone, Building2, Calendar } from 'lucide-react';
+import { Mail, Phone, Calendar } from 'lucide-react';
 import { Employee } from '@/types/employee';
 import EmployeeStatus from './EmployeeStatus';
 import EmployeeActions from './EmployeeActions';
+import DepartmentCell from './DepartmentCell';
 
 interface EmployeeTableRowProps {
   employee: Employee;
@@ -54,10 +55,10 @@ const EmployeeTableRow: React.FC<EmployeeTableRowProps> = ({
         </div>
       </TableCell>
       <TableCell className="hidden md:table-cell">
-        <div className="flex items-center">
-          <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
-          {employee.department || 'Non assigné'}
-        </div>
+        <DepartmentCell 
+          departmentId={employee.departmentId || ''} 
+          departmentName={employee.department || ''}
+        />
       </TableCell>
       <TableCell className="hidden md:table-cell">
         <EmployeeStatus status={employee.status} />
