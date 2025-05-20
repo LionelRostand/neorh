@@ -28,6 +28,14 @@ export const generateEmployeePdfWithDocuments = async (
 ) => {
   const doc = new JsPDF();
   
+  // Améliorer la qualité et la lisibilité du PDF
+  doc.setProperties({
+    title: `Fiche Employé - ${employee.name || 'Sans nom'}`,
+    subject: 'Informations employé',
+    author: 'Système RH',
+    creator: 'Application RH'
+  });
+  
   // Format employee status
   const status = formatEmployeeStatus(employee);
   

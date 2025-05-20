@@ -22,17 +22,21 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
   const personalInfoData = [
     ['Nom', employee.name || 'Non spécifié'],
     ['Email personnel', employee.personalEmail || 'Non spécifié'],
-    ['Email professionnel', employee.professionalEmail || employee.email || 'Non spécifié'],
     ['Téléphone', employee.phone || 'Non spécifié'],
     ['Date de naissance', employee.birthDate || 'Non spécifié']
   ];
   
+  // Utilisation de autoTable avec une configuration améliorée pour une meilleure visibilité
   autoTable(doc, {
     startY: startY + 20,
     head: [],
     body: personalInfoData,
     theme: 'plain',
-    styles: { fontSize: 10, cellPadding: 4 },
+    styles: { 
+      fontSize: 10, 
+      cellPadding: 5,
+      textColor: [0, 0, 0] // Noir pour une meilleure visibilité
+    },
     columnStyles: { 
       0: { fontStyle: 'bold', cellWidth: 60 },
       1: { cellWidth: 'auto' }
@@ -62,7 +66,11 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
     head: [],
     body: professionalInfoData,
     theme: 'plain',
-    styles: { fontSize: 10, cellPadding: 4 },
+    styles: { 
+      fontSize: 10, 
+      cellPadding: 5,
+      textColor: [0, 0, 0] // Noir pour une meilleure visibilité
+    },
     columnStyles: { 
       0: { fontStyle: 'bold', cellWidth: 60 },
       1: { cellWidth: 'auto' }

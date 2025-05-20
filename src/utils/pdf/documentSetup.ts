@@ -13,9 +13,9 @@ export const setupDocument = (
   statusColor?: string, 
   company?: Company
 ) => {
-  // Définir les couleurs et styles
-  const primaryColor = '#000000';
-  const secondaryColor = '#666666';
+  // Définir les couleurs et styles pour une meilleure visibilité
+  const primaryColor = '#000000'; // Noir pur pour le texte principal
+  const secondaryColor = '#333333'; // Gris foncé pour le texte secondaire
   const statusStyle = statusColor || '#22c55e';
   
   // Informations de l'entreprise (en-tête)
@@ -153,7 +153,7 @@ export const addPageFooter = (doc: jsPDF) => {
   
   for(let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
-    doc.setTextColor('#666666');
+    doc.setTextColor('#000000'); // Noir pur pour une meilleure visibilité
     doc.text(`Page ${i} sur ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
   }
 

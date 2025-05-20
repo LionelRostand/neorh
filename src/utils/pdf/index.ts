@@ -33,6 +33,14 @@ export const generateEmployeePdf = (employee: Employee, activeTab: string, optio
   // Initialisation du document PDF
   const doc = new jsPDF();
   
+  // Améliorer la qualité et la lisibilité du PDF
+  doc.setProperties({
+    title: `Fiche Employé - ${employee.name || 'Sans nom'}`,
+    subject: 'Informations employé',
+    author: 'Système RH',
+    creator: 'Application RH'
+  });
+  
   // Format employee status
   const status = formatEmployeeStatus(employee);
   
@@ -47,8 +55,6 @@ export const generateEmployeePdf = (employee: Employee, activeTab: string, optio
   );
   
   // Contenu en fonction de l'onglet actif
-  const startY = 85;
-  
   switch (activeTab as PdfTab) {
     case 'informations':
       generateInformationsTab(doc, employee);
