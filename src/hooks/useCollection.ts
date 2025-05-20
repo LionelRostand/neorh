@@ -1,23 +1,41 @@
 
-import { useLocation } from 'react-router-dom';
-import { useFirestore } from './useFirestore';
-import { ROUTE_TO_COLLECTION_MAP, CollectionTypes } from '@/lib/constants';
+import { useState } from 'react';
+import useFirestore from '@/hooks/useFirestore';
 
-/**
- * Hook qui retourne la collection Firestore correspondant à la route actuelle
- */
-export function useCollection<T extends keyof CollectionTypes>() {
-  const location = useLocation();
-  const currentPath = location.pathname;
-  
-  // Obtenir le nom de la collection correspondant à la route actuelle
-  const collectionName = ROUTE_TO_COLLECTION_MAP[currentPath as keyof typeof ROUTE_TO_COLLECTION_MAP] || '';
-  
-  // Utiliser useFirestore avec la collection déterminée
-  const collection = useFirestore<CollectionTypes[T]>(collectionName as any);
-  
-  return {
-    ...collection,
-    collectionName
+// Wrapper pour maintenir la compatibilité avec l'ancien code
+export const useCollection = <T extends string>() => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  // Déterminer la collection en fonction du type générique
+  const getCollectionName = () => {
+    // Le nom de la collection est extrait du type générique T
+    return String(T);
   };
-}
+
+  // Utiliser le hook useFirestore moderne
+  const firestore = useFirestore<any>(getCollectionName());
+
+  // Exposer les méthodes compatibles avec l'ancien hook
+  const getAll = async () => {
+    setIsLoading(true);
+    try {
+      const result = await firestore.getAll();
+      return result;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Erreur lors de la récupération des documents");
+      setError(error);
+      return { docs: [] };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    getAll,
+    isLoading,
+    error
+  };
+};
+
+export default useCollection;

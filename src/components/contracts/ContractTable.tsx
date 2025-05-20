@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Contract } from "@/lib/constants";
 import ContractStatusBadge from "./ContractStatusBadge";
 import ContractActions from "./ContractActions";
+import EmployeeCell from "./EmployeeCell";
 
 interface ContractTableProps {
   contracts: Contract[];
@@ -40,12 +41,10 @@ const ContractTable = ({ contracts, loading, onDetails, onEdit }: ContractTableP
             contracts.map((contract) => (
               <TableRow key={contract.id}>
                 <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
-                      {contract.employeeName?.charAt(0) || '?'}
-                    </div>
-                    <div className="font-medium">{contract.employeeName || 'Employé inconnu'}</div>
-                  </div>
+                  <EmployeeCell 
+                    employeeId={contract.employeeId || ''} 
+                    employeeName={contract.employeeName || 'Employé inconnu'} 
+                  />
                 </TableCell>
                 <TableCell>{contract.position || 'Non spécifié'}</TableCell>
                 <TableCell>{contract.type}</TableCell>
@@ -65,15 +64,14 @@ const ContractTable = ({ contracts, loading, onDetails, onEdit }: ContractTableP
             ))
           )}
 
-          {/* Example rows for demonstration when no contracts */}
           {contracts.length === 0 && !loading && (
             <>
               <TableRow>
                 <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">L</div>
-                    <div className="font-medium">Lionel DJOSSA</div>
-                  </div>
+                  <EmployeeCell 
+                    employeeId="example1"
+                    employeeName="Lionel DJOSSA" 
+                  />
                 </TableCell>
                 <TableCell>PDG</TableCell>
                 <TableCell>CDI</TableCell>
@@ -92,10 +90,10 @@ const ContractTable = ({ contracts, loading, onDetails, onEdit }: ContractTableP
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">?</div>
-                    <div className="font-medium">Employé inconnu</div>
-                  </div>
+                  <EmployeeCell 
+                    employeeId="example2"
+                    employeeName="Employé inconnu" 
+                  />
                 </TableCell>
                 <TableCell>Non spécifié</TableCell>
                 <TableCell>CDI</TableCell>

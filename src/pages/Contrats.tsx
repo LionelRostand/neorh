@@ -1,29 +1,29 @@
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Card, 
   CardContent 
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { useCollection } from "@/hooks/useCollection";
 import { toast } from "@/components/ui/use-toast";
 import { Contract } from "@/lib/constants";
 import ContractStatusCards from "@/components/contracts/ContractStatusCards";
 import ContractSearch from "@/components/contracts/ContractSearch";
 import ContractTable from "@/components/contracts/ContractTable";
+import useFirestore from "@/hooks/useFirestore";
 
 const Contrats = () => {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const { getAll, isLoading, error } = useCollection<'hr_contracts'>();
+  const firestore = useFirestore<Contract>('hr_contracts');
 
   // Fonction pour récupérer les contrats
-  const fetchContracts = useCallback(async () => {
+  const fetchContracts = async () => {
     setLoading(true);
     try {
-      const result = await getAll();
+      const result = await firestore.getAll();
       if (result.docs) {
         const typedContracts = result.docs.map(doc => ({
           id: doc.id || '',
@@ -48,12 +48,14 @@ const Contrats = () => {
     } finally {
       setLoading(false);
     }
-  }, [getAll]);
+  };
 
   // Charger les contrats au chargement de la page
   useEffect(() => {
     fetchContracts();
-  }, [fetchContracts]);
+    // Ne pas ajouter de dépendances à ce useEffect pour éviter la boucle infinie
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Count contracts by status
   const countByStatus = {
@@ -85,9 +87,9 @@ const Contrats = () => {
   };
 
   // Rafraîchir les contrats manuellement
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = () => {
     fetchContracts();
-  }, [fetchContracts]);
+  };
 
   // Filter contracts based on search term
   const filteredContracts = contracts.filter(contract => 
