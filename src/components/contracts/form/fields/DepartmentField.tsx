@@ -16,10 +16,11 @@ import {
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
 import { ContractFormValues } from "../schema";
+import { Department } from "@/types/firebase";
 
 interface DepartmentFieldProps {
   form: UseFormReturn<ContractFormValues>;
-  departments: Array<{ id: string; name: string }>;
+  departments: Department[];
 }
 
 export default function DepartmentField({ form, departments }: DepartmentFieldProps) {
@@ -38,7 +39,7 @@ export default function DepartmentField({ form, departments }: DepartmentFieldPr
             </FormControl>
             <SelectContent>
               {departments.map((department) => (
-                <SelectItem key={department.id} value={department.id}>
+                <SelectItem key={department.id || ''} value={department.id || ''}>
                   {department.name}
                 </SelectItem>
               ))}
