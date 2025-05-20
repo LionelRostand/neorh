@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +16,7 @@ import { useDepartmentsData } from '@/hooks/useDepartmentsData';
 import { useEmployeeData } from '@/hooks/useEmployeeData';
 import { useCompaniesData } from '@/hooks/useCompaniesData';
 import { Contract } from '@/lib/constants';
-import { generateContractPdf, saveContractAsDocument } from '@/utils/pdf/generateContractPdf';
+import { generateContractPdf, saveContractAsDocument, ContractData } from '@/utils/pdf';
 
 interface ContractFormProps {
   onCancel?: () => void;
@@ -87,7 +86,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
         const contractId = result.id;
         
         // Ensure all required fields are present
-        const contractData = {
+        const contractData: ContractData = {
           id: contractId,
           employeeId: data.employeeId,
           employeeName: data.employeeName || '',
