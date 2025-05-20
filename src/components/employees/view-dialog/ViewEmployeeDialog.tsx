@@ -7,6 +7,7 @@ import { toast } from '@/components/ui/use-toast';
 import EmployeeHeader from './EmployeeHeader';
 import EmployeeTabs from './EmployeeTabs';
 import { useCompaniesData } from '@/hooks/useCompaniesData';
+import { useDepartmentsData } from '@/hooks/useDepartmentsData';
 
 interface ViewEmployeeDialogProps {
   open: boolean;
@@ -24,6 +25,7 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
   const [activeTab, setActiveTab] = useState("informations");
   const [isExporting, setIsExporting] = useState(false);
   const { companies } = useCompaniesData();
+  const { departments } = useDepartmentsData();
   
   if (!employee) return null;
   
@@ -33,6 +35,20 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
       // Find the company data if available
       const employeeCompany = employee.companyId ? 
         companies.find(c => c.id === employee.companyId) : undefined;
+      
+      // Find department name if available
+      if (employee.departmentId && departments.length > 0) {
+        const department = departments.find(d => d.id === employee.departmentId);
+        if (department) {
+          // Temporarily update employee object with department name for PDF
+          employee.department = department.name;
+        }
+      }
+      
+      // Make sure company name is also shown in the PDF
+      if (employeeCompany) {
+        employee.companyId = employeeCompany.name;
+      }
       
       await generateEmployeePdfWithDocuments(employee, activeTab, { company: employeeCompany });
       toast({

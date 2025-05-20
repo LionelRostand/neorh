@@ -18,19 +18,25 @@ export const setupDocument = (
   const secondaryColor = '#666666';
   
   // Informations de l'entreprise (en-tête)
-  doc.setFontSize(14);
+  doc.setFontSize(22);  // Taille augmentée
   doc.setTextColor(primaryColor);
   doc.setFont('helvetica', 'bold');
   
   if (company) {
     // Use actual company data if provided
-    doc.text(company.name || 'ENTREPRISE', 14, 20);
+    doc.text(company.name || 'ENTREPRISE', 14, 25);  // Position Y ajustée
     
     doc.setFontSize(10);
     doc.setTextColor(secondaryColor);
     doc.setFont('helvetica', 'normal');
     
-    if (company.address) doc.text(company.address, 14, 30);
+    // Position Y de départ pour les informations supplémentaires
+    let infoY = 35;
+    
+    if (company.address) {
+      doc.text(company.address, 14, infoY);
+      infoY += 5;
+    }
     
     const locationParts = [];
     if (company.postalCode) locationParts.push(company.postalCode);
@@ -38,11 +44,15 @@ export const setupDocument = (
     if (company.country) locationParts.push(company.country);
     const locationText = locationParts.join(', ');
     
-    if (locationText) doc.text(locationText, 14, 40);
+    if (locationText) {
+      doc.text(locationText, 14, infoY);
+      infoY += 5;
+    }
     
     // Email de l'entreprise
     if (company.email) {
-      doc.text(`Email: ${company.email}`, 14, 50);
+      doc.text(`Email: ${company.email}`, 14, infoY);
+      infoY += 5;
     }
     
     // Add company logo if available
@@ -52,7 +62,7 @@ export const setupDocument = (
           company.logoUrl, 
           'JPEG', 
           doc.internal.pageSize.width - 70, 
-          15, 
+          20, 
           50, 
           30, 
           undefined, 
@@ -67,7 +77,7 @@ export const setupDocument = (
           company.logo.base64,
           'JPEG',
           doc.internal.pageSize.width - 70, 
-          15, 
+          20, 
           50, 
           30, 
           undefined, 
@@ -79,15 +89,15 @@ export const setupDocument = (
     }
   } else {
     // Default company info if none provided
-    doc.text('ENTREPRISE SARL', 14, 20);
+    doc.text('ENTREPRISE SARL', 14, 25);  // Position Y ajustée
     
     doc.setFontSize(10);
     doc.setTextColor(secondaryColor);
     doc.setFont('helvetica', 'normal');
     
-    doc.text('123 Rue des Entreprises', 14, 30);
+    doc.text('123 Rue des Entreprises', 14, 35);
     doc.text('75000 Paris, France', 14, 40);
-    doc.text('Email: contact@entreprise.fr', 14, 50);
+    doc.text('Email: contact@entreprise.fr', 14, 45);
   }
   
   // Ligne de séparation
