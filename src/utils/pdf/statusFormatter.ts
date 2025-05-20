@@ -13,6 +13,6 @@ export const formatEmployeeStatus = (employee: Employee): { text: string; color:
     case 'inactive':
       return { text: 'Inactif', color: '#ef4444' }; // red
     default:
-      return { text: 'Indéfini', color: '#6b7280' }; // gray
+      return { text: 'Non spécifié', color: '#6b7280' }; // gray
   }
 };

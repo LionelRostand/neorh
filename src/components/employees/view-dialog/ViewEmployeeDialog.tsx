@@ -36,21 +36,24 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
       const employeeCompany = employee.companyId ? 
         companies.find(c => c.id === employee.companyId) : undefined;
       
+      // Create a copy of the employee object to avoid modifying the original
+      const employeeCopy = { ...employee };
+      
       // Find department name if available
       if (employee.departmentId && departments.length > 0) {
         const department = departments.find(d => d.id === employee.departmentId);
         if (department) {
-          // Temporarily update employee object with department name for PDF
-          employee.department = department.name;
+          // Set department name for PDF
+          employeeCopy.department = department.name;
         }
       }
       
       // Make sure company name is also shown in the PDF
       if (employeeCompany) {
-        employee.companyId = employeeCompany.name;
+        employeeCopy.companyId = employeeCompany.name;
       }
       
-      await generateEmployeePdfWithDocuments(employee, activeTab, { company: employeeCompany });
+      await generateEmployeePdfWithDocuments(employeeCopy, activeTab, { company: employeeCompany });
       toast({
         title: "Exportation réussie",
         description: "Le document PDF a été généré avec succès",

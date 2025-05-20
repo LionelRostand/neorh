@@ -16,22 +16,23 @@ export const setupDocument = (
   // Définir les couleurs et styles
   const primaryColor = '#000000';
   const secondaryColor = '#666666';
+  const statusStyle = statusColor || '#22c55e';
   
   // Informations de l'entreprise (en-tête)
-  doc.setFontSize(22);  // Taille augmentée
+  doc.setFontSize(11);
   doc.setTextColor(primaryColor);
   doc.setFont('helvetica', 'bold');
   
   if (company) {
     // Use actual company data if provided
-    doc.text(company.name || 'ENTREPRISE', 14, 25);  // Position Y ajustée
+    doc.text(company.name || 'ENTREPRISE', 14, 20);
     
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setTextColor(secondaryColor);
     doc.setFont('helvetica', 'normal');
     
     // Position Y de départ pour les informations supplémentaires
-    let infoY = 35;
+    let infoY = 25;
     
     if (company.address) {
       doc.text(company.address, 14, infoY);
@@ -49,6 +50,12 @@ export const setupDocument = (
       infoY += 5;
     }
     
+    // Téléphone
+    if (company.phone) {
+      doc.text(`Tél: ${company.phone}`, 14, infoY);
+      infoY += 5;
+    }
+    
     // Email de l'entreprise
     if (company.email) {
       doc.text(`Email: ${company.email}`, 14, infoY);
@@ -61,10 +68,10 @@ export const setupDocument = (
         doc.addImage(
           company.logoUrl, 
           'JPEG', 
-          doc.internal.pageSize.width - 70, 
-          20, 
-          50, 
-          30, 
+          doc.internal.pageSize.width - 60, 
+          15, 
+          40, 
+          25, 
           undefined, 
           'FAST'
         );
@@ -76,10 +83,10 @@ export const setupDocument = (
         doc.addImage(
           company.logo.base64,
           'JPEG',
-          doc.internal.pageSize.width - 70, 
-          20, 
-          50, 
-          30, 
+          doc.internal.pageSize.width - 60, 
+          15, 
+          40, 
+          25, 
           undefined, 
           'FAST'
         );
@@ -89,27 +96,44 @@ export const setupDocument = (
     }
   } else {
     // Default company info if none provided
-    doc.text('ENTREPRISE SARL', 14, 25);  // Position Y ajustée
+    doc.text('ENTREPRISE SARL', 14, 20);
     
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setTextColor(secondaryColor);
     doc.setFont('helvetica', 'normal');
     
-    doc.text('123 Rue des Entreprises', 14, 35);
-    doc.text('75000 Paris, France', 14, 40);
-    doc.text('Email: contact@entreprise.fr', 14, 45);
+    doc.text('123 Rue des Entreprises', 14, 25);
+    doc.text('75000 Paris, France', 14, 30);
+    doc.text('Email: contact@entreprise.fr', 14, 35);
   }
   
-  // Ligne de séparation
-  doc.setDrawColor(200, 200, 200);
-  doc.line(14, 60, 196, 60);
+  // Titre du document
+  doc.setFontSize(16);
+  doc.setTextColor(primaryColor);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Fiche Employé', 14, 55);
+  
+  // Statut
+  if (statusText) {
+    doc.setTextColor(statusColor || '#22c55e');
+    doc.setFontSize(10);
+    doc.text(`Statut: ${statusText}`, 14, 62);
+  }
+  
+  // Sous-titre (nom de l'employé)
+  if (subtitle) {
+    doc.setTextColor(primaryColor);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(subtitle, 14, 70);
+  }
   
   // Date de génération
   const today = new Date();
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setTextColor(secondaryColor);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Document généré le ${today.toLocaleDateString('fr-FR')}`, 14, 70);
+  doc.text(`Document généré le ${today.toLocaleDateString('fr-FR')}`, 14, 77);
 
   return doc;
 };

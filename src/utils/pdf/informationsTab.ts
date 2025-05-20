@@ -8,45 +8,33 @@ import { Employee } from '@/types/employee';
  */
 export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
   // Position de départ après l'en-tête
-  const startY = 85;
+  const startY = 90;
   
-  doc.setFontSize(24);
+  doc.setFontSize(14);
   doc.setTextColor('#000000');
   doc.setFont('helvetica', 'bold');
   doc.text('Informations de l\'employé', 14, startY);
   
-  doc.setFontSize(20);
-  doc.text('Fiche Employé', 14, startY + 15);
-  
-  // Afficher le statut à côté du titre
-  doc.setFontSize(14);
-  doc.setTextColor('#22c55e'); // Couleur verte pour "Actif"
-  doc.text(`Statut: ${employee.status === 'active' ? 'Actif' : 
-           employee.status === 'onLeave' ? 'En congé' : 
-           employee.status === 'inactive' ? 'Inactif' : 'Inconnu'}`, 14, startY + 30);
-  doc.setTextColor('#000000'); // Réinitialiser la couleur du texte
-  
   // Informations personnelles
-  doc.setFontSize(18);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Informations personnelles', 14, startY + 45);
+  doc.setFontSize(12);
+  doc.text('Informations personnelles', 14, startY + 15);
   
-  // Tableau des informations personnelles
   const personalInfoData = [
     ['Nom', employee.name || 'Non spécifié'],
-    ['Email', employee.personalEmail || employee.email || 'Non spécifié'],
+    ['Email personnel', employee.personalEmail || 'Non spécifié'],
+    ['Email professionnel', employee.professionalEmail || employee.email || 'Non spécifié'],
     ['Téléphone', employee.phone || 'Non spécifié'],
     ['Date de naissance', employee.birthDate || 'Non spécifié']
   ];
   
   autoTable(doc, {
-    startY: startY + 50,
+    startY: startY + 20,
     head: [],
     body: personalInfoData,
     theme: 'plain',
-    styles: { fontSize: 12, cellPadding: 5 },
+    styles: { fontSize: 10, cellPadding: 4 },
     columnStyles: { 
-      0: { fontStyle: 'bold', cellWidth: 150 },
+      0: { fontStyle: 'bold', cellWidth: 60 },
       1: { cellWidth: 'auto' }
     }
   });
@@ -55,7 +43,7 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
   // Use type assertion to access lastAutoTable
   const tableEndY = (doc as any).lastAutoTable.finalY + 15;
   
-  doc.setFontSize(18);
+  doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.text('Informations professionnelles', 14, tableEndY);
   
@@ -66,7 +54,7 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
     ['Date d\'embauche', employee.startDate || 'Non spécifié'],
     ['Statut', employee.status === 'active' ? 'Actif' : 
               employee.status === 'onLeave' ? 'En congé' : 
-              employee.status === 'inactive' ? 'Inactif' : 'Inconnu']
+              employee.status === 'inactive' ? 'Inactif' : 'Non spécifié']
   ];
   
   autoTable(doc, {
@@ -74,9 +62,9 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
     head: [],
     body: professionalInfoData,
     theme: 'plain',
-    styles: { fontSize: 12, cellPadding: 5 },
+    styles: { fontSize: 10, cellPadding: 4 },
     columnStyles: { 
-      0: { fontStyle: 'bold', cellWidth: 150 },
+      0: { fontStyle: 'bold', cellWidth: 60 },
       1: { cellWidth: 'auto' }
     }
   });
