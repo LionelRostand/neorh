@@ -11,7 +11,7 @@ export const saveContractAsDocument = async (
   firestore: any
 ): Promise<Document> => {
   try {
-    // Créer un objet document pour la collection hr_documents
+    // Create document object for hr_documents collection
     const document: Document = {
       id: contractData.id || Date.now().toString(),
       title: `Contrat ${contractData.type} - ${contractData.employeeName}`,
@@ -19,16 +19,16 @@ export const saveContractAsDocument = async (
       fileUrl: pdfData.pdfBase64,
       fileType: 'application/pdf',
       uploadDate: new Date().toISOString(),
-      status: contractData.status || 'active',
+      status: contractData.status || 'pending_signature',
       employeeId: contractData.employeeId,
       employeeName: contractData.employeeName,
       contractId: contractData.id,
       description: `Contrat de travail ${contractData.type} pour ${contractData.position}`,
-      signedByEmployee: contractData.signedByEmployee || false,
-      signedByEmployer: contractData.signedByEmployer || false,
+      signedByEmployee: false,
+      signedByEmployer: false,
     };
     
-    // Sauvegarder le document
+    // Save the document
     await firestore.add(document);
     
     return document;

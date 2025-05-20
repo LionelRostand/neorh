@@ -56,7 +56,9 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         startDate: data.startDate.toISOString(),
         endDate: data.endDate?.toISOString(),
         departmentId: data.departmentId,
-        status: 'active',
+        status: 'pending_signature',
+        signedByEmployee: false,
+        signedByEmployer: false
       };
       
       if (department?.name) {
@@ -91,7 +93,7 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
           departmentName: department?.name || '',
           salary: data.salary,
           conventionCollective: data.conventionCollective,
-          status: 'pending_signature' as const,
+          status: 'pending_signature',
           signedByEmployee: false,
           signedByEmployer: false
         };
