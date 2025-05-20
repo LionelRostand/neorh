@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
@@ -26,53 +26,55 @@ const DocumentsRH = () => {
     expired: 0
   });
 
-  useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        setLoading(true);
-        const result = await documentsCollection.getAll();
+  const fetchDocuments = useCallback(async () => {
+    try {
+      setLoading(true);
+      const result = await documentsCollection.getAll();
+      
+      if (result.docs) {
+        const fetchedDocs = result.docs.map(doc => ({
+          id: doc.id || '',
+          title: doc.title || 'Document sans nom',
+          category: doc.category || 'other',
+          fileUrl: doc.fileUrl || '',
+          fileType: doc.fileType || 'application/pdf',
+          uploadDate: doc.uploadDate || new Date().toISOString(),
+          status: doc.status || 'active',
+          employeeId: doc.employeeId,
+          employeeName: doc.employeeName,
+          contractId: doc.contractId,
+          description: doc.description,
+          signedByEmployee: doc.signedByEmployee || false,
+          signedByEmployer: doc.signedByEmployer || false
+        }));
         
-        if (result.docs) {
-          const fetchedDocs = result.docs.map(doc => ({
-            id: doc.id || '',
-            title: doc.title || 'Document sans nom',
-            category: doc.category || 'other',
-            fileUrl: doc.fileUrl || '',
-            fileType: doc.fileType || 'application/pdf',
-            uploadDate: doc.uploadDate || new Date().toISOString(),
-            status: doc.status || 'active',
-            employeeId: doc.employeeId,
-            employeeName: doc.employeeName,
-            contractId: doc.contractId,
-            description: doc.description
-          }));
-          
-          setDocuments(fetchedDocs);
-          
-          // Calculer les statistiques des contrats
-          const contracts = fetchedDocs.filter(doc => doc.category === 'contracts');
-          setContractStats({
-            total: contracts.length,
-            active: contracts.filter(doc => doc.status === 'active').length,
-            pending: contracts.filter(doc => doc.status === 'pending').length,
-            expired: contracts.filter(doc => doc.status === 'expired').length
-          });
-        }
+        setDocuments(fetchedDocs);
         
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching documents:", error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les documents",
-          variant: "destructive",
+        // Calculer les statistiques des contrats
+        const contracts = fetchedDocs.filter(doc => doc.category === 'contracts');
+        setContractStats({
+          total: contracts.length,
+          active: contracts.filter(doc => doc.status === 'active').length,
+          pending: contracts.filter(doc => doc.status === 'pending' || doc.status === 'pending_signature').length,
+          expired: contracts.filter(doc => doc.status === 'expired').length
         });
-        setLoading(false);
       }
-    };
+      
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les documents",
+        variant: "destructive",
+      });
+      setLoading(false);
+    }
+  }, [documentsCollection]);
 
+  useEffect(() => {
     fetchDocuments();
-  }, []);
+  }, [fetchDocuments]);
 
   // Filter documents based on search term and active tab
   const filteredDocuments = documents.filter(doc => {
@@ -111,7 +113,11 @@ const DocumentsRH = () => {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />
-        <DocumentList documents={filteredDocuments} loading={loading} />
+        <DocumentList 
+          documents={filteredDocuments} 
+          loading={loading}
+          onRefresh={fetchDocuments}
+        />
       </div>
     </div>
   );

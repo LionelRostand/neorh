@@ -20,55 +20,59 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
   const [fetchCompleted, setFetchCompleted] = useState(false);
   const documentsCollection = useFirestore<Document>("hr_documents");
 
-  useEffect(() => {
-    const fetchEmployeeDocuments = async () => {
-      if (!employee?.id || fetchCompleted) return;
+  const fetchEmployeeDocuments = async () => {
+    if (!employee?.id) return;
+    
+    setLoading(true);
+    setFetchCompleted(false);
+    
+    try {
+      console.log(`Fetching documents for employee: ${employee.id}`);
       
-      setLoading(true);
-      try {
-        console.log(`Fetching documents for employee: ${employee.id}`);
+      // Utiliser la méthode search pour récupérer les documents de l'employé
+      const result = await documentsCollection.search({
+        field: "employeeId",
+        operator: "==", 
+        value: employee.id
+      });
+      
+      if (result.docs) {
+        const fetchedDocs = result.docs.map(doc => ({
+          id: doc.id || '',
+          title: doc.title || 'Document sans nom',
+          category: doc.category || 'other',
+          fileUrl: doc.fileUrl || '',
+          fileType: doc.fileType || 'application/pdf',
+          uploadDate: doc.uploadDate || new Date().toISOString(),
+          status: doc.status || 'active',
+          employeeId: doc.employeeId,
+          employeeName: doc.employeeName,
+          contractId: doc.contractId,
+          description: doc.description,
+          signedByEmployee: doc.signedByEmployee || false,
+          signedByEmployer: doc.signedByEmployer || false
+        }));
         
-        // Utiliser la méthode search pour récupérer les documents de l'employé
-        const result = await documentsCollection.search({
-          field: "employeeId",
-          operator: "==", 
-          value: employee.id
-        });
-        
-        if (result.docs) {
-          const fetchedDocs = result.docs.map(doc => ({
-            id: doc.id || '',
-            title: doc.title || 'Document sans nom',
-            category: doc.category || 'other',
-            fileUrl: doc.fileUrl || '',
-            fileType: doc.fileType || 'application/pdf',
-            uploadDate: doc.uploadDate || new Date().toISOString(),
-            status: doc.status || 'active',
-            employeeId: doc.employeeId,
-            employeeName: doc.employeeName,
-            contractId: doc.contractId,
-            description: doc.description
-          }));
-          
-          console.log(`Found ${fetchedDocs.length} documents for employee ${employee.id}`);
-          setDocuments(fetchedDocs);
-        }
-        
-      } catch (error) {
-        console.error('Error fetching employee documents:', error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de récupérer les documents de l'employé",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-        setFetchCompleted(true);
+        console.log(`Found ${fetchedDocs.length} documents for employee ${employee.id}`);
+        setDocuments(fetchedDocs);
       }
-    };
+      
+    } catch (error) {
+      console.error('Error fetching employee documents:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de récupérer les documents de l'employé",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+      setFetchCompleted(true);
+    }
+  };
 
+  useEffect(() => {
     fetchEmployeeDocuments();
-  }, [employee.id, documentsCollection, fetchCompleted]);
+  }, [employee.id]);
 
   return (
     <div className="space-y-4">
@@ -80,7 +84,11 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
         </Button>
       </div>
       
-      <DocumentList documents={documents} loading={loading} />
+      <DocumentList 
+        documents={documents} 
+        loading={loading} 
+        onRefresh={fetchEmployeeDocuments}
+      />
     </div>
   );
 };

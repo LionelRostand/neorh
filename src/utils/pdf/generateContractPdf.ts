@@ -1,8 +1,8 @@
-
 import jsPDF from 'jspdf';
 import { Company } from '@/types/company';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Document } from '@/lib/constants';
 
 interface ContractData {
   employeeId: string;
@@ -14,6 +14,12 @@ interface ContractData {
   endDate?: string | Date;
   departmentId: string;
   departmentName?: string;
+  id?: string;
+  status?: 'draft' | 'active' | 'signed' | 'pending_signature';
+  signedByEmployer?: boolean;
+  signedByEmployee?: boolean;
+  // Ajout de champs pour la convention collective
+  conventionCollective?: string;
 }
 
 /**
@@ -169,43 +175,148 @@ export const generateContractPdf = (contractData: ContractData, company?: Compan
   
   yPosition += 15;
   
+  // Référence à la convention collective si spécifiée
+  if (contractData.conventionCollective) {
+    doc.setFont('helvetica', 'bold');
+    doc.text('Convention collective applicable', margin, yPosition);
+    yPosition += 7;
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Le présent contrat est soumis à la convention collective ${contractData.conventionCollective}.`, margin, yPosition);
+    yPosition += 10;
+  }
+  
   // Contenu du contrat selon le type
   switch(contractData.type) {
     case 'CDI':
-      generateCDIContent(doc, contractData, margin, yPosition);
+      yPosition = generateCDIContent(doc, contractData, margin, yPosition);
       break;
     case 'CDD':
-      generateCDDContent(doc, contractData, margin, yPosition);
+      yPosition = generateCDDContent(doc, contractData, margin, yPosition);
       break;
     case 'Interim':
-      generateInterimContent(doc, contractData, margin, yPosition);
+      yPosition = generateInterimContent(doc, contractData, margin, yPosition);
       break;
     case 'Stage':
-      generateStageContent(doc, contractData, margin, yPosition);
+      yPosition = generateStageContent(doc, contractData, margin, yPosition);
       break;
     case 'Apprentissage':
-      generateApprentissageContent(doc, contractData, margin, yPosition);
+      yPosition = generateApprentissageContent(doc, contractData, margin, yPosition);
       break;
     case 'Freelance':
-      generateFreelanceContent(doc, contractData, margin, yPosition);
+      yPosition = generateFreelanceContent(doc, contractData, margin, yPosition);
       break;
     default:
-      generateDefaultContent(doc, contractData, margin, yPosition);
+      yPosition = generateDefaultContent(doc, contractData, margin, yPosition);
   }
   
-  // Pied de page
+  // Ajout des articles supplémentaires
+  yPosition = addAdditionalArticles(doc, margin, yPosition);
+  
+  // Ajout des signatures
+  yPosition = addSignatureSection(doc, margin, yPosition);
+  
+  // Pied de page avec mention légale
+  doc.setFontSize(8);
+  doc.text('Ce document est strictement confidentiel et établi conformément au droit du travail français. Il ne constitue pas un conseil juridique.',
+    doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+  
+  // Pied de page avec numéros de page
   const pageCount = (doc as any).internal.pages.length - 1;
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
-    doc.text(`Page ${i} / ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+    doc.text(`Page ${i} / ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 20, { align: 'center' });
   }
   
   // Enregistrement du PDF
   const fileName = `contrat_${contractData.type}_${contractData.employeeName.replace(/\s+/g, '_')}.pdf`;
   doc.save(fileName);
   
-  return fileName;
+  return {
+    fileName,
+    pdfData: doc.output('blob'),
+    pdfBase64: doc.output('datauristring')
+  };
+};
+
+/**
+ * Ajoute les articles supplémentaires visibles sur la capture d'écran
+ */
+const addAdditionalArticles = (doc: jsPDF, margin: number, startY: number) => {
+  let yPosition = startY;
+  
+  // Article 5 - Horaires de travail
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor('#003366');
+  doc.text('Article 5 - Horaires de travail', margin, yPosition);
+  yPosition += 10;
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor('#000000');
+  doc.text('Le/La Salarié(e) sera soumis(e) à l\'horaire en vigueur dans l\'entreprise, soit actuellement 35 heures hebdomadaire.', margin, yPosition);
+  yPosition += 7;
+  doc.text('- Du lundi au vendredi : de 9h00 à 17h00, avec une pause déjeuner d\'une heure.', margin, yPosition);
+  yPosition += 15;
+  
+  // Article 6 - Congés payés
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor('#003366');
+  doc.text('Article 6 - Congés payés', margin, yPosition);
+  yPosition += 10;
+  doc.setFont('helvetica', 'normal'); 
+  doc.setTextColor('#000000');
+  doc.text('Le/La Salarié(e) bénéficiera des congés payés institués par les dispositions légales et conventionnelles, soit 2,5 jours', margin, yPosition);
+  yPosition += 7;
+  doc.text('ouvrables par mois de travail effectif.', margin, yPosition);
+  yPosition += 15;
+  
+  // Article 7 - Obligations professionnelles
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor('#003366');
+  doc.text('Article 7 - Obligations professionnelles', margin, yPosition);
+  yPosition += 10;
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor('#000000');
+  doc.text('Le/La Salarié(e) s\'engage à respecter les directives et instructions émanant de la Direction et à se conformer aux règles', margin, yPosition);
+  yPosition += 7;
+  doc.text('en vigueur au sein de l\'entreprise.', margin, yPosition);
+  yPosition += 10;
+  doc.text('Le/La Salarié(e) s\'engage à informer l\'Employeur, sans délai, de tout changement qui interviendrait dans les situations', margin, yPosition);
+  yPosition += 7;
+  doc.text('personnelles qui ont été déclarées au moment de l\'engagement.', margin, yPosition);
+  
+  return yPosition + 20;
+};
+
+/**
+ * Ajoute la section des signatures au contrat
+ */
+const addSignatureSection = (doc: jsPDF, margin: number, startY: number) => {
+  let yPosition = startY;
+  
+  // Section signatures
+  doc.text('Fait en deux exemplaires originaux à [Ville], le [date]', margin, yPosition);
+  
+  yPosition += 30;
+  
+  // Créer deux colonnes pour les signatures
+  const middleX = doc.internal.pageSize.width / 2;
+  
+  // Signature de l'employeur (colonne gauche)
+  doc.text('Signature de l\'Employeur', margin, yPosition);
+  doc.text('Signature du/de la Salarié(e)', middleX + 10, yPosition);
+  
+  yPosition += 7;
+  
+  // Mention "Lu et approuvé"
+  doc.text('Précédée de la mention « Lu et approuvé »', margin, yPosition);
+  doc.text('Précédée de la mention « Lu et approuvé »', middleX + 10, yPosition);
+  
+  // Lignes de signature
+  yPosition -= 15;
+  doc.line(margin, yPosition + 30, margin + 80, yPosition + 30);
+  doc.line(middleX + 10, yPosition + 30, middleX + 90, yPosition + 30);
+  
+  return yPosition + 40;
 };
 
 /**
@@ -216,9 +327,11 @@ const generateCDIContent = (doc: jsPDF, contractData: ContractData, margin: numb
   
   // Article 1 - Engagement
   doc.setFont('helvetica', 'bold');
+  doc.setTextColor('#003366');
   doc.text('Article 1 - Engagement', margin, yPosition);
   yPosition += 7;
   doc.setFont('helvetica', 'normal');
+  doc.setTextColor('#000000');
   doc.text(`Le salarié est engagé en qualité de ${contractData.position} au sein du département ${contractData.departmentName || ''}.`, margin, yPosition);
   yPosition += 7;
   doc.text('Ce contrat est conclu pour une durée indéterminée. Il prendra effet le ' + 
@@ -227,9 +340,11 @@ const generateCDIContent = (doc: jsPDF, contractData: ContractData, margin: numb
   // Article 2 - Période d'essai
   yPosition += 12;
   doc.setFont('helvetica', 'bold');
+  doc.setTextColor('#003366');
   doc.text('Article 2 - Période d\'essai', margin, yPosition);
   yPosition += 7;
   doc.setFont('helvetica', 'normal');
+  doc.setTextColor('#000000');
   doc.text(`Le présent contrat est soumis à une période d'essai de trois mois renouvelable une fois.`, margin, yPosition);
   yPosition += 7;
   doc.text(`Durant cette période, chacune des parties pourra rompre le contrat sans indemnité ni préavis.`, margin, yPosition);
@@ -237,9 +352,11 @@ const generateCDIContent = (doc: jsPDF, contractData: ContractData, margin: numb
   // Article 3 - Fonctions
   yPosition += 12;
   doc.setFont('helvetica', 'bold');
+  doc.setTextColor('#003366');
   doc.text('Article 3 - Fonctions', margin, yPosition);
   yPosition += 7;
   doc.setFont('helvetica', 'normal');
+  doc.setTextColor('#000000');
   doc.text(`Le salarié exercera les fonctions de ${contractData.position}.`, margin, yPosition);
   yPosition += 7;
   doc.text(`Ces fonctions sont susceptibles d'évoluer en fonction des besoins de l'entreprise.`, margin, yPosition);
@@ -247,59 +364,16 @@ const generateCDIContent = (doc: jsPDF, contractData: ContractData, margin: numb
   // Article 4 - Rémunération
   yPosition += 12;
   doc.setFont('helvetica', 'bold');
+  doc.setTextColor('#003366');
   doc.text('Article 4 - Rémunération', margin, yPosition);
   yPosition += 7;
   doc.setFont('helvetica', 'normal');
+  doc.setTextColor('#000000');
   doc.text(`La rémunération brute annuelle du salarié est fixée à ${contractData.salary} euros.`, margin, yPosition);
   yPosition += 7;
   doc.text(`Cette rémunération sera versée sur 12 mois, à la fin de chaque mois.`, margin, yPosition);
   
-  // Article 5 - Lieu de travail
-  yPosition += 12;
-  doc.setFont('helvetica', 'bold');
-  doc.text('Article 5 - Lieu de travail', margin, yPosition);
-  yPosition += 7;
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Le salarié exercera ses fonctions au siège social de l'entreprise.`, margin, yPosition);
-  yPosition += 7;
-  doc.text(`Le salarié accepte tout changement de lieu de travail décidé par l'employeur.`, margin, yPosition);
-  
-  // Article 6 - Durée du travail
-  yPosition += 12;
-  doc.setFont('helvetica', 'bold');
-  doc.text('Article 6 - Durée du travail', margin, yPosition);
-  yPosition += 7;
-  doc.setFont('helvetica', 'normal');
-  doc.text(`La durée du travail est celle prévue par la convention collective applicable soit 35 heures par semaine.`, margin, yPosition);
-  
-  // Article 7 - Congés payés
-  yPosition += 12;
-  doc.setFont('helvetica', 'bold');
-  doc.text('Article 7 - Congés payés', margin, yPosition);
-  yPosition += 7;
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Le salarié bénéficiera des congés payés institués par la législation en vigueur, soit 2,5 jours ouvrables par mois.`, margin, yPosition);
-  
-  // Article 8 - Obligations du salarié
-  yPosition += 12;
-  doc.setFont('helvetica', 'bold');
-  doc.text('Article 8 - Obligations du salarié', margin, yPosition);
-  yPosition += 7;
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Le salarié s'engage à respecter les directives et instructions qui lui seront données par la direction`, margin, yPosition);
-  yPosition += 7;
-  doc.text(`et à se conformer aux règles en vigueur au sein de l'entreprise.`, margin, yPosition);
-  
-  // Signatures
-  yPosition += 20;
-  doc.text('Fait en double exemplaire à __________________, le ________________', margin, yPosition);
-  
-  yPosition += 20;
-  doc.text('L\'employeur', margin, yPosition);
-  doc.text('Le salarié', doc.internal.pageSize.width - margin - 50, yPosition);
-  
-  yPosition += 7;
-  doc.text('(signature précédée de la mention "Lu et approuvé")', margin, yPosition);
+  return yPosition + 10;
 };
 
 /**
@@ -539,4 +613,40 @@ const generateDefaultContent = (doc: jsPDF, contractData: ContractData, margin: 
   yPosition += 30;
   doc.text('L\'employeur', margin, yPosition);
   doc.text('Le salarié', doc.internal.pageSize.width - margin - 50, yPosition);
+};
+
+/**
+ * Sauvegarde le contrat dans Firestore et retourne un objet Document
+ */
+export const saveContractAsDocument = async (
+  contractData: ContractData,
+  pdfData: { fileName: string, pdfBase64: string },
+  firestore: any
+): Promise<Document> => {
+  try {
+    // Créer un objet document pour la collection hr_documents
+    const document: Document = {
+      id: contractData.id || Date.now().toString(),
+      title: `Contrat ${contractData.type} - ${contractData.employeeName}`,
+      category: 'contracts',
+      fileUrl: pdfData.pdfBase64,
+      fileType: 'application/pdf',
+      uploadDate: new Date().toISOString(),
+      status: contractData.status || 'active',
+      employeeId: contractData.employeeId,
+      employeeName: contractData.employeeName,
+      contractId: contractData.id,
+      description: `Contrat de travail ${contractData.type} pour ${contractData.position}`,
+      signedByEmployer: contractData.signedByEmployer || false,
+      signedByEmployee: contractData.signedByEmployee || false,
+    };
+    
+    // Sauvegarder le document
+    await firestore.add(document);
+    
+    return document;
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde du document de contrat:', error);
+    throw error;
+  }
 };

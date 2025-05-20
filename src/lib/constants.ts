@@ -102,17 +102,17 @@ export type Contract = {
 export type Document = {
   id: string;
   title: string;
-  category: string; // 'contracts', 'paystubs', 'certificates', 'other'
+  description?: string;
+  category: 'contracts' | 'paystubs' | 'certificates' | 'id_documents' | 'other';
   fileUrl: string;
   fileType: string;
   uploadDate: string;
-  status?: string;
+  status: 'active' | 'expired' | 'pending' | 'pending_signature' | 'draft' | 'signed';
   employeeId?: string;
   employeeName?: string;
   contractId?: string;
-  description?: string;
-  departmentId?: string;
-  departmentName?: string;
+  signedByEmployee?: boolean;
+  signedByEmployer?: boolean;
 }
 
 export type Training = {
