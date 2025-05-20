@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
 import { useCollection } from "@/hooks/useCollection";
@@ -15,7 +14,7 @@ const Conges = () => {
   const [loading, setLoading] = useState(true);
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
   const [showAllocationForm, setShowAllocationForm] = useState(false);
-  const { getAll, isLoading, error, update, search } = useCollection<'hr_leaves'>();
+  const { getAll, isLoading, error, update, search } = useCollection<string>();
   const { user } = useAuth();
   const { approveLeave, rejectLeave } = useLeaveApproval();
 
@@ -116,7 +115,7 @@ const Conges = () => {
       // Recherche simple par employeeId (peut être améliorée)
       const result = await search('employeeId', query);
       if (result?.docs) {
-        setLeaves(result.docs);
+        setLeaves(result.docs as Leave[]);
       }
     } catch (error) {
       console.error("Erreur lors de la recherche:", error);

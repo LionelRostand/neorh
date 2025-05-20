@@ -17,7 +17,7 @@ export const useBadges = () => {
   });
   
   // Utilisation de notre hook pour accéder à la collection des badges
-  const badgesCollection = useCollection<'hr_badges'>();
+  const badgesCollection = useCollection<string>();
   
   // Utilisation du hook Firestore pour récupérer les employés
   const employeesFirestore = useFirestore<Employee>("employees");
