@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import Layout from "./components/Layout";
@@ -41,6 +42,7 @@ function App() {
           <Route index element={<Index />} />
           <Route path="employes" element={<Employes />} />
           <Route path="badges" element={<Badges />} />
+          <Route path="contrats" element={<Contrats />} />
           <Route path="hierarchie" element={<Hierarchie />} />
           <Route path="feuilles-de-temps" element={<FeuillesDeTemps />} />
           <Route path="projets" element={<Projets />} />
