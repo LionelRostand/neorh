@@ -11,14 +11,14 @@ interface EmployeeInformationsProps {
 
 const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee }) => {
   const [departmentName, setDepartmentName] = useState<string>(employee.department || 'Non spécifié');
+  const [companyName, setCompanyName] = useState<string>('Non spécifié');
 
   useEffect(() => {
-    // If we have a proper department name already, use it
+    // Gestion du département
     if (employee.department && !employee.department.includes('QFW') && !employee.department.includes('dCij')) {
       return;
     }
     
-    // If we have the ID of the department, get its name
     if (employee.departmentId) {
       const fetchDepartmentName = async () => {
         try {
@@ -36,7 +36,26 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
       
       fetchDepartmentName();
     }
-  }, [employee.departmentId, employee.department]);
+
+    // Récupération de l'entreprise si disponible
+    if (employee.companyId) {
+      const fetchCompanyName = async () => {
+        try {
+          const companyRef = doc(db, 'hr_companies', employee.companyId);
+          const companySnap = await getDoc(companyRef);
+          
+          if (companySnap.exists()) {
+            const companyData = companySnap.data();
+            setCompanyName(companyData.name || 'Non spécifié');
+          }
+        } catch (error) {
+          console.error("Erreur lors de la récupération de l'entreprise:", error);
+        }
+      };
+      
+      fetchCompanyName();
+    }
+  }, [employee.departmentId, employee.department, employee.companyId]);
 
   return (
     <div className="space-y-6">
@@ -77,6 +96,10 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
             <div>
               <p className="text-sm text-gray-500">Département</p>
               <p className="font-medium">{departmentName}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Entreprise</p>
+              <p className="font-medium">{companyName}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Email professionnel</p>

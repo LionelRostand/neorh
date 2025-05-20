@@ -46,7 +46,7 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
   const professionalInfoData = [
     ['Poste', employee.position || 'Non spécifié'],
     ['Département', employee.department || 'Non spécifié'],
-    ['Entreprise', 'Non spécifié'],
+    ['Entreprise', employee.company || 'Non spécifié'],
     ['Date d\'embauche', employee.startDate || 'Non spécifié'],
     ['Statut', employee.status === 'active' ? 'Actif' : 
               employee.status === 'onLeave' ? 'En congé' : 

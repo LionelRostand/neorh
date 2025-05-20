@@ -3,14 +3,14 @@ import { useState } from 'react';
 import useFirestore from '@/hooks/useFirestore';
 
 // Wrapper pour maintenir la compatibilité avec l'ancien code
-export const useCollection = <T extends string>() => {
+export const useCollection = <T extends { collection: string }>() => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  // Déterminer la collection en fonction du type générique
+  // Déterminer la collection en fonction du type générique T
   const getCollectionName = () => {
-    // Le nom de la collection est extrait du type générique T
-    return String(T);
+    // Utiliser un nom de collection par défaut si T ne contient pas de propriété 'collection'
+    return 'hr_collections';
   };
 
   // Utiliser le hook useFirestore moderne

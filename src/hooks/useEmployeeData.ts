@@ -102,6 +102,7 @@ export const useEmployeeData = () => {
           position: data.position || '',
           department: departmentName,
           departmentId: data.department || '', // Keep the original ID for reference
+          companyId: data.company || '', // Add company ID reference
           email: data.email || '',
           phone: data.phone || '',
           photoUrl: data.photoUrl || '',
