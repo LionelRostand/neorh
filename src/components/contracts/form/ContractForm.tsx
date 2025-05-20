@@ -86,10 +86,19 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
         // Generate PDF with company info if available
         const contractId = result.id;
         
+        // Ensure all required fields are present
         const contractData = {
-          ...data,
           id: contractId,
+          employeeId: data.employeeId,
+          employeeName: data.employeeName || '',
+          position: data.position,
+          type: data.type,
+          startDate: data.startDate,
+          endDate: data.endDate,
+          departmentId: data.departmentId,
           departmentName: department?.name || '',
+          salary: data.salary,
+          conventionCollective: data.conventionCollective,
           status: 'pending_signature' as const
         };
         

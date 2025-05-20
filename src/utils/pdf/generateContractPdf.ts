@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { Company } from '@/types/company';
 import { format } from 'date-fns';
@@ -6,21 +5,18 @@ import { fr } from 'date-fns/locale';
 import { Document } from '@/lib/constants';
 
 interface ContractData {
+  id: string;
   employeeId: string;
   employeeName: string;
+  departmentName: string;
+  departmentId: string;
   position: string;
   type: string;
+  startDate: Date;
+  endDate?: Date;
   salary: string;
-  startDate: string | Date;
-  endDate?: string | Date;
-  departmentId: string;
-  departmentName?: string;
-  id?: string;
-  status?: 'draft' | 'active' | 'expired' | 'pending' | 'pending_signature' | 'signed';
-  signedByEmployer?: boolean;
-  signedByEmployee?: boolean;
-  // Ajout de champs pour la convention collective
   conventionCollective?: string;
+  status: 'draft' | 'pending_signature' | 'active' | 'signed';
 }
 
 /**
