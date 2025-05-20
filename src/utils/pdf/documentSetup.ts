@@ -116,13 +116,13 @@ export const setupDocument = (
   
   // Statut - ajusté pour être à côté de "Statut:" comme dans le modèle
   if (statusText) {
-    doc.setTextColor('#000000');
-    doc.setFontSize(10);
+    doc.setTextColor(primaryColor);
+    doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
     doc.text('Statut:', 14, 75);
-    doc.setTextColor(statusColor || '#22c55e');
+    doc.setTextColor(statusStyle);
     doc.setFont('helvetica', 'bold');
-    doc.text(statusText, 40, 75);
+    doc.text(statusText, 50, 75);
   }
   
   // Sous-titre (nom de l'employé) - ajusté pour être sous le statut

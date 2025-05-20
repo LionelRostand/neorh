@@ -79,7 +79,7 @@ export const generateEmployeePdfWithDocuments = async (
   addPageFooter(doc);
   
   // Save the PDF
-  const fileName = `${employee.name}_${activeTab}.pdf`;
+  const fileName = `${employee.name.replace(/\s+/g, '_')}_fiche.pdf`;
   doc.save(fileName);
 
   return fileName;

@@ -22,6 +22,7 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
   const personalInfoData = [
     ['Nom', employee.name || 'Non spécifié'],
     ['Email personnel', employee.personalEmail || 'Non spécifié'],
+    ['Email professionnel', employee.professionalEmail || employee.email || 'Non spécifié'],
     ['Téléphone', employee.phone || 'Non spécifié'],
     ['Date de naissance', employee.birthDate || 'Non spécifié']
   ];
