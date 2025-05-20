@@ -76,7 +76,9 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         company = companies.find(c => c.id === employee.companyId);
       }
       
-      if (result.id) {
+      // Vérifier que nous avons bien un ID de contrat avant de continuer
+      // Fix: Vérifier si result existe et a un ID
+      if (result && result.id) {
         // Generate PDF with company info if available
         const contractId = result.id;
         
@@ -116,6 +118,14 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         if (onSuccess) {
           onSuccess();
         }
+      } else {
+        // Afficher une erreur si nous n'avons pas pu obtenir l'ID du contrat
+        console.error('Erreur: Impossible d\'obtenir l\'ID du contrat créé');
+        toast({
+          title: 'Erreur',
+          description: 'Une erreur est survenue lors de la création du contrat',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Error creating contract:', error);

@@ -11,6 +11,15 @@ export const saveContractAsDocument = async (
   firestore: any
 ): Promise<Document> => {
   try {
+    // Vérifier que les données nécessaires sont présentes
+    if (!contractData || !contractData.id) {
+      throw new Error('Données de contrat invalides');
+    }
+    
+    if (!pdfData || !pdfData.pdfBase64) {
+      throw new Error('Données PDF invalides');
+    }
+    
     // Create document object for hr_documents collection
     const document: Document = {
       id: contractData.id || Date.now().toString(),
@@ -27,6 +36,11 @@ export const saveContractAsDocument = async (
       signedByEmployee: false,
       signedByEmployer: false,
     };
+    
+    // Vérifier que firestore est disponible
+    if (!firestore || typeof firestore.add !== 'function') {
+      throw new Error('Firestore non disponible');
+    }
     
     // Save the document
     await firestore.add(document);
