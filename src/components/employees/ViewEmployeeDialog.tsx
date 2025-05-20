@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Employee } from '@/types/employee';
 import { generateEmployeePdfWithDocuments } from '@/utils/pdfExport';
 import { toast } from '@/components/ui/use-toast';
 import EmployeeHeader from './view-dialog/EmployeeHeader';
 import EmployeeTabs from './view-dialog/EmployeeTabs';
+import { useCompaniesData } from '@/hooks/useCompaniesData';
 
 interface ViewEmployeeDialogProps {
   open: boolean;
@@ -22,13 +23,18 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState("informations");
   const [isExporting, setIsExporting] = useState(false);
+  const { companies } = useCompaniesData();
   
   if (!employee) return null;
   
   const handleExportPDF = async () => {
     try {
       setIsExporting(true);
-      await generateEmployeePdfWithDocuments(employee, activeTab);
+      // Find the company data if available
+      const employeeCompany = employee.companyId ? 
+        companies.find(c => c.id === employee.companyId) : undefined;
+      
+      await generateEmployeePdfWithDocuments(employee, activeTab, { company: employeeCompany });
       toast({
         title: "Exportation réussie",
         description: "Le document PDF a été généré avec succès",

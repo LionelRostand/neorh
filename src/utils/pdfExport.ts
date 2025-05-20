@@ -1,6 +1,9 @@
 
 import JsPDF from 'jspdf';
 import { Employee } from '@/types/employee';
+import { Company } from '@/types/company';
+import { setupDocument, addPageFooter } from './pdf/documentSetup';
+import { formatEmployeeStatus } from './pdf/statusFormatter';
 import {
   generateInformationsTab,
   generateDocumentsTab,
@@ -11,8 +14,32 @@ import {
   generateEvaluationsTab
 } from './pdf/tabGenerators';
 
-export const generateEmployeePdfWithDocuments = async (employee: Employee, activeTab: string) => {
+interface PdfOptions {
+  documents?: any[];
+  leaves?: any[];
+  evaluations?: any[];
+  company?: Company;
+}
+
+export const generateEmployeePdfWithDocuments = async (
+  employee: Employee, 
+  activeTab: string, 
+  options?: PdfOptions
+) => {
   const doc = new JsPDF();
+  
+  // Format employee status
+  const status = formatEmployeeStatus(employee);
+  
+  // Configure document with basic information
+  setupDocument(
+    doc, 
+    'Fiche Employé', 
+    employee.name || 'Sans nom', 
+    status.text, 
+    status.color,
+    options?.company
+  );
 
   switch (activeTab) {
     case 'informations':
@@ -39,8 +66,11 @@ export const generateEmployeePdfWithDocuments = async (employee: Employee, activ
     default:
       generateInformationsTab(doc, employee);
   }
-
-  // Sauvegarder le PDF avec le nom de l'employé
+  
+  // Add page numbers
+  addPageFooter(doc);
+  
+  // Save the PDF
   const fileName = `${employee.name}_${activeTab}.pdf`;
   doc.save(fileName);
 
