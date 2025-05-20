@@ -4,10 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import ContractForm from "./form/ContractForm";
 import useFirestore from "@/hooks/useFirestore";
 import { toast } from "@/components/ui/use-toast";
-import { useEmployeeData } from "@/hooks/useEmployeeData";
-import { useDepartmentsData } from "@/hooks/useDepartmentsData";
-import { useCompaniesData } from "@/hooks/useCompaniesData";
-import { generateContractPdf } from "@/utils/pdf/generateContractPdf";
 
 interface NewContractDialogProps {
   open: boolean;
@@ -20,96 +16,9 @@ export default function NewContractDialog({
   onOpenChange,
   onSuccess
 }: NewContractDialogProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const contractsCollection = useFirestore("hr_contracts");
-  const documentsCollection = useFirestore("hr_documents");
-  const { employees } = useEmployeeData();
-  const { departments } = useDepartmentsData();
-  const { companies } = useCompaniesData();
-
+  
   const handleCancel = () => {
     onOpenChange(false);
-  };
-
-  const handleSubmit = async (data: any) => {
-    setIsSubmitting(true);
-    try {
-      // Trouver l'employé pour afficher son nom dans le contrat
-      const employeeData = employees.find(emp => emp.id === data.employeeId);
-      
-      // Trouver le département pour le contrat
-      const departmentData = departments.find(dep => dep.id === data.departmentId);
-      
-      // Obtenir les données de l'entreprise pour l'en-tête du PDF
-      const company = companies.length > 0 ? companies[0] : undefined;
-      
-      // Préparer les données du contrat
-      const contractData = {
-        ...data,
-        employeeName: employeeData?.name || "Employé inconnu",
-        departmentName: departmentData?.name || "Département non spécifié",
-        startDate: data.startDate ? data.startDate.toISOString().split('T')[0] : "",
-        endDate: data.endDate ? data.endDate.toISOString().split('T')[0] : "",
-        status: "pending", // Par défaut, un nouveau contrat est en attente
-        createdAt: new Date().toISOString(),
-      };
-      
-      // Enregistrer dans Firestore
-      const savedContract = await contractsCollection.add(contractData);
-      
-      // Générer le PDF du contrat
-      const contractPdfDetails = {
-        employeeId: data.employeeId,
-        employeeName: contractData.employeeName,
-        position: data.position,
-        type: data.type,
-        salary: data.salary,
-        startDate: data.startDate,
-        endDate: data.endDate,
-        departmentId: data.departmentId,
-        departmentName: departmentData?.name
-      };
-      
-      const fileName = await generateContractPdf(contractPdfDetails, company);
-      
-      // Créer un document dans la collection hr_documents
-      const docData = {
-        title: `Contrat ${data.type} - ${contractData.employeeName}`,
-        category: "contracts",
-        fileType: "application/pdf",
-        fileUrl: fileName, // Ceci serait un URL réel dans une implémentation complète
-        uploadDate: new Date().toISOString(),
-        status: "active",
-        employeeId: data.employeeId,
-        employeeName: contractData.employeeName,
-        contractId: savedContract?.id,
-        description: `Contrat ${data.type} pour le poste de ${data.position}`,
-        departmentId: data.departmentId,
-        departmentName: departmentData?.name
-      };
-      
-      // Ajouter le document à Firestore
-      await documentsCollection.add(docData);
-      
-      // Notification de succès
-      toast({
-        title: "Contrat créé",
-        description: "Le contrat a été créé avec succès et le PDF a été généré",
-      });
-      
-      // Fermer le dialogue et rafraîchir les données
-      onOpenChange(false);
-      if (onSuccess) onSuccess();
-    } catch (error) {
-      console.error("Erreur lors de la création du contrat:", error);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de créer le contrat. Veuillez réessayer.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
@@ -120,8 +29,7 @@ export default function NewContractDialog({
         </DialogHeader>
         <ContractForm 
           onCancel={handleCancel} 
-          onSubmit={handleSubmit} 
-          isSubmitting={isSubmitting}
+          onSuccess={onSuccess}
         />
       </DialogContent>
     </Dialog>

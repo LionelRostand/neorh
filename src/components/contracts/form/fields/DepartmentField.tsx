@@ -14,19 +14,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UseFormReturn } from "react-hook-form";
+import { Control } from "react-hook-form";
 import { ContractFormValues } from "../schema";
 import { Department } from "@/types/firebase";
 
-interface DepartmentFieldProps {
-  form: UseFormReturn<ContractFormValues>;
-  departments: Department[];
+interface SimpleDepartment {
+  id: string;
+  name: string;
 }
 
-export default function DepartmentField({ form, departments }: DepartmentFieldProps) {
+interface DepartmentFieldProps {
+  control: Control<ContractFormValues>;
+  departments: SimpleDepartment[];
+}
+
+export default function DepartmentField({ control, departments }: DepartmentFieldProps) {
   return (
     <FormField
-      control={form.control}
+      control={control}
       name="departmentId"
       render={({ field }) => (
         <FormItem>
@@ -39,7 +44,7 @@ export default function DepartmentField({ form, departments }: DepartmentFieldPr
             </FormControl>
             <SelectContent>
               {departments.map((department) => (
-                <SelectItem key={department.id || ''} value={department.id || ''}>
+                <SelectItem key={department.id} value={department.id}>
                   {department.name}
                 </SelectItem>
               ))}

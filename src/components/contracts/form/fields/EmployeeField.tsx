@@ -15,23 +15,32 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Employee } from "@/types/employee";
-import { UseFormReturn } from "react-hook-form";
+import { Control } from "react-hook-form";
 import { ContractFormValues } from "../schema";
 
 interface EmployeeFieldProps {
-  form: UseFormReturn<ContractFormValues>;
+  control: Control<ContractFormValues>;
   employees: Employee[];
+  employeeName?: string;
+  setValue: (id: string, name: string) => void;
 }
 
-export default function EmployeeField({ form, employees }: EmployeeFieldProps) {
+export default function EmployeeField({ control, employees, setValue, employeeName }: EmployeeFieldProps) {
   return (
     <FormField
-      control={form.control}
+      control={control}
       name="employeeId"
       render={({ field }) => (
         <FormItem>
           <FormLabel>Employé</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <Select onValueChange={(value) => {
+              const employee = employees.find(e => e.id === value);
+              if (employee) {
+                setValue(value, employee.name);
+              }
+              field.onChange(value);
+            }} 
+            defaultValue={field.value}>
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner un employé" />

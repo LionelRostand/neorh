@@ -32,8 +32,8 @@ export interface ContractFormData {
 }
 
 interface ContractFormProps {
-  onSuccess?: () => void;
   onCancel?: () => void;
+  onSuccess?: () => void;
 }
 
 const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
@@ -65,7 +65,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
       setIsSubmitting(true);
       
       // Find department name
-      const department = departments.find(d => d.id === data.departmentId);
+      const department = departments.find(dep => dep.id === data.departmentId);
       
       // Create contract object
       const contract: Contract = {
@@ -102,7 +102,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
           ...data,
           id: contractId,
           departmentName: department?.name,
-          status: 'pending_signature'
+          status: 'pending_signature' as const
         };
         
         // Generate PDF
@@ -143,6 +143,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
           {/* Employee selection */}
           <EmployeeField
             control={form.control}
+            employees={employees}
             employeeName={form.watch('employeeName')}
             setValue={(id, name) => {
               form.setValue('employeeId', id);

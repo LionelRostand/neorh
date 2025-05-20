@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import { Company } from '@/types/company';
 import { format } from 'date-fns';
@@ -15,7 +16,7 @@ interface ContractData {
   departmentId: string;
   departmentName?: string;
   id?: string;
-  status?: 'draft' | 'active' | 'signed' | 'pending_signature';
+  status?: 'draft' | 'active' | 'expired' | 'pending' | 'pending_signature' | 'signed';
   signedByEmployer?: boolean;
   signedByEmployee?: boolean;
   // Ajout de champs pour la convention collective
@@ -242,7 +243,7 @@ export const generateContractPdf = (contractData: ContractData, company?: Compan
 /**
  * Ajoute les articles supplémentaires visibles sur la capture d'écran
  */
-const addAdditionalArticles = (doc: jsPDF, margin: number, startY: number) => {
+const addAdditionalArticles = (doc: jsPDF, margin: number, startY: number): number => {
   let yPosition = startY;
   
   // Article 5 - Horaires de travail
@@ -290,7 +291,7 @@ const addAdditionalArticles = (doc: jsPDF, margin: number, startY: number) => {
 /**
  * Ajoute la section des signatures au contrat
  */
-const addSignatureSection = (doc: jsPDF, margin: number, startY: number) => {
+const addSignatureSection = (doc: jsPDF, margin: number, startY: number): number => {
   let yPosition = startY;
   
   // Section signatures
@@ -322,7 +323,7 @@ const addSignatureSection = (doc: jsPDF, margin: number, startY: number) => {
 /**
  * Génère le contenu d'un contrat CDI
  */
-const generateCDIContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number) => {
+const generateCDIContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number): number => {
   let yPosition = startY;
   
   // Article 1 - Engagement
@@ -379,7 +380,7 @@ const generateCDIContent = (doc: jsPDF, contractData: ContractData, margin: numb
 /**
  * Génère le contenu d'un contrat CDD
  */
-const generateCDDContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number) => {
+const generateCDDContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number): number => {
   let yPosition = startY;
   
   // Article 1 - Engagement
@@ -447,22 +448,13 @@ const generateCDDContent = (doc: jsPDF, contractData: ContractData, margin: numb
   
   // Ajouter le reste des articles similaires au CDI...
   
-  // Signatures
-  yPosition += 20;
-  doc.text('Fait en double exemplaire à __________________, le ________________', margin, yPosition);
-  
-  yPosition += 20;
-  doc.text('L\'employeur', margin, yPosition);
-  doc.text('Le salarié', doc.internal.pageSize.width - margin - 50, yPosition);
-  
-  yPosition += 7;
-  doc.text('(signature précédée de la mention "Lu et approuvé")', margin, yPosition);
+  return yPosition + 20;
 };
 
 /**
  * Génère le contenu d'un contrat d'intérim
  */
-const generateInterimContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number) => {
+const generateInterimContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number): number => {
   let yPosition = startY;
   
   // Contenu simplifié pour intérim
@@ -483,16 +475,13 @@ const generateInterimContent = (doc: jsPDF, contractData: ContractData, margin: 
   yPosition += 10;
   doc.text(`Rémunération: ${contractData.salary} € brut annuel`, margin, yPosition);
   
-  // Signatures
-  yPosition += 30;
-  doc.text('L\'employeur', margin, yPosition);
-  doc.text('Le salarié', doc.internal.pageSize.width - margin - 50, yPosition);
+  return yPosition + 30;
 };
 
 /**
  * Génère le contenu d'une convention de stage
  */
-const generateStageContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number) => {
+const generateStageContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number): number => {
   let yPosition = startY;
   
   doc.setFont('helvetica', 'bold');
@@ -514,16 +503,13 @@ const generateStageContent = (doc: jsPDF, contractData: ContractData, margin: nu
   yPosition += 10;
   doc.text(`Gratification: ${contractData.salary} €`, margin, yPosition);
   
-  // Signatures
-  yPosition += 30;
-  doc.text('L\'entreprise d\'accueil', margin, yPosition);
-  doc.text('Le stagiaire', doc.internal.pageSize.width - margin - 50, yPosition);
+  return yPosition + 30;
 };
 
 /**
  * Génère le contenu d'un contrat d'apprentissage
  */
-const generateApprentissageContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number) => {
+const generateApprentissageContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number): number => {
   let yPosition = startY;
   
   doc.setFont('helvetica', 'bold');
@@ -545,16 +531,13 @@ const generateApprentissageContent = (doc: jsPDF, contractData: ContractData, ma
   yPosition += 10;
   doc.text(`Rémunération: ${contractData.salary} € brut annuel`, margin, yPosition);
   
-  // Signatures
-  yPosition += 30;
-  doc.text('L\'employeur', margin, yPosition);
-  doc.text('L\'apprenti', doc.internal.pageSize.width - margin - 50, yPosition);
+  return yPosition + 30;
 };
 
 /**
  * Génère le contenu d'un contrat de freelance
  */
-const generateFreelanceContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number) => {
+const generateFreelanceContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number): number => {
   let yPosition = startY;
   
   doc.setFont('helvetica', 'bold');
@@ -576,16 +559,13 @@ const generateFreelanceContent = (doc: jsPDF, contractData: ContractData, margin
   yPosition += 10;
   doc.text(`Montant des honoraires: ${contractData.salary} € HT`, margin, yPosition);
   
-  // Signatures
-  yPosition += 30;
-  doc.text('Le client', margin, yPosition);
-  doc.text('Le prestataire', doc.internal.pageSize.width - margin - 50, yPosition);
+  return yPosition + 30;
 };
 
 /**
  * Génère un contenu par défaut
  */
-const generateDefaultContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number) => {
+const generateDefaultContent = (doc: jsPDF, contractData: ContractData, margin: number, startY: number): number => {
   let yPosition = startY;
   
   doc.setFont('helvetica', 'bold');
@@ -609,10 +589,7 @@ const generateDefaultContent = (doc: jsPDF, contractData: ContractData, margin: 
   yPosition += 10;
   doc.text(`Rémunération: ${contractData.salary} € brut annuel`, margin, yPosition);
   
-  // Signatures
-  yPosition += 30;
-  doc.text('L\'employeur', margin, yPosition);
-  doc.text('Le salarié', doc.internal.pageSize.width - margin - 50, yPosition);
+  return yPosition + 30;
 };
 
 /**
@@ -637,8 +614,8 @@ export const saveContractAsDocument = async (
       employeeName: contractData.employeeName,
       contractId: contractData.id,
       description: `Contrat de travail ${contractData.type} pour ${contractData.position}`,
-      signedByEmployer: contractData.signedByEmployer || false,
       signedByEmployee: contractData.signedByEmployee || false,
+      signedByEmployer: contractData.signedByEmployer || false,
     };
     
     // Sauvegarder le document

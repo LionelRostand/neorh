@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Document } from "@/lib/constants";
-import { FileIcon, Signature, Download, Eye, Edit } from "lucide-react";
+import { FileIcon, Signature, Download, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
@@ -34,12 +33,12 @@ const DocumentCard = ({ document, onRefresh }: DocumentCardProps) => {
 
     try {
       // Create an anchor element and set the href to the document's file URL
-      const link = document.createElement("a");
+      const link = window.document.createElement("a");
       link.href = document.fileUrl;
       link.download = `${document.title}.pdf`;
-      document.body.appendChild(link);
+      window.document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      window.document.body.removeChild(link);
     } catch (error) {
       console.error("Erreur téléchargement:", error);
       toast({

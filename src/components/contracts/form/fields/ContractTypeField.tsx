@@ -14,23 +14,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UseFormReturn } from "react-hook-form";
+import { Control, UseFormSetValue } from "react-hook-form";
 import { ContractFormValues } from "../schema";
 import { CONTRACT_TYPES } from "../constants";
 
 interface ContractTypeFieldProps {
-  form: UseFormReturn<ContractFormValues>;
+  control: Control<ContractFormValues>;
+  setValue: UseFormSetValue<ContractFormValues>;
 }
 
-export default function ContractTypeField({ form }: ContractTypeFieldProps) {
+export default function ContractTypeField({ control, setValue }: ContractTypeFieldProps) {
   return (
     <FormField
-      control={form.control}
+      control={control}
       name="type"
       render={({ field }) => (
         <FormItem>
           <FormLabel>Type de contrat</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <Select
+            onValueChange={(value) => {
+              field.onChange(value);
+              // If CDD is selected, ensure endDate is required
+              if (value === 'CDD' || value === 'Interim' || value === 'Stage') {
+                setValue('endDate', new Date(new Date().setMonth(new Date().getMonth() + 3)));
+              }
+            }}
+            defaultValue={field.value}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner un type" />

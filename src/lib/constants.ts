@@ -1,3 +1,4 @@
+
 // Define the mapping between routes and Firestore collections
 export const ROUTE_TO_COLLECTION_MAP = {
   '/employes': 'hr_employees',
@@ -96,7 +97,14 @@ export type Contract = {
   type: string;
   startDate: string;
   endDate?: string;
-  status: 'draft' | 'active' | 'expired' | 'pending';
+  status: 'draft' | 'active' | 'expired' | 'pending' | 'pending_signature' | 'signed';
+  departmentId?: string;  // Added this field
+  departmentName?: string; // Added this field
+  salary?: string; // Changed from number to string to align with form
+  benefits?: string;
+  documents?: string[];
+  signedByEmployee?: boolean; // Added signature fields
+  signedByEmployer?: boolean; // Added signature fields
 }
 
 export type Document = {
