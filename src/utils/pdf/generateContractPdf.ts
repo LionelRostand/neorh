@@ -7,7 +7,7 @@ import {
   addPartiesSection,
   addCollectiveAgreement,
   addPageFooter 
-} from './contract/documentSetup';
+} from './contract/setup';
 import { addSignatureSection } from './contract/signatureSection';
 import { addAdditionalArticles } from './contract/additionalArticles';
 import { 
