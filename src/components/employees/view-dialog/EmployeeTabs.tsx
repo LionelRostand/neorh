@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Employee } from '@/types/employee';
@@ -26,6 +26,11 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
   onTabChange,
   onRefresh
 }) => {
+  // Utilisons React.memo pour éviter les re-renders inutiles des onglets
+  const MemoizedDocumentsTab = React.memo(DocumentsTab);
+  const MemoizedFeuillesDeTempsTab = React.memo(FeuillesDeTempsTab);
+  const MemoizedCongesTab = React.memo(CongesTab);
+
   return (
     <Tabs defaultValue="informations" value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className="grid grid-cols-7 bg-gray-50 border-b">
@@ -44,7 +49,7 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
         </TabsContent>
         
         <TabsContent value="documents" className="p-6">
-          <DocumentsTab employee={employee} />
+          <MemoizedDocumentsTab employee={employee} />
         </TabsContent>
         
         <TabsContent value="competences" className="p-6">
@@ -56,11 +61,11 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
         </TabsContent>
         
         <TabsContent value="feuillesdetemps" className="p-6">
-          <FeuillesDeTempsTab employee={employee} />
+          <MemoizedFeuillesDeTempsTab employee={employee} />
         </TabsContent>
         
         <TabsContent value="conges" className="p-6">
-          <CongesTab employee={employee} />
+          <MemoizedCongesTab employee={employee} />
         </TabsContent>
         
         <TabsContent value="evaluations" className="p-6">
@@ -71,4 +76,4 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
   );
 };
 
-export default EmployeeTabs;
+export default React.memo(EmployeeTabs);

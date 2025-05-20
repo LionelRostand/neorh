@@ -17,11 +17,12 @@ interface EmployeeDocumentsProps {
 const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchCompleted, setFetchCompleted] = useState(false);
   const documentsCollection = useFirestore<Document>("hr_documents");
 
   useEffect(() => {
     const fetchEmployeeDocuments = async () => {
-      if (!employee?.id) return;
+      if (!employee?.id || fetchCompleted) return;
       
       setLoading(true);
       try {
@@ -62,11 +63,12 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
         });
       } finally {
         setLoading(false);
+        setFetchCompleted(true);
       }
     };
 
     fetchEmployeeDocuments();
-  }, [employee.id, documentsCollection]);
+  }, [employee.id, documentsCollection, fetchCompleted]);
 
   return (
     <div className="space-y-4">

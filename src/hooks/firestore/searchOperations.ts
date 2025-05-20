@@ -33,6 +33,14 @@ export const createSearchOperations = <T extends Record<string, any>>(
   setError: (error: Error | null) => void,
   getCollection: () => CollectionReference<T>
 ) => {
+  // Cache pour les recherches récentes
+  const searchCache: Record<string, {
+    timestamp: number,
+    result: Array<T & { id: string }>
+  }> = {};
+  
+  const CACHE_TTL = 30000; // 30 secondes en millisecondes
+
   // Search for documents based on a field value
   const search = async (criteria: SearchCriteria | string, value?: any, options?: SearchOptions) => {
     setIsLoading(true);
@@ -58,6 +66,16 @@ export const createSearchOperations = <T extends Record<string, any>>(
         searchValue = value;
         if (options) searchOptions = options;
       }
+      
+      // Create a cache key
+      const cacheKey = `${field}_${operator}_${JSON.stringify(searchValue)}`;
+      
+      // Check if we have a cached result
+      const now = Date.now();
+      if (searchCache[cacheKey] && now - searchCache[cacheKey].timestamp < CACHE_TTL) {
+        console.log(`Using cached search result for ${field} ${operator} ${searchValue}`);
+        return { docs: searchCache[cacheKey].result };
+      }
 
       console.log(`Searching in collection with criteria: ${field} ${operator} ${searchValue}`);
       
@@ -81,6 +99,12 @@ export const createSearchOperations = <T extends Record<string, any>>(
       });
       
       console.log(`Search found ${documents.length} documents matching ${field} ${operator} ${searchValue}`);
+      
+      // Cache the result
+      searchCache[cacheKey] = {
+        timestamp: now,
+        result: documents
+      };
       
       return { docs: documents };
     } catch (err) {
