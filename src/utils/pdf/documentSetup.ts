@@ -18,13 +18,19 @@ export const setupDocument = (
   const secondaryColor = '#666666';
   
   // Informations de l'entreprise (en-tête)
-  doc.setFontSize(10);
-  doc.setTextColor(secondaryColor);
+  doc.setFontSize(14);
+  doc.setTextColor(primaryColor);
+  doc.setFont('helvetica', 'bold');
   
   if (company) {
     // Use actual company data if provided
-    doc.text(company.name || 'ENTREPRISE', 14, 15);
-    doc.text(company.address || '', 14, 20);
+    doc.text(company.name || 'ENTREPRISE', 14, 20);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(secondaryColor);
+    doc.setFont('helvetica', 'normal');
+    
+    if (company.address) doc.text(company.address, 14, 30);
     
     const locationParts = [];
     if (company.postalCode) locationParts.push(company.postalCode);
@@ -32,9 +38,12 @@ export const setupDocument = (
     if (company.country) locationParts.push(company.country);
     const locationText = locationParts.join(', ');
     
-    if (locationText) doc.text(locationText, 14, 25);
-    if (company.phone) doc.text(`Tel: ${company.phone}`, 14, 30);
-    if (company.email) doc.text(`Email: ${company.email}`, 14, 35);
+    if (locationText) doc.text(locationText, 14, 40);
+    
+    // Email de l'entreprise
+    if (company.email) {
+      doc.text(`Email: ${company.email}`, 14, 50);
+    }
     
     // Add company logo if available
     if (company.logoUrl) {
@@ -42,10 +51,10 @@ export const setupDocument = (
         doc.addImage(
           company.logoUrl, 
           'JPEG', 
-          doc.internal.pageSize.width - 50, 
-          10, 
-          40, 
-          20, 
+          doc.internal.pageSize.width - 70, 
+          15, 
+          50, 
+          30, 
           undefined, 
           'FAST'
         );
@@ -57,10 +66,10 @@ export const setupDocument = (
         doc.addImage(
           company.logo.base64,
           'JPEG',
-          doc.internal.pageSize.width - 50, 
-          10, 
-          40, 
-          20, 
+          doc.internal.pageSize.width - 70, 
+          15, 
+          50, 
+          30, 
           undefined, 
           'FAST'
         );
@@ -70,44 +79,27 @@ export const setupDocument = (
     }
   } else {
     // Default company info if none provided
-    doc.text('ENTREPRISE SARL', 14, 15);
-    doc.text('123 Rue des Entreprises', 14, 20);
-    doc.text('75000 Paris, France', 14, 25);
-    doc.text('Tel: +33 1 23 45 67 89', 14, 30);
-    doc.text('Email: contact@entreprise.fr', 14, 35);
+    doc.text('ENTREPRISE SARL', 14, 20);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(secondaryColor);
+    doc.setFont('helvetica', 'normal');
+    
+    doc.text('123 Rue des Entreprises', 14, 30);
+    doc.text('75000 Paris, France', 14, 40);
+    doc.text('Email: contact@entreprise.fr', 14, 50);
   }
   
   // Ligne de séparation
   doc.setDrawColor(200, 200, 200);
-  doc.line(14, 40, 196, 40);
-  
-  // Titre du document
-  doc.setFontSize(18);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(primaryColor);
-  doc.text(title, 14, 50);
-  
-  // Status (si fourni)
-  if (statusText && statusColor) {
-    doc.setFontSize(12);
-    doc.setTextColor(statusColor);
-    doc.text(`Statut: ${statusText}`, 14, 57);
-  }
-  
-  // Sous-titre (si fourni)
-  if (subtitle) {
-    doc.setFontSize(14);
-    doc.setTextColor(primaryColor);
-    doc.setFont('helvetica', 'bold');
-    doc.text(subtitle, 14, 65);
-  }
+  doc.line(14, 60, 196, 60);
   
   // Date de génération
   const today = new Date();
-  doc.setFontSize(10);
+  doc.setFontSize(9);
   doc.setTextColor(secondaryColor);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Document généré le ${today.toLocaleDateString('fr-FR')}`, 14, 72);
+  doc.text(`Document généré le ${today.toLocaleDateString('fr-FR')}`, 14, 70);
 
   return doc;
 };

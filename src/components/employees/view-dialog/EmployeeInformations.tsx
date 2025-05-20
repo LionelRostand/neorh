@@ -15,10 +15,6 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
 
   useEffect(() => {
     // Gestion du département
-    if (employee.department && !employee.department.includes('QFW') && !employee.department.includes('dCij')) {
-      return;
-    }
-    
     if (employee.departmentId) {
       const fetchDepartmentName = async () => {
         try {
@@ -55,7 +51,7 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
       
       fetchCompanyName();
     }
-  }, [employee.departmentId, employee.department, employee.companyId]);
+  }, [employee.departmentId, employee.companyId]);
 
   return (
     <div className="space-y-6">
