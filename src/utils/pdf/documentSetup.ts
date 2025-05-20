@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import { Company } from '@/types/company';
 
