@@ -11,12 +11,14 @@ import { Contract } from "@/lib/constants";
 import ContractStatusCards from "@/components/contracts/ContractStatusCards";
 import ContractSearch from "@/components/contracts/ContractSearch";
 import ContractTable from "@/components/contracts/ContractTable";
+import NewContractDialog from "@/components/contracts/NewContractDialog";
 import useFirestore from "@/hooks/useFirestore";
 
 const Contrats = () => {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [newContractDialogOpen, setNewContractDialogOpen] = useState(false);
   const firestore = useFirestore<Contract>('hr_contracts');
 
   // Fonction pour récupérer les contrats
@@ -66,10 +68,7 @@ const Contrats = () => {
   };
 
   const handleNewContract = () => {
-    toast({
-      title: "Information",
-      description: "Cette fonctionnalité sera bientôt disponible"
-    });
+    setNewContractDialogOpen(true);
   };
 
   const handleDetails = (id: string) => {
@@ -148,6 +147,12 @@ const Contrats = () => {
           </div>
         </CardContent>
       </Card>
+
+      <NewContractDialog 
+        open={newContractDialogOpen} 
+        onOpenChange={setNewContractDialogOpen}
+        onSuccess={fetchContracts}
+      />
     </div>
   );
 };
