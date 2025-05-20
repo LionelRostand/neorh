@@ -1,7 +1,6 @@
 
 import { z } from "zod";
 
-// Rename export to match what ContractForm is expecting
 export const schema = z.object({
   employeeId: z.string({ required_error: "Veuillez sélectionner un employé" }),
   employeeName: z.string().optional(),

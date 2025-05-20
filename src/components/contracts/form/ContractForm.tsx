@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form } from '@/components/ui/form';
-import { schema } from './schema';
+import { schema, ContractFormValues } from './schema';
 import { toast } from '@/components/ui/use-toast';
 import FormFooter from './components/FormFooter';
 import EmployeeField from './fields/EmployeeField';
@@ -18,18 +18,6 @@ import { useEmployeeData } from '@/hooks/useEmployeeData';
 import { useCompaniesData } from '@/hooks/useCompaniesData';
 import { Contract } from '@/lib/constants';
 import { generateContractPdf, saveContractAsDocument } from '@/utils/pdf/generateContractPdf';
-
-export interface ContractFormData {
-  employeeId: string;
-  employeeName: string;
-  position: string;
-  type: string;
-  startDate: Date;
-  endDate?: Date;
-  departmentId: string;
-  salary: string;
-  conventionCollective?: string;
-}
 
 interface ContractFormProps {
   onCancel?: () => void;
@@ -46,7 +34,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
   const documentsCollection = useFirestore('hr_documents');
   
   // Initialize form
-  const form = useForm<ContractFormData>({
+  const form = useForm<ContractFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       employeeId: '',
@@ -60,7 +48,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
     },
   });
   
-  const handleSubmit = async (data: ContractFormData) => {
+  const handleSubmit = async (data: ContractFormValues) => {
     try {
       setIsSubmitting(true);
       
@@ -70,7 +58,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
       // Create contract object
       const contract: Contract = {
         employeeId: data.employeeId,
-        employeeName: data.employeeName,
+        employeeName: data.employeeName || '',
         type: data.type,
         position: data.position,
         startDate: data.startDate.toISOString(),
@@ -101,7 +89,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
         const contractData = {
           ...data,
           id: contractId,
-          departmentName: department?.name,
+          departmentName: department?.name || '',
           status: 'pending_signature' as const
         };
         
@@ -162,7 +150,8 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
             control={form.control} 
             departments={departments.map(dept => ({ 
               id: dept.id || '', 
-              name: dept.name 
+              name: dept.name,
+              description: dept.description
             }))}
           />
           
