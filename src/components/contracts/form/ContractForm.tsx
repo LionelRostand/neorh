@@ -99,7 +99,9 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
           departmentName: department?.name || '',
           salary: data.salary,
           conventionCollective: data.conventionCollective,
-          status: 'pending_signature' as const
+          status: 'pending_signature' as const,
+          signedByEmployee: false,
+          signedByEmployer: false
         };
         
         // Generate PDF

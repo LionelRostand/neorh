@@ -17,6 +17,8 @@ interface ContractData {
   salary: string;
   conventionCollective?: string;
   status: 'draft' | 'pending_signature' | 'active' | 'signed';
+  signedByEmployee?: boolean;
+  signedByEmployer?: boolean;
 }
 
 /**
