@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from "react";
-import { useCollection } from "@/hooks/useCollection";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { Document } from "@/lib/constants";
 import DocumentFilter from "@/components/documents/DocumentFilter";
 import DocumentList from "@/components/documents/DocumentList";
 import ContractStatusCards from "@/components/contracts/ContractStatusCards";
+import useFirestore from "@/hooks/useFirestore";
 
 const DocumentsRH = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -16,11 +16,11 @@ const DocumentsRH = () => {
   const [loading, setLoading] = useState(true);
   
   // Use the collection hook to access the documents collection
-  const documentsCollection = useCollection<'hr_documents'>();
+  const documentsCollection = useFirestore<Document>("hr_documents");
 
   // Contract stats
   const [contractStats, setContractStats] = useState({
-    total: 1,
+    total: 0,
     active: 0,
     pending: 0,
     expired: 0
@@ -29,30 +29,36 @@ const DocumentsRH = () => {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        // In a real scenario, we would fetch from Firestore
-        // For now, we'll use mock data
-        setDocuments([
-          {
-            id: "1",
-            title: "Bulletin de paie - mai 2025",
-            category: "paystubs",
-            fileUrl: "/documents/1",
-            fileType: "application/pdf",
-            uploadDate: "2025-05-15",
-            status: "active",
-            employeeId: "emp1",
-            employeeName: "Lionel DJOSSA"
-          },
-          {
-            id: "2",
-            title: "Document sans titre",
-            category: "other",
-            fileUrl: "/documents/2",
-            fileType: "unknown",
-            uploadDate: "2025-05-14",
-            status: "active"
-          }
-        ]);
+        setLoading(true);
+        const result = await documentsCollection.getAll();
+        
+        if (result.docs) {
+          const fetchedDocs = result.docs.map(doc => ({
+            id: doc.id || '',
+            title: doc.title || 'Document sans nom',
+            category: doc.category || 'other',
+            fileUrl: doc.fileUrl || '',
+            fileType: doc.fileType || 'application/pdf',
+            uploadDate: doc.uploadDate || new Date().toISOString(),
+            status: doc.status || 'active',
+            employeeId: doc.employeeId,
+            employeeName: doc.employeeName,
+            contractId: doc.contractId,
+            description: doc.description
+          }));
+          
+          setDocuments(fetchedDocs);
+          
+          // Calculer les statistiques des contrats
+          const contracts = fetchedDocs.filter(doc => doc.category === 'contracts');
+          setContractStats({
+            total: contracts.length,
+            active: contracts.filter(doc => doc.status === 'active').length,
+            pending: contracts.filter(doc => doc.status === 'pending').length,
+            expired: contracts.filter(doc => doc.status === 'expired').length
+          });
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error("Error fetching documents:", error);
@@ -79,9 +85,12 @@ const DocumentsRH = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Gestion des documents</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Gestion des documents</h1>
+          <p className="text-muted-foreground">Consultez et gérez tous les documents RH</p>
+        </div>
         <Button className="bg-emerald-600 hover:bg-emerald-700">
           <Plus className="mr-2 h-4 w-4" /> Nouveau document
         </Button>
@@ -102,7 +111,7 @@ const DocumentsRH = () => {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
         />
-        <DocumentList documents={filteredDocuments} />
+        <DocumentList documents={filteredDocuments} loading={loading} />
       </div>
     </div>
   );

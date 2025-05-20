@@ -1,4 +1,3 @@
-
 // Define the mapping between routes and Firestore collections
 export const ROUTE_TO_COLLECTION_MAP = {
   '/employes': 'hr_employees',
@@ -101,16 +100,19 @@ export type Contract = {
 }
 
 export type Document = {
-  id?: string;
+  id: string;
   title: string;
-  employeeId?: string;
-  employeeName?: string;
-  category: string;
+  category: string; // 'contracts', 'paystubs', 'certificates', 'other'
   fileUrl: string;
   fileType: string;
   uploadDate: string;
-  expiryDate?: string;
-  status: 'active' | 'archived' | 'pending';
+  status?: string;
+  employeeId?: string;
+  employeeName?: string;
+  contractId?: string;
+  description?: string;
+  departmentId?: string;
+  departmentName?: string;
 }
 
 export type Training = {

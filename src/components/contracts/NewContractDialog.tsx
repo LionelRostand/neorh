@@ -22,6 +22,7 @@ export default function NewContractDialog({
 }: NewContractDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const contractsCollection = useFirestore("hr_contracts");
+  const documentsCollection = useFirestore("hr_documents");
   const { employees } = useEmployeeData();
   const { departments } = useDepartmentsData();
   const { companies } = useCompaniesData();
@@ -54,10 +55,10 @@ export default function NewContractDialog({
       };
       
       // Enregistrer dans Firestore
-      await contractsCollection.add(contractData);
+      const savedContract = await contractsCollection.add(contractData);
       
       // Générer le PDF du contrat
-      generateContractPdf({
+      const contractPdfDetails = {
         employeeId: data.employeeId,
         employeeName: contractData.employeeName,
         position: data.position,
@@ -67,7 +68,28 @@ export default function NewContractDialog({
         endDate: data.endDate,
         departmentId: data.departmentId,
         departmentName: departmentData?.name
-      }, company);
+      };
+      
+      const fileName = await generateContractPdf(contractPdfDetails, company);
+      
+      // Créer un document dans la collection hr_documents
+      const docData = {
+        title: `Contrat ${data.type} - ${contractData.employeeName}`,
+        category: "contracts",
+        fileType: "application/pdf",
+        fileUrl: fileName, // Ceci serait un URL réel dans une implémentation complète
+        uploadDate: new Date().toISOString(),
+        status: "active",
+        employeeId: data.employeeId,
+        employeeName: contractData.employeeName,
+        contractId: savedContract?.id,
+        description: `Contrat ${data.type} pour le poste de ${data.position}`,
+        departmentId: data.departmentId,
+        departmentName: departmentData?.name
+      };
+      
+      // Ajouter le document à Firestore
+      await documentsCollection.add(docData);
       
       // Notification de succès
       toast({
