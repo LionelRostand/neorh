@@ -8,14 +8,14 @@ import { Employee } from '@/types/employee';
  */
 export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
   // Position de départ après l'en-tête
-  const startY = 90;
+  const startY = 110; // Ajusté pour commencer après la date de génération du document
   
   doc.setFontSize(14);
   doc.setTextColor('#000000');
   doc.setFont('helvetica', 'bold');
   doc.text('Informations de l\'employé', 14, startY);
   
-  // Informations personnelles
+  // Informations personnelles - décalées vers le bas
   doc.setFontSize(12);
   doc.text('Informations personnelles', 14, startY + 15);
   

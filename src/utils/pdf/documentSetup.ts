@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import { Company } from '@/types/company';
 
@@ -62,7 +61,7 @@ export const setupDocument = (
       infoY += 5;
     }
     
-    // Add company logo if available
+    // Add company logo if available - déplacé à droite
     if (company.logoUrl) {
       try {
         doc.addImage(
@@ -96,7 +95,7 @@ export const setupDocument = (
     }
   } else {
     // Default company info if none provided
-    doc.text('ENTREPRISE SARL', 14, 20);
+    doc.text('ENTREPRISE', 14, 20);
     
     doc.setFontSize(9);
     doc.setTextColor(secondaryColor);
@@ -104,36 +103,41 @@ export const setupDocument = (
     
     doc.text('123 Rue des Entreprises', 14, 25);
     doc.text('75000 Paris, France', 14, 30);
-    doc.text('Email: contact@entreprise.fr', 14, 35);
+    doc.text('Tél: +33123456789', 14, 35);
+    doc.text('Email: contact@entreprise.fr', 14, 40);
   }
   
-  // Titre du document
+  // Titre du document - Fiche Employé
   doc.setFontSize(16);
   doc.setTextColor(primaryColor);
   doc.setFont('helvetica', 'bold');
-  doc.text('Fiche Employé', 14, 55);
+  doc.text('Fiche Employé', 14, 65);
   
-  // Statut
+  // Statut - ajusté pour être à côté de "Statut:" comme dans le modèle
   if (statusText) {
-    doc.setTextColor(statusColor || '#22c55e');
+    doc.setTextColor('#000000');
     doc.setFontSize(10);
-    doc.text(`Statut: ${statusText}`, 14, 62);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Statut:', 14, 75);
+    doc.setTextColor(statusColor || '#22c55e');
+    doc.setFont('helvetica', 'bold');
+    doc.text(statusText, 40, 75);
   }
   
-  // Sous-titre (nom de l'employé)
+  // Sous-titre (nom de l'employé) - ajusté pour être sous le statut
   if (subtitle) {
     doc.setTextColor(primaryColor);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text(subtitle, 14, 70);
+    doc.text(subtitle, 14, 85);
   }
   
-  // Date de génération
+  // Date de génération - ajustée pour être sous le nom de l'employé
   const today = new Date();
-  doc.setFontSize(8);
+  doc.setFontSize(9);
   doc.setTextColor(secondaryColor);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Document généré le ${today.toLocaleDateString('fr-FR')}`, 14, 77);
+  doc.text(`Document généré le ${today.toLocaleDateString('fr-FR')}`, 14, 95);
 
   return doc;
 };
