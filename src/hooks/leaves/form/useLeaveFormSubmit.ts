@@ -15,7 +15,7 @@ import { leaveRequestService } from "./utils/leaveRequestService";
 
 export const useLeaveFormSubmit = (onSuccess?: () => void) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { add: addLeave } = useCollection<string>();
+  const { add: addLeave } = useCollection("leaves");
   const { add: addAllocation } = useFirestore<LeaveAllocation>('hr_leave_allocations');
   const { update: updateAllocation } = useFirestore<LeaveAllocation>('hr_leave_allocations');
   const { user } = useAuth();

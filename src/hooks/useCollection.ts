@@ -3,29 +3,33 @@ import { useState } from 'react';
 import { useFirestore } from './firestore';
 
 // Type that allows both string and { collection: string } for backward compatibility
-type CollectionInput = string | { collection: string };
+export type CollectionInput = string | { collection: string };
 
-// Wrapper pour maintenir la compatibilité avec l'ancien code
-export const useCollection = <T extends CollectionInput>() => {
+// Wrapper to maintain compatibility with older code
+export const useCollection = <T extends CollectionInput>(collectionNameOrConfig?: T) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  // Déterminer la collection en fonction du type générique T
-  const getCollectionName = () => {
-    // Handle both string and object with collection property
-    if (typeof T === 'string') {
-      return T;
-    } else if (typeof T === 'object' && T && 'collection' in T) {
-      return T.collection;
+  // Determine the collection name based on the input parameter
+  const getCollectionName = (): string => {
+    if (!collectionNameOrConfig) {
+      return 'hr_collections'; // Default collection
     }
+    
+    if (typeof collectionNameOrConfig === 'string') {
+      return collectionNameOrConfig;
+    } else if (typeof collectionNameOrConfig === 'object' && 'collection' in collectionNameOrConfig) {
+      return collectionNameOrConfig.collection;
+    }
+    
     // Fallback to a default collection
     return 'hr_collections';
   };
 
-  // Utiliser le hook useFirestore moderne
+  // Use the modern useFirestore hook
   const firestore = useFirestore<any>(getCollectionName());
 
-  // Exposer les méthodes compatibles avec l'ancien hook
+  // Expose methods compatible with the old hook
   const getAll = async () => {
     setIsLoading(true);
     try {

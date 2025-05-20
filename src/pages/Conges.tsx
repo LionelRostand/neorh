@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { showSuccessToast, showErrorToast } from "@/utils/toastUtils";
 import { useCollection } from "@/hooks/useCollection";
@@ -14,7 +15,7 @@ const Conges = () => {
   const [loading, setLoading] = useState(true);
   const [showNewLeaveForm, setShowNewLeaveForm] = useState(false);
   const [showAllocationForm, setShowAllocationForm] = useState(false);
-  const { getAll, isLoading, error, update, search } = useCollection<string>();
+  const { getAll, isLoading, error, update, search } = useCollection("leaves");
   const { user } = useAuth();
   const { approveLeave, rejectLeave } = useLeaveApproval();
 

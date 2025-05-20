@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useCollection } from "@/hooks/useCollection";
-import { useFirestore } from "@/hooks/useFirestore";
+import { useFirestore } from "@/hooks/firestore";
 import { Badge, Employee } from "@/types/firebase";
 import { toast } from "@/components/ui/use-toast";
 
@@ -17,7 +17,7 @@ export const useBadges = () => {
   });
   
   // Utilisation de notre hook pour accéder à la collection des badges
-  const badgesCollection = useCollection<string>();
+  const badgesCollection = useCollection("badges");
   
   // Utilisation du hook Firestore pour récupérer les employés
   const employeesFirestore = useFirestore<Employee>("employees");
