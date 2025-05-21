@@ -44,7 +44,7 @@ export const generateEmployeePdfWithDocuments = async (
   // Generate content based on the active tab
   switch (activeTab) {
     case 'informations':
-      generateInformationsTab(doc, employee);
+      await generateInformationsTab(doc, employee);
       break;
     case 'documents':
       await generateDocumentsTab(doc, employee);
@@ -65,7 +65,7 @@ export const generateEmployeePdfWithDocuments = async (
       generateEvaluationsTab(doc, employee);
       break;
     default:
-      generateInformationsTab(doc, employee);
+      await generateInformationsTab(doc, employee);
   }
   
   // Add page numbers

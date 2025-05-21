@@ -2,11 +2,12 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Employee } from '@/types/employee';
+import { employeeService } from '@/hooks/leaves/form/utils/employeeService';
 
 /**
  * Génère la section informations
  */
-export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
+export const generateInformationsTab = async (doc: jsPDF, employee: Employee) => {
   doc.setFontSize(16);
   doc.setTextColor('#000000');
   doc.setFont('helvetica', 'bold');
@@ -72,10 +73,20 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('Informations professionnelles', 14, tableEndY);
+
+  // Récupérer le vrai nom du département si on a un ID
+  let departmentName = employee.department || 'Non spécifié';
+  if (employee.departmentId && employee.departmentId !== employee.department) {
+    try {
+      departmentName = await employeeService.fetchDepartmentName(employee.departmentId);
+    } catch (error) {
+      console.error("Erreur lors de la récupération du nom du département:", error);
+    }
+  }
   
   const professionalInfoData = [
     ['Poste', employee.position || 'Non spécifié'],
-    ['Département', employee.department || 'Non spécifié'],
+    ['Département', departmentName],
     ['Entreprise', typeof employee.companyId === 'string' && !employee.companyId.includes('@') ? employee.companyId : 'Non spécifié'],
     ['Date d\'embauche', employee.startDate || 'Non spécifié'],
     ['Statut', employee.status === 'active' ? 'Actif' : 
