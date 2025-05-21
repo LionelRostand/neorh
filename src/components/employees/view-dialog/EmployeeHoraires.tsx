@@ -38,7 +38,13 @@ export const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, on
     const fetchSchedules = async () => {
       setIsLoading(true);
       try {
-        const response = await schedulesCollection.getWhere('employeeId', '==', employee.id || '');
+        // Using search instead of getWhere
+        const response = await schedulesCollection.search({ 
+          field: 'employeeId', 
+          value: employee.id || '',
+          operator: '=='
+        });
+        
         if (response && response.docs) {
           setSchedules(response.docs);
           setEditedSchedules([...response.docs]);

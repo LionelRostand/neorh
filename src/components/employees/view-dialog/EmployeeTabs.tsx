@@ -57,7 +57,7 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
         </TabsContent>
         
         <TabsContent value="horaires" className="p-6">
-          <HorairesTab />
+          <HorairesTab employee={employee} onRefresh={onRefresh} />
         </TabsContent>
         
         <TabsContent value="feuillesdetemps" className="p-6">
