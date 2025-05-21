@@ -3,12 +3,12 @@ import React, { useEffect } from 'react';
 import { Control, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { FormField } from '@/components/ui/form';
 import { ContractFormValues } from '../schema';
-import { EmployeeField } from '../fields/EmployeeField';
-import { PositionField } from '../fields/PositionField';
-import { ContractTypeField } from '../fields/ContractTypeField';
-import { DateFields } from '../fields/DateFields';
-import { DepartmentField } from '../fields/DepartmentField';
-import { SalaryField } from '../fields/SalaryField';
+import EmployeeField from '../fields/EmployeeField';
+import PositionField from '../fields/PositionField';
+import ContractTypeField from '../fields/ContractTypeField';
+import DateFields from '../fields/DateFields';
+import DepartmentField from '../fields/DepartmentField';
+import SalaryField from '../fields/SalaryField';
 import { ConventionCollectiveField } from '../fields/ConventionCollectiveField';
 import { Department } from '@/types/firebase';
 import { Employee } from '@/types/employee';
@@ -45,16 +45,26 @@ const FormFields = ({
   
   return (
     <div className="space-y-4">
-      <EmployeeField control={control} employees={employees} />
+      <EmployeeField 
+        control={control} 
+        employees={employees}
+        setValue={(id, name) => {
+          setValue('employeeId', id);
+          setValue('employeeName', name);
+        }}
+        employeeName={employeeName} 
+      />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <PositionField control={control} />
-        <ContractTypeField control={control} />
+        <ContractTypeField control={control} setValue={setValue} />
       </div>
       
       <DateFields 
         control={control} 
         watch={watch}
+        setValue={setValue}
+        contractType={contractType}
       />
       
       <DepartmentField control={control} departments={departments} />
