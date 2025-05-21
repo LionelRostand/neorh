@@ -10,7 +10,6 @@ export const schema = z.object({
   salary: z.string().regex(/^\d+$/, { message: "Le salaire doit être un nombre" }),
   startDate: z.date({ required_error: "Veuillez sélectionner une date de début" }),
   endDate: z.date().optional(),
-  conventionCollective: z.string().optional(),
 });
 
 export type ContractFormValues = z.infer<typeof schema>;
