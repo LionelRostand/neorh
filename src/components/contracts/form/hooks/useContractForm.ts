@@ -65,22 +65,27 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         contract.departmentName = department.name;
       }
       
-      // Add contract to Firestore
-      const result = await contractsCollection.add(contract);
+      // Générer un ID temporaire pour le contrat avant de l'ajouter à Firestore
+      // Cela garantit que nous aurons toujours un ID valide
+      const tempContractId = `contract_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       
-      // Find employee for company ID
-      const employee = employees.find(e => e.id === data.employeeId);
-      let company = null;
-      
-      if (employee?.companyId) {
-        company = companies.find(c => c.id === employee.companyId);
-      }
-      
-      // Vérifier que nous avons bien un ID de contrat avant de continuer
-      // Fix: Vérifier si result existe et a un ID
-      if (result && result.id) {
-        // Generate PDF with company info if available
-        const contractId = result.id;
+      try {
+        // Ajouter le contrat à Firestore
+        const result = await contractsCollection.add({
+          ...contract,
+          id: tempContractId // Ajouter l'ID temporaire
+        });
+        
+        // Déterminer l'ID final du contrat (soit celui retourné par Firestore, soit l'ID temporaire)
+        const contractId = (result && result.id) ? result.id : tempContractId;
+        
+        // Find employee for company ID
+        const employee = employees.find(e => e.id === data.employeeId);
+        let company = null;
+        
+        if (employee?.companyId) {
+          company = companies.find(c => c.id === employee.companyId);
+        }
         
         // Ensure all required fields are present
         const contractData: ContractData = {
@@ -118,14 +123,9 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         if (onSuccess) {
           onSuccess();
         }
-      } else {
-        // Afficher une erreur si nous n'avons pas pu obtenir l'ID du contrat
-        console.error('Erreur: Impossible d\'obtenir l\'ID du contrat créé');
-        toast({
-          title: 'Erreur',
-          description: 'Une erreur est survenue lors de la création du contrat',
-          variant: 'destructive',
-        });
+      } catch (error) {
+        console.error('Error creating contract in Firestore:', error);
+        throw error; // Re-throw the error to be caught by the outer try-catch
       }
     } catch (error) {
       console.error('Error creating contract:', error);
