@@ -13,6 +13,7 @@ import useFirestore from "@/hooks/useFirestore";
 import { Document } from "@/lib/constants";
 import { toast } from "@/components/ui/use-toast";
 import { SearchCriteria } from "@/hooks/firestore/searchOperations";
+import { showErrorToast } from "@/utils/toastUtils";
 
 interface ViewContractDialogProps {
   open: boolean;
@@ -38,24 +39,21 @@ const ViewContractDialog = ({
       setError(null);
       
       try {
-        // Chercher le document associé au contrat en utilisant search au lieu de getWhere
+        console.log("Fetching contract document for ID:", contractId);
+        
+        // Chercher le document associé au contrat en utilisant search
         const criteria: SearchCriteria = { 
           field: 'contractId', 
           value: contractId, 
           operator: '==' 
         };
         
-        const categoryFilter: SearchCriteria = {
-          field: 'category',
-          value: 'contracts',
-          operator: '=='
-        };
-        
-        // Utiliser d'abord search pour le premier critère
         const result = await documentsCollection.search(criteria);
+        console.log("Search result:", result);
         
-        // Filtrer manuellement pour le deuxième critère si nécessaire
+        // Filtrer manuellement pour la catégorie 'contracts'
         const filteredDocs = result.docs.filter(doc => doc.category === 'contracts');
+        console.log("Filtered docs:", filteredDocs);
         
         if (filteredDocs && filteredDocs.length > 0) {
           setDocument(filteredDocs[0]);
@@ -65,11 +63,7 @@ const ViewContractDialog = ({
       } catch (err) {
         console.error("Erreur lors de la récupération du document:", err);
         setError("Erreur lors du chargement du contrat.");
-        toast({
-          variant: "destructive",
-          title: "Erreur",
-          description: "Impossible de charger le document du contrat."
-        });
+        showErrorToast("Impossible de charger le document du contrat.");
       } finally {
         setLoading(false);
       }
@@ -82,30 +76,40 @@ const ViewContractDialog = ({
     if (!document?.fileUrl) return;
     
     try {
-      // Convertir la base64 en Blob
-      const byteCharacters = atob(document.fileUrl.split(',')[1]);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      // Vérifier si fileUrl est une URL ou une chaîne base64
+      const isBase64 = document.fileUrl.startsWith('data:');
       
-      // Créer un URL pour le blob et télécharger en utilisant le window.document
-      const url = window.URL.createObjectURL(blob);
-      const link = window.document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${document.title || 'contrat'}.pdf`);
-      window.document.body.appendChild(link);
-      link.click();
-      window.document.body.removeChild(link);
+      if (isBase64) {
+        // Traitement pour base64
+        const byteCharacters = atob(document.fileUrl.split(',')[1]);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        
+        // Créer un URL pour le blob et télécharger
+        const url = window.URL.createObjectURL(blob);
+        const link = window.document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${document.title || 'contrat'}.pdf`);
+        window.document.body.appendChild(link);
+        link.click();
+        window.document.body.removeChild(link);
+      } else {
+        // Traitement pour URL directe
+        const link = window.document.createElement('a');
+        link.href = document.fileUrl;
+        link.setAttribute('download', `${document.title || 'contrat'}.pdf`);
+        link.setAttribute('target', '_blank');
+        window.document.body.appendChild(link);
+        link.click();
+        window.document.body.removeChild(link);
+      }
     } catch (err) {
       console.error("Erreur lors du téléchargement:", err);
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de télécharger le document."
-      });
+      showErrorToast("Impossible de télécharger le document.");
     }
   };
 
@@ -146,11 +150,21 @@ const ViewContractDialog = ({
               <p className="text-red-500">{error}</p>
             </div>
           ) : document?.fileUrl ? (
-            <iframe 
-              src={document.fileUrl}
-              className="w-full h-full border rounded-md"
-              title="Contract PDF"
-            />
+            isBase64Data(document.fileUrl) ? (
+              <iframe 
+                src={document.fileUrl}
+                className="w-full h-full border rounded-md"
+                title="Contract PDF"
+              />
+            ) : (
+              <object 
+                data={document.fileUrl}
+                type="application/pdf" 
+                className="w-full h-full border rounded-md"
+              >
+                <p>Le navigateur ne peut pas afficher ce PDF. <a href={document.fileUrl} target="_blank" rel="noopener noreferrer">Ouvrir le PDF</a></p>
+              </object>
+            )
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <p>Aucun document disponible pour ce contrat.</p>
@@ -160,6 +174,11 @@ const ViewContractDialog = ({
       </DialogContent>
     </Dialog>
   );
+};
+
+// Fonction utilitaire pour vérifier si une chaîne est au format base64
+const isBase64Data = (str: string): boolean => {
+  return str.startsWith('data:');
 };
 
 export default ViewContractDialog;
