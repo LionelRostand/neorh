@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { 
   Card, 
@@ -47,12 +48,12 @@ const Formations = () => {
     });
   };
 
-  // Filtrer les formations en fonction des critères de recherche
+  // Filtrer les formations en fonction des critères de recherche avec vérification pour les valeurs undefined
   const filteredTrainings = trainings
     .filter(training => 
-      training.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      training.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      training.trainer.toLowerCase().includes(searchTerm.toLowerCase())
+      (training.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      training.description?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      training.trainer?.toLowerCase().includes(searchTerm.toLowerCase())) ?? false
     )
     .filter(training => selectedDepartment === "all" || training.department === selectedDepartment)
     .filter(training => selectedStatus === "all" || training.status === selectedStatus);
