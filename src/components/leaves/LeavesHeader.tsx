@@ -1,13 +1,8 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Filter, Plus, Calendar, ChevronDown } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Filter, Plus } from "lucide-react";
+import LeaveUnifiedAllocationForm from "./allocation/LeaveUnifiedAllocationForm";
 
 interface LeavesHeaderProps {
   onNewRequest: () => void;
@@ -15,6 +10,24 @@ interface LeavesHeaderProps {
 }
 
 const LeavesHeader = ({ onNewRequest, onNewAllocation }: LeavesHeaderProps) => {
+  // État pour contrôler l'ouverture du formulaire unifié
+  const [showAllocationForm, setShowAllocationForm] = React.useState(false);
+  
+  const handleOpenForm = () => {
+    setShowAllocationForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowAllocationForm(false);
+  };
+
+  const handleSuccess = () => {
+    setShowAllocationForm(false);
+    // Si onNewRequest ou onNewAllocation était appelé avec des paramètres supplémentaires,
+    // nous devrions les transmettre ici
+    if (onNewRequest) onNewRequest();
+  };
+
   return (
     <div className="flex justify-between items-center">
       <div>
@@ -26,28 +39,21 @@ const LeavesHeader = ({ onNewRequest, onNewAllocation }: LeavesHeaderProps) => {
           <Filter className="h-4 w-4" /> Filtres
         </Button>
         
-        {/* Bouton unifié avec menu déroulant */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              variant="default" 
-              className="gap-2 bg-emerald-500 hover:bg-emerald-600"
-            >
-              <Plus className="h-4 w-4" /> Nouvelle attribution
-              <ChevronDown className="h-4 w-4 ml-1" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {onNewAllocation && (
-              <DropdownMenuItem onClick={onNewAllocation}>
-                <Calendar className="h-4 w-4 mr-2" /> Attribution simple
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem onClick={onNewRequest}>
-              <Calendar className="h-4 w-4 mr-2" /> Attribution sur période
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button 
+          variant="default" 
+          className="gap-2 bg-emerald-500 hover:bg-emerald-600"
+          onClick={handleOpenForm}
+        >
+          <Plus className="h-4 w-4" /> Attribution de congés
+        </Button>
+        
+        {/* Formulaire unifié pour les deux types d'attribution */}
+        <LeaveUnifiedAllocationForm
+          open={showAllocationForm}
+          onClose={handleCloseForm}
+          onSuccess={handleSuccess}
+          canAllocateSimple={!!onNewAllocation}
+        />
       </div>
     </div>
   );

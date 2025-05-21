@@ -16,6 +16,7 @@ interface LeaveAllocationFormProps {
   onClose: () => void;
   onSuccess?: () => void;
   employeeId?: string;
+  embedded?: boolean; // Nouveau prop pour indiquer si le formulaire est intégré
 }
 
 const LeaveAllocationForm: React.FC<LeaveAllocationFormProps> = ({
@@ -23,6 +24,7 @@ const LeaveAllocationForm: React.FC<LeaveAllocationFormProps> = ({
   onClose,
   onSuccess,
   employeeId,
+  embedded = false,
 }) => {
   const {
     form,
@@ -30,6 +32,26 @@ const LeaveAllocationForm: React.FC<LeaveAllocationFormProps> = ({
     isLoading,
     handleSubmit
   } = useLeaveAllocationForm(employeeId, onSuccess, onClose);
+
+  // Si le formulaire est intégré dans un autre composant, nous n'avons pas besoin du Dialog
+  if (embedded) {
+    return (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <LeaveAllocationFields 
+            form={form} 
+            employeeId={employeeId}
+          />
+          
+          <LeaveAllocationFormActions 
+            onCancel={onClose} 
+            isSubmitting={isSubmitting} 
+            isLoading={isLoading}
+          />
+        </form>
+      </Form>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>

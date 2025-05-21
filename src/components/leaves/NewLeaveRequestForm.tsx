@@ -15,6 +15,7 @@ interface NewLeaveRequestFormProps {
   onSuccess?: () => void;
   employeeId?: string;
   isAllocation?: boolean;
+  embedded?: boolean; // Nouveau prop pour indiquer si le formulaire est intégré
 }
 
 const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({ 
@@ -22,7 +23,8 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
   onClose, 
   onSuccess,
   employeeId,
-  isAllocation = false
+  isAllocation = false,
+  embedded = false
 }) => {
   const {
     form,
@@ -37,6 +39,27 @@ const NewLeaveRequestForm: React.FC<NewLeaveRequestFormProps> = ({
     getRttHelperText,
     getDialogTitle
   } = useLeaveRequestForm(onClose, onSuccess, employeeId, isAllocation);
+
+  // Si le formulaire est intégré dans un autre composant, nous n'avons pas besoin du Dialog
+  if (embedded) {
+    return (
+      <LeaveRequestFormContent
+        form={form}
+        employeeId={employeeId}
+        isAllocation={isAllocation}
+        showPaidLeaveAllocation={showPaidLeaveAllocation}
+        showRttAllocation={showRttAllocation}
+        getPaidLeaveAllocationLabel={getPaidLeaveAllocationLabel}
+        getRttAllocationLabel={getRttAllocationLabel}
+        getPaidLeaveHelperText={getPaidLeaveHelperText}
+        getRttHelperText={getRttHelperText}
+        syncDaysAllocated={syncDaysAllocated}
+        onSubmit={handleFormSubmit}
+        onClose={onClose}
+        isSubmitting={isSubmitting}
+      />
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
