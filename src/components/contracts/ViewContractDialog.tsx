@@ -12,6 +12,7 @@ import { Contract } from "@/lib/constants";
 import useFirestore from "@/hooks/useFirestore";
 import { Document } from "@/lib/constants";
 import { toast } from "@/components/ui/use-toast";
+import { SearchCriteria } from "@/hooks/firestore/searchOperations";
 
 interface ViewContractDialogProps {
   open: boolean;
@@ -37,15 +38,27 @@ const ViewContractDialog = ({
       setError(null);
       
       try {
-        // Chercher le document associé au contrat
-        const params = [
-          { field: 'contractId', operator: '==', value: contractId },
-          { field: 'category', operator: '==', value: 'contracts' }
-        ];
+        // Chercher le document associé au contrat en utilisant search au lieu de getWhere
+        const criteria: SearchCriteria = { 
+          field: 'contractId', 
+          value: contractId, 
+          operator: '==' 
+        };
         
-        const result = await documentsCollection.getWhere(params);
-        if (result.docs && result.docs.length > 0) {
-          setDocument(result.docs[0]);
+        const categoryFilter: SearchCriteria = {
+          field: 'category',
+          value: 'contracts',
+          operator: '=='
+        };
+        
+        // Utiliser d'abord search pour le premier critère
+        const result = await documentsCollection.search(criteria);
+        
+        // Filtrer manuellement pour le deuxième critère si nécessaire
+        const filteredDocs = result.docs.filter(doc => doc.category === 'contracts');
+        
+        if (filteredDocs && filteredDocs.length > 0) {
+          setDocument(filteredDocs[0]);
         } else {
           setError("Aucun document trouvé pour ce contrat.");
         }
@@ -78,14 +91,14 @@ const ViewContractDialog = ({
       const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray], { type: 'application/pdf' });
       
-      // Créer un URL pour le blob et télécharger
+      // Créer un URL pour le blob et télécharger en utilisant le window.document
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = window.document.createElement('a');
       link.href = url;
       link.setAttribute('download', `${document.title || 'contrat'}.pdf`);
-      document.body.appendChild(link);
+      window.document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      window.document.body.removeChild(link);
     } catch (err) {
       console.error("Erreur lors du téléchargement:", err);
       toast({
