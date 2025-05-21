@@ -3,6 +3,7 @@ import React from 'react';
 import { Employee } from '@/types/employee';
 import EmployeeLeaves from './EmployeeLeaves';
 import EmployeeTimesheets from './EmployeeTimesheets';
+import EmployeeHoraires from './EmployeeHoraires';
 
 // Autres composants
 export { default as InformationsTab } from './EmployeeInformations';
@@ -10,13 +11,11 @@ export { default as DocumentsTab } from './EmployeeDocuments';
 export { default as CompetencesTab } from './EmployeeSkills';
 export { default as EvaluationsTab } from './EmployeeEvaluations';
 
-export const HorairesTab = () => {
-  return (
-    <div className="space-y-6">
-      <h3 className="text-xl font-semibold">Horaires de travail</h3>
-      <p className="text-gray-500">Fonctionnalité en cours de développement.</p>
-    </div>
-  );
+export const HorairesTab: React.FC<{ employee: Employee; onRefresh?: () => void }> = ({ 
+  employee,
+  onRefresh
+}) => {
+  return <EmployeeHoraires employee={employee} onRefresh={onRefresh} />;
 };
 
 export const FeuillesDeTempsTab: React.FC<{ employee: Employee }> = ({ employee }) => {
