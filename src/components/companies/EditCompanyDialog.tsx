@@ -60,10 +60,11 @@ const EditCompanyDialog = ({ companyId, open, onOpenChange, onSuccess }: EditCom
       setLoadError(null);
       
       try {
-        const company = await getById(companyId);
-        console.log("EditCompanyDialog: Company data received:", company);
+        const result = await getById(companyId);
+        console.log("EditCompanyDialog: Company data received:", result);
         
-        if (company) {
+        if (result.docs && result.docs.length > 0) {
+          const company = result.docs[0];
           setInitialData({
             name: company.name || "",
             industry: company.industry || "",
