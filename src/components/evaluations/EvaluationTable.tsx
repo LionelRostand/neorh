@@ -45,6 +45,8 @@ const EvaluationTable = ({ evaluations, loading, onDelete, onModify, onManage }:
     );
   }
 
+  // Afficher un message explicite lorsqu'il n'y a aucune évaluation
+  console.log("Evaluations in table:", evaluations);
   if (!evaluations || evaluations.length === 0) {
     return (
       <div className="border rounded-md p-8 text-center">

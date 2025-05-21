@@ -11,17 +11,20 @@ export const useEvaluationsPage = () => {
   const [selectedEmployee, setSelectedEmployee] = useState("all");
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [loading, setLoading] = useState(true);
-  const { search, getAll } = useFirestore<Evaluation>('hr_evaluations');
+  const { getAll } = useFirestore<Evaluation>('hr_evaluations');
   const { employees } = useEmployeeData();
 
   // Fonction pour récupérer les évaluations
   const fetchEvaluations = useCallback(async () => {
     setLoading(true);
     try {
+      console.log("Fetching evaluations...");
       const result = await getAll();
-      if (result.docs) {
+      if (result.docs && result.docs.length > 0) {
+        console.log(`Retrieved ${result.docs.length} evaluations`, result.docs);
         setEvaluations(result.docs);
       } else {
+        console.log("No evaluations found or empty result");
         setEvaluations([]);
       }
     } catch (error) {
@@ -31,6 +34,8 @@ export const useEvaluationsPage = () => {
         title: "Erreur",
         description: "Impossible de charger les évaluations"
       });
+      // Assurer que l'état est toujours défini même en cas d'erreur
+      setEvaluations([]);
     } finally {
       setLoading(false);
     }

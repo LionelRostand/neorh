@@ -38,6 +38,12 @@ const EvaluationsContent = ({
   onManage,
   onRefresh
 }: EvaluationsContentProps) => {
+  console.log("EvaluationsContent rendered with:", { 
+    filteredEvaluations,
+    loading,
+    employeesCount: employees?.length 
+  });
+
   return (
     <Card className="border shadow-sm">
       <CardContent className="p-6">
