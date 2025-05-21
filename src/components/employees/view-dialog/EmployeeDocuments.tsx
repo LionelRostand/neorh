@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Document } from '@/lib/constants';
 import { Employee } from '@/types/employee';
 import { Button } from '@/components/ui/button';
@@ -19,14 +19,31 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
   const [loading, setLoading] = useState(true);
   const [fetchCompleted, setFetchCompleted] = useState(false);
   const documentsCollection = useFirestore<Document>("hr_documents");
+  
+  // Références pour éviter les appels multiples
+  const fetchInProgress = useRef(false);
+  const lastFetchedEmployeeId = useRef<string | null>(null);
 
   const fetchEmployeeDocuments = async () => {
     if (!employee?.id) return;
     
-    setLoading(true);
-    setFetchCompleted(false);
+    // Vérifier si une requête est déjà en cours pour le même employé
+    if (fetchInProgress.current) {
+      console.log("Requête de documents employé déjà en cours, annulation du doublon");
+      return;
+    }
+    
+    // Si les documents ont déjà été chargés pour cet employé, ne pas recharger
+    if (lastFetchedEmployeeId.current === employee.id && documents.length > 0 && !loading) {
+      console.log("Documents déjà chargés pour cet employé");
+      return;
+    }
     
     try {
+      fetchInProgress.current = true;
+      setLoading(true);
+      setFetchCompleted(false);
+      
       console.log(`Fetching documents for employee: ${employee.id}`);
       
       // Utiliser la méthode search pour récupérer les documents de l'employé
@@ -55,6 +72,7 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
         
         console.log(`Found ${fetchedDocs.length} documents for employee ${employee.id}`);
         setDocuments(fetchedDocs);
+        lastFetchedEmployeeId.current = employee.id;
       }
       
     } catch (error) {
@@ -67,11 +85,15 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
     } finally {
       setLoading(false);
       setFetchCompleted(true);
+      fetchInProgress.current = false;
     }
   };
 
   useEffect(() => {
-    fetchEmployeeDocuments();
+    // Ne charger les documents que si l'ID de l'employé change
+    if (employee.id && lastFetchedEmployeeId.current !== employee.id) {
+      fetchEmployeeDocuments();
+    }
   }, [employee.id]);
 
   return (
@@ -87,7 +109,10 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
       <DocumentList 
         documents={documents} 
         loading={loading} 
-        onRefresh={fetchEmployeeDocuments}
+        onRefresh={() => {
+          lastFetchedEmployeeId.current = null;
+          fetchEmployeeDocuments();
+        }}
       />
     </div>
   );

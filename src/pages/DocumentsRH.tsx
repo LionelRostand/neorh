@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
@@ -15,6 +15,10 @@ const DocumentsRH = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [loading, setLoading] = useState(true);
   
+  // Utiliser une référence pour éviter les appels multiples
+  const fetchInProgress = useRef(false);
+  const hasLoadedDocuments = useRef(false);
+  
   // Use the collection hook to access the documents collection
   const documentsCollection = useFirestore<Document>("hr_documents");
 
@@ -27,8 +31,17 @@ const DocumentsRH = () => {
   });
 
   const fetchDocuments = useCallback(async () => {
+    // Vérifier si une requête est déjà en cours ou si les documents ont déjà été chargés
+    if (fetchInProgress.current) {
+      console.log("Requête de documents déjà en cours, annulation du doublon");
+      return;
+    }
+    
     try {
+      fetchInProgress.current = true;
       setLoading(true);
+      
+      console.log("Chargement des documents...");
       const result = await documentsCollection.getAll();
       
       if (result.docs) {
@@ -48,7 +61,9 @@ const DocumentsRH = () => {
           signedByEmployer: doc.signedByEmployer || false
         }));
         
+        console.log(`${fetchedDocs.length} documents chargés avec succès`);
         setDocuments(fetchedDocs);
+        hasLoadedDocuments.current = true;
         
         // Calculer les statistiques des contrats
         const contracts = fetchedDocs.filter(doc => doc.category === 'contracts');
@@ -60,7 +75,6 @@ const DocumentsRH = () => {
         });
       }
       
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching documents:", error);
       toast({
@@ -68,12 +82,17 @@ const DocumentsRH = () => {
         description: "Impossible de charger les documents",
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
+      fetchInProgress.current = false;
     }
   }, [documentsCollection]);
 
   useEffect(() => {
-    fetchDocuments();
+    // Ne charger les documents qu'une seule fois au montage du composant
+    if (!hasLoadedDocuments.current) {
+      fetchDocuments();
+    }
   }, [fetchDocuments]);
 
   // Filter documents based on search term and active tab
@@ -116,7 +135,10 @@ const DocumentsRH = () => {
         <DocumentList 
           documents={filteredDocuments} 
           loading={loading}
-          onRefresh={fetchDocuments}
+          onRefresh={() => {
+            hasLoadedDocuments.current = false;
+            fetchDocuments();
+          }}
         />
       </div>
     </div>
