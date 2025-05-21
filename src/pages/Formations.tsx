@@ -13,18 +13,17 @@ import TrainingStatusCards from "@/components/training/TrainingStatusCards";
 import TrainingTable from "@/components/training/TrainingTable";
 import { useTrainingData } from "@/hooks/useTrainingData";
 import { Skeleton } from "@/components/ui/skeleton";
+import NewTrainingDialog from "@/components/training/NewTrainingDialog";
 
 const Formations = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const { trainings, loading, error, refetch } = useTrainingData();
+  const [isNewTrainingOpen, setIsNewTrainingOpen] = useState(false);
   
   const handleNewTraining = () => {
-    toast({
-      title: "Nouvelle formation",
-      description: "Fonctionnalité à implémenter",
-    });
+    setIsNewTrainingOpen(true);
   };
 
   const handleDelete = (id: string) => {
@@ -164,6 +163,12 @@ const Formations = () => {
           )}
         </CardContent>
       </Card>
+      
+      <NewTrainingDialog 
+        open={isNewTrainingOpen}
+        onOpenChange={setIsNewTrainingOpen}
+        onSuccess={refetch}
+      />
     </div>
   );
 };

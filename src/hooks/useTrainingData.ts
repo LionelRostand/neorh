@@ -11,6 +11,11 @@ export interface Training {
   participants: number;
   status: "planifiée" | "complétée" | "annulée";
   employeeId?: string;
+  employeeName?: string; 
+  type?: string;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const useTrainingData = () => {
