@@ -15,6 +15,7 @@ export interface ContractData {
   status: 'draft' | 'pending_signature' | 'active' | 'signed';
   signedByEmployee: boolean;
   signedByEmployer: boolean;
+  conventionCollective?: string; // Added optional conventionCollective property
 }
 
 export interface PdfResult {
