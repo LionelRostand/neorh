@@ -35,7 +35,7 @@ export const saveContractAsDocument = async (
       description: `Contrat de travail ${contractData.type} pour ${contractData.position} - Département: ${contractData.departmentName}`,
       signedByEmployee: false,
       signedByEmployer: false,
-      // Ajouter des champs pour faciliter la recherche
+      // These properties are now properly typed in the Document type
       departmentId: contractData.departmentId,
       departmentName: contractData.departmentName,
       salary: contractData.salary,

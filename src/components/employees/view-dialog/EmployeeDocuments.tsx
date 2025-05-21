@@ -51,6 +51,7 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
           description: doc.description || '',
           signedByEmployee: doc.signedByEmployee || false,
           signedByEmployer: doc.signedByEmployer || false,
+          // These properties were causing TypeScript errors - now they're properly typed
           departmentId: doc.departmentId,
           departmentName: doc.departmentName,
           salary: doc.salary,

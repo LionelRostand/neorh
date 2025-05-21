@@ -121,6 +121,11 @@ export type Document = {
   contractId?: string;
   signedByEmployee?: boolean;
   signedByEmployer?: boolean;
+  // Add the missing properties needed for contract documents
+  departmentId?: string;
+  departmentName?: string;
+  salary?: string;
+  conventionCollective?: string;
 }
 
 export type Training = {
