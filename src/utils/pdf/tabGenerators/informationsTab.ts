@@ -22,7 +22,6 @@ export const generateInformationsTab = async (doc: jsPDF, employee: Employee) =>
   doc.setFont('helvetica', 'bold');
   doc.text('Fiche Employé', 14, 70);
   
-  // Move employee name and status under "Fiche Employé"
   // Display employee status
   doc.setFontSize(10);
   doc.setTextColor('#22c55e'); // Green color for status
@@ -76,9 +75,12 @@ export const generateInformationsTab = async (doc: jsPDF, employee: Employee) =>
 
   // Récupérer le vrai nom du département si on a un ID
   let departmentName = employee.department || 'Non spécifié';
-  if (employee.departmentId && employee.departmentId !== employee.department) {
+  if (employee.departmentId) {
     try {
-      departmentName = await employeeService.fetchDepartmentName(employee.departmentId);
+      if (employee.departmentId.includes('@') || employee.departmentId.includes('-') || employee.departmentId.length > 25) {
+        // Si ça ressemble à un ID plutôt qu'à un nom, essayer de récupérer le nom
+        departmentName = await employeeService.fetchDepartmentName(employee.departmentId);
+      }
     } catch (error) {
       console.error("Erreur lors de la récupération du nom du département:", error);
     }

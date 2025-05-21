@@ -36,6 +36,12 @@ export const employeeService = {
     try {
       if (!departmentId) return 'Non spécifié';
       
+      // Si l'ID est déjà un nom lisible, le retourner directement
+      if (departmentId.length < 20 && !departmentId.includes('@') && !departmentId.includes('-')) {
+        return departmentId;
+      }
+      
+      console.log("Tentative de récupération du nom du département:", departmentId);
       const deptRef = doc(db, 'hr_departments', departmentId);
       const deptSnap = await getDoc(deptRef);
       
