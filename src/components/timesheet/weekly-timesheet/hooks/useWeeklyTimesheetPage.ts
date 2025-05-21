@@ -69,17 +69,18 @@ export const useWeeklyTimesheetPage = (timesheetId: string) => {
       // Mark fetch as attempted regardless of result
       setFetchAttempted(true);
       
-      if (!result) {
+      if (!result.docs || result.docs.length === 0) {
         throw new Error("Feuille de temps non trouvée");
       }
       
-      console.log("Timesheet data received:", result);
-      setTimesheet(result);
+      const timesheetData = result.docs[0];
+      console.log("Timesheet data received:", timesheetData);
+      setTimesheet(timesheetData);
       
       // Generate weekly data based on the timesheet period
-      if (result.weekStartDate && result.weekEndDate) {
-        const start = parseISO(result.weekStartDate);
-        const end = parseISO(result.weekEndDate);
+      if (timesheetData.weekStartDate && timesheetData.weekEndDate) {
+        const start = parseISO(timesheetData.weekStartDate);
+        const end = parseISO(timesheetData.weekEndDate);
         const daysInPeriod = differenceInCalendarDays(end, start) + 1;
         const numberOfWeeks = Math.ceil(daysInPeriod / 7);
         
@@ -94,8 +95,8 @@ export const useWeeklyTimesheetPage = (timesheetId: string) => {
             week: getWeekNumber(weekStartDate),
             startDate: format(weekStartDate, 'yyyy-MM-dd'),
             endDate: format(weekEndDate, 'yyyy-MM-dd'),
-            projects: result.weeklyProjects && result.weeklyProjects[i] 
-              ? result.weeklyProjects[i].projects 
+            projects: timesheetData.weeklyProjects && timesheetData.weeklyProjects[i] 
+              ? timesheetData.weeklyProjects[i].projects 
               : []
           });
         }

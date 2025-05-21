@@ -26,7 +26,7 @@ export const createReadOperations = <T extends Record<string, any>>(
       const documents: T[] = [];
       
       querySnapshot.forEach((doc) => {
-        documents.push({ id: doc.id, ...doc.data() } as T);
+        documents.push({ ...doc.data(), id: doc.id } as T);
       });
       
       console.info(`Retrieved ${documents.length} documents from ${collectionName}`);
@@ -58,7 +58,7 @@ export const createReadOperations = <T extends Record<string, any>>(
       const docSnapshot = await getDoc(docRef);
       
       if (docSnapshot.exists()) {
-        const document = { id: docSnapshot.id, ...docSnapshot.data() } as T;
+        const document = { ...docSnapshot.data(), id: docSnapshot.id } as T;
         return { docs: [document] };
       } else {
         console.warn(`No document found with ID: ${id}`);
@@ -104,7 +104,7 @@ export const createReadOperations = <T extends Record<string, any>>(
       const documents: T[] = [];
       
       querySnapshot.forEach((doc) => {
-        documents.push({ id: doc.id, ...doc.data() } as T);
+        documents.push({ ...doc.data(), id: doc.id } as T);
       });
       
       return { docs: documents };

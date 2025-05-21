@@ -29,10 +29,11 @@ export const createWriteOperations = <T extends Record<string, any>>(
       };
       
       const docRef = await addDoc(getCollection(), dataWithDates as any);
+      const newDoc = { ...dataWithDates, id: docRef.id } as unknown as T;
       
       return { 
         id: docRef.id,
-        doc: { id: docRef.id, ...dataWithDates } as T 
+        doc: newDoc
       };
     } catch (error) {
       const firestoreError = error as FirestoreError;
@@ -65,9 +66,11 @@ export const createWriteOperations = <T extends Record<string, any>>(
       const docRef = doc(db, collectionName, id);
       await updateDoc(docRef, dataWithDates as any);
       
+      const updatedDoc = { ...dataWithDates, id } as unknown as T;
+      
       return { 
         id,
-        doc: { id, ...dataWithDates } as T 
+        doc: updatedDoc
       };
     } catch (error) {
       const firestoreError = error as FirestoreError;

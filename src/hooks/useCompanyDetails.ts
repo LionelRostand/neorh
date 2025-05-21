@@ -46,24 +46,25 @@ export const useCompanyDetails = (): UseCompanyDetailsResult => {
       
       console.log("useCompanyDetails: Résultat de la récupération:", result);
       
-      if (result) {
+      if (result.docs && result.docs.length > 0) {
+        const companyData = result.docs[0];
         // Make sure we have a proper company object with required fields
         const processedCompany: Company = {
-          id: result.id || id,
-          name: result.name || 'Entreprise sans nom',
-          status: result.status || 'inactive',
-          industry: result.industry || '',
-          type: result.type || '',
-          email: result.email || '',
-          phone: result.phone || '',
-          website: result.website || '',
-          address: result.address || '',
-          city: result.city || '',
-          postalCode: result.postalCode || '',
-          country: result.country || '',
-          description: result.description || '',
-          logoUrl: result.logoUrl || '',
-          registrationDate: result.registrationDate || ''
+          id: companyData.id || id,
+          name: companyData.name || 'Entreprise sans nom',
+          status: companyData.status || 'inactive',
+          industry: companyData.industry || '',
+          type: companyData.type || '',
+          email: companyData.email || '',
+          phone: companyData.phone || '',
+          website: companyData.website || '',
+          address: companyData.address || '',
+          city: companyData.city || '',
+          postalCode: companyData.postalCode || '',
+          country: companyData.country || '',
+          description: companyData.description || '',
+          logoUrl: companyData.logoUrl || '',
+          registrationDate: companyData.registrationDate || ''
         };
         
         console.log("useCompanyDetails: Entreprise traitée:", processedCompany);

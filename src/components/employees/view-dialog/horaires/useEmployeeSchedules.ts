@@ -1,129 +1,148 @@
 
 import { useState, useEffect } from 'react';
-import { useFirestore } from '@/hooks/firestore';
-import { toast } from "@/components/ui/use-toast";
 import { Employee } from "@/types/employee";
 import { WorkSchedule } from './types';
+import { useFirestore } from '@/hooks/firestore';
+import { toast } from '@/components/ui/use-toast';
 
 export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void) => {
   const [schedules, setSchedules] = useState<WorkSchedule[]>([]);
+  const [editedSchedules, setEditedSchedules] = useState<WorkSchedule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedSchedules, setEditedSchedules] = useState<WorkSchedule[]>([]);
   
-  const schedulesCollection = useFirestore<WorkSchedule>('hr_work_schedules');
+  const schedulesCollection = useFirestore<WorkSchedule>("hr_schedules");
   
-  // Load employee schedules
+  // Fetch employee schedules
   useEffect(() => {
     const fetchSchedules = async () => {
+      if (!employee.id) return;
+      
       setIsLoading(true);
+      
       try {
-        // Using search instead of getWhere
-        const response = await schedulesCollection.search({ 
-          field: 'employeeId', 
-          value: employee.id || '',
-          operator: '=='
+        const result = await schedulesCollection.search({
+          field: 'employeeId',
+          value: employee.id
         });
         
-        if (response && response.docs) {
-          setSchedules(response.docs);
-          setEditedSchedules([...response.docs]);
+        if (result.docs && result.docs.length > 0) {
+          setSchedules(result.docs);
+          setEditedSchedules(result.docs);
+        } else {
+          // If no schedules found, set to empty arrays
+          setSchedules([]);
+          setEditedSchedules([]);
         }
       } catch (error) {
-        console.error("Erreur lors du chargement des horaires:", error);
+        console.error("Error fetching schedules:", error);
         toast({
           title: "Erreur",
           description: "Impossible de charger les horaires",
-          variant: "destructive",
+          variant: "destructive"
         });
       } finally {
         setIsLoading(false);
       }
     };
     
-    if (employee.id) {
-      fetchSchedules();
-    }
-  }, [employee.id]);
+    fetchSchedules();
+  }, [employee.id, schedulesCollection]);
   
-  // Add a new schedule
+  // Handle adding a new schedule
   const handleAddSchedule = () => {
-    const newSchedule: WorkSchedule = {
-      employeeId: employee.id || '',
-      dayOfWeek: 1, // Monday by default
-      startTime: "09:00",
-      endTime: "17:00",
-      isActive: true
-    };
-    
-    setEditedSchedules([...editedSchedules, newSchedule]);
+    setEditedSchedules(prev => [
+      ...prev,
+      {
+        employeeId: employee.id!,
+        dayOfWeek: 1, // Default to Monday
+        startTime: "09:00",
+        endTime: "17:00",
+        isActive: true
+      }
+    ]);
   };
   
-  // Remove a schedule
+  // Handle removing a schedule
   const handleRemoveSchedule = (index: number) => {
-    const newSchedules = [...editedSchedules];
-    newSchedules.splice(index, 1);
-    setEditedSchedules(newSchedules);
+    setEditedSchedules(prev => prev.filter((_, i) => i !== index));
   };
   
-  // Update a schedule
+  // Handle changing a schedule
   const handleScheduleChange = (index: number, field: keyof WorkSchedule, value: any) => {
-    const newSchedules = [...editedSchedules];
-    newSchedules[index] = {
-      ...newSchedules[index],
-      [field]: value
-    };
-    setEditedSchedules(newSchedules);
+    setEditedSchedules(prev => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        [field]: value
+      };
+      return updated;
+    });
   };
   
-  // Save schedules
+  // Save the schedules
   const handleSaveSchedules = async () => {
+    if (!employee.id) return;
+    
+    setIsLoading(true);
+    
     try {
-      // Remove old schedules
-      for (const schedule of schedules) {
-        if (schedule.id) {
-          await schedulesCollection.remove(schedule.id);
-        }
-      }
+      // Delete existing schedules
+      const deletePromises = schedules.map(schedule => 
+        schedule.id ? schedulesCollection.remove(schedule.id) : Promise.resolve()
+      );
       
-      // Add new schedules
-      for (const schedule of editedSchedules) {
-        await schedulesCollection.add({
-          employeeId: employee.id || '',
-          dayOfWeek: schedule.dayOfWeek,
-          startTime: schedule.startTime,
-          endTime: schedule.endTime,
-          isActive: true
-        });
-      }
+      await Promise.all(deletePromises);
       
-      setSchedules([...editedSchedules]);
-      setIsEditing(false);
+      // Create new schedules
+      const createPromises = editedSchedules.map(schedule => 
+        schedulesCollection.add({
+          ...schedule,
+          employeeId: employee.id!
+        })
+      );
       
-      if (onRefresh) {
-        onRefresh();
+      await Promise.all(createPromises);
+      
+      // Update local state
+      const result = await schedulesCollection.search({
+        field: 'employeeId',
+        value: employee.id
+      });
+      
+      if (result.docs) {
+        setSchedules(result.docs);
       }
       
       toast({
         title: "Succès",
-        description: "Les horaires ont été sauvegardés avec succès",
+        description: "Horaires enregistrés avec succès"
       });
+      
+      // Exit edit mode
+      setIsEditing(false);
+      
+      // Call refresh callback if provided
+      if (onRefresh) onRefresh();
+      
     } catch (error) {
-      console.error("Erreur lors de la sauvegarde des horaires:", error);
+      console.error("Error saving schedules:", error);
       toast({
         title: "Erreur",
-        description: "Impossible de sauvegarder les horaires",
-        variant: "destructive",
+        description: "Impossible d'enregistrer les horaires",
+        variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
-
+  
   return {
     schedules,
+    editedSchedules,
     isLoading,
     isEditing,
     setIsEditing,
-    editedSchedules,
     setEditedSchedules,
     handleAddSchedule,
     handleRemoveSchedule,

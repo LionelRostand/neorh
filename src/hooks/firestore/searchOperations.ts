@@ -1,5 +1,10 @@
+import { query, where, orderBy, limit, getDocs, FirestoreError, CollectionReference, WhereFilterOp } from "firebase/firestore";
 
-import { query, where, orderBy, limit, getDocs, FirestoreError, CollectionReference } from "firebase/firestore";
+export interface SearchCriteria {
+  field: string;
+  value: any;
+  operator?: WhereFilterOp;
+}
 
 interface SearchOperationsResult<T> {
   docs?: T[];
@@ -15,8 +20,8 @@ export const createSearchOperations = <T extends Record<string, any>>(
    * Search for documents matching a specific field value
    */
   const search = async (
-    field: string,
-    value: any,
+    criteria: SearchCriteria | string, 
+    value?: any,
     options?: { 
       sortField?: string;
       sortDirection?: 'asc' | 'desc';
@@ -27,7 +32,22 @@ export const createSearchOperations = <T extends Record<string, any>>(
     setError(null);
     
     try {
-      let q = query(getCollection(), where(field, '==', value));
+      // Handle both old and new API formats
+      let field: string;
+      let searchValue: any;
+      let operator: WhereFilterOp = '==';
+      
+      // Check if first parameter is SearchCriteria object or string
+      if (typeof criteria === 'string') {
+        field = criteria;
+        searchValue = value;
+      } else {
+        field = criteria.field;
+        searchValue = criteria.value;
+        operator = criteria.operator || '==';
+      }
+      
+      let q = query(getCollection(), where(field, operator, searchValue));
       
       if (options?.sortField) {
         q = query(q, orderBy(options.sortField, options.sortDirection || 'asc'));

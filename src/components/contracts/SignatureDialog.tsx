@@ -55,13 +55,16 @@ export default function SignatureDialog({
         });
         
         // Vérifier si les deux parties ont signé
-        const updatedDoc = await documentsCollection.getById(document.id);
+        const result = await documentsCollection.getById(document.id);
         
         // Si les deux ont signé, mettre à jour le statut
-        if (updatedDoc?.signedByEmployee && updatedDoc?.signedByEmployer) {
-          await documentsCollection.update(document.id, { status: 'active' });
-          if (document.contractId) {
-            await contractsCollection.update(document.contractId, { status: 'active' });
+        if (result.docs && result.docs.length > 0) {
+          const updatedDoc = result.docs[0];
+          if (updatedDoc.signedByEmployee && updatedDoc.signedByEmployer) {
+            await documentsCollection.update(document.id, { status: 'active' });
+            if (document.contractId) {
+              await contractsCollection.update(document.contractId, { status: 'active' });
+            }
           }
         }
       }

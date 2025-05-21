@@ -87,7 +87,10 @@ export const useCollection = <T extends CollectionInput>(collectionNameOrConfig?
   const search = async (field: string, value: any) => {
     setIsLoading(true);
     try {
-      return await firestore.search({ field, value });
+      return await firestore.search({
+        field,
+        value
+      });
     } catch (err) {
       const error = err instanceof Error ? err : new Error("Erreur lors de la recherche de documents");
       setError(error);

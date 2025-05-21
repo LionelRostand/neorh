@@ -2,8 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Document } from "@/lib/constants";
 import useFirestore from "@/hooks/useFirestore";
-import { SearchCriteria } from "@/hooks/firestore/searchOperations";
-import { showErrorToast } from "@/utils/toastUtils";
+import { toast } from "@/components/ui/use-toast";
 
 /**
  * Hook to fetch a contract document
@@ -43,18 +42,15 @@ export const useContractDocument = (contractId: string | null, isOpen: boolean) 
     
     try {
       // Chercher le document associé au contrat
-      const criteria: SearchCriteria = { 
-        field: 'contractId', 
-        value: id, 
-        operator: '==' 
-      };
+      const result = await documentsCollection.search({
+        field: 'contractId',
+        value: id
+      });
       
-      console.log("Critères de recherche:", criteria);
-      const result = await documentsCollection.search(criteria);
       console.log("Résultat de la recherche:", result);
       
       // Filtrer manuellement pour la catégorie 'contracts'
-      const filteredDocs = result.docs.filter(doc => doc.category === 'contracts');
+      const filteredDocs = result.docs ? result.docs.filter(doc => doc.category === 'contracts') : [];
       console.log("Documents filtrés:", filteredDocs);
       
       if (filteredDocs && filteredDocs.length > 0) {
@@ -67,7 +63,11 @@ export const useContractDocument = (contractId: string | null, isOpen: boolean) 
     } catch (err) {
       console.error("Erreur lors de la récupération du document:", err);
       setError("Erreur lors du chargement du contrat.");
-      showErrorToast("Impossible de charger le document du contrat.");
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger le document du contrat",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
       isFetchingRef.current = false;

@@ -34,8 +34,7 @@ export const useTimesheets = (employeeId?: string) => {
         console.log(`[useTimesheets] Searching for timesheets with employeeId: ${employeeIdRef.current}`);
         result = await timesheetsCollection.search({
           field: 'employeeId',
-          value: employeeIdRef.current,
-          operator: '=='
+          value: employeeIdRef.current
         });
       }
       
