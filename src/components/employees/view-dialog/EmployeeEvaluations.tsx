@@ -13,7 +13,7 @@ interface EmployeeEvaluationsProps {
 }
 
 const EmployeeEvaluations: React.FC<EmployeeEvaluationsProps> = ({ employee }) => {
-  const { evaluations, loading, error } = useEmployeeEvaluations(employee.id);
+  const { evaluations, loading, error } = useEmployeeEvaluations(employee.id || '');
   
   const getStatusBadgeClass = (status: string) => {
     switch(status) {
