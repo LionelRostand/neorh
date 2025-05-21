@@ -58,7 +58,13 @@ export const createReadOperations = <T extends Record<string, any>>(
       const docSnapshot = await getDoc(docRef);
       
       if (docSnapshot.exists()) {
-        const document = { ...docSnapshot.data(), id: docSnapshot.id } as T;
+        // Fix: Cast the entire combined object to type T, not just the id
+        const documentData = docSnapshot.data();
+        const document = { 
+          ...(documentData as Record<string, any>),
+          id: docSnapshot.id 
+        } as T;
+        
         return { docs: [document] };
       } else {
         console.warn(`No document found with ID: ${id}`);
