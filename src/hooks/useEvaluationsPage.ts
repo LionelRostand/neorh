@@ -12,7 +12,7 @@ export const useEvaluationsPage = () => {
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchComplete, setFetchComplete] = useState(false); // Flag to prevent loops
-  const { getAll } = useFirestore<Evaluation>('hr_evaluations');
+  const { getAll, remove } = useFirestore<Evaluation>('hr_evaluations');
   const { employees } = useEmployeeData();
 
   // Fonction pour récupérer les évaluations
@@ -65,11 +65,25 @@ export const useEvaluationsPage = () => {
     });
   };
 
-  const handleDelete = (id: string) => {
-    toast({
-      title: "Suppression",
-      description: `Suppression de l'évaluation ${id}`,
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      setLoading(true);
+      await remove(id);
+      setEvaluations(prev => prev.filter(e => e.id !== id));
+      toast({
+        title: "Suppression réussie",
+        description: "L'évaluation a été supprimée avec succès",
+      });
+    } catch (error) {
+      console.error("Erreur lors de la suppression:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer l'évaluation",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleModify = (id: string) => {

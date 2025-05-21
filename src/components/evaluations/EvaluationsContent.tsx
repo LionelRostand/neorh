@@ -38,7 +38,6 @@ const EvaluationsContent = ({
   onManage,
   onRefresh
 }: EvaluationsContentProps) => {
-  // Suppression du console.log pour éviter des logs excessifs
   return (
     <Card className="border shadow-sm">
       <CardContent className="p-6">
@@ -71,6 +70,8 @@ const EvaluationsContent = ({
           onDelete={onDelete}
           onModify={onModify}
           onManage={onManage}
+          employees={employees}
+          showEmployeeColumn={true}
         />
       </CardContent>
     </Card>

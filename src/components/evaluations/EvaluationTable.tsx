@@ -19,9 +19,19 @@ interface EvaluationTableProps {
   onDelete: (id: string) => void;
   onModify: (id: string) => void;
   onManage: (id: string) => void;
+  employees?: { id: string; name: string }[] | null;
+  showEmployeeColumn?: boolean;
 }
 
-const EvaluationTable = ({ evaluations, loading, onDelete, onModify, onManage }: EvaluationTableProps) => {
+const EvaluationTable = ({ 
+  evaluations, 
+  loading, 
+  onDelete, 
+  onModify, 
+  onManage,
+  employees = null,
+  showEmployeeColumn = false
+}: EvaluationTableProps) => {
   const getStatusBadgeClass = (status: string) => {
     switch(status) {
       case "planifiée":
@@ -35,6 +45,12 @@ const EvaluationTable = ({ evaluations, loading, onDelete, onModify, onManage }:
     }
   };
 
+  const getEmployeeName = (employeeId: string) => {
+    if (!employees) return employeeId;
+    const employee = employees.find(e => e.id === employeeId);
+    return employee ? employee.name : employeeId;
+  };
+
   if (loading) {
     return (
       <div className="py-8">
@@ -46,7 +62,6 @@ const EvaluationTable = ({ evaluations, loading, onDelete, onModify, onManage }:
   }
 
   // Afficher un message explicite lorsqu'il n'y a aucune évaluation
-  console.log("Evaluations in table:", evaluations);
   if (!evaluations || evaluations.length === 0) {
     return (
       <div className="border rounded-md p-8 text-center">
@@ -61,6 +76,9 @@ const EvaluationTable = ({ evaluations, loading, onDelete, onModify, onManage }:
         <TableHeader>
           <TableRow className="bg-gray-50">
             <TableHead className="font-medium">Titre</TableHead>
+            {showEmployeeColumn && (
+              <TableHead className="font-medium">Employé</TableHead>
+            )}
             <TableHead className="font-medium">Date</TableHead>
             <TableHead className="font-medium">Évaluateur</TableHead>
             <TableHead className="font-medium">Status</TableHead>
@@ -71,6 +89,9 @@ const EvaluationTable = ({ evaluations, loading, onDelete, onModify, onManage }:
           {evaluations.map((evaluation) => (
             <TableRow key={evaluation.id}>
               <TableCell>{evaluation.title}</TableCell>
+              {showEmployeeColumn && (
+                <TableCell>{getEmployeeName(evaluation.employeeId)}</TableCell>
+              )}
               <TableCell>{evaluation.date}</TableCell>
               <TableCell>{evaluation.evaluator}</TableCell>
               <TableCell>
