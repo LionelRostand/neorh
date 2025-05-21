@@ -23,7 +23,7 @@ import {
   generateFreelanceContent,
   generateDefaultContent
 } from './contract/contractTypes/otherContracts';
-import { saveContractAsDocument } from './contract/documentStorage';
+import { saveContractAsDocument } from './contract/storage';
 import { ContractData, PdfResult } from './types/contractTypes';
 
 /**

@@ -15,7 +15,8 @@ import {
 import type { PdfTab } from './types';
 import type { Evaluation } from '@/hooks/useEmployeeEvaluations';
 // Re-export contract PDF generation functions
-export { generateContractPdf, saveContractAsDocument } from './generateContractPdf';
+export { generateContractPdf } from './generateContractPdf';
+export { saveContractAsDocument } from './contract/storage';
 export type { ContractData } from './types/contractTypes';
 
 /**

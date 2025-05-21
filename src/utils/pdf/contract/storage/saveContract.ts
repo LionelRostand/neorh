@@ -1,5 +1,5 @@
 
-import { ContractData, PdfResult } from '../types/contractTypes';
+import { ContractData, PdfResult } from '../../types/contractTypes';
 import { Document } from '@/lib/constants';
 
 /**
