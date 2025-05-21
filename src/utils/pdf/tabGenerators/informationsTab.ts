@@ -10,7 +10,6 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
   doc.setFontSize(16);
   doc.setTextColor('#000000');
   doc.setFont('helvetica', 'bold');
-  doc.text('Fiche Employé', 14, 30);
   
   // Employee name
   doc.setFontSize(14);
@@ -20,14 +19,19 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
   const today = new Date();
   doc.text(`Document généré le ${today.toLocaleDateString('fr-FR')}`, 14, 55);
   
+  // Move "Fiche Employé" below the document generation date
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Fiche Employé', 14, 70);
+  
   // Title for employee information
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
-  doc.text('Informations de l\'employé', 14, 70);
+  doc.text('Informations de l\'employé', 14, 85);
   
   // Personal information section
   doc.setFontSize(14);
-  doc.text('Informations personnelles', 14, 85);
+  doc.text('Informations personnelles', 14, 100);
   
   const personalInfoData = [
     ['Nom', employee.name || 'Non spécifié'],
@@ -38,7 +42,7 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
   ];
   
   autoTable(doc, {
-    startY: 90,
+    startY: 105,
     head: [],
     body: personalInfoData,
     theme: 'plain',
