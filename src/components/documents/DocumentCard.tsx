@@ -32,7 +32,6 @@ const DocumentCard = ({ document, onRefresh }: DocumentCardProps) => {
           a.download = document.title
             .replace(/\s+/g, '_')
             .toLowerCase() + '.pdf';
-          document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);
         });
