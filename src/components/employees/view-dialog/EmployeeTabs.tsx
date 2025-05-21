@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,7 +12,6 @@ import {
   FeuillesDeTempsTab,
   EvaluationsTab
 } from './EmployeeTabContent';
-import EmployeeHoraires from './horaires';
 
 interface EmployeeTabsProps {
   employee: Employee;
@@ -57,7 +57,7 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
         </TabsContent>
         
         <TabsContent value="horaires" className="p-6">
-          <EmployeeHoraires employee={employee} onRefresh={onRefresh} />
+          <HorairesTab employee={employee} onRefresh={onRefresh} />
         </TabsContent>
         
         <TabsContent value="feuillesdetemps" className="p-6">

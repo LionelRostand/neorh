@@ -47,7 +47,7 @@ export const useEmployeeEvaluations = (employeeId: string) => {
       try {
         console.log(`Fetching evaluations for employee ID: ${employeeId}`);
         
-        // Fix: Pass criteria as an object and options as a separate parameter
+        // Use the search criteria object format
         const result = await search({
           field: 'employeeId',
           value: employeeId
