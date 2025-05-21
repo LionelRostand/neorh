@@ -25,8 +25,16 @@ export const createWriteOperations = <T extends Record<string, any>>(
       console.log(`Ajout d'un document dans ${collectionName}:`, data);
       const collectionRef = getCollection();
       
+      // Clean data by removing undefined values (Firestore doesn't accept undefined)
+      const cleanedData = Object.entries(data as DocumentData).reduce((acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as DocumentData);
+      
       // Utilisation de addDoc et await pour obtenir une référence valide
-      const docRef = await addDoc(collectionRef, data as DocumentData);
+      const docRef = await addDoc(collectionRef, cleanedData);
       
       // Vérification de la référence et de l'ID
       if (!docRef) {
@@ -62,8 +70,16 @@ export const createWriteOperations = <T extends Record<string, any>>(
     setIsLoading(true);
     setError(null);
     try {
+      // Clean data by removing undefined values
+      const cleanedData = Object.entries(data as DocumentData).reduce((acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as DocumentData);
+      
       const docRef = doc(db, collectionName, id);
-      await updateDoc(docRef, data as DocumentData);
+      await updateDoc(docRef, cleanedData);
       toast({
         title: "Succès",
         description: "Document mis à jour avec succès",

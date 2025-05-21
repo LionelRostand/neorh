@@ -47,19 +47,23 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
       // Find department name
       const department = departments.find(dep => dep.id === data.departmentId);
       
-      // Create contract object
-      const contract: Contract = {
+      // Create contract object - omit undefined values
+      const contract: Partial<Contract> = {
         employeeId: data.employeeId,
         employeeName: data.employeeName || '',
         type: data.type,
         position: data.position,
         startDate: data.startDate.toISOString(),
-        endDate: data.endDate?.toISOString(),
         departmentId: data.departmentId,
         status: 'pending_signature',
         signedByEmployee: false,
         signedByEmployer: false
       };
+      
+      // Only add endDate if it exists
+      if (data.endDate) {
+        contract.endDate = data.endDate.toISOString();
+      }
       
       if (department?.name) {
         contract.departmentName = department.name;
@@ -68,7 +72,7 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
       console.log("Création du contrat:", contract);
       
       // First, explicitly add the contract to Firestore
-      const result = await contractsCollection.add(contract);
+      const result = await contractsCollection.add(contract as Contract);
       
       // Check if result exists
       if (!result) {
@@ -100,15 +104,22 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         position: data.position,
         type: data.type,
         startDate: data.startDate,
-        endDate: data.endDate,
         departmentId: data.departmentId,
         departmentName: department?.name || '',
         salary: data.salary,
         status: 'pending_signature',
         signedByEmployee: false,
-        signedByEmployer: false,
-        conventionCollective: data.conventionCollective // Ajout du champ conventionCollective
+        signedByEmployer: false
       };
+      
+      // Add endDate and conventionCollective only if they exist
+      if (data.endDate) {
+        contractData.endDate = data.endDate;
+      }
+      
+      if (data.conventionCollective) {
+        contractData.conventionCollective = data.conventionCollective;
+      }
       
       // Generate PDF
       const pdfResult = generateContractPdf(contractData, company || undefined);
