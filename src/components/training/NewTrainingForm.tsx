@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -67,7 +66,7 @@ const trainingTypes = [
 const NewTrainingForm = ({ onCancel, onSuccess }: NewTrainingFormProps) => {
   const { employees } = useEmployeeData();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { create } = useFirestore<Training>("hr_trainings");
+  const { add } = useFirestore<Training>("hr_trainings");
   
   const form = useForm<TrainingFormValues>({
     resolver: zodResolver(trainingSchema),
@@ -93,7 +92,7 @@ const NewTrainingForm = ({ onCancel, onSuccess }: NewTrainingFormProps) => {
       for (const employeeId of values.employees) {
         const employeeName = employees.find(e => e.id === employeeId)?.name || "Unknown";
         
-        await create({
+        await add({
           title: values.title,
           description: values.description || "",
           type: values.type,
