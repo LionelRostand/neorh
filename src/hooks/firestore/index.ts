@@ -1,68 +1,44 @@
 
-import { useBaseFirestore } from "./baseFirestore";
-import { createReadOperations } from "./readOperations";
-import { createWriteOperations } from "./writeOperations";
-import { createSearchOperations, type SearchCriteria, type SearchOptions } from "./searchOperations";
+import { useState } from 'react';
+import { createReadOperations } from './readOperations';
+import { createWriteOperations } from './writeOperations';
+import { createSearchOperations } from './searchOperations';
+import { useBaseFirestore } from './baseFirestore';
 
-// Main hook that combines all firestore operations
 export const useFirestore = <T extends Record<string, any>>(collectionName: string) => {
-  const { 
-    getCollection, 
-    isLoading, 
-    setIsLoading, 
-    error, 
-    setError 
-  } = useBaseFirestore<T>(collectionName);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   
-  // Get read operations
-  const { 
-    getAll, 
-    getById 
-  } = createReadOperations<T>(
-    collectionName, 
-    setIsLoading, 
-    setError, 
-    getCollection
+  const baseFirestore = useBaseFirestore<T>(collectionName);
+  
+  const readOperations = createReadOperations<T>(
+    collectionName,
+    setIsLoading,
+    setError,
+    baseFirestore.getCollection
   );
-
-  // Get write operations
-  const { 
-    add, 
-    update, 
-    remove 
-  } = createWriteOperations<T>(
-    collectionName, 
-    setIsLoading, 
-    setError, 
-    getCollection
+  
+  const writeOperations = createWriteOperations<T>(
+    collectionName,
+    setIsLoading,
+    setError,
+    baseFirestore.getCollection
   );
-
-  // Get search operations
-  const { 
-    search 
-  } = createSearchOperations<T>(
-    setIsLoading, 
-    setError, 
-    getCollection
+  
+  const searchOperations = createSearchOperations<T>(
+    collectionName,
+    setIsLoading,
+    setError,
+    baseFirestore.getCollection
   );
-
+  
   return {
-    // State
+    ...readOperations,
+    ...writeOperations,
+    ...searchOperations,
     isLoading,
-    error,
-    
-    // Operations
-    getAll,
-    getById,
-    add,
-    update,
-    remove,
-    search
+    error
   };
 };
 
-// Export the main hook as default
-export default useFirestore;
-
-// Re-export types using 'export type'
-export type { SearchCriteria, SearchOptions } from './searchOperations';
+export { useFirestore as default };

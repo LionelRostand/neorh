@@ -1,15 +1,17 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Control, UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import { FormField } from '@/components/ui/form';
 import { ContractFormValues } from '../schema';
-import { Employee } from '@/types/employee';
+import { EmployeeField } from '../fields/EmployeeField';
+import { PositionField } from '../fields/PositionField';
+import { ContractTypeField } from '../fields/ContractTypeField';
+import { DateFields } from '../fields/DateFields';
+import { DepartmentField } from '../fields/DepartmentField';
+import { SalaryField } from '../fields/SalaryField';
+import { ConventionCollectiveField } from '../fields/ConventionCollectiveField';
 import { Department } from '@/types/firebase';
-import EmployeeField from '../fields/EmployeeField';
-import ContractTypeField from '../fields/ContractTypeField';
-import PositionField from '../fields/PositionField';
-import DateFields from '../fields/DateFields';
-import DepartmentField from '../fields/DepartmentField';
-import SalaryField from '../fields/SalaryField';
+import { Employee } from '@/types/employee';
 
 interface FormFieldsProps {
   control: Control<ContractFormValues>;
@@ -17,56 +19,49 @@ interface FormFieldsProps {
   watch: UseFormWatch<ContractFormValues>;
   employees: Employee[];
   departments: Department[];
-  employeeName?: string;
+  employeeName: string;
 }
 
-const FormFields: React.FC<FormFieldsProps> = ({ 
-  control, 
-  setValue, 
-  watch, 
-  employees, 
+const FormFields = ({
+  control,
+  setValue,
+  watch,
+  employees,
   departments,
   employeeName
-}) => {
+}: FormFieldsProps) => {
+  const contractType = watch('type');
+  const selectedEmployeeId = watch('employeeId');
+  
+  // Auto-fill employee name when employeeId changes
+  useEffect(() => {
+    if (selectedEmployeeId) {
+      const employee = employees.find(emp => emp.id === selectedEmployeeId);
+      if (employee) {
+        setValue('employeeName', employee.name);
+      }
+    }
+  }, [selectedEmployeeId, employees, setValue]);
+  
   return (
     <div className="space-y-4">
-      {/* Employee selection */}
-      <EmployeeField
-        control={control}
-        employees={employees}
-        employeeName={watch('employeeName')}
-        setValue={(id, name) => {
-          setValue('employeeId', id);
-          setValue('employeeName', name);
-        }}
-      />
+      <EmployeeField control={control} employees={employees} />
       
-      {/* Contract type selection */}
-      <ContractTypeField control={control} setValue={setValue} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <PositionField control={control} />
+        <ContractTypeField control={control} />
+      </div>
       
-      {/* Position */}
-      <PositionField control={control} />
-      
-      {/* Department */}
-      <DepartmentField 
+      <DateFields 
         control={control} 
-        departments={departments.map(dept => ({ 
-          id: dept.id || '', 
-          name: dept.name,
-          description: dept.description
-        }))}
-      />
-      
-      {/* Dates */}
-      <DateFields
-        control={control}
         watch={watch}
-        setValue={setValue}
-        contractType={watch('type')}
       />
       
-      {/* Salary */}
+      <DepartmentField control={control} departments={departments} />
+      
       <SalaryField control={control} />
+
+      <ConventionCollectiveField control={control} />
     </div>
   );
 };

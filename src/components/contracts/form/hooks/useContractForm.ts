@@ -42,6 +42,7 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
   const handleSubmit = async (data: ContractFormValues) => {
     try {
       setIsSubmitting(true);
+      console.log("Données du formulaire:", data);
       
       // Find department name
       const department = departments.find(dep => dep.id === data.departmentId);
@@ -64,16 +65,24 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         contract.departmentName = department.name;
       }
       
-      // First, explicitly add the contract to Firestore and await the response
-      const docRef = await contractsCollection.add(contract);
+      console.log("Création du contrat:", contract);
       
-      // Check if docRef exists and has an id property
-      if (!docRef || !docRef.id) {
+      // First, explicitly add the contract to Firestore
+      const result = await contractsCollection.add(contract);
+      
+      // Check if result exists
+      if (!result) {
+        throw new Error("Erreur lors de la création du contrat");
+      }
+      
+      // Get the ID from the result
+      const contractId = result.id;
+      
+      if (!contractId) {
         throw new Error("Impossible d'obtenir l'ID du contrat créé");
       }
       
-      // Get the ID from the docRef
-      const contractId = docRef.id;
+      console.log("Contrat créé avec l'ID:", contractId);
       
       // Find employee for company ID
       const employee = employees.find(e => e.id === data.employeeId);
@@ -97,7 +106,8 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         salary: data.salary,
         status: 'pending_signature',
         signedByEmployee: false,
-        signedByEmployer: false
+        signedByEmployer: false,
+        conventionCollective: data.conventionCollective // Ajout du champ conventionCollective
       };
       
       // Generate PDF
