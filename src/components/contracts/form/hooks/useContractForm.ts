@@ -37,7 +37,6 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
       startDate: new Date(),
       departmentId: '',
       salary: '',
-      conventionCollective: 'Convention Collective Nationale applicable à l\'entreprise'
     },
   });
   
@@ -97,7 +96,6 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
           departmentId: data.departmentId,
           departmentName: department?.name || '',
           salary: data.salary,
-          conventionCollective: data.conventionCollective,
           status: 'pending_signature',
           signedByEmployee: false,
           signedByEmployer: false
