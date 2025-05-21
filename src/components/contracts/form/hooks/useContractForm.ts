@@ -70,11 +70,8 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
       const tempContractId = `contract_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       
       try {
-        // Ajouter le contrat à Firestore
-        const result = await contractsCollection.add({
-          ...contract,
-          id: tempContractId // Ajouter l'ID temporaire
-        });
+        // Ajouter le contrat à Firestore sans inclure l'ID dans l'objet
+        const result = await contractsCollection.add(contract);
         
         // Déterminer l'ID final du contrat (soit celui retourné par Firestore, soit l'ID temporaire)
         const contractId = (result && result.id) ? result.id : tempContractId;
