@@ -13,7 +13,9 @@ interface EmployeeEvaluationsProps {
 }
 
 const EmployeeEvaluations: React.FC<EmployeeEvaluationsProps> = ({ employee }) => {
-  const { evaluations, loading, error } = useEmployeeEvaluations(employee.id || '');
+  // Utiliser l'ID de l'employé seulement s'il est défini
+  const employeeId = employee?.id || '';
+  const { evaluations, loading, error } = useEmployeeEvaluations(employeeId);
   
   const getStatusBadgeClass = (status: string) => {
     switch(status) {

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useFirestore } from './useFirestore';
 import { toast } from '@/components/ui/use-toast';
 
@@ -19,11 +19,19 @@ export const useEmployeeEvaluations = (employeeId: string) => {
   const [error, setError] = useState<Error | null>(null);
   const { search } = useFirestore<Evaluation>('hr_evaluations');
   
+  // Utiliser useRef pour suivre si une requête a déjà été effectuée
+  const fetchedRef = useRef(false);
+  
   useEffect(() => {
     // Ne pas exécuter la recherche si l'employeeId est vide
     if (!employeeId) {
       setLoading(false);
       setEvaluations([]);
+      return;
+    }
+    
+    // N'exécuter la requête qu'une seule fois par employeeId
+    if (fetchedRef.current) {
       return;
     }
     
@@ -46,10 +54,15 @@ export const useEmployeeEvaluations = (employeeId: string) => {
           console.log('No evaluations found or empty result');
           setEvaluations([]);
         }
+        
+        // Marquer comme complété après la requête réussie
+        fetchedRef.current = true;
       } catch (err) {
         console.error("Error fetching employee evaluations:", err);
         setError(err instanceof Error ? err : new Error('Erreur inconnue'));
         setEvaluations([]);
+        // Marquer comme complété même en cas d'erreur pour éviter les requêtes infinies
+        fetchedRef.current = true;
       } finally {
         setLoading(false);
       }
