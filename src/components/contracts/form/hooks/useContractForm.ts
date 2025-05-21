@@ -64,8 +64,16 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         contract.departmentName = department.name;
       }
       
-      // Add contract to Firestore
-      const result = await contractsCollection.add(contract);
+      // First, explicitly add the contract to Firestore and await the response
+      const docRef = await contractsCollection.add(contract);
+      
+      // Check if docRef exists and has an id property
+      if (!docRef || !docRef.id) {
+        throw new Error("Impossible d'obtenir l'ID du contrat créé");
+      }
+      
+      // Get the ID from the docRef
+      const contractId = docRef.id;
       
       // Find employee for company ID
       const employee = employees.find(e => e.id === data.employeeId);
@@ -75,55 +83,40 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         company = companies.find(c => c.id === employee.companyId);
       }
       
-      // Vérifier que nous avons bien un ID de contrat avant de continuer
-      // Fix: Vérifier si result existe et a un ID
-      if (result && result.id) {
-        // Generate PDF with company info if available
-        const contractId = result.id;
-        
-        // Ensure all required fields are present
-        const contractData: ContractData = {
-          id: contractId,
-          employeeId: data.employeeId,
-          employeeName: data.employeeName || '',
-          position: data.position,
-          type: data.type,
-          startDate: data.startDate,
-          endDate: data.endDate,
-          departmentId: data.departmentId,
-          departmentName: department?.name || '',
-          salary: data.salary,
-          status: 'pending_signature',
-          signedByEmployee: false,
-          signedByEmployer: false
-        };
-        
-        // Generate PDF
-        const pdfResult = generateContractPdf(contractData, company || undefined);
-        
-        // Save contract as document for HR Documents and Employee profile
-        await saveContractAsDocument(
-          contractData,
-          pdfResult,
-          documentsCollection
-        );
-        
-        toast({
-          title: 'Contrat créé',
-          description: 'Le contrat a été généré avec succès et est disponible dans la section Documents',
-        });
-        
-        if (onSuccess) {
-          onSuccess();
-        }
-      } else {
-        // Afficher une erreur si nous n'avons pas pu obtenir l'ID du contrat
-        console.error('Erreur: Impossible d\'obtenir l\'ID du contrat créé');
-        toast({
-          title: 'Erreur',
-          description: 'Une erreur est survenue lors de la création du contrat',
-          variant: 'destructive',
-        });
+      // Ensure all required fields are present
+      const contractData: ContractData = {
+        id: contractId,
+        employeeId: data.employeeId,
+        employeeName: data.employeeName || '',
+        position: data.position,
+        type: data.type,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        departmentId: data.departmentId,
+        departmentName: department?.name || '',
+        salary: data.salary,
+        status: 'pending_signature',
+        signedByEmployee: false,
+        signedByEmployer: false
+      };
+      
+      // Generate PDF
+      const pdfResult = generateContractPdf(contractData, company || undefined);
+      
+      // Save contract as document for HR Documents and Employee profile
+      await saveContractAsDocument(
+        contractData,
+        pdfResult,
+        documentsCollection
+      );
+      
+      toast({
+        title: 'Contrat créé',
+        description: 'Le contrat a été généré avec succès et est disponible dans la section Documents',
+      });
+      
+      if (onSuccess) {
+        onSuccess();
       }
     } catch (error) {
       console.error('Error creating contract:', error);

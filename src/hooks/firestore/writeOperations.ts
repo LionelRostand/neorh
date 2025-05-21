@@ -4,7 +4,8 @@ import {
   addDoc, 
   updateDoc, 
   deleteDoc,
-  DocumentData
+  DocumentData,
+  DocumentReference
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "@/components/ui/use-toast";
@@ -17,17 +18,25 @@ export const createWriteOperations = <T extends Record<string, any>>(
   getCollection: () => any
 ) => {
   // Ajouter un nouveau document
-  const add = async (data: Omit<T, 'id'>) => {
+  const add = async (data: Omit<T, 'id'>): Promise<{ id: string } & Omit<T, 'id'> | null> => {
     setIsLoading(true);
     setError(null);
     try {
       const collectionRef = getCollection();
       const docRef = await addDoc(collectionRef, data as DocumentData);
+      
+      // Ensure we have a valid ID
+      if (!docRef || !docRef.id) {
+        throw new Error("Impossible d'obtenir l'ID du document créé");
+      }
+      
       toast({
         title: "Succès",
         description: "Document ajouté avec succès",
       });
-      return { id: docRef.id, ...data } as T & { id: string };
+      
+      // Return the document with its ID
+      return { id: docRef.id, ...data } as { id: string } & Omit<T, 'id'>;
     } catch (err) {
       const error = err instanceof Error ? err : new Error("Une erreur est survenue");
       setError(error);
