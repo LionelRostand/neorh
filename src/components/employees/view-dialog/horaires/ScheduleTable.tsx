@@ -2,6 +2,7 @@
 import React from 'react';
 import { Calendar, Clock } from "lucide-react";
 import { WorkSchedule, daysOfWeek } from './types';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 
 interface ScheduleTableProps {
   schedules: WorkSchedule[];
@@ -31,36 +32,34 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules, isLoading = fa
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="p-3 text-left">Jour</th>
-            <th className="p-3 text-left">Horaires</th>
-          </tr>
-        </thead>
-        <tbody>
-          {schedules
-            .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
-            .map((schedule, index) => (
-            <tr key={index} className="border-b">
-              <td className="p-3">
-                <div className="flex items-center">
-                  <Calendar className="mr-2 h-4 w-4 text-blue-500" />
-                  {daysOfWeek[schedule.dayOfWeek]}
-                </div>
-              </td>
-              <td className="p-3">
-                <div className="flex items-center">
-                  <Clock className="mr-2 h-4 w-4 text-green-500" />
-                  {schedule.startTime} - {schedule.endTime}
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Jour</TableHead>
+          <TableHead>Horaires</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {schedules
+          .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
+          .map((schedule, index) => (
+          <TableRow key={index}>
+            <TableCell>
+              <div className="flex items-center">
+                <Calendar className="mr-2 h-4 w-4 text-blue-500" />
+                {daysOfWeek[schedule.dayOfWeek]}
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center">
+                <Clock className="mr-2 h-4 w-4 text-green-500" />
+                {schedule.startTime} - {schedule.endTime}
+              </div>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 };
 

@@ -4,28 +4,44 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import { WorkSchedule, daysOfWeek } from './types';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 
 interface ScheduleFormProps {
   schedules: WorkSchedule[];
   handleScheduleChange: (index: number, field: keyof WorkSchedule, value: any) => void;
   handleRemoveSchedule: (index: number) => void;
-  handleAddSchedule: () => void;
 }
 
 const ScheduleForm: React.FC<ScheduleFormProps> = ({
   schedules,
   handleScheduleChange,
   handleRemoveSchedule,
-  handleAddSchedule
 }) => {
+  if (schedules.length === 0) {
+    return (
+      <div className="p-8 text-center border rounded-lg bg-gray-50">
+        <p className="text-sm text-gray-500">
+          Aucun horaire défini. Cliquez sur "Ajouter un horaire" pour commencer.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {schedules.map((schedule, index) => (
-        <Card key={index} className="border border-gray-200">
-          <CardContent className="p-4 flex flex-col md:flex-row md:items-center gap-4">
-            <div className="flex-1 space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Jour</label>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Jour</TableHead>
+            <TableHead>Heure de début</TableHead>
+            <TableHead>Heure de fin</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {schedules.map((schedule, index) => (
+            <TableRow key={index}>
+              <TableCell>
                 <select
                   className="w-full p-2 border rounded-md"
                   value={schedule.dayOfWeek}
@@ -35,49 +51,36 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
                     <option key={idx} value={idx}>{day}</option>
                   ))}
                 </select>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Heure début</label>
-                  <input
-                    type="time"
-                    className="w-full p-2 border rounded-md"
-                    value={schedule.startTime}
-                    onChange={(e) => handleScheduleChange(index, 'startTime', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Heure fin</label>
-                  <input
-                    type="time"
-                    className="w-full p-2 border rounded-md"
-                    value={schedule.endTime}
-                    onChange={(e) => handleScheduleChange(index, 'endTime', e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <Button 
-              variant="destructive" 
-              size="icon"
-              onClick={() => handleRemoveSchedule(index)}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </CardContent>
-        </Card>
-      ))}
-      
-      <Button 
-        variant="outline" 
-        className="w-full flex items-center justify-center p-4" 
-        onClick={handleAddSchedule}
-      >
-        <span className="mr-2">+</span>
-        Ajouter un horaire
-      </Button>
+              </TableCell>
+              <TableCell>
+                <input
+                  type="time"
+                  className="w-full p-2 border rounded-md"
+                  value={schedule.startTime}
+                  onChange={(e) => handleScheduleChange(index, 'startTime', e.target.value)}
+                />
+              </TableCell>
+              <TableCell>
+                <input
+                  type="time"
+                  className="w-full p-2 border rounded-md"
+                  value={schedule.endTime}
+                  onChange={(e) => handleScheduleChange(index, 'endTime', e.target.value)}
+                />
+              </TableCell>
+              <TableCell>
+                <Button 
+                  variant="destructive" 
+                  size="icon"
+                  onClick={() => handleRemoveSchedule(index)}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 };

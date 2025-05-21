@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Employee } from "@/types/employee";
-import { WorkSchedule } from './types';
+import { WorkSchedule } from '@/types/presence';
 import { useFirestore } from '@/hooks/firestore';
 import { toast } from '@/components/ui/use-toast';
 
@@ -141,7 +141,6 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
     schedules,
     editedSchedules,
     isLoading,
-    setIsLoading,
     isEditing,
     setIsEditing,
     setEditedSchedules,
