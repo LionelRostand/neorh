@@ -80,7 +80,7 @@ export const generateInformationsTab = (doc: jsPDF, employee: Employee) => {
   });
   
   // Add page number at the bottom
-  const pageCount = doc.internal.getNumberOfPages();
+  const pageCount = doc.internal.pages.length - 1; // Fix: Use pages.length instead of getNumberOfPages()
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.text(`Page 1 sur ${pageCount}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
