@@ -36,18 +36,27 @@ export const employeeService = {
     try {
       if (!departmentId) return 'Non spécifié';
       
+      // Cache pour éviter les appels répétés
+      const cacheKey = `dept_${departmentId}`;
+      const cachedName = sessionStorage.getItem(cacheKey);
+      if (cachedName) {
+        return cachedName;
+      }
+      
       // Si l'ID est déjà un nom lisible, le retourner directement
       if (departmentId.length < 20 && !departmentId.includes('@') && !departmentId.includes('-')) {
+        sessionStorage.setItem(cacheKey, departmentId);
         return departmentId;
       }
       
-      console.log("Tentative de récupération du nom du département:", departmentId);
       const deptRef = doc(db, 'hr_departments', departmentId);
       const deptSnap = await getDoc(deptRef);
       
       if (deptSnap.exists()) {
         const deptData = deptSnap.data();
-        return deptData.name || 'Non spécifié';
+        const name = deptData.name || 'Non spécifié';
+        sessionStorage.setItem(cacheKey, name);
+        return name;
       }
       
       return 'Non spécifié';

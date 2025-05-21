@@ -73,14 +73,17 @@ export const generateInformationsTab = async (doc: jsPDF, employee: Employee) =>
   doc.setFont('helvetica', 'bold');
   doc.text('Informations professionnelles', 14, tableEndY);
 
-  // Récupérer le vrai nom du département si on a un ID
+  // Utiliser le nom du département s'il est déjà fourni dans employee.department
   let departmentName = employee.department || 'Non spécifié';
-  if (employee.departmentId) {
+  
+  // Si departmentId est présent et semble être un ID (non un nom lisible), récupérer le nom
+  if (employee.departmentId && !departmentName && 
+      (employee.departmentId.includes('@') || 
+       employee.departmentId.includes('-') || 
+       employee.departmentId.length > 25)) {
     try {
-      if (employee.departmentId.includes('@') || employee.departmentId.includes('-') || employee.departmentId.length > 25) {
-        // Si ça ressemble à un ID plutôt qu'à un nom, essayer de récupérer le nom
-        departmentName = await employeeService.fetchDepartmentName(employee.departmentId);
-      }
+      // Limiter à une seule requête par département
+      departmentName = await employeeService.fetchDepartmentName(employee.departmentId);
     } catch (error) {
       console.error("Erreur lors de la récupération du nom du département:", error);
     }
