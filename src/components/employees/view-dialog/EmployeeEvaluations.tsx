@@ -1,12 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Employee } from '@/types/employee';
 import { useEmployeeEvaluations, Evaluation } from '@/hooks/useEmployeeEvaluations';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Star } from "lucide-react";
+import { AlertCircle, Star, Eye } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import ViewEvaluationDialog from "@/components/evaluations/ViewEvaluationDialog";
 
 interface EmployeeEvaluationsProps {
   employee: Employee;
@@ -16,6 +18,8 @@ const EmployeeEvaluations: React.FC<EmployeeEvaluationsProps> = ({ employee }) =
   // Utiliser l'ID de l'employé seulement s'il est défini
   const employeeId = employee?.id || '';
   const { evaluations, loading, error } = useEmployeeEvaluations(employeeId);
+  const [selectedEvaluationId, setSelectedEvaluationId] = useState<string | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   
   const getStatusBadgeClass = (status: string) => {
     switch(status) {
@@ -28,6 +32,11 @@ const EmployeeEvaluations: React.FC<EmployeeEvaluationsProps> = ({ employee }) =
       default:
         return "bg-gray-600 hover:bg-gray-700";
     }
+  };
+
+  const handleOpenEvaluation = (evaluationId: string) => {
+    setSelectedEvaluationId(evaluationId);
+    setIsViewDialogOpen(true);
   };
 
   if (loading) {
@@ -88,11 +97,16 @@ const EmployeeEvaluations: React.FC<EmployeeEvaluationsProps> = ({ employee }) =
             <TableHead className="font-medium">Date</TableHead>
             <TableHead className="font-medium">Évaluateur</TableHead>
             <TableHead className="font-medium">Statut</TableHead>
+            <TableHead className="font-medium text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {evaluations.map((evaluation) => (
-            <TableRow key={evaluation.id}>
+            <TableRow 
+              key={evaluation.id}
+              className="cursor-pointer hover:bg-gray-50"
+              onClick={() => handleOpenEvaluation(evaluation.id)}
+            >
               <TableCell>{evaluation.title}</TableCell>
               <TableCell>{evaluation.date}</TableCell>
               <TableCell>{evaluation.evaluator}</TableCell>
@@ -101,10 +115,29 @@ const EmployeeEvaluations: React.FC<EmployeeEvaluationsProps> = ({ employee }) =
                   {evaluation.status}
                 </Badge>
               </TableCell>
+              <TableCell className="text-right">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Empêcher le déclenchement du onClick de la ligne
+                    handleOpenEvaluation(evaluation.id);
+                  }}
+                >
+                  <Eye className="h-4 w-4 mr-1" /> Voir
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      
+      <ViewEvaluationDialog 
+        evaluationId={selectedEvaluationId}
+        open={isViewDialogOpen}
+        onOpenChange={setIsViewDialogOpen}
+        evaluations={evaluations}
+      />
     </div>
   );
 };
