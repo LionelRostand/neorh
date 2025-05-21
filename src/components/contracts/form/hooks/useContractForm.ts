@@ -10,6 +10,7 @@ import { useEmployeeData } from '@/hooks/useEmployeeData';
 import { useCompaniesData } from '@/hooks/useCompaniesData';
 import { Contract } from '@/lib/constants';
 import { generateContractPdf, saveContractAsDocument } from '@/utils/pdf';
+import { ContractData } from '@/utils/pdf/types/contractTypes';
 
 interface UseContractFormProps {
   onSuccess?: () => void;
@@ -85,7 +86,7 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         }
         
         // Ensure all required fields are present
-        const contractData = {
+        const contractData: ContractData = {
           id: contractId,
           employeeId: data.employeeId,
           employeeName: data.employeeName || '',
