@@ -3,7 +3,7 @@ import React from 'react';
 import { Employee } from '@/types/employee';
 import EmployeeLeaves from './EmployeeLeaves';
 import EmployeeTimesheets from './EmployeeTimesheets';
-import EmployeeHoraires from './EmployeeHoraires';
+import EmployeeHoraires from './horaires';
 
 // Autres composants
 export { default as InformationsTab } from './EmployeeInformations';
