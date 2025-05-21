@@ -48,23 +48,12 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
           employeeId: doc.employeeId,
           employeeName: doc.employeeName,
           contractId: doc.contractId,
-          description: doc.description || '',
+          description: doc.description,
           signedByEmployee: doc.signedByEmployee || false,
-          signedByEmployer: doc.signedByEmployer || false,
-          // These properties were causing TypeScript errors - now they're properly typed
-          departmentId: doc.departmentId,
-          departmentName: doc.departmentName,
-          salary: doc.salary,
-          conventionCollective: doc.conventionCollective,
+          signedByEmployer: doc.signedByEmployer || false
         }));
         
         console.log(`Found ${fetchedDocs.length} documents for employee ${employee.id}`);
-        
-        // Trier les documents par date (les plus récents en premier)
-        fetchedDocs.sort((a, b) => {
-          return new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime();
-        });
-        
         setDocuments(fetchedDocs);
       }
       
@@ -100,14 +89,6 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
         loading={loading} 
         onRefresh={fetchEmployeeDocuments}
       />
-      
-      {!loading && documents.length === 0 && (
-        <div className="text-center py-10">
-          <FileText className="mx-auto h-12 w-12 text-gray-300" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Aucun document</h3>
-          <p className="mt-1 text-sm text-gray-500">Aucun document n'a été trouvé pour cet employé.</p>
-        </div>
-      )}
     </div>
   );
 };

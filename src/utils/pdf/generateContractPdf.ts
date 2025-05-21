@@ -7,7 +7,7 @@ import {
   addPartiesSection,
   addCollectiveAgreement,
   addPageFooter 
-} from './contract/setup';
+} from './contract/documentSetup';
 import { addSignatureSection } from './contract/signatureSection';
 import { addAdditionalArticles } from './contract/additionalArticles';
 import { 
@@ -23,7 +23,7 @@ import {
   generateFreelanceContent,
   generateDefaultContent
 } from './contract/contractTypes/otherContracts';
-import { saveContractAsDocument } from './contract/storage';
+import { saveContractAsDocument } from './contract/documentStorage';
 import { ContractData, PdfResult } from './types/contractTypes';
 
 /**
@@ -88,10 +88,8 @@ export const generateContractPdf = (contractData: ContractData, company?: Compan
   // Add standard additional articles
   yPosition = addAdditionalArticles(doc, margin, yPosition);
   
-  // Add signature section - Convert the city parameter to string if it's a number
-  // This is the fix for the type error - converting yPosition to string if needed
-  const city = 'Paris'; // Default city value as string
-  yPosition = addSignatureSection(doc, city, margin, yPosition);
+  // Add signature section
+  yPosition = addSignatureSection(doc, margin, yPosition);
   
   // Add page footers with legal mentions and page numbers
   addPageFooter(doc);

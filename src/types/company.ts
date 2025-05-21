@@ -15,7 +15,6 @@ export interface Company {
   logoUrl?: string;
   registrationDate?: string;
   status: string;
-  siret?: string; // Added siret property
   logo?: {
     base64: string;
     type: string;

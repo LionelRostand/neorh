@@ -6,48 +6,33 @@ import jsPDF from 'jspdf';
  */
 export const addSignatureSection = (
   doc: jsPDF, 
-  city: string = 'Paris',
   margin: number = 20, 
   startY: number = 0
 ): number => {
   let yPosition = startY;
   
-  // "Fait en deux exemplaires" section
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'normal');
-  const currentDate = new Date();
-  const dateStr = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
-  doc.text(`Fait en deux exemplaires originaux à ${city}, le ${dateStr}`, margin, yPosition);
+  // Section signatures
+  doc.text('Fait en deux exemplaires originaux à [Ville], le [date]', margin, yPosition);
   
   yPosition += 30;
   
-  // Signature lines
+  // Créer deux colonnes pour les signatures
   const middleX = doc.internal.pageSize.width / 2;
   
-  // Draw signature lines
-  doc.line(margin, yPosition, margin + 80, yPosition);
-  doc.line(middleX + 10, yPosition, middleX + 90, yPosition);
-  
-  yPosition += 5;
-  
-  // Signature labels
-  doc.setFontSize(10);
+  // Signature de l'employeur (colonne gauche)
   doc.text('Signature de l\'Employeur', margin, yPosition);
   doc.text('Signature du/de la Salarié(e)', middleX + 10, yPosition);
   
   yPosition += 7;
   
-  // "Lu et approuvé" mentions
-  doc.setFontSize(8);
+  // Mention "Lu et approuvé"
   doc.text('Précédée de la mention « Lu et approuvé »', margin, yPosition);
   doc.text('Précédée de la mention « Lu et approuvé »', middleX + 10, yPosition);
   
-  // Legal disclaimer
-  yPosition += 30;
-  doc.setFontSize(8);
-  doc.setTextColor(100, 100, 100);
-  doc.text('Ce document est strictement confidentiel et établi conformément au droit du travail français. Il ne constitue pas un conseil juridique.',
-    doc.internal.pageSize.width / 2, yPosition, { align: 'center' });
+  // Lignes de signature
+  yPosition -= 15;
+  doc.line(margin, yPosition + 30, margin + 80, yPosition + 30);
+  doc.line(middleX + 10, yPosition + 30, middleX + 90, yPosition + 30);
   
   return yPosition + 40;
 };

@@ -67,6 +67,18 @@ const FormFields: React.FC<FormFieldsProps> = ({
       
       {/* Salary */}
       <SalaryField control={control} />
+      
+      {/* Convention collective */}
+      <div className="space-y-2">
+        <label htmlFor="conventionCollective" className="text-sm font-medium">
+          Convention Collective
+        </label>
+        <input
+          id="conventionCollective"
+          className="w-full p-2 border rounded"
+          {...control.register('conventionCollective')}
+        />
+      </div>
     </div>
   );
 };
