@@ -8,7 +8,7 @@ import { PresenceKiosk } from "@/components/presence/PresenceKiosk";
 import { PresenceRegistry } from "@/components/presence/PresenceRegistry";
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
-import { usePresenceData } from '@/hooks/usePresenceData';
+import { usePresenceData } from '@/hooks/presence';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 

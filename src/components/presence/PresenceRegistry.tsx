@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { usePresenceData } from '@/hooks/usePresenceData';
+import { usePresenceData } from '@/hooks/presence';
 import { PresenceFilters } from './filters/PresenceFilters';
 import { PresenceTable } from './table/PresenceTable';
 

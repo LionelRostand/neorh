@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Clock, Calendar, LogIn, LogOut } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "@/hooks/use-toast";
-import { usePresenceData } from '@/hooks/usePresenceData';
+import { usePresenceData } from '@/hooks/presence';
 
 export const PresenceKiosk = () => {
   const [badgeId, setBadgeId] = useState<string>("");
