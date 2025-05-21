@@ -58,12 +58,14 @@ export const createReadOperations = <T extends Record<string, any>>(
       const docSnapshot = await getDoc(docRef);
       
       if (docSnapshot.exists()) {
-        // Fix: Cast the entire combined object to type T, not just the id
+        // Get document data and explicitly cast to unknown first before casting to T
         const documentData = docSnapshot.data();
-        const document = { 
-          ...(documentData as Record<string, any>),
-          id: docSnapshot.id 
-        } as T;
+        
+        // Create the complete document with id and data
+        const document = {
+          ...documentData,
+          id: docSnapshot.id
+        } as unknown as T;
         
         return { docs: [document] };
       } else {
@@ -110,7 +112,7 @@ export const createReadOperations = <T extends Record<string, any>>(
       const documents: T[] = [];
       
       querySnapshot.forEach((doc) => {
-        documents.push({ ...doc.data(), id: doc.id } as T);
+        documents.push({ ...doc.data(), id: doc.id } as unknown as T);
       });
       
       return { docs: documents };
