@@ -59,10 +59,9 @@ export const useEvaluationsPage = () => {
   }, []); // Dépendances vides pour n'exécuter qu'une fois
 
   const handleNewEvaluation = () => {
-    toast({
-      title: "Nouvelle évaluation",
-      description: "Fonctionnalité à implémenter",
-    });
+    // Cette fonction sera maintenant gérée par le dialogue
+    // Quand une nouvelle évaluation est créée, on rafraîchit la liste
+    handleRefresh();
   };
 
   const handleDelete = async (id: string) => {
