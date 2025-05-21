@@ -28,18 +28,10 @@ export const generateEmployeePdfWithDocuments = async (
 ) => {
   const doc = new JsPDF();
   
-  // Améliorer la qualité et la lisibilité du PDF
-  doc.setProperties({
-    title: `Fiche Employé - ${employee.name || 'Sans nom'}`,
-    subject: 'Informations employé',
-    author: 'Système RH',
-    creator: 'Application RH'
-  });
-  
   // Format employee status
   const status = formatEmployeeStatus(employee);
   
-  // Configure document with basic information
+  // Configure document with company information
   setupDocument(
     doc, 
     'Fiche Employé', 
@@ -49,6 +41,7 @@ export const generateEmployeePdfWithDocuments = async (
     options?.company
   );
 
+  // Generate content based on the active tab
   switch (activeTab) {
     case 'informations':
       generateInformationsTab(doc, employee);
@@ -78,8 +71,9 @@ export const generateEmployeePdfWithDocuments = async (
   // Add page numbers
   addPageFooter(doc);
   
-  // Save the PDF
-  const fileName = `${employee.name.replace(/\s+/g, '_')}_fiche.pdf`;
+  // Save the PDF with a clean, formatted filename
+  const cleanName = (employee.name || 'employee').replace(/\s+/g, '_').toLowerCase();
+  const fileName = `fiche_${cleanName}_${new Date().toISOString().slice(0,10)}.pdf`;
   doc.save(fileName);
 
   return fileName;

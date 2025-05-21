@@ -13,26 +13,34 @@ export const setupDocument = (
   statusColor?: string, 
   company?: Company
 ) => {
+  // Set basic document properties
+  doc.setProperties({
+    title: title || 'Fiche Employé',
+    subject: 'Informations employé',
+    author: 'Système RH',
+    creator: 'Application RH'
+  });
+  
   // Définir les couleurs et styles pour une meilleure visibilité
   const primaryColor = '#000000'; // Noir pur pour le texte principal
   const secondaryColor = '#333333'; // Gris foncé pour le texte secondaire
   const statusStyle = statusColor || '#22c55e';
   
   // Informations de l'entreprise (en-tête)
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.setTextColor(primaryColor);
   doc.setFont('helvetica', 'bold');
   
   if (company) {
     // Use actual company data if provided
-    doc.text(company.name || 'ENTREPRISE', 14, 20);
+    doc.text(company.name || 'ENTREPRISE', 14, 15);
     
     doc.setFontSize(9);
     doc.setTextColor(secondaryColor);
     doc.setFont('helvetica', 'normal');
     
     // Position Y de départ pour les informations supplémentaires
-    let infoY = 25;
+    let infoY = 20;
     
     if (company.address) {
       doc.text(company.address, 14, infoY);
@@ -59,7 +67,6 @@ export const setupDocument = (
     // Email de l'entreprise
     if (company.email) {
       doc.text(`Email: ${company.email}`, 14, infoY);
-      infoY += 5;
     }
     
     // Add company logo if available - déplacé à droite
@@ -94,51 +101,15 @@ export const setupDocument = (
         console.error('Error adding base64 logo to PDF:', err);
       }
     }
-  } else {
-    // Default company info if none provided
-    doc.text('ENTREPRISE', 14, 20);
-    
-    doc.setFontSize(9);
-    doc.setTextColor(secondaryColor);
-    doc.setFont('helvetica', 'normal');
-    
-    doc.text('123 Rue des Entreprises', 14, 25);
-    doc.text('75000 Paris, France', 14, 30);
-    doc.text('Tél: +33123456789', 14, 35);
-    doc.text('Email: contact@entreprise.fr', 14, 40);
   }
   
-  // Titre du document - Fiche Employé
-  doc.setFontSize(16);
-  doc.setTextColor(primaryColor);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Fiche Employé', 14, 65);
-  
-  // Statut - ajusté pour être à côté de "Statut:" comme dans le modèle
+  // Add status if provided
   if (statusText) {
-    doc.setTextColor(primaryColor);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Statut:', 14, 75);
+    doc.setFontSize(10);
     doc.setTextColor(statusStyle);
     doc.setFont('helvetica', 'bold');
-    doc.text(statusText, 50, 75);
+    doc.text(`Statut: ${statusText}`, 14, 40);
   }
-  
-  // Sous-titre (nom de l'employé) - ajusté pour être sous le statut
-  if (subtitle) {
-    doc.setTextColor(primaryColor);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text(subtitle, 14, 85);
-  }
-  
-  // Date de génération - ajustée pour être sous le nom de l'employé
-  const today = new Date();
-  doc.setFontSize(9);
-  doc.setTextColor(secondaryColor);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Document généré le ${today.toLocaleDateString('fr-FR')}`, 14, 95);
 
   return doc;
 };

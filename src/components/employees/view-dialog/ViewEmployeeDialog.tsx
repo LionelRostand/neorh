@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Employee } from '@/types/employee';
 import { generateEmployeePdfWithDocuments } from '@/utils/pdfExport';
@@ -32,6 +32,7 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
   const handleExportPDF = async () => {
     try {
       setIsExporting(true);
+      
       // Find the company data if available
       const employeeCompany = employee.companyId ? 
         companies.find(c => c.id === employee.companyId) : undefined;
@@ -54,6 +55,7 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
       }
       
       await generateEmployeePdfWithDocuments(employeeCopy, activeTab, { company: employeeCompany });
+      
       toast({
         title: "Exportation réussie",
         description: "Le document PDF a été généré avec succès",
