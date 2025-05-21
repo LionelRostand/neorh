@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +26,7 @@ const DocumentCard = ({ document, onRefresh }: DocumentCardProps) => {
       base64Response.then(res => res.blob())
         .then(blob => {
           const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
+          const a = window.document.createElement('a');
           a.href = url;
           a.download = document.title
             .replace(/\s+/g, '_')
