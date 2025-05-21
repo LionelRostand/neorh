@@ -8,10 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, X } from "lucide-react";
-import { Contract } from "@/lib/constants";
-import useFirestore from "@/hooks/useFirestore";
 import { Document } from "@/lib/constants";
-import { toast } from "@/components/ui/use-toast";
+import useFirestore from "@/hooks/useFirestore";
 import { SearchCriteria } from "@/hooks/firestore/searchOperations";
 import { showErrorToast } from "@/utils/toastUtils";
 
@@ -30,17 +28,33 @@ const ViewContractDialog = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const documentsCollection = useFirestore<Document>("hr_documents");
+  
+  // Utilisons une référence pour suivre si un fetch est en cours
+  const [isFetching, setIsFetching] = useState(false);
+
+  // Référence pour éviter les appels répétés au même ID
+  const lastFetchedId = React.useRef<string | null>(null);
 
   useEffect(() => {
+    // Ne fais rien si le dialogue n'est pas ouvert ou s'il n'y a pas d'ID de contrat
+    if (!contractId || !open) {
+      return;
+    }
+
+    // Ne pas refaire la requête si nous sommes déjà en train de charger le même ID
+    if (isFetching || (lastFetchedId.current === contractId && document)) {
+      return;
+    }
+
     const fetchContractDocument = async () => {
-      if (!contractId || !open) return;
+      console.log("Début de la récupération du document de contrat pour l'ID:", contractId);
       
       setLoading(true);
       setError(null);
+      setIsFetching(true);
+      lastFetchedId.current = contractId;
       
       try {
-        console.log("Fetching contract document for ID:", contractId);
-        
         // Chercher le document associé au contrat en utilisant search
         const criteria: SearchCriteria = { 
           field: 'contractId', 
@@ -48,12 +62,13 @@ const ViewContractDialog = ({
           operator: '==' 
         };
         
+        console.log("Critères de recherche:", criteria);
         const result = await documentsCollection.search(criteria);
-        console.log("Search result:", result);
+        console.log("Résultat de la recherche:", result);
         
         // Filtrer manuellement pour la catégorie 'contracts'
         const filteredDocs = result.docs.filter(doc => doc.category === 'contracts');
-        console.log("Filtered docs:", filteredDocs);
+        console.log("Documents filtrés:", filteredDocs);
         
         if (filteredDocs && filteredDocs.length > 0) {
           setDocument(filteredDocs[0]);
@@ -66,11 +81,12 @@ const ViewContractDialog = ({
         showErrorToast("Impossible de charger le document du contrat.");
       } finally {
         setLoading(false);
+        setIsFetching(false);
       }
     };
 
     fetchContractDocument();
-  }, [contractId, open, documentsCollection]);
+  }, [contractId, open]); // Ne pas inclure document ou isFetching dans les dépendances
 
   const handleDownload = () => {
     if (!document?.fileUrl) return;
