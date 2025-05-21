@@ -1,7 +1,13 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Filter, Plus, Calendar } from "lucide-react";
+import { Filter, Plus, Calendar, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface LeavesHeaderProps {
   onNewRequest: () => void;
@@ -19,22 +25,29 @@ const LeavesHeader = ({ onNewRequest, onNewAllocation }: LeavesHeaderProps) => {
         <Button variant="outline" className="gap-2">
           <Filter className="h-4 w-4" /> Filtres
         </Button>
-        {onNewAllocation && (
-          <Button
-            variant="outline"
-            className="gap-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50"
-            onClick={onNewAllocation}
-          >
-            <Calendar className="h-4 w-4" /> Nouvelle attribution
-          </Button>
-        )}
-        <Button 
-          variant="default" 
-          className="gap-2 bg-emerald-500 hover:bg-emerald-600" 
-          onClick={onNewRequest}
-        >
-          <Plus className="h-4 w-4" /> Attribution de congés sur période
-        </Button>
+        
+        {/* Bouton unifié avec menu déroulant */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="default" 
+              className="gap-2 bg-emerald-500 hover:bg-emerald-600"
+            >
+              <Plus className="h-4 w-4" /> Nouvelle attribution
+              <ChevronDown className="h-4 w-4 ml-1" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {onNewAllocation && (
+              <DropdownMenuItem onClick={onNewAllocation}>
+                <Calendar className="h-4 w-4 mr-2" /> Attribution simple
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={onNewRequest}>
+              <Calendar className="h-4 w-4 mr-2" /> Attribution sur période
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
