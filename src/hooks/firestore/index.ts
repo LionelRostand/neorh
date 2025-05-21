@@ -21,8 +21,7 @@ export const useFirestore = <T extends Record<string, any>>(collectionName: stri
   const writeOperations = createWriteOperations<T>(
     collectionName,
     setIsLoading,
-    setError,
-    baseFirestore.getCollection
+    setError
   );
   
   const searchOperations = createSearchOperations<T>(
