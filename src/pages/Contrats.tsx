@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Card, 
@@ -12,6 +11,7 @@ import ContractStatusCards from "@/components/contracts/ContractStatusCards";
 import ContractSearch from "@/components/contracts/ContractSearch";
 import ContractTable from "@/components/contracts/ContractTable";
 import NewContractDialog from "@/components/contracts/NewContractDialog";
+import ViewContractDialog from "@/components/contracts/ViewContractDialog";
 import useFirestore from "@/hooks/useFirestore";
 
 const Contrats = () => {
@@ -19,6 +19,8 @@ const Contrats = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [newContractDialogOpen, setNewContractDialogOpen] = useState(false);
+  const [viewContractId, setViewContractId] = useState<string | null>(null);
+  const [editContractId, setEditContractId] = useState<string | null>(null);
   const firestore = useFirestore<Contract>('hr_contracts');
 
   // Fonction pour récupérer les contrats
@@ -72,13 +74,11 @@ const Contrats = () => {
   };
 
   const handleDetails = (id: string) => {
-    toast({
-      title: "Détails",
-      description: `Affichage des détails pour le contrat ${id}`
-    });
+    setViewContractId(id);
   };
 
   const handleEdit = (id: string) => {
+    setEditContractId(id);
     toast({
       title: "Modifier",
       description: `Modification du contrat ${id}`
@@ -152,6 +152,12 @@ const Contrats = () => {
         open={newContractDialogOpen} 
         onOpenChange={setNewContractDialogOpen}
         onSuccess={fetchContracts}
+      />
+
+      <ViewContractDialog 
+        open={!!viewContractId}
+        onClose={() => setViewContractId(null)}
+        contractId={viewContractId}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { File, Edit } from "lucide-react";
+import { FileText, Edit } from "lucide-react";
 
 interface ContractActionsProps {
   contractId: string;
@@ -18,7 +18,7 @@ const ContractActions = ({ contractId, onDetails, onEdit }: ContractActionsProps
         className="h-8 px-2" 
         onClick={() => onDetails(contractId)}
       >
-        <File className="h-4 w-4 mr-1" /> Détails
+        <FileText className="h-4 w-4 mr-1" /> Détails
       </Button>
       <Button 
         variant="outline" 
