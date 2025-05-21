@@ -5,12 +5,14 @@ import EmployeeLeaves from './EmployeeLeaves';
 import EmployeeTimesheets from './EmployeeTimesheets';
 import EmployeeHoraires from './horaires';
 import EmployeeEvaluations from './EmployeeEvaluations';
+import EmployeeTrainings from './EmployeeTrainings';
 
 // Autres composants
 export { default as InformationsTab } from './EmployeeInformations';
 export { default as DocumentsTab } from './EmployeeDocuments';
 export { default as CompetencesTab } from './EmployeeSkills';
 export { default as EvaluationsTab } from './EmployeeEvaluations';
+export { default as FormationsTab } from './EmployeeTrainings';
 
 export const HorairesTab: React.FC<{ employee: Employee; onRefresh?: () => void }> = ({ 
   employee,

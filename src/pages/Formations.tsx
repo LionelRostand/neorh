@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Card, 
@@ -6,38 +5,20 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PlusIcon, SearchIcon, FilterIcon } from "lucide-react";
+import { PlusIcon, SearchIcon, FilterIcon, BookOpen, AlertCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import TrainingStatusCards from "@/components/training/TrainingStatusCards";
 import TrainingTable from "@/components/training/TrainingTable";
-
-interface Training {
-  id: string;
-  title: string;
-  description: string;
-  trainer: string;
-  department: string;
-  participants: number;
-  status: "planifiée" | "complétée" | "annulée";
-}
-
-const mockTrainings: Training[] = [
-  {
-    id: "8a7d6215b-9c5c-4247-bc8c-5d8ce3313e7e",
-    title: "Formation Excel Avancé",
-    description: "Maîtriser les tableaux croisés dynamiques",
-    trainer: "Marie Dubois",
-    department: "Administration",
-    participants: 12,
-    status: "planifiée"
-  }
-];
+import { useTrainingData } from "@/hooks/useTrainingData";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Formations = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [trainings] = useState<Training[]>(mockTrainings);
-
+  const [selectedDepartment, setSelectedDepartment] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const { trainings, loading, error, refetch } = useTrainingData();
+  
   const handleNewTraining = () => {
     toast({
       title: "Nouvelle formation",
@@ -66,10 +47,23 @@ const Formations = () => {
     });
   };
 
+  // Filtrer les formations en fonction des critères de recherche
+  const filteredTrainings = trainings
+    .filter(training => 
+      training.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      training.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      training.trainer.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter(training => selectedDepartment === "all" || training.department === selectedDepartment)
+    .filter(training => selectedStatus === "all" || training.status === selectedStatus);
+
   // Count trainings by status
   const active = trainings.filter(t => t.status === "planifiée").length;
   const pending = trainings.filter(t => t.status === "complétée").length;
   const expired = trainings.filter(t => t.status === "annulée").length;
+  
+  // Calculate coverage (example metric - could be replaced with actual calculation)
+  const coverage = trainings.length > 0 ? Math.round((active + pending) * 100 / trainings.length) : 0;
 
   return (
     <div className="space-y-6">
@@ -87,7 +81,7 @@ const Formations = () => {
         active={active} 
         pending={pending} 
         expired={expired} 
-        coverage={85} 
+        coverage={coverage} 
       />
 
       <Card className="border shadow-sm">
@@ -105,20 +99,20 @@ const Formations = () => {
               />
             </div>
             <div className="flex gap-2">
-              <Select>
+              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
                 <SelectTrigger className="w-52">
                   <SelectValue placeholder="Tous les départements" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tous les départements</SelectItem>
-                  <SelectItem value="administration">Administration</SelectItem>
-                  <SelectItem value="it">IT</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="ventes">Ventes</SelectItem>
+                  <SelectItem value="Administration">Administration</SelectItem>
+                  <SelectItem value="IT">IT</SelectItem>
+                  <SelectItem value="Marketing">Marketing</SelectItem>
+                  <SelectItem value="Ventes">Ventes</SelectItem>
                 </SelectContent>
               </Select>
               
-              <Select>
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                 <SelectTrigger className="w-44">
                   <SelectValue placeholder="Tous les statuts" />
                 </SelectTrigger>
@@ -130,18 +124,43 @@ const Formations = () => {
                 </SelectContent>
               </Select>
               
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => refetch()}>
                 <FilterIcon className="h-4 w-4" />
               </Button>
             </div>
           </div>
 
-          <TrainingTable 
-            trainings={trainings}
-            onDelete={handleDelete}
-            onModify={handleModify}
-            onManage={handleManage}
-          />
+          {loading ? (
+            <div className="space-y-2 py-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          ) : error ? (
+            <Card className="border border-red-200 bg-red-50">
+              <CardContent className="p-4 flex items-center gap-3">
+                <AlertCircle className="h-5 w-5 text-red-500" />
+                <div>
+                  <p className="text-red-600 font-medium">Erreur lors du chargement des formations</p>
+                  <p className="text-sm text-red-500">Veuillez réessayer plus tard ou contacter l'administrateur.</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <TrainingTable 
+              trainings={filteredTrainings}
+              onDelete={handleDelete}
+              onModify={handleModify}
+              onManage={handleManage}
+            />
+          )}
+          
+          {filteredTrainings.length === 0 && !loading && !error && (
+            <div className="text-center p-8">
+              <BookOpen className="mx-auto h-10 w-10 text-gray-300 mb-3" />
+              <p className="text-gray-500">Aucune formation ne correspond à vos critères de recherche.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -10,7 +10,8 @@ import {
   HorairesTab,
   CongesTab,
   FeuillesDeTempsTab,
-  EvaluationsTab
+  EvaluationsTab,
+  FormationsTab
 } from './EmployeeTabContent';
 
 interface EmployeeTabsProps {
@@ -30,10 +31,11 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
   const MemoizedDocumentsTab = React.memo(DocumentsTab);
   const MemoizedFeuillesDeTempsTab = React.memo(FeuillesDeTempsTab);
   const MemoizedCongesTab = React.memo(CongesTab);
+  const MemoizedFormationsTab = React.memo(FormationsTab);
 
   return (
     <Tabs defaultValue="informations" value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className="grid grid-cols-7 bg-gray-50 border-b">
+      <TabsList className="grid grid-cols-8 bg-gray-50 border-b">
         <TabsTrigger value="informations">Informations</TabsTrigger>
         <TabsTrigger value="documents">Documents</TabsTrigger>
         <TabsTrigger value="competences">Compétences</TabsTrigger>
@@ -41,6 +43,7 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
         <TabsTrigger value="feuillesdetemps">Feuilles de temps</TabsTrigger>
         <TabsTrigger value="conges">Congés</TabsTrigger>
         <TabsTrigger value="evaluations">Évaluations</TabsTrigger>
+        <TabsTrigger value="formations">Formations</TabsTrigger>
       </TabsList>
       
       <ScrollArea className="h-[calc(90vh-140px)]">
@@ -70,6 +73,10 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
         
         <TabsContent value="evaluations" className="p-6">
           <EvaluationsTab employee={employee} />
+        </TabsContent>
+        
+        <TabsContent value="formations" className="p-6">
+          <MemoizedFormationsTab employee={employee} />
         </TabsContent>
       </ScrollArea>
     </Tabs>
