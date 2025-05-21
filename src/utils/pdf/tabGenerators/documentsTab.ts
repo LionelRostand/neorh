@@ -7,24 +7,71 @@ import { Employee } from '@/types/employee';
 /**
  * Génère la section documents
  */
-export const generateDocumentsTab = async (doc: jsPDF, employee: Employee) => {
+export const generateDocumentsTab = async (doc: jsPDF, employee: Employee, documents: Document[] = []) => {
   doc.setFontSize(16);
   doc.setTextColor('#000000');
   doc.setFont('helvetica', 'bold');
   doc.text('Documents', 14, 30);
   
-  // Since we don't have actual documents data here, we're showing a placeholder
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Aucun document disponible pour cet employé.', 14, 45);
+  if (documents.length === 0) {
+    // No documents available
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Aucun document disponible pour cet employé.', 14, 45);
+    
+    // Empty table for demonstration purposes
+    autoTable(doc, {
+      startY: 55,
+      head: [
+        ['Titre', 'Catégorie', 'Type', 'Date', 'Statut']
+      ],
+      body: [],
+      theme: 'grid',
+      styles: {
+        fontSize: 8
+      },
+      headStyles: {
+        fillColor: [220, 220, 220],
+        textColor: [0, 0, 0],
+        fontStyle: 'bold'
+      }
+    });
+    return;
+  }
   
-  // Empty table for demonstration purposes
+  // Format documents for table
+  const rows = documents.map(doc => {
+    let status = 'Non disponible';
+    if (doc.category === 'contracts') {
+      if (doc.signedByEmployee && doc.signedByEmployer) {
+        status = 'Signé';
+      } else if (doc.signedByEmployee || doc.signedByEmployer) {
+        status = 'Signature partielle';
+      } else {
+        status = 'En attente de signature';
+      }
+    } else {
+      status = doc.status || 'Actif';
+    }
+    
+    const date = doc.uploadDate ? new Date(doc.uploadDate).toLocaleDateString() : 'N/A';
+    
+    return [
+      doc.title || 'Sans titre',
+      doc.category === 'contracts' ? 'Contrat' : doc.category || 'Autre',
+      doc.fileType || 'PDF',
+      date,
+      status
+    ];
+  });
+  
+  // Generate table with documents
   autoTable(doc, {
-    startY: 55,
+    startY: 40,
     head: [
       ['Titre', 'Catégorie', 'Type', 'Date', 'Statut']
     ],
-    body: [],
+    body: rows,
     theme: 'grid',
     styles: {
       fontSize: 8
