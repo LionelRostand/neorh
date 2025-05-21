@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useFirestore } from '@/hooks/firestore';
 import { WorkSchedule } from '@/types/presence';
 

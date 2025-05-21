@@ -48,23 +48,15 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
         </div>
       </div>
       
-      {isLoading ? (
-        <div className="flex justify-center p-4">
-          <p>Chargement des horaires...</p>
-        </div>
+      {isEditing ? (
+        <ScheduleForm
+          schedules={editedSchedules}
+          handleScheduleChange={handleScheduleChange}
+          handleRemoveSchedule={handleRemoveSchedule}
+          handleAddSchedule={handleAddSchedule}
+        />
       ) : (
-        <>
-          {isEditing ? (
-            <ScheduleForm
-              schedules={editedSchedules}
-              handleScheduleChange={handleScheduleChange}
-              handleRemoveSchedule={handleRemoveSchedule}
-              handleAddSchedule={handleAddSchedule}
-            />
-          ) : (
-            <ScheduleTable schedules={schedules} />
-          )}
-        </>
+        <ScheduleTable schedules={schedules} isLoading={isLoading} />
       )}
     </div>
   );

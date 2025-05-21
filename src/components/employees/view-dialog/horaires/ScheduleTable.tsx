@@ -5,9 +5,19 @@ import { WorkSchedule, daysOfWeek } from './types';
 
 interface ScheduleTableProps {
   schedules: WorkSchedule[];
+  isLoading?: boolean;
 }
 
-const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules }) => {
+const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules, isLoading = false }) => {
+  if (isLoading) {
+    return (
+      <div className="p-8 text-center border rounded-lg bg-gray-50">
+        <Clock className="mx-auto h-12 w-12 text-blue-400 animate-pulse" />
+        <h3 className="mt-2 text-sm font-medium text-gray-900">Chargement des horaires...</h3>
+      </div>
+    );
+  }
+  
   if (schedules.length === 0) {
     return (
       <div className="p-8 text-center border rounded-lg bg-gray-50">
