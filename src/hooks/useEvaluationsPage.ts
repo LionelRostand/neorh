@@ -11,11 +11,14 @@ export const useEvaluationsPage = () => {
   const [selectedEmployee, setSelectedEmployee] = useState("all");
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchComplete, setFetchComplete] = useState(false); // Flag to prevent loops
   const { getAll } = useFirestore<Evaluation>('hr_evaluations');
   const { employees } = useEmployeeData();
 
   // Fonction pour récupérer les évaluations
   const fetchEvaluations = useCallback(async () => {
+    if (fetchComplete) return; // Prevent refetching if already done
+    
     setLoading(true);
     try {
       console.log("Fetching evaluations...");
@@ -27,6 +30,7 @@ export const useEvaluationsPage = () => {
         console.log("No evaluations found or empty result");
         setEvaluations([]);
       }
+      setFetchComplete(true); // Mark as complete after fetching
     } catch (error) {
       console.error("Erreur lors du chargement des évaluations:", error);
       toast({
@@ -36,15 +40,23 @@ export const useEvaluationsPage = () => {
       });
       // Assurer que l'état est toujours défini même en cas d'erreur
       setEvaluations([]);
+      setFetchComplete(true); // Mark as complete even on error
     } finally {
       setLoading(false);
     }
   }, [getAll]);
 
-  // Charger les évaluations au chargement de la page
-  useEffect(() => {
+  // Fonction pour réinitialiser le flag et permettre un rechargement
+  const handleRefresh = useCallback(() => {
+    setFetchComplete(false);
     fetchEvaluations();
   }, [fetchEvaluations]);
+
+  // Charger les évaluations au chargement de la page, une seule fois
+  useEffect(() => {
+    fetchEvaluations();
+    // Ne pas inclure fetchEvaluations dans les dépendances pour éviter des boucles
+  }, []); // Dépendances vides pour n'exécuter qu'une fois
 
   const handleNewEvaluation = () => {
     toast({
@@ -114,7 +126,7 @@ export const useEvaluationsPage = () => {
     evaluations,
     filteredEvaluations,
     loading,
-    fetchEvaluations,
+    fetchEvaluations: handleRefresh, // Utiliser handleRefresh au lieu de fetchEvaluations
     handleNewEvaluation,
     handleDelete,
     handleModify,
