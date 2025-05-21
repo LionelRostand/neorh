@@ -32,9 +32,14 @@ export const saveContractAsDocument = async (
       employeeId: contractData.employeeId,
       employeeName: contractData.employeeName,
       contractId: contractData.id,
-      description: `Contrat de travail ${contractData.type} pour ${contractData.position}`,
+      description: `Contrat de travail ${contractData.type} pour ${contractData.position} - Département: ${contractData.departmentName}`,
       signedByEmployee: false,
       signedByEmployer: false,
+      // Ajouter des champs pour faciliter la recherche
+      departmentId: contractData.departmentId,
+      departmentName: contractData.departmentName,
+      salary: contractData.salary,
+      conventionCollective: contractData.conventionCollective,
     };
     
     // Vérifier que firestore est disponible

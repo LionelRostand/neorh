@@ -6,7 +6,7 @@ import jsPDF from 'jspdf';
  */
 export const addSignatureSection = (
   doc: jsPDF, 
-  city: string = '[Ville]',
+  city: string = 'Paris',
   margin: number = 20, 
   startY: number = 0
 ): number => {
@@ -16,7 +16,7 @@ export const addSignatureSection = (
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
   const currentDate = new Date();
-  const dateStr = `[${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}]`;
+  const dateStr = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
   doc.text(`Fait en deux exemplaires originaux à ${city}, le ${dateStr}`, margin, yPosition);
   
   yPosition += 30;
