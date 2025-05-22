@@ -10,12 +10,14 @@ import ContractsHeader from "@/components/contracts/page/ContractsHeader";
 import ContractStatusCards from "@/components/contracts/ContractStatusCards";
 import ContractsListCard from "@/components/contracts/page/ContractsListCard";
 import ContractDialogs from "@/components/contracts/page/ContractDialogs";
+import { Contract } from "@/lib/constants";
 
 const Contrats = () => {
   // State for dialogs
   const [newContractDialogOpen, setNewContractDialogOpen] = useState(false);
   const [viewContractId, setViewContractId] = useState<string | null>(null);
-  const [editContractId, setEditContractId] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editContract, setEditContract] = useState<Contract | null>(null);
   const [deleteContractId, setDeleteContractId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
@@ -38,11 +40,17 @@ const Contrats = () => {
   };
 
   const handleEdit = (id: string) => {
-    setEditContractId(id);
-    toast({
-      title: "Modifier",
-      description: `Modification du contrat ${id}`
-    });
+    const contractToEdit = contracts.find(c => c.id === id);
+    if (contractToEdit) {
+      setEditContract(contractToEdit);
+      setEditDialogOpen(true);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: `Contrat introuvable: ${id}`
+      });
+    }
   };
 
   const handleDeleteRequest = (id: string) => {
@@ -88,6 +96,9 @@ const Contrats = () => {
         deleteContractId={deleteContractId}
         onDeleteConfirm={handleDeleteConfirm}
         onContractsRefresh={fetchContracts}
+        editDialogOpen={editDialogOpen}
+        setEditDialogOpen={setEditDialogOpen}
+        editContract={editContract}
       />
     </div>
   );

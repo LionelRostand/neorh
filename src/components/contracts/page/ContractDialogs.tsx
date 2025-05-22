@@ -3,6 +3,8 @@ import React from "react";
 import NewContractDialog from "@/components/contracts/NewContractDialog";
 import ViewContractDialog from "@/components/contracts/ViewContractDialog";
 import DeleteContractDialog from "@/components/contracts/DeleteContractDialog";
+import EditContractDialog from "@/components/contracts/EditContractDialog";
+import { Contract } from "@/lib/constants";
 
 interface ContractDialogsProps {
   newContractOpen: boolean;
@@ -14,6 +16,9 @@ interface ContractDialogsProps {
   deleteContractId: string | null;
   onDeleteConfirm: () => void;
   onContractsRefresh: () => void;
+  editDialogOpen: boolean;
+  setEditDialogOpen: (open: boolean) => void;
+  editContract: Contract | null;
 }
 
 const ContractDialogs: React.FC<ContractDialogsProps> = ({
@@ -25,7 +30,10 @@ const ContractDialogs: React.FC<ContractDialogsProps> = ({
   setDeleteDialogOpen,
   deleteContractId,
   onDeleteConfirm,
-  onContractsRefresh
+  onContractsRefresh,
+  editDialogOpen,
+  setEditDialogOpen,
+  editContract
 }) => {
   return (
     <>
@@ -46,6 +54,13 @@ const ContractDialogs: React.FC<ContractDialogsProps> = ({
         onOpenChange={setDeleteDialogOpen}
         onConfirm={onDeleteConfirm}
         contractId={deleteContractId}
+      />
+
+      <EditContractDialog 
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        contract={editContract}
+        onSuccess={onContractsRefresh}
       />
     </>
   );
