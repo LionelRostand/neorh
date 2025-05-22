@@ -23,13 +23,13 @@ const ViewContractDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-4xl h-[80vh] flex flex-col p-0">
+      <DialogContent className="sm:max-w-4xl h-[90vh] flex flex-col p-0">
         <DocumentDialogHeader 
           document={document} 
           onClose={onClose} 
         />
         
-        <div className="flex-1 overflow-hidden p-6 pt-2">
+        <div className="flex-1 overflow-hidden">
           <DocumentViewer 
             document={document}
             loading={loading}

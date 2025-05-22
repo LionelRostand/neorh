@@ -5,7 +5,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileText, Download, X } from "lucide-react";
+import { FileText, Download, X, Printer } from "lucide-react";
 import { Document } from "@/lib/constants";
 import { downloadDocument } from "@/utils/contracts/documentDownload";
 
@@ -18,14 +18,25 @@ const DocumentDialogHeader: React.FC<DocumentDialogHeaderProps> = ({ document, o
   const handleDownload = () => {
     downloadDocument(document);
   };
+  
+  const handlePrint = () => {
+    window.print();
+  };
 
   return (
-    <DialogHeader className="px-6 pt-6 pb-2 flex flex-row justify-between items-center">
+    <DialogHeader className="px-6 pt-6 pb-2 flex flex-row justify-between items-center border-b">
       <DialogTitle className="text-xl flex items-center gap-2">
         <FileText className="h-5 w-5" />
-        {document?.title || "Contrat"}
+        {document?.title || "Contrat de travail"}
       </DialogTitle>
       <div className="flex gap-2">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handlePrint}
+        >
+          <Printer className="h-4 w-4 mr-2" /> Imprimer
+        </Button>
         <Button 
           variant="outline" 
           size="sm" 
