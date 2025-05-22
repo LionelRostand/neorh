@@ -31,7 +31,7 @@ const MockContract: React.FC = () => {
   return (
     <div className="w-full h-full flex flex-col">
       <div className="mx-6 mt-4 mb-2">
-        <Alert variant="info" className="bg-blue-50 text-blue-700 border-blue-200">
+        <Alert variant="default" className="bg-blue-50 text-blue-700 border-blue-200">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Document exemple affiché. Le contrat réel n'a pas pu être chargé.
