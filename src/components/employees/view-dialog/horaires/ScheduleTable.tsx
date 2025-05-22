@@ -1,10 +1,9 @@
 
 import React from 'react';
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Plus } from "lucide-react";
 import { WorkSchedule, daysOfWeek } from './types';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 interface ScheduleTableProps {
   schedules: WorkSchedule[];

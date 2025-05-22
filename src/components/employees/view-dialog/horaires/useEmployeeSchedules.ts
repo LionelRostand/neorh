@@ -29,7 +29,7 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
         if (result.docs && result.docs.length > 0) {
           const sortedSchedules = [...result.docs].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
           setSchedules(sortedSchedules);
-          setEditedSchedules(sortedSchedules);
+          setEditedSchedules([...sortedSchedules]);
         } else {
           // If no schedules found, set to empty arrays
           setSchedules([]);
@@ -62,6 +62,7 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
     };
     
     setEditedSchedules(prev => [...prev, newSchedule]);
+    console.log("Schedule added, new length:", editedSchedules.length + 1);
   };
   
   // Handle removing a schedule
@@ -118,7 +119,7 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
       if (result.docs) {
         const sortedSchedules = [...result.docs].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
         setSchedules(sortedSchedules);
-        setEditedSchedules(sortedSchedules);
+        setEditedSchedules([...sortedSchedules]);
       }
       
       toast({

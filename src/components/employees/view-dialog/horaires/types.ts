@@ -1,5 +1,5 @@
 
-import { Employee } from "@/types/employee";
+import { Employee } from '@/types/employee';
 
 export interface WorkSchedule {
   id?: string;
@@ -10,11 +10,17 @@ export interface WorkSchedule {
   isActive: boolean;
 }
 
+export const daysOfWeek: Record<number, string> = {
+  0: "Dimanche",
+  1: "Lundi",
+  2: "Mardi",
+  3: "Mercredi",
+  4: "Jeudi",
+  5: "Vendredi",
+  6: "Samedi"
+};
+
 export interface EmployeeHorairesProps {
   employee: Employee;
   onRefresh?: () => void;
 }
-
-export const daysOfWeek = [
-  "Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"
-];
