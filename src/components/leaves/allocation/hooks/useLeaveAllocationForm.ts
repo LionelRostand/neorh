@@ -6,6 +6,7 @@ import { useFirestore } from "@/hooks/firestore";
 import { toast } from "@/components/ui/use-toast";
 import { LeaveAllocation } from "@/hooks/leaves";
 import { EmployeeSelectProps } from "../../form/EmployeeField";
+import { HR } from "@/lib/constants/collections";
 
 export interface AllocationFormValues extends EmployeeSelectProps {
   paidLeavesTotal: number;
@@ -17,7 +18,7 @@ export function useLeaveAllocationForm(employeeId?: string, onSuccess?: () => vo
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { add: addAllocation, update: updateAllocation, search } = 
-    useFirestore<LeaveAllocation>("hr_leave_allocations");
+    useFirestore<LeaveAllocation>(HR.LEAVE_ALLOCATIONS);
   const [existingAllocation, setExistingAllocation] = useState<LeaveAllocation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 

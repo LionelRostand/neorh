@@ -2,6 +2,7 @@
 import { useFirestore } from '@/hooks/firestore';
 import { LeaveAllocation } from '../types';
 import { useAuth } from '@/hooks/useAuth';
+import { HR } from '@/lib/constants/collections';
 
 export function useAllocationService() {
   const { 
@@ -9,7 +10,7 @@ export function useAllocationService() {
     add: addAllocation,
     update: updateAllocation,
     getAll: getAllAllocations
-  } = useFirestore<LeaveAllocation>('hr_leave_allocations');
+  } = useFirestore<LeaveAllocation>(HR.LEAVE_ALLOCATIONS);
   
   const { user } = useAuth();
   
@@ -22,7 +23,7 @@ export function useAllocationService() {
     
     try {
       // Add more detailed logging
-      console.log(`[allocationService] Searching in collection 'hr_leave_allocations' for employeeId=${employeeId}`);
+      console.log(`[allocationService] Searching in collection '${HR.LEAVE_ALLOCATIONS}' for employeeId=${employeeId}`);
       
       const result = await searchAllocation('employeeId', employeeId);
       console.log(`[allocationService] Search result for employee ${employeeId}:`, result);

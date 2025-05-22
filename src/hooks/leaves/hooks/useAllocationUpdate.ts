@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { LeaveAllocation } from '../types';
@@ -5,7 +6,8 @@ import { allocationCache } from '../utils/leaveAllocationCache';
 import { useAllocationService } from '../api/allocationService';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { Leave } from '@/types/firebase'; // Added import
+import { Leave } from '@/types/firebase';
+import { HR } from '@/lib/constants/collections';
 
 /**
  * Custom hook for updating allocation data

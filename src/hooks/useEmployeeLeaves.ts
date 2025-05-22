@@ -1,6 +1,7 @@
 
 import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { useLeaveAllocation, useEmployeeLeaveData, useLeaveTypeLabels } from './leaves';
+import { HR } from '@/lib/constants/collections';
 
 // Re-export LeaveAllocation interface for backward compatibility
 export type { LeaveAllocation } from './leaves';

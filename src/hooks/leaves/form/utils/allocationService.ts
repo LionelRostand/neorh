@@ -3,6 +3,7 @@ import { doc, getDoc, query, where, getDocs, collection, QuerySnapshot } from "f
 import { db } from "@/lib/firebase";
 import { LeaveAllocation } from "@/hooks/leaves";
 import { LeaveFormValues } from "@/components/leaves/form/types";
+import { HR } from "@/lib/constants/collections";
 
 /**
  * Service pour gérer les allocations de congés
@@ -15,7 +16,7 @@ export const allocationService = {
     existingAllocation: (LeaveAllocation & { id: string }) | null;
     querySnapshot: QuerySnapshot;
   }> => {
-    const allocationRef = collection(db, 'hr_leave_allocations');
+    const allocationRef = collection(db, HR.LEAVE_ALLOCATIONS);
     const q = query(allocationRef, 
       where('employeeId', '==', employeeId), 
       where('year', '==', year)

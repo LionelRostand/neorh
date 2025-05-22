@@ -2,6 +2,7 @@
 import { LeaveFormValues } from "@/components/leaves/form/types";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { HR } from "@/lib/constants/collections";
 
 /**
  * Service pour gérer les demandes de congés
@@ -34,7 +35,7 @@ export const leaveRequestService = {
       rttDaysUsed
     };
     
-    await addDoc(collection(db, 'hr_leaves'), leaveData);
+    await addDoc(collection(db, HR.LEAVES), leaveData);
   },
   
   /**
@@ -47,7 +48,7 @@ export const leaveRequestService = {
     endDateStr: string
   ) => {
     // Créer une entrée dans hr_leaves pour enregistrer l'allocation
-    await addDoc(collection(db, 'hr_leaves'), {
+    await addDoc(collection(db, HR.LEAVES), {
       employeeId: data.employeeId,
       type: 'allocation',
       startDate: startDateStr,

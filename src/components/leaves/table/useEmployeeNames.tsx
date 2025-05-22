@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { doc, getDoc, getDocs, collection, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Leave } from "@/types/firebase";
+import { HR } from "@/lib/constants/collections";
 
 export const useEmployeeNames = (leaves: Leave[]) => {
   const [employeeNames, setEmployeeNames] = useState<Record<string, string>>({});
@@ -36,7 +37,7 @@ export const useEmployeeNames = (leaves: Leave[]) => {
         for (let i = 0; i < allIds.length; i += batchSize) {
           const batch = allIds.slice(i, i + batchSize);
           
-          const q = query(collection(db, 'hr_employees'), where('__name__', 'in', batch));
+          const q = query(collection(db, HR.EMPLOYEES), where('__name__', 'in', batch));
           const querySnapshot = await getDocs(q);
           
           querySnapshot.forEach(doc => {
@@ -61,7 +62,7 @@ export const useEmployeeNames = (leaves: Leave[]) => {
           if (!id) continue;
           
           try {
-            const docRef = await getDoc(doc(db, 'hr_employees', id));
+            const docRef = await getDoc(doc(db, HR.EMPLOYEES, id));
             if (docRef.exists()) {
               const data = docRef.data();
               const fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim();

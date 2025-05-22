@@ -7,11 +7,12 @@ import LeavesHeader from "@/components/leaves/LeavesHeader";
 import LeavesContent from "@/components/leaves/LeavesContent";
 import { useAuth } from "@/hooks/useAuth";
 import { useLeaveApproval } from "@/hooks/leaves/useLeaveApproval";
+import { HR } from "@/lib/constants/collections";
 
 const Conges = () => {
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(true);
-  const { getAll, isLoading, error, update, search } = useCollection("leaves");
+  const { getAll, isLoading, error, update, search } = useCollection(HR.LEAVES);
   const { user } = useAuth();
   const { approveLeave, rejectLeave } = useLeaveApproval();
 
