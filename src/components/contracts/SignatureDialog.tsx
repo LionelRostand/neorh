@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Signature, CheckCircle, XCircle } from "lucide-react";
+import { Signature, CheckCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Document } from "@/lib/constants";
 import useFirestore from "@/hooks/useFirestore";
+import { updateContractWithSignatures } from "@/utils/pdf/contract/documentStorage";
 
 interface SignatureDialogProps {
   document: Document;
@@ -43,10 +44,6 @@ export default function SignatureDialog({
       
       // Date de la signature
       const signatureDate = new Date().toISOString();
-      const signatureInfo = {
-        date: signatureDate,
-        by: isEmployer ? 'employer' : 'employee'
-      };
       
       // Mettre à jour le document avec la signature
       await documentsCollection.update(document.id, {
@@ -85,6 +82,15 @@ export default function SignatureDialog({
             await documentsCollection.update(document.id, { status: 'active' });
             if (document.contractId) {
               await contractsCollection.update(document.contractId, { status: 'active' });
+              
+              // Mettre à jour le PDF avec les signatures
+              await updateContractWithSignatures(
+                document.contractId,
+                true,
+                true,
+                updatedDoc.employeeSignatureDate || '',
+                updatedDoc.employerSignatureDate || ''
+              );
               
               toast({
                 title: "Contrat activé",
@@ -179,4 +185,3 @@ export default function SignatureDialog({
     </Dialog>
   );
 }
-

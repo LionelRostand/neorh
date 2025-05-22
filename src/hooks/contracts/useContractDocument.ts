@@ -15,36 +15,36 @@ export const useContractDocument = (contractId: string | null, isOpen: boolean) 
   
   // Utilisation d'un ref pour le flag de fetching plutôt qu'un state pour éviter les re-renders
   const isFetchingRef = useRef(false);
-  // Cache pour les documents déjà chargés
-  const documentsCache = useRef<Record<string, Document>>({});
-  // Référence pour suivre si une recherche a déjà été effectuée pour cet ID
-  const searchCompletedRef = useRef<Record<string, boolean>>({});
+  
+  // Référence pour suivre la dernière date de mise à jour
+  const lastFetchTime = useRef<number>(0);
+  
+  // Référence pour le contrat actuellement affiché
+  const currentContractId = useRef<string | null>(null);
 
   // Création d'une fonction memoïsée pour éviter de créer une nouvelle fonction à chaque render
-  const fetchContractDocument = useCallback(async (id: string) => {
-    // Si on a déjà cherché ce document sans le trouver, ne pas réessayer
-    if (searchCompletedRef.current[id] === true) {
-      console.log("Recherche déjà effectuée pour ce contrat, pas de document trouvé");
-      setLoading(false);
-      setError("Aucun document trouvé pour ce contrat.");
-      return;
-    }
-    
+  const fetchContractDocument = useCallback(async (id: string, force = false) => {
     // Si on est déjà en train de récupérer des données, ne pas commencer une autre requête
-    if (isFetchingRef.current) {
+    if (isFetchingRef.current && !force) {
       console.log("Une requête est déjà en cours, annulation de la nouvelle requête");
       return;
     }
-
-    // On ignore le cache pour toujours obtenir la version la plus récente des documents signés
-    // Vider le cache pour cet ID afin de forcer un rechargement
-    delete documentsCache.current[id];
+    
+    // Vérifier si c'est un nouveau contrat
+    const isNewContract = currentContractId.current !== id;
+    
+    // Vérifier si on doit rafraîchir les données (soit nouveau contrat, soit forcer le rafraîchissement)
+    if (!isNewContract && !force && Date.now() - lastFetchTime.current < 5000) {
+      console.log("Données récentes disponibles, pas besoin de rafraîchir");
+      return;
+    }
 
     console.log("Début de la récupération du document de contrat pour l'ID:", id);
     
     setLoading(true);
     setError(null);
     isFetchingRef.current = true;
+    currentContractId.current = id;
     
     try {
       // Chercher le document associé au contrat
@@ -60,16 +60,11 @@ export const useContractDocument = (contractId: string | null, isOpen: boolean) 
       console.log("Documents filtrés:", filteredDocs);
       
       if (filteredDocs && filteredDocs.length > 0) {
-        // Mettre en cache le document
-        documentsCache.current[id] = filteredDocs[0];
         setDocument(filteredDocs[0]);
+        // Mettre à jour le moment du dernier fetch
+        lastFetchTime.current = Date.now();
       } else {
-        // Marquer comme recherche complétée sans résultat
-        searchCompletedRef.current[id] = true;
         setError("Aucun document trouvé pour ce contrat.");
-        
-        // Afficher un contrat fictif pour l'exemple en cas d'absence de document réel
-        // Cela évite l'écran de chargement infini
         setDocument(null);
       }
     } catch (err) {
@@ -81,18 +76,27 @@ export const useContractDocument = (contractId: string | null, isOpen: boolean) 
         variant: "destructive"
       });
     } finally {
-      // Marquer comme terminé dans tous les cas pour éviter un chargement infini
+      // Marquer comme terminé dans tous les cas
       setLoading(false);
       isFetchingRef.current = false;
     }
   }, [documentsCollection]);
 
-  // Effect pour charger le document quand le contractId change
+  // Rafraîchir périodiquement les données du document pour voir les mises à jour de signatures
   useEffect(() => {
-    // Ne rien faire si le dialog n'est pas ouvert ou s'il n'y a pas d'ID
     if (!isOpen || !contractId) {
       return;
     }
+
+    // Charger initialement
+    fetchContractDocument(contractId);
+    
+    // Rafraîchir périodiquement si c'est un document en attente de signature
+    const intervalId = setInterval(() => {
+      if (document?.status === 'pending_signature') {
+        fetchContractDocument(contractId, true);
+      }
+    }, 5000); // Rafraîchir toutes les 5 secondes pour les documents en attente
 
     // Définir un timeout pour éviter le chargement infini
     const timeoutId = setTimeout(() => {
@@ -103,15 +107,20 @@ export const useContractDocument = (contractId: string | null, isOpen: boolean) 
       }
     }, 10000); // Timeout après 10 secondes
 
-    fetchContractDocument(contractId);
-
-    // Fonction de nettoyage pour annuler le timeout et les requêtes
+    // Fonction de nettoyage
     return () => {
       clearTimeout(timeoutId);
+      clearInterval(intervalId);
       isFetchingRef.current = false;
     };
-  }, [contractId, isOpen, fetchContractDocument, loading, document, error]);
+  }, [contractId, isOpen, fetchContractDocument, document?.status, loading, document, error]);
 
-  return { document, loading, error };
+  // Fonction pour forcer le rafraîchissement
+  const refreshDocument = useCallback(() => {
+    if (contractId) {
+      fetchContractDocument(contractId, true);
+    }
+  }, [contractId, fetchContractDocument]);
+
+  return { document, loading, error, refreshDocument };
 };
-

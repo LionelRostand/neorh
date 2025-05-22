@@ -37,4 +37,3 @@ export interface PdfResult {
  * Types de contrats disponibles
  */
 export type ContractType = 'CDI' | 'CDD' | 'Interim' | 'Stage' | 'Apprentissage' | 'Freelance';
-

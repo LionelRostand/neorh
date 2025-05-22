@@ -26,4 +26,3 @@ const ContractStatusBadge = ({ status }: ContractStatusBadgeProps) => {
 };
 
 export default ContractStatusBadge;
-

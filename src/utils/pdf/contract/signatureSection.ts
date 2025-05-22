@@ -40,12 +40,27 @@ export const addSignatureSection = (
     doc.setFontSize(10);
     doc.setFont('helvetica', 'italic');
     doc.setTextColor(0, 0, 150);
-    const employerDate = new Date(employerSignatureDate);
+    let employerDate = new Date();
+    try {
+      employerDate = new Date(employerSignatureDate);
+    } catch (e) {
+      console.error("Invalid employer signature date format");
+    }
     doc.text(`Signé électroniquement le ${employerDate.toLocaleDateString('fr-FR')}`, margin + 10, yPosition - 10);
     
     // Ajouter une marque de signature dans la case
     doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
     doc.text("SIGNATURE ÉLECTRONIQUE", margin + 10, yPosition - 5);
+    
+    // Ajouter une signature graphique (représentation stylisée)
+    doc.setDrawColor(0, 0, 150);
+    doc.setLineWidth(0.5);
+    const sigStartX = margin + 20;
+    const sigY = yPosition - 15;
+    doc.line(sigStartX, sigY, sigStartX + 10, sigY - 5);
+    doc.line(sigStartX + 10, sigY - 5, sigStartX + 25, sigY + 5);
+    doc.line(sigStartX + 25, sigY + 5, sigStartX + 40, sigY - 10);
     doc.setFont('helvetica', 'normal');
   }
   
@@ -53,17 +68,34 @@ export const addSignatureSection = (
     doc.setFontSize(10);
     doc.setFont('helvetica', 'italic');
     doc.setTextColor(0, 0, 150);
-    const employeeDate = new Date(employeeSignatureDate);
+    let employeeDate = new Date();
+    try {
+      employeeDate = new Date(employeeSignatureDate);
+    } catch (e) {
+      console.error("Invalid employee signature date format");
+    }
     doc.text(`Signé électroniquement le ${employeeDate.toLocaleDateString('fr-FR')}`, middleX + 15, yPosition - 10);
     
     // Ajouter une marque de signature dans la case
     doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
     doc.text("SIGNATURE ÉLECTRONIQUE", middleX + 15, yPosition - 5);
+    
+    // Ajouter une signature graphique (représentation stylisée)
+    doc.setDrawColor(0, 0, 150);
+    doc.setLineWidth(0.5);
+    const sigStartX = middleX + 25;
+    const sigY = yPosition - 15;
+    doc.line(sigStartX, sigY, sigStartX + 8, sigY + 5);
+    doc.line(sigStartX + 8, sigY + 5, sigStartX + 15, sigY - 3);
+    doc.line(sigStartX + 15, sigY - 3, sigStartX + 30, sigY + 6);
     doc.setFont('helvetica', 'normal');
   }
   
   // Revenir à la couleur standard pour le reste du document
   doc.setTextColor(0, 0, 0);
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.1);
   
   // Draw signature lines
   doc.line(margin, yPosition, margin + 80, yPosition);
@@ -92,4 +124,3 @@ export const addSignatureSection = (
   
   return yPosition;
 };
-
