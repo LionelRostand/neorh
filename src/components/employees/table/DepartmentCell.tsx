@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ interface DepartmentCellProps {
 
 const DepartmentCell = ({ departmentId, departmentName }: DepartmentCellProps) => {
   const [displayName, setDisplayName] = useState<string>(departmentName || "");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     // If we already have a proper department name, use it
@@ -21,8 +23,12 @@ const DepartmentCell = ({ departmentId, departmentName }: DepartmentCellProps) =
     
     // Otherwise fetch the name from Firestore if we have an ID
     const fetchDepartmentName = async () => {
-      if (!departmentId) return;
+      if (!departmentId) {
+        setDisplayName('Département non assigné');
+        return;
+      }
       
+      setIsLoading(true);
       try {
         const deptRef = doc(db, 'hr_departments', departmentId);
         const deptSnap = await getDoc(deptRef);
@@ -30,7 +36,7 @@ const DepartmentCell = ({ departmentId, departmentName }: DepartmentCellProps) =
         if (deptSnap.exists()) {
           const deptData = deptSnap.data();
           setDisplayName(deptData.name || 'Département inconnu');
-          console.log("Fetched department name:", deptData.name);
+          console.log("Fetched department name:", deptData.name, "for ID:", departmentId);
         } else {
           console.log("Department document not found for ID:", departmentId);
           setDisplayName('Département inconnu');
@@ -38,6 +44,8 @@ const DepartmentCell = ({ departmentId, departmentName }: DepartmentCellProps) =
       } catch (err) {
         console.error("Error fetching department name:", err);
         setDisplayName('Erreur de chargement');
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -48,7 +56,7 @@ const DepartmentCell = ({ departmentId, departmentName }: DepartmentCellProps) =
     <div className="flex items-center">
       <Badge variant="outline" className="flex gap-1 items-center font-normal">
         <Building2 className="h-3 w-3 text-muted-foreground" />
-        {displayName || "Département non assigné"}
+        {isLoading ? "Chargement..." : displayName || "Département non assigné"}
       </Badge>
     </div>
   );
