@@ -37,6 +37,12 @@ const DepartmentsTable: React.FC<DepartmentsTableProps> = ({
     return id.substring(0, 8);
   };
 
+  console.log("DepartmentsTable rendering with:", {
+    departmentsCount: departments?.length,
+    isLoading,
+    hasError: !!error
+  });
+
   return (
     <div className="bg-white border rounded-lg overflow-hidden">
       <div className="p-4 border-b">

@@ -39,6 +39,15 @@ const Departements = () => {
     }
   }, [departments]);
 
+  // Debug pour voir ce qui se passe avec les données
+  useEffect(() => {
+    console.log("Departments page - Current state:", { 
+      departmentsCount: departments?.length,
+      isLoading,
+      hasError: !!error
+    });
+  }, [departments, isLoading, error]);
+
   const handleNewDepartment = () => {
     setIsNewDialogOpen(true);
   };

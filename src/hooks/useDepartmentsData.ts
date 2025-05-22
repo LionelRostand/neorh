@@ -14,11 +14,7 @@ export const useDepartmentsData = () => {
   const hasRun = useRef(false);
 
   const fetchDepartments = useCallback(async () => {
-    // Skip if we've already run this once and we're not being explicitly called
-    if (hasRun.current) {
-      return;
-    }
-    
+    // Nous allons toujours exécuter la requête pour s'assurer que les données sont chargées
     setIsLoading(true);
     setError(null);
     
@@ -74,7 +70,6 @@ export const useDepartmentsData = () => {
   
   // Manual refetch that bypasses the hasRun check
   const refetch = useCallback(async () => {
-    hasRun.current = false;
     await fetchDepartments();
   }, [fetchDepartments]);
 
