@@ -26,7 +26,9 @@ const schema = z.object({
   type: z.string().min(1, { message: "Le type de contrat est requis" }),
   startDate: z.string().min(1, { message: "La date de début est requise" }),
   endDate: z.string().optional(),
-  status: z.string().min(1, { message: "Le statut est requis" })
+  status: z.enum(["draft", "pending", "active", "expired", "pending_signature"], { 
+    message: "Le statut doit être valide" 
+  })
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -224,6 +226,7 @@ export default function EditContractDialog({
                     <SelectContent>
                       <SelectItem value="draft">Brouillon</SelectItem>
                       <SelectItem value="pending">En attente</SelectItem>
+                      <SelectItem value="pending_signature">En attente de signature</SelectItem>
                       <SelectItem value="active">Actif</SelectItem>
                       <SelectItem value="expired">Expiré</SelectItem>
                     </SelectContent>
