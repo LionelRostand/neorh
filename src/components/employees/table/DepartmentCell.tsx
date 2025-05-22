@@ -15,7 +15,7 @@ const DepartmentCell = ({ departmentId, departmentName }: DepartmentCellProps) =
 
   useEffect(() => {
     // If we already have a proper department name, use it
-    if (departmentName && !departmentName.includes('QFW') && !departmentId.includes('dCij')) {
+    if (departmentName && departmentName.trim() !== '') {
       setDisplayName(departmentName);
       return;
     }
@@ -31,9 +31,14 @@ const DepartmentCell = ({ departmentId, departmentName }: DepartmentCellProps) =
         if (deptSnap.exists()) {
           const deptData = deptSnap.data();
           setDisplayName(deptData.name || 'Département inconnu');
+          console.log("Fetched department name:", deptData.name);
+        } else {
+          console.log("Department document not found for ID:", departmentId);
+          setDisplayName('Département inconnu');
         }
       } catch (err) {
         console.error("Error fetching department name:", err);
+        setDisplayName('Erreur de chargement');
       }
     };
     
@@ -46,7 +51,7 @@ const DepartmentCell = ({ departmentId, departmentName }: DepartmentCellProps) =
         <Building2 className="h-3 w-3 text-muted-foreground" />
         {displayName || "Département non assigné"}
       </Badge>
-      {departmentId && displayName && (
+      {departmentId && (
         <span className="text-xs text-muted-foreground ml-2 hidden md:inline">
           {departmentId.substring(0, 6)}...
         </span>
