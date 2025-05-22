@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -139,4 +140,17 @@
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;  /* Chrome, Safari, Opera */
+}
+
+/* Styles spécifiques pour les onglets employés */
+.employee-tabs-header {
+  @apply border-b border-gray-200;
+}
+
+.employee-tab-active {
+  @apply text-blue-700 border-b-2 border-blue-600 font-medium;
+}
+
+.employee-tab-content {
+  @apply p-4;
 }

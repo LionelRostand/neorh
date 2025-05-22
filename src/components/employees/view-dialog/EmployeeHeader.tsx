@@ -44,11 +44,16 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
   const firstName = nameParts[0] || '';
   const lastName = nameParts.slice(1).join(' ') || '';
 
-  const getStatusLabel = (status: string): string => {
+  const getStatusLabel = (status: string | undefined): string => {
+    if (!status) return "Inconnu";
+    
     switch (status) {
       case "active": return "Actif";
       case "inactive": return "Inactif";
       case "onLeave": return "Congé";
+      case "actif": return "Actif";
+      case "inactif": return "Inactif";
+      case "congé": return "Congé";
       default: return status;
     }
   };
@@ -70,7 +75,7 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
           )}
           
           <div>
-            <DialogTitle className="text-xl font-semibold">
+            <DialogTitle className="text-xl font-bold text-blue-700">
               {firstName} {lastName}
             </DialogTitle>
             
@@ -80,13 +85,9 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
               </Badge>
               
               {employee.department && (
-                <Badge variant="outline" className="font-normal">
-                  {employee.department}
-                </Badge>
-              )}
-              
-              {employee.position && (
-                <span className="text-sm text-gray-500">{employee.position}</span>
+                <span className="text-sm text-gray-600">
+                  {employee.position && `${employee.position} • `}{employee.department}
+                </span>
               )}
             </div>
           </div>
