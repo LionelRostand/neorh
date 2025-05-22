@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { RecruitmentPost } from "@/types/recruitment";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useDepartmentsData } from "@/hooks/useDepartmentsData";
 
 interface RecruitmentListProps {
   posts: RecruitmentPost[];
@@ -12,6 +13,14 @@ interface RecruitmentListProps {
 }
 
 const RecruitmentList: React.FC<RecruitmentListProps> = ({ posts, onPostClick }) => {
+  const { departments } = useDepartmentsData();
+  
+  // Fonction pour obtenir le nom du département à partir de son ID
+  const getDepartmentName = (departmentId: string) => {
+    const department = departments.find(dept => dept.id === departmentId);
+    return department ? department.name : departmentId;
+  };
+
   return (
     <Card>
       <Table>
@@ -32,7 +41,7 @@ const RecruitmentList: React.FC<RecruitmentListProps> = ({ posts, onPostClick })
               onClick={() => onPostClick(post.id)}
             >
               <TableCell className="font-medium">{post.title}</TableCell>
-              <TableCell>{post.department}</TableCell>
+              <TableCell>{getDepartmentName(post.department)}</TableCell>
               <TableCell>
                 <StatusBadge status={post.status} />
               </TableCell>
