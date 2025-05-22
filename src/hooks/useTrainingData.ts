@@ -1,129 +1,54 @@
 
-import { useState, useEffect, useRef } from 'react';
-import { useFirestore } from './firestore';
+import { useState, useEffect } from 'react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export interface Training {
   id: string;
   title: string;
-  description: string;
-  trainer: string;
-  department: string;
-  participants: number;
-  status: "planifiée" | "complétée" | "annulée";
-  employeeId?: string;
-  employeeName?: string; 
+  description?: string;
   type?: string;
+  organization?: string;
   location?: string;
+  status: 'planifiée' | 'complétée' | 'annulée';
   startDate?: string;
   endDate?: string;
+  employeeId?: string;
+  employeeName?: string;
+  participants?: number;
 }
 
 export const useTrainingData = () => {
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const { getAll } = useFirestore<Training>('hr_trainings');
-  const fetchedRef = useRef(false);
   
   useEffect(() => {
-    const fetchTrainings = async () => {
-      if (fetchedRef.current) return;
-      
-      setLoading(true);
-      setError(null);
-      
-      try {
-        console.log('Fetching all trainings from hr_trainings');
-        const result = await getAll();
-        
-        if (result.docs) {
-          console.log(`Found ${result.docs.length} trainings`);
-          setTrainings(result.docs);
-        } else {
-          console.log('No trainings found or empty result');
-          setTrainings([]);
-        }
-        
-        fetchedRef.current = true;
-      } catch (err) {
-        console.error("Error fetching trainings:", err);
-        setError(err instanceof Error ? err : new Error('Erreur inconnue'));
-        fetchedRef.current = true;
-      } finally {
-        setLoading(false);
-      }
-    };
+    const trainingsCollection = collection(db, 'hr_trainings');
     
-    fetchTrainings();
-  }, [getAll]);
-  
-  return {
-    trainings,
-    loading,
-    error,
-    refetch: () => {
-      fetchedRef.current = false;
-      setTrainings([]);
-    }
-  };
-};
-
-export const useEmployeeTrainings = (employeeId: string) => {
-  const [employeeTrainings, setEmployeeTrainings] = useState<Training[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const { search } = useFirestore<Training>('hr_trainings');
-  const fetchedRef = useRef(false);
-  
-  useEffect(() => {
-    // Ne pas exécuter la recherche si l'employeeId est vide
-    if (!employeeId) {
-      setLoading(false);
-      setEmployeeTrainings([]);
-      return;
-    }
-    
-    // N'exécuter la requête qu'une seule fois par employeeId
-    if (fetchedRef.current) {
-      return;
-    }
-    
-    const fetchEmployeeTrainings = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        console.log(`Fetching trainings for employee ID: ${employeeId}`);
-        
-        const result = await search({
-          field: 'employeeId',
-          value: employeeId
+    const unsubscribe = onSnapshot(
+      trainingsCollection,
+      (snapshot) => {
+        const trainingsData: Training[] = [];
+        snapshot.forEach((doc) => {
+          trainingsData.push({
+            id: doc.id,
+            ...doc.data() as Omit<Training, 'id'>
+          });
         });
         
-        if (result.docs) {
-          console.log(`Found ${result.docs.length} trainings for employee`);
-          setEmployeeTrainings(result.docs);
-        } else {
-          console.log('No trainings found for this employee');
-          setEmployeeTrainings([]);
-        }
-        
-        fetchedRef.current = true;
-      } catch (err) {
-        console.error("Error fetching employee trainings:", err);
-        setError(err instanceof Error ? err : new Error('Erreur inconnue'));
-        fetchedRef.current = true;
-      } finally {
+        setTrainings(trainingsData);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error fetching trainings:', error);
         setLoading(false);
       }
-    };
-
-    fetchEmployeeTrainings();
-  }, [employeeId, search]);
-
-  return {
-    trainings: employeeTrainings,
-    loading,
-    error
-  };
+    );
+    
+    return () => unsubscribe();
+  }, []);
+  
+  return { trainings, loading };
 };
+
+export default useTrainingData;
