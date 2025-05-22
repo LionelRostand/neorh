@@ -4,14 +4,24 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { RecruitmentPost, RecruitmentStatus, KanbanColumn as KanbanColumnType } from "@/types/recruitment";
 import KanbanColumn from "./KanbanColumn";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { toast } from "@/components/ui/use-toast";
+import { db } from "@/lib/firebase";
+import { deleteDoc, doc } from "firebase/firestore";
 
 interface RecruitmentKanbanProps {
   posts: RecruitmentPost[];
   onStatusChange: (postId: string, newStatus: string) => void;
   onPostClick: (postId: string) => void;
+  onPostDeleted?: () => void;
 }
 
-const RecruitmentKanban: React.FC<RecruitmentKanbanProps> = ({ posts, onStatusChange, onPostClick }) => {
+const RecruitmentKanban: React.FC<RecruitmentKanbanProps> = ({ 
+  posts, 
+  onStatusChange, 
+  onPostClick,
+  onPostDeleted 
+}) => {
   const columns: KanbanColumnType[] = [
     { id: 'ouverte', title: 'Ouverte', items: [] },
     { id: 'en_cours', title: 'En cours', items: [] },
@@ -19,6 +29,9 @@ const RecruitmentKanban: React.FC<RecruitmentKanbanProps> = ({ posts, onStatusCh
     { id: 'offre', title: 'Offre', items: [] },
     { id: 'fermée', title: 'Fermée', items: [] }
   ];
+  
+  const [postToDelete, setPostToDelete] = React.useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
   
   // Distribute posts to their respective columns
   posts.forEach(post => {
@@ -49,26 +62,84 @@ const RecruitmentKanban: React.FC<RecruitmentKanbanProps> = ({ posts, onStatusCh
       onStatusChange(postId, newStatus);
     }
   };
+
+  const handleDeletePost = (postId: string) => {
+    setPostToDelete(postId);
+  };
+
+  const confirmDelete = async () => {
+    if (!postToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      const postRef = doc(db, 'hr_recruitment', postToDelete);
+      await deleteDoc(postRef);
+      
+      toast({
+        title: "Offre supprimée",
+        description: "L'offre a été supprimée avec succès"
+      });
+      
+      if (onPostDeleted) {
+        onPostDeleted();
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer l'offre"
+      });
+    } finally {
+      setIsDeleting(false);
+      setPostToDelete(null);
+    }
+  };
   
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-      modifiers={[restrictToVerticalAxis]}
-    >
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        {columns.map(column => (
-          <KanbanColumn 
-            key={column.id}
-            id={column.id}
-            title={column.title}
-            items={column.items}
-            onPostClick={onPostClick}
-          />
-        ))}
-      </div>
-    </DndContext>
+    <>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+        modifiers={[restrictToVerticalAxis]}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {columns.map(column => (
+            <KanbanColumn 
+              key={column.id}
+              id={column.id}
+              title={column.title}
+              items={column.items}
+              onPostClick={onPostClick}
+              onDeletePost={handleDeletePost}
+            />
+          ))}
+        </div>
+      </DndContext>
+      
+      <AlertDialog open={!!postToDelete} onOpenChange={(open) => !open && setPostToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer cette offre d'emploi ?
+              Cette action ne peut pas être annulée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Suppression..." : "Supprimer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 

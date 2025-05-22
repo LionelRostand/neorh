@@ -27,17 +27,13 @@ const Formations = () => {
   };
 
   const handleDelete = (id: string) => {
-    toast({
-      title: "Suppression",
-      description: `Suppression de la formation ${id}`,
-    });
+    // Cette fonction n'est plus utilisée directement
+    // La suppression est maintenant gérée dans le composant de dialogue
   };
 
   const handleModify = (id: string) => {
-    toast({
-      title: "Modification",
-      description: `Modification de la formation ${id}`,
-    });
+    // Cette fonction n'est plus utilisée directement
+    // La modification est maintenant gérée dans le composant de dialogue
   };
 
   const handleManage = (id: string) => {
@@ -152,6 +148,7 @@ const Formations = () => {
               onDelete={handleDelete}
               onModify={handleModify}
               onManage={handleManage}
+              onRefresh={refetch}
             />
           )}
           

@@ -80,6 +80,11 @@ const Recrutement = () => {
     setNewPostDialogOpen(true);
   };
 
+  const handlePostDeleted = () => {
+    // Rafraîchir les stats après suppression
+    // (useRecruitmentFirebaseData gère déjà la mise à jour de la liste)
+  };
+
   return (
     <div className="container py-6">
       <RecruitmentHeader onNewPostClick={handleNewPostClick} />
@@ -93,6 +98,7 @@ const Recrutement = () => {
         loading={loading}
         onPostClick={handlePostClick}
         onStatusChange={handleStatusChange}
+        onPostDeleted={handlePostDeleted}
       />
       
       <RecruitmentDialogs 
