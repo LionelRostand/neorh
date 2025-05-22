@@ -4,6 +4,7 @@ import { Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { HR } from "@/lib/constants/collections";
 
 interface DepartmentCellProps {
   departmentId: string;
@@ -30,7 +31,7 @@ const DepartmentCell = ({ departmentId, departmentName }: DepartmentCellProps) =
       
       setIsLoading(true);
       try {
-        const deptRef = doc(db, 'hr_departments', departmentId);
+        const deptRef = doc(db, HR.DEPARTMENTS, departmentId);
         const deptSnap = await getDoc(deptRef);
         
         if (deptSnap.exists()) {
