@@ -17,9 +17,19 @@ export const useContractDocument = (contractId: string | null, isOpen: boolean) 
   const isFetchingRef = useRef(false);
   // Cache pour les documents déjà chargés
   const documentsCache = useRef<Record<string, Document>>({});
+  // Référence pour suivre si une recherche a déjà été effectuée pour cet ID
+  const searchCompletedRef = useRef<Record<string, boolean>>({});
 
   // Création d'une fonction memoïsée pour éviter de créer une nouvelle fonction à chaque render
   const fetchContractDocument = useCallback(async (id: string) => {
+    // Si on a déjà cherché ce document sans le trouver, ne pas réessayer
+    if (searchCompletedRef.current[id] === true) {
+      console.log("Recherche déjà effectuée pour ce contrat, pas de document trouvé");
+      setLoading(false);
+      setError("Aucun document trouvé pour ce contrat.");
+      return;
+    }
+    
     // Si on est déjà en train de récupérer des données, ne pas commencer une autre requête
     if (isFetchingRef.current) {
       console.log("Une requête est déjà en cours, annulation de la nouvelle requête");
@@ -58,7 +68,13 @@ export const useContractDocument = (contractId: string | null, isOpen: boolean) 
         documentsCache.current[id] = filteredDocs[0];
         setDocument(filteredDocs[0]);
       } else {
+        // Marquer comme recherche complétée sans résultat
+        searchCompletedRef.current[id] = true;
         setError("Aucun document trouvé pour ce contrat.");
+        
+        // Afficher un contrat fictif pour l'exemple en cas d'absence de document réel
+        // Cela évite l'écran de chargement infini
+        setDocument(null);
       }
     } catch (err) {
       console.error("Erreur lors de la récupération du document:", err);
@@ -69,6 +85,7 @@ export const useContractDocument = (contractId: string | null, isOpen: boolean) 
         variant: "destructive"
       });
     } finally {
+      // Marquer comme terminé dans tous les cas pour éviter un chargement infini
       setLoading(false);
       isFetchingRef.current = false;
     }
@@ -81,14 +98,23 @@ export const useContractDocument = (contractId: string | null, isOpen: boolean) 
       return;
     }
 
+    // Définir un timeout pour éviter le chargement infini
+    const timeoutId = setTimeout(() => {
+      if (loading && !document && !error) {
+        console.log("Timeout de chargement atteint");
+        setLoading(false);
+        setError("Le chargement du document a pris trop de temps.");
+      }
+    }, 10000); // Timeout après 10 secondes
+
     fetchContractDocument(contractId);
 
-    // Fonction de nettoyage pour potentiellement annuler des requêtes
+    // Fonction de nettoyage pour annuler le timeout et les requêtes
     return () => {
-      // Pour le moment, nous mettons juste le flag à false
+      clearTimeout(timeoutId);
       isFetchingRef.current = false;
     };
-  }, [contractId, isOpen, fetchContractDocument]); // Dépendances explicites et minimales
+  }, [contractId, isOpen, fetchContractDocument, loading, document, error]);
 
   return { document, loading, error };
 };

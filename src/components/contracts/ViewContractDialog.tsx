@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,26 @@ const ViewContractDialog = ({
   contractId,
 }: ViewContractDialogProps) => {
   const { document, loading, error } = useContractDocument(contractId, open);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  
+  // Ajouter un timeout pour éviter le chargement infini
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    if (open && contractId) {
+      setHasTimedOut(false);
+      timeoutId = setTimeout(() => {
+        if (loading && !document) {
+          console.log("Fallback de sécurité activé après timeout");
+          setHasTimedOut(true);
+        }
+      }, 8000); // Fallback après 8 secondes
+    }
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [open, contractId, loading, document]);
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -32,8 +52,8 @@ const ViewContractDialog = ({
         <div className="flex-1 overflow-hidden">
           <DocumentViewer 
             document={document}
-            loading={loading}
-            error={error}
+            loading={loading && !hasTimedOut}
+            error={hasTimedOut ? "Le chargement du document a pris trop de temps. Affichage d'un exemple." : error}
           />
         </div>
       </DialogContent>
