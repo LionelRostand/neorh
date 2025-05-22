@@ -11,9 +11,10 @@ import DocumentCard from '@/components/documents/EmployeeDocumentCard';
 
 interface EmployeeDocumentsProps {
   employee: Employee;
+  onRefresh?: () => void;
 }
 
-const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
+const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee, onRefresh }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchCompleted, setFetchCompleted] = useState(false);
@@ -99,6 +100,9 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
   const handleRefresh = () => {
     lastFetchedEmployeeId.current = null; // Réinitialiser l'ID pour forcer le rechargement
     fetchEmployeeDocuments();
+    if (onRefresh) {
+      onRefresh();
+    }
   };
 
   // Rendu du contenu selon l'état

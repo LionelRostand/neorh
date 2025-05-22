@@ -13,12 +13,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface EmployeeSkillsProps {
   employee: Employee;
+  onRefresh?: () => void;
 }
 
 // Utiliser memo pour éviter les rendus inutiles
 const SkillCard_Memoized = memo(SkillCard);
 
-const EmployeeSkills: React.FC<EmployeeSkillsProps> = ({ employee }) => {
+const EmployeeSkills: React.FC<EmployeeSkillsProps> = ({ employee, onRefresh }) => {
   const { skills, loading, addSkill, updateSkill, deleteSkill } = useEmployeeSkills(employee.id);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -28,19 +29,22 @@ const EmployeeSkills: React.FC<EmployeeSkillsProps> = ({ employee }) => {
   const handleAddSkill = useCallback(async (skill: Omit<Skill, 'id' | 'employeeId'>) => {
     await addSkill(skill);
     setIsAddDialogOpen(false);
-  }, [addSkill]);
+    if (onRefresh) onRefresh();
+  }, [addSkill, onRefresh]);
 
   const handleUpdateSkill = useCallback(async (id: string, skill: Partial<Skill>) => {
     await updateSkill(id, skill);
     setIsEditDialogOpen(false);
-  }, [updateSkill]);
+    if (onRefresh) onRefresh();
+  }, [updateSkill, onRefresh]);
 
   const handleDeleteSkill = useCallback(async () => {
     if (currentSkill && currentSkill.id) {
       await deleteSkill(currentSkill.id);
       setIsDeleteDialogOpen(false);
+      if (onRefresh) onRefresh();
     }
-  }, [currentSkill, deleteSkill]);
+  }, [currentSkill, deleteSkill, onRefresh]);
 
   const openEditDialog = useCallback((skill: Skill) => {
     setCurrentSkill(skill);

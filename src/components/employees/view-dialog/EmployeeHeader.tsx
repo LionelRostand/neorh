@@ -32,21 +32,26 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
       case "inactive":
         return "bg-red-500";
       case "congé":
-      case "leave":
+      case "onLeave":
         return "bg-amber-500";
       default:
         return "bg-gray-500";
     }
   };
 
+  // Extract first and last name from the employee name property
+  const nameParts = employee.name ? employee.name.split(' ') : ['', ''];
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
+
   return (
     <DialogHeader className="sticky top-0 z-10 bg-white p-6 pb-4 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          {employee.photoURL ? (
+          {employee.photoUrl ? (
             <img 
-              src={employee.photoURL} 
-              alt={`${employee.firstName} ${employee.lastName}`}
+              src={employee.photoUrl} 
+              alt={`${firstName} ${lastName}`}
               className="h-12 w-12 rounded-full object-cover"
             />
           ) : (
@@ -57,12 +62,12 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
           
           <div>
             <DialogTitle className="text-xl font-semibold">
-              {employee.firstName} {employee.lastName}
+              {firstName} {lastName}
             </DialogTitle>
             
             <div className="flex items-center gap-2 mt-1">
               <Badge className={`${getStatusColor(employee.status)}`}>
-                {employee.status === "actif" || employee.status === "active" ? "Actif" : employee.status}
+                {employee.status === "active" ? "Actif" : employee.status}
               </Badge>
               
               {employee.department && (
