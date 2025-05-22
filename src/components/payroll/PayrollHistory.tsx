@@ -5,7 +5,7 @@ import { collection, query, orderBy, getDocs, DocumentData } from "firebase/fire
 import { db } from "@/lib/firebase";
 import { HR } from "@/lib/constants/collections";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FilePdf, Download, Search } from "lucide-react";
+import { FileText, Download, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -108,7 +108,7 @@ const PayrollHistory: React.FC = () => {
           </div>
         ) : filteredPayslips.length === 0 ? (
           <div className="text-center py-10">
-            <FilePdf className="mx-auto h-12 w-12 text-gray-300" />
+            <FileText className="mx-auto h-12 w-12 text-gray-300" />
             <h3 className="mt-2 text-sm font-semibold text-gray-900">
               {searchTerm ? "Aucun résultat trouvé" : "Aucune fiche de paie générée"}
             </h3>
@@ -127,7 +127,7 @@ const PayrollHistory: React.FC = () => {
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <FilePdf className="h-5 w-5 text-emerald-600" />
+                    <FileText className="h-5 w-5 text-emerald-600" />
                     <h3 className="font-medium">{payslip.employeeName}</h3>
                     <Badge variant="outline" className="ml-2">
                       {payslip.period}
