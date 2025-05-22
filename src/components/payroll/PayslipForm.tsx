@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -15,6 +15,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/components/ui/use-toast";
 import * as z from "zod";
+import { useEmployeeData } from "@/hooks/useEmployeeData";
+import { useCompaniesData } from "@/hooks/useCompaniesData";
+import useContractsList from "@/hooks/contracts/useContractsList";
 
 // Schema for the payslip form
 const payslipFormSchema = z.object({
@@ -29,6 +32,18 @@ const payslipFormSchema = z.object({
 type PayslipFormValues = z.infer<typeof payslipFormSchema>;
 
 const PayslipForm: React.FC = () => {
+  // Récupération des données des employés
+  const { employees, isLoading: employeesLoading } = useEmployeeData();
+  
+  // Récupération des données des entreprises
+  const { companies, isLoading: companiesLoading } = useCompaniesData();
+  
+  // Récupération des contrats pour le salaire
+  const { contracts, loading: contractsLoading } = useContractsList();
+  
+  // État pour le salaire annuel
+  const [salaryValue, setSalaryValue] = useState<string>("");
+
   const form = useForm<PayslipFormValues>({
     resolver: zodResolver(payslipFormSchema),
     defaultValues: {
@@ -41,10 +56,58 @@ const PayslipForm: React.FC = () => {
     },
   });
 
+  // Récupération du salaire à partir du contrat de l'employé sélectionné
+  useEffect(() => {
+    const employeeId = form.getValues("employee");
+    if (employeeId && contracts && contracts.length > 0) {
+      // Rechercher le contrat actif pour l'employé sélectionné
+      const employeeContract = contracts.find(
+        (contract) => contract.employeeId === employeeId && contract.status === "active"
+      );
+      
+      if (employeeContract && employeeContract.salary) {
+        const formattedSalary = `${employeeContract.salary} €`;
+        setSalaryValue(formattedSalary);
+        form.setValue("annualSalary", formattedSalary);
+      } else {
+        setSalaryValue("Aucun contrat actif trouvé");
+        form.setValue("annualSalary", "");
+      }
+    } else {
+      setSalaryValue("");
+      form.setValue("annualSalary", "");
+    }
+  }, [form.watch("employee"), contracts, form]);
+
+  // Générer les périodes mensuelles pour l'année en cours et la suivante
+  const generateMonthlyPeriods = () => {
+    const periods = [];
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    
+    // Générer les périodes pour l'année en cours et la suivante
+    for (let year = currentYear; year <= currentYear + 1; year++) {
+      for (let month = 0; month < 12; month++) {
+        const date = new Date(year, month, 1);
+        const monthName = date.toLocaleDateString('fr-FR', { month: 'long' });
+        const periodId = `${year}-${month + 1}`;
+        const periodLabel = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}`;
+        periods.push({ id: periodId, label: periodLabel });
+      }
+    }
+    return periods;
+  };
+
+  const periods = generateMonthlyPeriods();
+
   function onSubmit(data: PayslipFormValues) {
+    // Récupérer les noms complets pour l'affichage du toast
+    const employeeName = employees.find(e => e.id === data.employee)?.name || data.employee;
+    const periodLabel = periods.find(p => p.id === data.period)?.label || data.period;
+    
     toast({
       title: "Fiche de paie générée",
-      description: `Fiche de paie pour ${data.employee} - Période: ${data.period}`,
+      description: `Fiche de paie pour ${employeeName} - Période: ${periodLabel}`,
     });
   }
 
@@ -60,7 +123,8 @@ const PayslipForm: React.FC = () => {
                 <FormLabel>Employé</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  defaultValue={field.value || "default-emp"}
+                  value={field.value}
+                  disabled={employeesLoading}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -68,9 +132,11 @@ const PayslipForm: React.FC = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="emp1">Jean Dupont</SelectItem>
-                    <SelectItem value="emp2">Marie Martin</SelectItem>
-                    <SelectItem value="emp3">Pierre Durand</SelectItem>
+                    {employees.map((employee) => (
+                      <SelectItem key={employee.id} value={employee.id}>
+                        {employee.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -85,7 +151,8 @@ const PayslipForm: React.FC = () => {
                 <FormLabel>Entreprise</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  defaultValue={field.value || "default-comp"}
+                  value={field.value}
+                  disabled={companiesLoading}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -93,8 +160,11 @@ const PayslipForm: React.FC = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="comp1">Tech Solutions SAS</SelectItem>
-                    <SelectItem value="comp2">Marketing Pro SARL</SelectItem>
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id || ""}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -111,7 +181,7 @@ const PayslipForm: React.FC = () => {
                 <FormLabel>Période</FormLabel>
                 <Select 
                   onValueChange={field.onChange} 
-                  defaultValue={field.value || "default-period"}
+                  value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -119,9 +189,11 @@ const PayslipForm: React.FC = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="mai2025">Mai 2025</SelectItem>
-                    <SelectItem value="juin2025">Juin 2025</SelectItem>
-                    <SelectItem value="juil2025">Juillet 2025</SelectItem>
+                    {periods.map((period) => (
+                      <SelectItem key={period.id} value={period.id}>
+                        {period.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -136,9 +208,10 @@ const PayslipForm: React.FC = () => {
                 <FormLabel>Salaire brut annuel</FormLabel>
                 <FormControl>
                   <Input 
-                    placeholder="Salaire brut annuel récupéré depuis le contrat" 
+                    placeholder={contractsLoading ? "Chargement..." : "Salaire brut annuel récupéré depuis le contrat"} 
                     {...field}
-                    disabled 
+                    value={salaryValue}
+                    disabled
                   />
                 </FormControl>
               </FormItem>
