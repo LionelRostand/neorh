@@ -23,11 +23,16 @@ const DocumentDialogHeader: React.FC<DocumentDialogHeaderProps> = ({ document, o
     window.print();
   };
 
+  // Titre spécifique pour le contrat de Lionel DJOSSA
+  const title = document?.employeeName === "Lionel DJOSSA" 
+    ? "Contrat CDI - Lionel DJOSSA" 
+    : (document?.title || "Contrat de travail");
+
   return (
     <DialogHeader className="px-6 pt-6 pb-2 flex flex-row justify-between items-center border-b">
       <DialogTitle className="text-xl flex items-center gap-2">
         <FileText className="h-5 w-5" />
-        {document?.title || "Contrat de travail"}
+        {title}
       </DialogTitle>
       <div className="flex gap-2">
         <Button 

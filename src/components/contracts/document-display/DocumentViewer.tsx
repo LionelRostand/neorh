@@ -60,7 +60,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, loading, erro
               
               <h1 className="text-center font-bold text-xl my-10">CONTRAT DE TRAVAIL À DURÉE INDÉTERMINÉE</h1>
               
-              <p className="mb-4">Fait à DAMMARIE LES LYS, le 21 mai 2025</p>
+              <p className="mb-4">Fait à DAMMARIE LES LYS, le 22 mai 2025</p>
               
               <div className="mb-4">
                 <p className="font-bold">ENTRE LES SOUSSIGNÉS :</p>
@@ -81,13 +81,13 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, loading, erro
               <div className="mb-4">
                 <p className="font-bold text-blue-800">Article 1 - Engagement</p>
                 <p>Le salarié est engagé en qualité de PDG au sein du département Direction Générale.</p>
-                <p>Ce contrat est conclu pour une durée indéterminée. Il prendra effet le 21 mai 2025.</p>
+                <p>Ce contrat est conclu pour une durée indéterminée. Il prendra effet le 22 mai 2025.</p>
               </div>
               
               <div className="mb-4">
                 <p className="font-bold text-blue-800">Article 2 - Période d'essai</p>
                 <p>Le présent contrat est soumis à une période d'essai de trois mois renouvelable une fois.</p>
-                <p>Durant cette période, chacune des parties pourra rompre le contrat sans préavis.</p>
+                <p>Durant cette période, chacune des parties pourra rompre le contrat sans préavis ni indemnité.</p>
               </div>
               
               <div className="mb-4">
@@ -95,25 +95,13 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, loading, erro
                 <p>Le salarié exercera les fonctions de PDG.</p>
                 <p>Ces fonctions sont susceptibles d'évoluer en fonction des besoins de l'entreprise.</p>
               </div>
-              
-              <div className="mb-4">
-                <p className="font-bold text-blue-800">Article 4 - Rémunération</p>
-                <p>La rémunération brute annuelle du salarié est fixée à 10000 euros.</p>
-                <p>Cette rémunération sera versée sur 12 mois, à la fin de chaque mois.</p>
-              </div>
             </div>
           ) : (
             <div className="bg-white p-8 min-h-full">
               <div className="mb-4">
-                <p className="font-bold text-blue-800">Article 3 - Rémunération</p>
-                <p>En contrepartie de son travail, le/la Salarié(e) percevra une rémunération.</p>
-                <p>Cette rémunération tiendra compte des heures éventuelles heures supplémentaires effectuées dans la limite du contingent annuel.</p>
-              </div>
-              
-              <div className="mb-4">
-                <p className="font-bold text-blue-800">Article 4 - Lieu de travail</p>
-                <p>Le/La Salarié(e) exercera ses fonctions à/à l'adresse du lieu de travail.</p>
-                <p>Toutefois, compte tenu de la nature des activités de la société et des nécessités du poste, le lieu de travail pourra.</p>
+                <p className="font-bold text-blue-800">Article 4 - Rémunération</p>
+                <p>La rémunération brute annuelle du salarié est fixée à 10000 euros.</p>
+                <p>Cette rémunération sera versée sur 12 mois, à la fin de chaque mois.</p>
               </div>
               
               <div className="mb-4">
@@ -124,17 +112,17 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, loading, erro
               
               <div className="mb-4">
                 <p className="font-bold text-blue-800">Article 6 - Congés payés</p>
-                <p>Le/La Salarié(e) bénéficiera des congés payés institués par les dispositions légales et conventionnelles, soit 2,5 jours.</p>
+                <p>Le/La Salarié(e) bénéficiera des congés payés institués par les dispositions légales et conventionnelles, soit 2,5 jours ouvrables par mois de travail effectif.</p>
               </div>
               
               <div className="mb-4">
                 <p className="font-bold text-blue-800">Article 7 - Obligations professionnelles</p>
-                <p>Le/La Salarié(e) s'engage à respecter les directives et instructions émanant de la Direction et à se conformer aux règles.</p>
-                <p>Le/La Salarié(e) s'engage à informer l'Employeur, sans délai, de tout changement qui interviendrait dans les situations.</p>
+                <p>Le/La Salarié(e) s'engage à respecter les directives et instructions émanant de la Direction et à se conformer aux règles en vigueur au sein de l'entreprise.</p>
+                <p>Le/La Salarié(e) s'engage à informer l'Employeur, sans délai, de tout changement qui interviendrait dans les situations qu'il/elle a signalées lors de son engagement.</p>
               </div>
               
               <div className="mt-12">
-                <p className="mb-8">Fait en deux exemplaires originaux à (ville), le (date).</p>
+                <p className="mb-8">Fait en deux exemplaires originaux à DAMMARIE LES LYS, le 22 mai 2025.</p>
                 
                 <div className="flex justify-between">
                   <div>
@@ -143,7 +131,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, loading, erro
                   </div>
                   
                   <div>
-                    <p className="border-t border-black pt-2 w-40">Signature du/de la Salarié(e)</p>
+                    <p className="border-t border-black pt-2 w-40">Signature du Salarié</p>
                     <p className="text-xs">Précédée de la mention « Lu et approuvé »</p>
                   </div>
                 </div>
