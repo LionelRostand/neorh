@@ -20,6 +20,8 @@ export interface ContractData {
   signedByEmployer: boolean;
   conventionCollective?: string;
   additionalClauses?: string;
+  employeeSignatureDate?: string;
+  employerSignatureDate?: string;
 }
 
 /**
@@ -35,3 +37,4 @@ export interface PdfResult {
  * Types de contrats disponibles
  */
 export type ContractType = 'CDI' | 'CDD' | 'Interim' | 'Stage' | 'Apprentissage' | 'Freelance';
+

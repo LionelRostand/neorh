@@ -30,6 +30,8 @@ export const saveContractAsDocument = async (
       status: 'pending_signature',
       signedByEmployee: false,
       signedByEmployer: false,
+      employeeSignatureDate: null,
+      employerSignatureDate: null,
       tags: ['contrat', contractData.type.toLowerCase()]
     };
     
@@ -49,3 +51,12 @@ export const saveContractAsDocument = async (
     throw error;
   }
 };
+
+/**
+ * Met à jour le document PDF du contrat avec les signatures
+ */
+export const updateContractWithSignatures = async (contractId: string, employeeSignature: boolean, employerSignature: boolean) => {
+  // Cette fonction sera implémentée lorsque nous aurons besoin de mettre à jour le PDF
+  console.log("Mise à jour du contrat avec signatures:", contractId);
+}
+

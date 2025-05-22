@@ -1,3 +1,4 @@
+
 // Define the mapping between routes and Firestore collections
 export const ROUTE_TO_COLLECTION_MAP = {
   '/employes': 'hr_employees',
@@ -101,8 +102,10 @@ export type Contract = {
   departmentName?: string;
   signedByEmployee?: boolean;
   signedByEmployer?: boolean;
+  employeeSignatureDate?: string;
+  employerSignatureDate?: string;
   salary?: string | number;
-  conventionCollective?: string; // Ajout de la propriété conventionCollective
+  conventionCollective?: string;
 }
 
 export type Document = {
@@ -119,6 +122,8 @@ export type Document = {
   contractId?: string;
   signedByEmployee?: boolean;
   signedByEmployer?: boolean;
+  employeeSignatureDate?: string;
+  employerSignatureDate?: string;
 }
 
 export type Training = {
@@ -132,3 +137,4 @@ export type Training = {
   endDate?: string;
   status: 'planifiée' | 'complétée' | 'annulée';
 }
+

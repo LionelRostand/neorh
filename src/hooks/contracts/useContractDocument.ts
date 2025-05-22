@@ -36,13 +36,9 @@ export const useContractDocument = (contractId: string | null, isOpen: boolean) 
       return;
     }
 
-    // Vérifier si le document est dans le cache
-    if (documentsCache.current[id]) {
-      console.log("Document trouvé dans le cache, pas besoin de refaire la requête");
-      setDocument(documentsCache.current[id]);
-      setLoading(false);
-      return;
-    }
+    // On ignore le cache pour toujours obtenir la version la plus récente des documents signés
+    // Vider le cache pour cet ID afin de forcer un rechargement
+    delete documentsCache.current[id];
 
     console.log("Début de la récupération du document de contrat pour l'ID:", id);
     
@@ -118,3 +114,4 @@ export const useContractDocument = (contractId: string | null, isOpen: boolean) 
 
   return { document, loading, error };
 };
+

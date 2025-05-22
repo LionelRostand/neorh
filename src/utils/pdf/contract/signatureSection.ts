@@ -8,7 +8,9 @@ export const addSignatureSection = (
   doc: jsPDF, 
   city: string = 'Paris',
   margin: number = 20, 
-  startY: number = 0
+  startY: number = 0,
+  employeeSignatureDate?: string,
+  employerSignatureDate?: string
 ): number => {
   let yPosition = startY;
   
@@ -32,6 +34,36 @@ export const addSignatureSection = (
   
   // Employee signature box
   doc.rect(middleX + 10, yPosition - 25, 80, 35);
+  
+  // Si nous avons des signatures, ajouter une indication visuelle
+  if (employerSignatureDate) {
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(0, 0, 150);
+    const employerDate = new Date(employerSignatureDate);
+    doc.text(`Signé électroniquement le ${employerDate.toLocaleDateString('fr-FR')}`, margin + 10, yPosition - 10);
+    
+    // Ajouter une marque de signature dans la case
+    doc.setFont('helvetica', 'bold');
+    doc.text("SIGNATURE ÉLECTRONIQUE", margin + 10, yPosition - 5);
+    doc.setFont('helvetica', 'normal');
+  }
+  
+  if (employeeSignatureDate) {
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(0, 0, 150);
+    const employeeDate = new Date(employeeSignatureDate);
+    doc.text(`Signé électroniquement le ${employeeDate.toLocaleDateString('fr-FR')}`, middleX + 15, yPosition - 10);
+    
+    // Ajouter une marque de signature dans la case
+    doc.setFont('helvetica', 'bold');
+    doc.text("SIGNATURE ÉLECTRONIQUE", middleX + 15, yPosition - 5);
+    doc.setFont('helvetica', 'normal');
+  }
+  
+  // Revenir à la couleur standard pour le reste du document
+  doc.setTextColor(0, 0, 0);
   
   // Draw signature lines
   doc.line(margin, yPosition, margin + 80, yPosition);
@@ -60,3 +92,4 @@ export const addSignatureSection = (
   
   return yPosition;
 };
+

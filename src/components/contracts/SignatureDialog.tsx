@@ -41,19 +41,38 @@ export default function SignatureDialog({
     try {
       setIsSubmitting(true);
       
-      // Mettre à jour le document
+      // Date de la signature
+      const signatureDate = new Date().toISOString();
+      const signatureInfo = {
+        date: signatureDate,
+        by: isEmployer ? 'employer' : 'employee'
+      };
+      
+      // Mettre à jour le document avec la signature
       await documentsCollection.update(document.id, {
         ...(isEmployer 
-          ? { signedByEmployer: true }
-          : { signedByEmployee: true })
+          ? { 
+              signedByEmployer: true,
+              employerSignatureDate: signatureDate
+            }
+          : { 
+              signedByEmployee: true,
+              employeeSignatureDate: signatureDate
+            })
       });
       
       // Si le document est lié à un contrat, mettre à jour également le contrat
       if (document.contractId) {
         await contractsCollection.update(document.contractId, {
           ...(isEmployer 
-            ? { signedByEmployer: true }
-            : { signedByEmployee: true })
+            ? { 
+                signedByEmployer: true,
+                employerSignatureDate: signatureDate
+              }
+            : { 
+                signedByEmployee: true,
+                employeeSignatureDate: signatureDate
+              })
         });
         
         // Vérifier si les deux parties ont signé
@@ -66,6 +85,12 @@ export default function SignatureDialog({
             await documentsCollection.update(document.id, { status: 'active' });
             if (document.contractId) {
               await contractsCollection.update(document.contractId, { status: 'active' });
+              
+              toast({
+                title: "Contrat activé",
+                description: "Le contrat est maintenant actif et disponible dans le profil de l'employé",
+                variant: "default"
+              });
             }
           }
         }
@@ -154,3 +179,4 @@ export default function SignatureDialog({
     </Dialog>
   );
 }
+

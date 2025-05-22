@@ -90,7 +90,14 @@ export const generateContractPdf = (contractData: ContractData, company?: Compan
   
   // Add signature section
   const city = company?.city || 'Paris'; 
-  yPosition = addSignatureSection(doc, city, margin, yPosition);
+  yPosition = addSignatureSection(
+    doc, 
+    city, 
+    margin, 
+    yPosition,
+    contractData.employeeSignatureDate,
+    contractData.employerSignatureDate
+  );
   
   // Add page footers with legal mentions and page numbers
   addPageFooter(doc);
@@ -108,3 +115,4 @@ export const generateContractPdf = (contractData: ContractData, company?: Compan
 
 // Export the saveContractAsDocument function
 export { saveContractAsDocument };
+
