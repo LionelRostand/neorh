@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Employee } from '@/types/employee';
 import { generateEmployeePdfWithDocuments } from '@/utils/pdfExport';
@@ -26,25 +26,33 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
   const [isExporting, setIsExporting] = useState(false);
   const { companies } = useCompaniesData();
   const { departments, isLoading: departmentsLoading } = useDepartmentsData();
+  const [processedEmployee, setProcessedEmployee] = useState<Employee | null>(null);
   
-  if (!employee) return null;
-  
-  // Create a processed copy of employee data with proper department name
-  let processedEmployee = { ...employee };
-  
-  // Make sure we have departments data and a department ID to look up
-  if (employee.departmentId && departments && departments.length > 0) {
-    // Find the department by ID
-    const department = departments.find(d => d.id === employee.departmentId);
+  // Process employee data when departments are loaded or employee changes
+  useEffect(() => {
+    if (!employee) return;
     
-    if (department && department.name) {
-      // Set the department name in our processed employee object
-      processedEmployee.department = department.name;
-      console.log("Found department name:", department.name);
-    } else {
-      console.log("Department not found for ID:", employee.departmentId);
+    // Create a processed copy of employee data
+    const employeeCopy = { ...employee };
+    
+    // Make sure we have departments data and a department ID to look up
+    if (employee.departmentId && departments && departments.length > 0) {
+      // Find the department by ID
+      const department = departments.find(d => d.id === employee.departmentId);
+      
+      if (department && department.name) {
+        // Set the department name in our processed employee object
+        employeeCopy.department = department.name;
+        console.log("Found department name:", department.name);
+      } else {
+        console.log("Department not found for ID:", employee.departmentId);
+      }
     }
-  }
+    
+    setProcessedEmployee(employeeCopy);
+  }, [employee, departments]);
+  
+  if (!employee || !processedEmployee) return null;
   
   const handleExportPDF = async () => {
     try {
@@ -55,16 +63,7 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
         companies.find(c => c.id === employee.companyId) : undefined;
       
       // Create a copy of the employee object to avoid modifying the original
-      const employeeCopy = { ...employee };
-      
-      // Find department name if available
-      if (employee.departmentId && departments.length > 0) {
-        const department = departments.find(d => d.id === employee.departmentId);
-        if (department) {
-          // Set department name for PDF
-          employeeCopy.department = department.name;
-        }
-      }
+      const employeeCopy = { ...processedEmployee };
       
       // Make sure company name is also shown in the PDF
       if (employeeCompany) {
