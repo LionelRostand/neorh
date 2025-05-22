@@ -6,6 +6,7 @@ interface MockContractPageProps {
 }
 
 const MockContractPage: React.FC<MockContractPageProps> = ({ page }) => {
+  // Page 1 : En-tête et début du contrat
   if (page === 1) {
     return (
       <div className="bg-white p-8 min-h-full">
@@ -48,17 +49,19 @@ const MockContractPage: React.FC<MockContractPageProps> = ({ page }) => {
           <p>Le présent contrat est soumis à une période d'essai de trois mois renouvelable une fois.</p>
           <p>Durant cette période, chacune des parties pourra rompre le contrat sans préavis ni indemnité.</p>
         </div>
-        
+      </div>
+    );
+  } 
+  // Page 2 : Suite du contrat
+  else if (page === 2) {
+    return (
+      <div className="bg-white p-8 min-h-full">
         <div className="mb-4">
           <p className="font-bold text-blue-800">Article 3 - Fonctions</p>
           <p>Le salarié exercera les fonctions de PDG.</p>
           <p>Ces fonctions sont susceptibles d'évoluer en fonction des besoins de l'entreprise.</p>
         </div>
-      </div>
-    );
-  } else {
-    return (
-      <div className="bg-white p-8 min-h-full">
+        
         <div className="mb-4">
           <p className="font-bold text-blue-800">Article 4 - Rémunération</p>
           <p>La rémunération brute annuelle du salarié est fixée à 10000 euros.</p>
@@ -75,11 +78,28 @@ const MockContractPage: React.FC<MockContractPageProps> = ({ page }) => {
           <p className="font-bold text-blue-800">Article 6 - Congés payés</p>
           <p>Le/La Salarié(e) bénéficiera des congés payés institués par les dispositions légales et conventionnelles, soit 2,5 jours ouvrables par mois de travail effectif.</p>
         </div>
-        
+      </div>
+    );
+  } 
+  // Page 3 : Fin du contrat et signatures
+  else {
+    return (
+      <div className="bg-white p-8 min-h-full">
         <div className="mb-4">
           <p className="font-bold text-blue-800">Article 7 - Obligations professionnelles</p>
           <p>Le/La Salarié(e) s'engage à respecter les directives et instructions émanant de la Direction et à se conformer aux règles en vigueur au sein de l'entreprise.</p>
           <p>Le/La Salarié(e) s'engage à informer l'Employeur, sans délai, de tout changement qui interviendrait dans les situations qu'il/elle a signalées lors de son engagement.</p>
+        </div>
+        
+        <div className="mb-4">
+          <p className="font-bold text-blue-800">Article 8 - Confidentialité</p>
+          <p>Le/La Salarié(e) est tenu(e) à une obligation de discrétion concernant les informations confidentielles auxquelles il/elle aura accès dans le cadre de ses fonctions.</p>
+          <p>Cette obligation perdure après la fin du contrat de travail.</p>
+        </div>
+        
+        <div className="mb-4">
+          <p className="font-bold text-blue-800">Article 9 - Droits de propriété intellectuelle</p>
+          <p>Tous les droits de propriété intellectuelle sur les œuvres créées par le/la Salarié(e) dans le cadre de son contrat de travail appartiennent à l'Employeur.</p>
         </div>
         
         <div className="mt-12">

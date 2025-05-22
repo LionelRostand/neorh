@@ -4,8 +4,9 @@ import DocumentPagination from "../pagination/DocumentPagination";
 import MockContractPage from "./MockContractPage";
 
 const MockContract: React.FC = () => {
+  // Augmentation du nombre total de pages à 3
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 2; // Nous avons 2 pages pour ce contrat
+  const totalPages = 3; // Nombre total de pages du contrat
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
@@ -16,6 +17,12 @@ const MockContract: React.FC = () => {
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePageChange = (pageNumber: number) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
     }
   };
 
@@ -30,6 +37,7 @@ const MockContract: React.FC = () => {
         totalPages={totalPages}
         onPrevPage={handlePrevPage}
         onNextPage={handleNextPage}
+        onPageChange={handlePageChange}
       />
     </div>
   );
