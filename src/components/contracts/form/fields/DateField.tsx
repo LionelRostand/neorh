@@ -11,20 +11,27 @@ import { Input } from "@/components/ui/input";
 import { Control } from "react-hook-form";
 import { EditContractFormValues } from "../editSchema";
 
-interface PositionFieldProps {
+interface DateFieldProps {
   control: Control<EditContractFormValues>;
+  name: "startDate" | "endDate";
+  label: string;
+  required?: boolean;
 }
 
-export default function PositionField({ control }: PositionFieldProps) {
+export default function DateField({ control, name, label, required = true }: DateFieldProps) {
   return (
     <FormField
       control={control}
-      name="position"
+      name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Poste</FormLabel>
+          <FormLabel>{label}{required ? '' : ' (optionnelle)'}</FormLabel>
           <FormControl>
-            <Input {...field} placeholder="Poste" />
+            <Input 
+              type="date" 
+              {...field} 
+              value={field.value || ''} 
+            />
           </FormControl>
           <FormMessage />
         </FormItem>

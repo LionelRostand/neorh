@@ -11,20 +11,20 @@ import { Input } from "@/components/ui/input";
 import { Control } from "react-hook-form";
 import { EditContractFormValues } from "../editSchema";
 
-interface PositionFieldProps {
+interface EmployeeNameFieldProps {
   control: Control<EditContractFormValues>;
 }
 
-export default function PositionField({ control }: PositionFieldProps) {
+export default function EmployeeNameField({ control }: EmployeeNameFieldProps) {
   return (
     <FormField
       control={control}
-      name="position"
+      name="employeeName"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Poste</FormLabel>
+          <FormLabel>Nom de l'employé</FormLabel>
           <FormControl>
-            <Input {...field} placeholder="Poste" />
+            <Input {...field} placeholder="Nom de l'employé" />
           </FormControl>
           <FormMessage />
         </FormItem>

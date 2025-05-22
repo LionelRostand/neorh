@@ -4,17 +4,13 @@ import { Contract } from "@/lib/constants";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { editContractSchema, EditContractFormValues } from "./editSchema";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import EmployeeNameField from "./fields/EmployeeNameField";
+import PositionField from "./fields/PositionField";
+import ContractTypeField from "./fields/ContractTypeField";
+import StatusField from "./fields/StatusField";
+import DateField from "./fields/DateField";
 
 interface EditContractFormProps {
   contract: Contract | null;
@@ -56,123 +52,25 @@ export default function EditContractForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="employeeName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom de l'employé</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Nom de l'employé" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="position"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Poste</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Poste" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Type de contrat</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez un type de contrat" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="CDI">CDI</SelectItem>
-                  <SelectItem value="CDD">CDD</SelectItem>
-                  <SelectItem value="Alternance">Alternance</SelectItem>
-                  <SelectItem value="Stage">Stage</SelectItem>
-                  <SelectItem value="Intérim">Intérim</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <EmployeeNameField control={form.control} />
+        <PositionField control={form.control} />
+        <ContractTypeField control={form.control} />
 
         <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="startDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date de début</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          <DateField 
+            control={form.control} 
+            name="startDate" 
+            label="Date de début" 
           />
-
-          <FormField
-            control={form.control}
-            name="endDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Date de fin (optionnelle)</FormLabel>
-                <FormControl>
-                  <Input 
-                    type="date" 
-                    {...field} 
-                    value={field.value || ''} 
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          <DateField 
+            control={form.control} 
+            name="endDate" 
+            label="Date de fin" 
+            required={false} 
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Statut</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez un statut" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="draft">Brouillon</SelectItem>
-                  <SelectItem value="pending">En attente</SelectItem>
-                  <SelectItem value="pending_signature">En attente de signature</SelectItem>
-                  <SelectItem value="active">Actif</SelectItem>
-                  <SelectItem value="expired">Expiré</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <StatusField control={form.control} />
 
         <div className="flex justify-end space-x-2 pt-4">
           <Button 

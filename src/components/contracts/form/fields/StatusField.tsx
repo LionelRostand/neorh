@@ -16,35 +16,34 @@ import {
 } from "@/components/ui/select";
 import { Control } from "react-hook-form";
 import { EditContractFormValues } from "../editSchema";
-import { CONTRACT_TYPES } from "../constants";
 
-interface ContractTypeFieldProps {
+interface StatusFieldProps {
   control: Control<EditContractFormValues>;
 }
 
-export default function ContractTypeField({ control }: ContractTypeFieldProps) {
+export default function StatusField({ control }: StatusFieldProps) {
   return (
     <FormField
       control={control}
-      name="type"
+      name="status"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Type de contrat</FormLabel>
+          <FormLabel>Statut</FormLabel>
           <Select 
             onValueChange={field.onChange} 
             defaultValue={field.value}
           >
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un type de contrat" />
+                <SelectValue placeholder="Sélectionnez un statut" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {CONTRACT_TYPES.map((type) => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
+              <SelectItem value="draft">Brouillon</SelectItem>
+              <SelectItem value="pending">En attente</SelectItem>
+              <SelectItem value="pending_signature">En attente de signature</SelectItem>
+              <SelectItem value="active">Actif</SelectItem>
+              <SelectItem value="expired">Expiré</SelectItem>
             </SelectContent>
           </Select>
           <FormMessage />
