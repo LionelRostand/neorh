@@ -8,9 +8,12 @@ export const schema = z.object({
   position: z.string().min(1, { message: "Veuillez saisir un poste" }),
   type: z.string({ required_error: "Veuillez sélectionner un type de contrat" }),
   salary: z.string().regex(/^\d+$/, { message: "Le salaire doit être un nombre" }),
-  startDate: z.date({ required_error: "Veuillez sélectionner une date de début" }),
-  endDate: z.date().optional(),
+  startDate: z.string({ required_error: "Veuillez sélectionner une date de début" }),
+  endDate: z.string().optional(),
   conventionCollective: z.string().optional(),
+  status: z.enum(["draft", "pending", "active", "expired", "pending_signature"], { 
+    required_error: "Veuillez sélectionner un statut"
+  }).default("pending_signature"),
 });
 
 export type ContractFormValues = z.infer<typeof schema>;

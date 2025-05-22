@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Control } from "react-hook-form";
-import { EditContractFormValues } from "../editSchema";
+import { ContractFormValues } from "../schema";
 
 interface PositionFieldProps {
-  control: Control<EditContractFormValues>;
+  control: Control<ContractFormValues>;
 }
 
 export default function PositionField({ control }: PositionFieldProps) {

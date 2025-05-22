@@ -9,7 +9,7 @@ import ContractTypeField from './fields/ContractTypeField';
 import DateFields from './fields/DateFields';
 import DepartmentField from './fields/DepartmentField';
 import SalaryField from './fields/SalaryField';
-import ConventionCollectiveField from './fields/ConventionCollectiveField';
+import { ConventionCollectiveField } from './fields/ConventionCollectiveField';
 import StatusField from './fields/StatusField';
 
 interface ContractFormProps {
@@ -30,7 +30,12 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
           <EmployeeNameField control={form.control} />
           <PositionField control={form.control} />
           <ContractTypeField control={form.control} />
-          <DateFields control={form.control} />
+          <DateFields 
+            control={form.control} 
+            watch={form.watch} 
+            setValue={form.setValue} 
+            contractType={form.watch('type')}
+          />
           <DepartmentField 
             control={form.control} 
             departments={departments} 

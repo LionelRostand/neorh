@@ -19,12 +19,12 @@ import { ContractFormValues } from "../schema";
 
 interface DateFieldsProps {
   control: Control<ContractFormValues>;
-  watch: UseFormWatch<ContractFormValues>;
-  setValue: UseFormSetValue<ContractFormValues>;
-  contractType: string;
+  watch?: UseFormWatch<ContractFormValues>;
+  setValue?: UseFormSetValue<ContractFormValues>;
+  contractType?: string;
 }
 
-export default function DateFields({ control, watch, setValue, contractType }: DateFieldsProps) {
+export default function DateFields({ control }: DateFieldsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Start Date Field */}
@@ -45,7 +45,7 @@ export default function DateFields({ control, watch, setValue, contractType }: D
                     )}
                   >
                     {field.value ? (
-                      format(field.value, "PPP", { locale: fr })
+                      format(new Date(field.value), "PPP", { locale: fr })
                     ) : (
                       <span>Choisir une date</span>
                     )}
@@ -56,8 +56,8 @@ export default function DateFields({ control, watch, setValue, contractType }: D
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
+                  selected={field.value ? new Date(field.value) : undefined}
+                  onSelect={(date) => field.onChange(date ? date.toISOString() : '')}
                   initialFocus
                 />
               </PopoverContent>
@@ -67,7 +67,7 @@ export default function DateFields({ control, watch, setValue, contractType }: D
         )}
       />
 
-      {/* End Date Field - Now always shown */}
+      {/* End Date Field */}
       <FormField
         control={control}
         name="endDate"
@@ -85,7 +85,7 @@ export default function DateFields({ control, watch, setValue, contractType }: D
                     )}
                   >
                     {field.value ? (
-                      format(field.value, "PPP", { locale: fr })
+                      format(new Date(field.value), "PPP", { locale: fr })
                     ) : (
                       <span>Choisir une date</span>
                     )}
@@ -96,8 +96,8 @@ export default function DateFields({ control, watch, setValue, contractType }: D
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
+                  selected={field.value ? new Date(field.value) : undefined}
+                  onSelect={(date) => field.onChange(date ? date.toISOString() : '')}
                   initialFocus
                 />
               </PopoverContent>

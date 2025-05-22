@@ -34,9 +34,10 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
       employeeName: '',
       position: '',
       type: 'CDI',
-      startDate: new Date(),
+      startDate: new Date().toISOString(),
       departmentId: '',
       salary: '',
+      status: 'pending_signature',
     },
   });
   
@@ -54,7 +55,7 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         employeeName: data.employeeName || '',
         type: data.type,
         position: data.position,
-        startDate: data.startDate.toISOString(),
+        startDate: data.startDate,
         departmentId: data.departmentId,
         status: 'pending_signature',
         signedByEmployee: false,
@@ -63,7 +64,7 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
       
       // Only add endDate if it exists
       if (data.endDate) {
-        contract.endDate = data.endDate.toISOString();
+        contract.endDate = data.endDate;
       }
       
       if (department?.name) {
@@ -104,7 +105,7 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         employeeName: data.employeeName || '',
         position: data.position,
         type: data.type,
-        startDate: data.startDate,
+        startDate: new Date(data.startDate),
         departmentId: data.departmentId,
         departmentName: department?.name || '',
         salary: data.salary,
@@ -115,7 +116,7 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
       
       // Add endDate and conventionCollective only if they exist
       if (data.endDate) {
-        contractData.endDate = data.endDate;
+        contractData.endDate = new Date(data.endDate);
       }
       
       if (data.conventionCollective) {

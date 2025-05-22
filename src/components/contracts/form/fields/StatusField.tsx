@@ -15,10 +15,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Control } from "react-hook-form";
-import { EditContractFormValues } from "../editSchema";
+import { ContractFormValues } from "../schema";
 
 interface StatusFieldProps {
-  control: Control<EditContractFormValues>;
+  control: Control<ContractFormValues>;
 }
 
 export default function StatusField({ control }: StatusFieldProps) {
