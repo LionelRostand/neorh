@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Employee } from "@/types/employee";
 import { WorkSchedule } from './types';
 import { useFirestore } from '@/hooks/firestore';
@@ -13,45 +13,48 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
   
   const schedulesCollection = useFirestore<WorkSchedule>("hr_work_schedules");
   
-  // Fetch employee schedules
-  useEffect(() => {
-    const fetchSchedules = async () => {
-      if (!employee.id) return;
-      
-      setIsLoading(true);
-      
-      try {
-        console.log(`[useEmployeeSchedules] Fetching schedules for employee ID: ${employee.id}`);
-        const result = await schedulesCollection.search({
-          field: 'employeeId',
-          value: employee.id
-        });
-        
-        if (result.docs && result.docs.length > 0) {
-          console.log(`[useEmployeeSchedules] Found ${result.docs.length} schedules`);
-          const sortedSchedules = [...result.docs].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
-          setSchedules(sortedSchedules);
-          setEditedSchedules([...sortedSchedules]);
-        } else {
-          console.log("[useEmployeeSchedules] No schedules found for this employee");
-          // If no schedules found, set to empty arrays
-          setSchedules([]);
-          setEditedSchedules([]);
-        }
-      } catch (error) {
-        console.error("[useEmployeeSchedules] Error fetching schedules:", error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les horaires",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // Fetch employee schedules - wrapped in useCallback to prevent infinite loops
+  const fetchSchedules = useCallback(async () => {
+    if (!employee.id) return;
     
-    fetchSchedules();
+    setIsLoading(true);
+    
+    try {
+      console.log(`[useEmployeeSchedules] Fetching schedules for employee ID: ${employee.id}`);
+      const result = await schedulesCollection.search({
+        field: 'employeeId',
+        value: employee.id
+      });
+      
+      if (result.docs && result.docs.length > 0) {
+        console.log(`[useEmployeeSchedules] Found ${result.docs.length} schedules`);
+        const sortedSchedules = [...result.docs].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
+        setSchedules(sortedSchedules);
+        setEditedSchedules([...sortedSchedules]);
+      } else {
+        console.log("[useEmployeeSchedules] No schedules found for this employee");
+        setSchedules([]);
+        setEditedSchedules([]);
+      }
+    } catch (error) {
+      console.error("[useEmployeeSchedules] Error fetching schedules:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les horaires",
+        variant: "destructive"
+      });
+      // Reset states to prevent UI bugs
+      setSchedules([]);
+      setEditedSchedules([]);
+    } finally {
+      setIsLoading(false);
+    }
   }, [employee.id, schedulesCollection]);
+  
+  // Use useEffect with the fetchSchedules function
+  useEffect(() => {
+    fetchSchedules();
+  }, [fetchSchedules]);
   
   // Handle adding a new schedule
   const handleAddSchedule = () => {
@@ -64,7 +67,6 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
       isActive: true
     };
     
-    // Copier complètement l'état actuel et ajouter le nouvel horaire
     setEditedSchedules(currentSchedules => {
       const newSchedules = [...currentSchedules, newSchedule];
       console.log("[useEmployeeSchedules] New schedules array:", newSchedules);
@@ -101,11 +103,14 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
       console.log("[useEmployeeSchedules] Saving schedules:", editedSchedules);
       
       // Delete existing schedules
-      const deletePromises = schedules.map(schedule => 
-        schedule.id ? schedulesCollection.remove(schedule.id) : Promise.resolve()
-      );
+      const deletePromises = schedules
+        .filter(schedule => schedule.id) // S'assurer que l'ID existe
+        .map(schedule => schedulesCollection.remove(schedule.id!));
       
-      await Promise.all(deletePromises);
+      if (deletePromises.length > 0) {
+        await Promise.all(deletePromises);
+        console.log("[useEmployeeSchedules] Existing schedules deleted");
+      }
       
       // Create new schedules
       const createPromises = editedSchedules.map(schedule => 
@@ -116,18 +121,10 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
       );
       
       await Promise.all(createPromises);
+      console.log("[useEmployeeSchedules] New schedules created");
       
       // Update local state with the newly saved schedules
-      const result = await schedulesCollection.search({
-        field: 'employeeId',
-        value: employee.id
-      });
-      
-      if (result.docs) {
-        const sortedSchedules = [...result.docs].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
-        setSchedules(sortedSchedules);
-        setEditedSchedules([...sortedSchedules]);
-      }
+      await fetchSchedules();
       
       toast({
         title: "Succès",

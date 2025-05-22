@@ -42,6 +42,9 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules, isLoading = fa
     );
   }
 
+  // Assurons-nous que schedules est un tableau avant de l'utiliser
+  const validSchedules = Array.isArray(schedules) ? schedules : [];
+
   return (
     <div className="space-y-4">
       <Table>
@@ -52,10 +55,11 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules, isLoading = fa
           </TableRow>
         </TableHeader>
         <TableBody>
-          {schedules
+          {validSchedules
+            .slice() // Créer une copie pour éviter la mutation
             .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
             .map((schedule, index) => (
-            <TableRow key={index}>
+            <TableRow key={schedule.id || index}>
               <TableCell>
                 <div className="flex items-center">
                   <Calendar className="mr-2 h-4 w-4 text-blue-500" />

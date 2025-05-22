@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Edit, Save, Plus, Clock } from "lucide-react";
 import { useEmployeeSchedules } from './useEmployeeSchedules';
@@ -30,6 +30,7 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
     setTimeout(() => handleAddSchedule(), 100);
   };
 
+  // Afficher un état de chargement pendant la récupération des données
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -94,7 +95,7 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
       ) : (
         <ScheduleTable 
           schedules={schedules} 
-          isLoading={isLoading} 
+          isLoading={false} 
           onAddSchedule={handleAddScheduleFromTable}
         />
       )}

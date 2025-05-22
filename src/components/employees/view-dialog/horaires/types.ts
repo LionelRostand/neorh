@@ -4,7 +4,7 @@ import { Employee } from '@/types/employee';
 export interface WorkSchedule {
   id?: string;
   employeeId: string;
-  dayOfWeek: number; // 0 = Sunday, 1 = Monday, etc.
+  dayOfWeek: number; // 0 = Dimanche, 1 = Lundi, etc.
   startTime: string;
   endTime: string;
   isActive: boolean;
