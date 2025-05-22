@@ -43,4 +43,5 @@ export const ROUTE_TO_COLLECTION_MAP = {
   '/contrats': HR.CONTRACTS,
   '/documents': HR.DOCUMENTS,
   '/formations': HR.TRAININGS,
+  '/salaires': HR.PAYSLIPS,
 };

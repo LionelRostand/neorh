@@ -9,6 +9,9 @@ import useContractsList from "@/hooks/contracts/useContractsList";
 import { toast } from "@/components/ui/use-toast";
 import { payslipFormSchema } from "./schema";
 import { generatePayslipPdf } from "@/utils/pdf/generatePayslipPdf";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { HR } from "@/lib/constants/collections";
 
 export type PayslipFormValues = z.infer<typeof payslipFormSchema>;
 
@@ -80,6 +83,48 @@ export const usePayslipForm = () => {
 
   const periods = generateMonthlyPeriods();
 
+  // Save payslip document to Firestore
+  const savePayslipToFirestore = async (
+    employee,
+    company,
+    periodLabel, 
+    fileUrl,
+    pdfBlob
+  ) => {
+    try {
+      // Create a document reference in HR_PAYSLIPS collection
+      const payslipRef = await addDoc(collection(db, HR.PAYSLIPS), {
+        employeeId: employee.id,
+        employeeName: employee.name,
+        companyId: company.id,
+        companyName: company.name,
+        period: periodLabel,
+        createdAt: serverTimestamp(),
+        fileUrl: fileUrl || "",
+        status: "completed"
+      });
+      
+      // Create a document reference in HR_DOCUMENTS collection
+      await addDoc(collection(db, HR.DOCUMENTS), {
+        title: `Fiche de paie - ${employee.name} - ${periodLabel}`,
+        category: "paystubs",
+        fileUrl: fileUrl || "",
+        uploadDate: serverTimestamp(),
+        status: "active",
+        employeeId: employee.id,
+        employeeName: employee.name,
+        companyId: company.id,
+        description: `Fiche de paie pour la période ${periodLabel}`
+      });
+
+      console.log("Fiche de paie sauvegardée avec succès", payslipRef.id);
+      return payslipRef.id;
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde de la fiche de paie:", error);
+      throw error;
+    }
+  };
+
   // Form submission handler
   const onSubmit = async (data: PayslipFormValues) => {
     try {
@@ -111,6 +156,15 @@ export const usePayslipForm = () => {
         overtimeRate: data.overtimeRate,
         date: new Date(),
       });
+      
+      // Save to Firestore (we would normally upload the PDF to storage first, but we'll skip that for now)
+      await savePayslipToFirestore(
+        employee,
+        company,
+        periodLabel,
+        "", // In a real app, this would be the URL to the uploaded PDF
+        payslipPdf.pdfBlob
+      );
       
       // Save the PDF
       payslipPdf.saveToFile();

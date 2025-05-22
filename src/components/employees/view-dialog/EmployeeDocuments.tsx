@@ -8,6 +8,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
 import useFirestore from '@/hooks/useFirestore';
 import DocumentCard from '@/components/documents/EmployeeDocumentCard';
+import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import { db } from '@/lib/firebase';
+import { HR } from '@/lib/constants/collections';
 
 interface EmployeeDocumentsProps {
   employee: Employee;
@@ -46,15 +49,18 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee, onRefre
       
       console.log(`Fetching documents for employee: ${employee.id}`);
       
-      // Utiliser la méthode search pour récupérer les documents de l'employé
+      // Deux façons de récupérer les documents: 
+      // 1. Avec useFirestore
       const result = await documentsCollection.search({
         field: "employeeId",
         operator: "==", 
         value: employee.id
       });
       
+      let fetchedDocs: Document[] = [];
+      
       if (result.docs) {
-        const fetchedDocs = result.docs.map(doc => ({
+        fetchedDocs = result.docs.map(doc => ({
           id: doc.id || '',
           title: doc.title || 'Document sans nom',
           category: doc.category || 'other',
@@ -69,11 +75,40 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee, onRefre
           signedByEmployee: doc.signedByEmployee || false,
           signedByEmployer: doc.signedByEmployer || false
         }));
-        
-        console.log(`Found ${fetchedDocs.length} documents for employee ${employee.id}`);
-        setDocuments(fetchedDocs);
-        lastFetchedEmployeeId.current = employee.id;
       }
+      
+      // 2. Récupérer directement les fiches de paie de l'employé
+      const payslipsQuery = query(
+        collection(db, HR.PAYSLIPS),
+        where("employeeId", "==", employee.id),
+        orderBy("createdAt", "desc")
+      );
+      
+      const payslipsSnapshot = await getDocs(payslipsQuery);
+      const payslipsDocs: Document[] = [];
+      
+      payslipsSnapshot.forEach((doc) => {
+        const data = doc.data();
+        payslipsDocs.push({
+          id: doc.id,
+          title: `Fiche de paie - ${data.period}`,
+          category: 'paystubs',
+          fileUrl: data.fileUrl || '',
+          fileType: 'application/pdf',
+          uploadDate: data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
+          status: 'active',
+          employeeId: data.employeeId,
+          employeeName: data.employeeName,
+          description: `Fiche de paie pour la période ${data.period}`
+        });
+      });
+      
+      // Combiner les résultats
+      const allDocs = [...fetchedDocs, ...payslipsDocs];
+      
+      console.log(`Found ${allDocs.length} documents for employee ${employee.id}`);
+      setDocuments(allDocs);
+      lastFetchedEmployeeId.current = employee.id;
       
     } catch (error) {
       console.error('Error fetching employee documents:', error);
