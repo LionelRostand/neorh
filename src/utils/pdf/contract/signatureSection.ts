@@ -46,21 +46,34 @@ export const addSignatureSection = (
     } catch (e) {
       console.error("Invalid employer signature date format");
     }
-    doc.text(`Signé électroniquement le ${employerDate.toLocaleDateString('fr-FR')}`, margin + 10, yPosition - 10);
+    doc.text(`Signé électroniquement le ${employerDate.toLocaleDateString('fr-FR')}`, margin + 5, yPosition - 20);
     
     // Ajouter une marque de signature dans la case
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.text("SIGNATURE ÉLECTRONIQUE", margin + 10, yPosition - 5);
     
-    // Ajouter une signature graphique (représentation stylisée)
+    // Ajouter une signature graphique plus visible et élaborée
     doc.setDrawColor(0, 0, 150);
-    doc.setLineWidth(0.5);
-    const sigStartX = margin + 20;
+    doc.setLineWidth(0.8);
+    
+    // Dessiner une signature stylisée plus visible
+    const sigStartX = margin + 15;
     const sigY = yPosition - 15;
+    
+    // Création d'une signature plus élaborée et visible
     doc.line(sigStartX, sigY, sigStartX + 10, sigY - 5);
-    doc.line(sigStartX + 10, sigY - 5, sigStartX + 25, sigY + 5);
-    doc.line(sigStartX + 25, sigY + 5, sigStartX + 40, sigY - 10);
+    doc.line(sigStartX + 10, sigY - 5, sigStartX + 25, sigY + 2);
+    doc.line(sigStartX + 25, sigY + 2, sigStartX + 40, sigY - 8);
+    doc.line(sigStartX + 40, sigY - 8, sigStartX + 50, sigY);
+    
+    // Tampon "Approuvé"
+    doc.setFillColor(0, 0, 150);
+    doc.setTextColor(0, 0, 150);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold-italic');
+    doc.text("Lu et approuvé", margin + 15, yPosition - 8);
+    
     doc.setFont('helvetica', 'normal');
   }
   
@@ -74,21 +87,35 @@ export const addSignatureSection = (
     } catch (e) {
       console.error("Invalid employee signature date format");
     }
-    doc.text(`Signé électroniquement le ${employeeDate.toLocaleDateString('fr-FR')}`, middleX + 15, yPosition - 10);
+    doc.text(`Signé électroniquement le ${employeeDate.toLocaleDateString('fr-FR')}`, middleX + 15, yPosition - 20);
     
     // Ajouter une marque de signature dans la case
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.text("SIGNATURE ÉLECTRONIQUE", middleX + 15, yPosition - 5);
     
-    // Ajouter une signature graphique (représentation stylisée)
+    // Ajouter une signature graphique plus visible et différente de celle de l'employeur
     doc.setDrawColor(0, 0, 150);
-    doc.setLineWidth(0.5);
-    const sigStartX = middleX + 25;
+    doc.setLineWidth(0.8);
+    
+    // Dessiner une signature stylisée différente pour l'employé
+    const sigStartX = middleX + 20;
     const sigY = yPosition - 15;
+    
+    // Création d'une signature cursive stylisée
     doc.line(sigStartX, sigY, sigStartX + 8, sigY + 5);
     doc.line(sigStartX + 8, sigY + 5, sigStartX + 15, sigY - 3);
-    doc.line(sigStartX + 15, sigY - 3, sigStartX + 30, sigY + 6);
+    doc.line(sigStartX + 15, sigY - 3, sigStartX + 30, sigY + 4);
+    doc.line(sigStartX + 30, sigY + 4, sigStartX + 45, sigY - 5);
+    doc.line(sigStartX + 45, sigY - 5, sigStartX + 50, sigY);
+    
+    // Tampon "Approuvé"
+    doc.setFillColor(0, 0, 150);
+    doc.setTextColor(0, 0, 150);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold-italic');
+    doc.text("Lu et approuvé", middleX + 20, yPosition - 8);
+    
     doc.setFont('helvetica', 'normal');
   }
   
