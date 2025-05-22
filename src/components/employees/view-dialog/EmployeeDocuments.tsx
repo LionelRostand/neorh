@@ -96,6 +96,12 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
     }
   }, [employee.id]);
 
+  // Fonction de rafraîchissement pour être appelée après la suppression d'un document
+  const handleRefresh = () => {
+    lastFetchedEmployeeId.current = null; // Réinitialiser l'ID pour forcer le rechargement
+    fetchEmployeeDocuments();
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-start mb-6">
@@ -109,10 +115,7 @@ const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee }) => {
       <DocumentList 
         documents={documents} 
         loading={loading} 
-        onRefresh={() => {
-          lastFetchedEmployeeId.current = null;
-          fetchEmployeeDocuments();
-        }}
+        onRefresh={handleRefresh}
       />
     </div>
   );

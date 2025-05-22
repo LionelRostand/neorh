@@ -31,7 +31,7 @@ const DocumentsRH = () => {
   });
 
   const fetchDocuments = useCallback(async () => {
-    // Vérifier si une requête est déjà en cours ou si les documents ont déjà été chargés
+    // Vérifier si une requête est déjà en cours
     if (fetchInProgress.current) {
       console.log("Requête de documents déjà en cours, annulation du doublon");
       return;
@@ -95,6 +95,12 @@ const DocumentsRH = () => {
     }
   }, [fetchDocuments]);
 
+  // Fonction pour rafraîchir la liste des documents (utilisée après suppression)
+  const handleRefresh = () => {
+    hasLoadedDocuments.current = false;
+    fetchDocuments();
+  };
+
   // Filter documents based on search term and active tab
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -135,10 +141,7 @@ const DocumentsRH = () => {
         <DocumentList 
           documents={filteredDocuments} 
           loading={loading}
-          onRefresh={() => {
-            hasLoadedDocuments.current = false;
-            fetchDocuments();
-          }}
+          onRefresh={handleRefresh}
         />
       </div>
     </div>

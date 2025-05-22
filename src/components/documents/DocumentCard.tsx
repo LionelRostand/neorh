@@ -4,10 +4,13 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Document } from "@/lib/constants";
-import { FileText, Download, Check, X } from "lucide-react";
+import { FileText, Download, Check, X, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import SignatureDialog from "../contracts/SignatureDialog";
+import DeleteDocumentDialog from "./DeleteDocumentDialog";
+import useFirestore from "@/hooks/useFirestore";
+import { toast } from "@/components/ui/use-toast";
 
 interface DocumentCardProps {
   document: Document;
@@ -17,6 +20,10 @@ interface DocumentCardProps {
 const DocumentCard = ({ document, onRefresh }: DocumentCardProps) => {
   const [signDialogOpen, setSignDialogOpen] = useState(false);
   const [isEmployerSigning, setIsEmployerSigning] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  
+  // Firestore hook pour la suppression de documents
+  const documentCollection = useFirestore<Document>("hr_documents");
   
   const handleDownload = () => {
     if (!document.fileUrl) return;
@@ -39,6 +46,36 @@ const DocumentCard = ({ document, onRefresh }: DocumentCardProps) => {
         });
     } else {
       window.open(document.fileUrl, '_blank');
+    }
+  };
+  
+  const handleDelete = async () => {
+    if (!document.id) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer ce document car il n'a pas d'identifiant valide.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      await documentCollection.remove(document.id);
+      toast({
+        title: "Succès",
+        description: "Document supprimé avec succès",
+      });
+      // Rafraîchir la liste des documents
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (error) {
+      console.error("Erreur lors de la suppression du document:", error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur s'est produite lors de la suppression du document.",
+        variant: "destructive"
+      });
     }
   };
   
@@ -128,37 +165,51 @@ const DocumentCard = ({ document, onRefresh }: DocumentCardProps) => {
       </CardContent>
       
       <CardFooter className="border-t pt-4 pb-4 flex flex-wrap gap-2 justify-between">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex items-center gap-1"
-          onClick={handleDownload}
-        >
-          <Download className="h-3.5 w-3.5" />
-          <span>Télécharger</span>
-        </Button>
-        
-        {needsSignature && !document.signedByEmployee && (
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={handleDownload}
+          >
+            <Download className="h-3.5 w-3.5" />
+            <span>Télécharger</span>
+          </Button>
+          
           <Button
             variant="outline"
             size="sm"
-            onClick={() => openSignatureDialog(false)}
-            className="border-blue-500 text-blue-600 hover:bg-blue-50"
+            className="flex items-center gap-1 border-red-500 text-red-600 hover:bg-red-50"
+            onClick={() => setDeleteDialogOpen(true)}
           >
-            Signer (employé)
+            <Trash2 className="h-3.5 w-3.5" />
+            <span>Supprimer</span>
           </Button>
-        )}
+        </div>
         
-        {needsSignature && !document.signedByEmployer && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => openSignatureDialog(true)}
-            className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
-          >
-            Signer (employeur)
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {needsSignature && !document.signedByEmployee && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => openSignatureDialog(false)}
+              className="border-blue-500 text-blue-600 hover:bg-blue-50"
+            >
+              Signer (employé)
+            </Button>
+          )}
+          
+          {needsSignature && !document.signedByEmployer && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => openSignatureDialog(true)}
+              className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+            >
+              Signer (employeur)
+            </Button>
+          )}
+        </div>
       </CardFooter>
       
       <SignatureDialog
@@ -167,6 +218,13 @@ const DocumentCard = ({ document, onRefresh }: DocumentCardProps) => {
         onOpenChange={setSignDialogOpen}
         onSuccess={onRefresh}
         isEmployer={isEmployerSigning}
+      />
+      
+      <DeleteDocumentDialog
+        documentId={document.id || null}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDelete}
       />
     </Card>
   );
