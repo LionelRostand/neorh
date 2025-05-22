@@ -34,5 +34,5 @@ export interface PdfResult {
   blob: Blob;
 }
 
-// Réexporter les types des contrats
-export { ContractData, PdfResult as ContractPdfResult } from './contractTypes';
+// Fix for TypeScript 'isolatedModules': use 'export type' for re-exporting types
+export type { ContractData, PdfResult as ContractPdfResult } from './contractTypes';
