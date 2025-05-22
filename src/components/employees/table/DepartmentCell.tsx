@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -51,11 +50,6 @@ const DepartmentCell = ({ departmentId, departmentName }: DepartmentCellProps) =
         <Building2 className="h-3 w-3 text-muted-foreground" />
         {displayName || "Département non assigné"}
       </Badge>
-      {departmentId && (
-        <span className="text-xs text-muted-foreground ml-2 hidden md:inline">
-          {departmentId.substring(0, 6)}...
-        </span>
-      )}
     </div>
   );
 };
