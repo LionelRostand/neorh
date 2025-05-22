@@ -1,17 +1,16 @@
 
-import React, { useState } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import React from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Employee } from '@/types/employee';
 import { 
   InformationsTab, 
-  DocumentsTab,
-  CompetencesTab,
-  HorairesTab,
-  CongesTab,
-  FeuillesDeTempsTab,
-  EvaluationsTab,
-  FormationsTab
+  DocumentsTab, 
+  CompetencesTab, 
+  EvaluationsTab, 
+  FormationsTab,
+  HorairesTab, 
+  FeuillesDeTempsTab, 
+  CongesTab 
 } from './EmployeeTabContent';
 
 interface EmployeeTabsProps {
@@ -25,62 +24,61 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({
   employee, 
   activeTab, 
   onTabChange,
-  onRefresh
+  onRefresh 
 }) => {
-  // Utilisons React.memo pour éviter les re-renders inutiles des onglets
-  const MemoizedDocumentsTab = React.memo(DocumentsTab);
-  const MemoizedFeuillesDeTempsTab = React.memo(FeuillesDeTempsTab);
-  const MemoizedCongesTab = React.memo(CongesTab);
-  const MemoizedFormationsTab = React.memo(FormationsTab);
-
   return (
-    <Tabs defaultValue="informations" value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className="grid grid-cols-8 bg-gray-50 border-b">
-        <TabsTrigger value="informations">Informations</TabsTrigger>
-        <TabsTrigger value="documents">Documents</TabsTrigger>
-        <TabsTrigger value="competences">Compétences</TabsTrigger>
-        <TabsTrigger value="horaires">Horaires</TabsTrigger>
-        <TabsTrigger value="feuillesdetemps">Feuilles de temps</TabsTrigger>
-        <TabsTrigger value="conges">Congés</TabsTrigger>
-        <TabsTrigger value="evaluations">Évaluations</TabsTrigger>
-        <TabsTrigger value="formations">Formations</TabsTrigger>
-      </TabsList>
-      
-      <ScrollArea className="h-[calc(90vh-140px)]">
-        <TabsContent value="informations" className="p-6 focus:outline-none">
+    <div className="p-6 overflow-auto max-h-[calc(90vh-80px)]">
+      <Tabs 
+        defaultValue="informations" 
+        value={activeTab}
+        onValueChange={onTabChange}
+        className="w-full"
+      >
+        <TabsList className="mb-6 bg-gray-100 p-1 overflow-x-auto flex w-full max-w-full no-scrollbar">
+          <TabsTrigger value="informations" className="flex-1">Informations</TabsTrigger>
+          <TabsTrigger value="documents" className="flex-1 whitespace-nowrap">Documents</TabsTrigger>
+          <TabsTrigger value="competences" className="flex-1 whitespace-nowrap">Compétences</TabsTrigger>
+          <TabsTrigger value="horaires" className="flex-1 whitespace-nowrap">Horaires</TabsTrigger>
+          <TabsTrigger value="feuillesDeTemps" className="flex-1 whitespace-nowrap">Feuilles de temps</TabsTrigger>
+          <TabsTrigger value="conges" className="flex-1 whitespace-nowrap">Congés</TabsTrigger>
+          <TabsTrigger value="evaluations" className="flex-1 whitespace-nowrap">Évaluations</TabsTrigger>
+          <TabsTrigger value="formations" className="flex-1 whitespace-nowrap">Formations</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="informations">
           <InformationsTab employee={employee} />
         </TabsContent>
         
-        <TabsContent value="documents" className="p-6">
-          <MemoizedDocumentsTab employee={employee} />
+        <TabsContent value="documents">
+          <DocumentsTab employee={employee} onRefresh={onRefresh} />
         </TabsContent>
         
-        <TabsContent value="competences" className="p-6">
-          <CompetencesTab employee={employee} />
+        <TabsContent value="competences">
+          <CompetencesTab employee={employee} onRefresh={onRefresh} />
         </TabsContent>
         
-        <TabsContent value="horaires" className="p-6">
+        <TabsContent value="horaires">
           <HorairesTab employee={employee} onRefresh={onRefresh} />
         </TabsContent>
         
-        <TabsContent value="feuillesdetemps" className="p-6">
-          <MemoizedFeuillesDeTempsTab employee={employee} />
+        <TabsContent value="feuillesDeTemps">
+          <FeuillesDeTempsTab employee={employee} />
         </TabsContent>
         
-        <TabsContent value="conges" className="p-6">
-          <MemoizedCongesTab employee={employee} />
+        <TabsContent value="conges">
+          <CongesTab employee={employee} />
         </TabsContent>
         
-        <TabsContent value="evaluations" className="p-6">
+        <TabsContent value="evaluations">
           <EvaluationsTab employee={employee} />
         </TabsContent>
         
-        <TabsContent value="formations" className="p-6">
-          <MemoizedFormationsTab employee={employee} />
+        <TabsContent value="formations">
+          <FormationsTab employee={employee} />
         </TabsContent>
-      </ScrollArea>
-    </Tabs>
+      </Tabs>
+    </div>
   );
 };
 
-export default React.memo(EmployeeTabs);
+export default EmployeeTabs;

@@ -5,11 +5,12 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle,
-  DialogFooter
+  DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Signature } from "lucide-react";
+import { Signature, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Document } from "@/lib/constants";
 import useFirestore from "@/hooks/useFirestore";
@@ -30,6 +31,7 @@ export default function SignatureDialog({
   isEmployer = false
 }: SignatureDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [signatureComplete, setSignatureComplete] = useState(false);
   const documentsCollection = useFirestore<Document>("hr_documents");
   const contractsCollection = useFirestore("hr_contracts");
   
@@ -69,13 +71,13 @@ export default function SignatureDialog({
         }
       }
       
-      toast({
-        title: "Signature effectuée",
-        description: "Le document a été signé avec succès",
-      });
+      setSignatureComplete(true);
       
-      if (onSuccess) onSuccess();
-      onOpenChange(false);
+      setTimeout(() => {
+        if (onSuccess) onSuccess();
+        onOpenChange(false);
+        setSignatureComplete(false);
+      }, 1500);
       
     } catch (error) {
       console.error("Erreur lors de la signature:", error);
@@ -84,6 +86,7 @@ export default function SignatureDialog({
         description: "Une erreur est survenue lors de la signature",
         variant: "destructive"
       });
+      onOpenChange(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -94,40 +97,59 @@ export default function SignatureDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Signature du document</DialogTitle>
-        </DialogHeader>
-        
-        <div className="py-6 space-y-4">
-          <p>
-            Vous êtes sur le point de signer électroniquement ce document en tant que <strong>{signerType}</strong>.
-          </p>
-          
-          <p>
-            En cliquant sur "Signer le document", vous reconnaissez avoir lu et approuvé l'intégralité de son contenu.
-          </p>
-          
-          <div className="flex items-center justify-center p-4 border rounded-md">
-            <Signature className="h-16 w-16 text-blue-500" />
+        {!signatureComplete ? (
+          <>
+            <DialogHeader>
+              <DialogTitle className="text-xl">Signature du document</DialogTitle>
+              <DialogDescription>
+                Vous êtes sur le point de signer électroniquement ce document en tant que <strong>{signerType}</strong>.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="py-6 space-y-4">
+              <div className="flex items-center justify-center p-6 border rounded-md bg-gray-50">
+                <Signature className="h-20 w-20 text-blue-600" />
+              </div>
+              
+              <div className="text-center text-sm text-gray-500">
+                <p>
+                  En cliquant sur "Signer le document", vous reconnaissez avoir lu et 
+                  approuvé l'intégralité du contenu de ce document.
+                </p>
+              </div>
+              
+              <Separator />
+              
+              <div className="bg-gray-50 p-3 rounded-md">
+                <p className="text-sm font-medium">Document: {document?.title}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Cette signature électronique a la même valeur légale qu'une signature manuscrite.
+                </p>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Annuler
+              </Button>
+              <Button 
+                onClick={handleSignature} 
+                disabled={isSubmitting}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
+                {isSubmitting ? "En cours..." : "Signer le document"}
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          <div className="py-8 flex flex-col items-center justify-center">
+            <CheckCircle className="h-16 w-16 text-emerald-500 mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Signature réussie !</h2>
+            <p className="text-center text-gray-500">
+              Le document a été signé avec succès en tant que {signerType}.
+            </p>
           </div>
-          
-          <Separator />
-          
-          <p className="text-sm text-gray-500">
-            Document: {document?.title}
-          </p>
-        </div>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
-          <Button 
-            onClick={handleSignature} 
-            disabled={isSubmitting}
-            className="bg-emerald-600 hover:bg-emerald-700"
-          >
-            {isSubmitting ? "En cours..." : "Signer le document"}
-          </Button>
-        </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );
