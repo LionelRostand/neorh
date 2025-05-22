@@ -7,7 +7,7 @@ import { useCompaniesData } from "@/hooks/useCompaniesData";
 import useContractsList from "@/hooks/contracts/useContractsList";
 import { toast } from "@/components/ui/use-toast";
 import { payslipFormSchema } from "./schema";
-import { generatePayslip } from "@/utils/pdf/payslip";
+import { generatePayslipPdf } from "@/utils/pdf/payslip";
 import { PayslipData } from "@/utils/pdf/payslip/types";
 import { PayslipFormValues } from "./types";
 import { useSalaryFetcher } from "./hooks/useSalaryFetcher";
@@ -92,7 +92,7 @@ export const usePayslipForm = () => {
         leaveAllocation: allocation,
       };
       
-      const payslipPdf = generatePayslip(payslipData);
+      const payslipPdf = generatePayslipPdf(payslipData);
       
       // Save to Firestore
       await savePayslipToFirestore(
