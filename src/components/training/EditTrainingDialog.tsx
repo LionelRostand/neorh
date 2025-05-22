@@ -45,6 +45,7 @@ const EditTrainingDialog = ({
       status: training.status,
       startDate: training.startDate ? new Date(training.startDate) : undefined,
       endDate: training.endDate ? new Date(training.endDate) : undefined,
+      employees: [], // Default empty array since we're editing a single training
     },
   });
 
@@ -58,6 +59,8 @@ const EditTrainingDialog = ({
         employeeId: training.employeeId,
         employeeName: training.employeeName,
         participants: training.participants,
+        trainer: data.organization || training.trainer || "Interne",
+        department: training.department,
       });
 
       toast({

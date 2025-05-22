@@ -17,13 +17,10 @@ import DeleteTrainingDialog from "./DeleteTrainingDialog";
 
 interface TrainingTableProps {
   trainings: Training[];
-  onDelete: (id: string) => void;
-  onModify: (id: string) => void;
-  onManage: (id: string) => void;
   onRefresh: () => void;
 }
 
-const TrainingTable = ({ trainings, onDelete, onModify, onManage, onRefresh }: TrainingTableProps) => {
+const TrainingTable = ({ trainings, onRefresh }: TrainingTableProps) => {
   const [selectedTraining, setSelectedTraining] = useState<Training | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -42,6 +39,11 @@ const TrainingTable = ({ trainings, onDelete, onModify, onManage, onRefresh }: T
   const handleDelete = (training: Training) => {
     setSelectedTraining(training);
     setDeleteDialogOpen(true);
+  };
+
+  const handleManage = (id: string) => {
+    // Placeholder for future implementation
+    console.log("Manage participants for training:", id);
   };
 
   return (
@@ -65,9 +67,9 @@ const TrainingTable = ({ trainings, onDelete, onModify, onManage, onRefresh }: T
                 <TableCell className="font-mono text-xs">{training.id}</TableCell>
                 <TableCell>{training.title}</TableCell>
                 <TableCell>{training.description}</TableCell>
-                <TableCell>{training.trainer}</TableCell>
-                <TableCell>{training.department}</TableCell>
-                <TableCell>{training.participants}</TableCell>
+                <TableCell>{training.trainer || training.organization || "Interne"}</TableCell>
+                <TableCell>{training.department || "Non spécifié"}</TableCell>
+                <TableCell>{training.participants || 1}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button
@@ -95,7 +97,7 @@ const TrainingTable = ({ trainings, onDelete, onModify, onManage, onRefresh }: T
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onManage(training.id)}
+                      onClick={() => handleManage(training.id)}
                     >
                       <Users className="h-4 w-4" /> Gérer
                     </Button>

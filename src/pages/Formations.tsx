@@ -26,28 +26,12 @@ const Formations = () => {
     setIsNewTrainingOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    // Cette fonction n'est plus utilisée directement
-    // La suppression est maintenant gérée dans le composant de dialogue
-  };
-
-  const handleModify = (id: string) => {
-    // Cette fonction n'est plus utilisée directement
-    // La modification est maintenant gérée dans le composant de dialogue
-  };
-
-  const handleManage = (id: string) => {
-    toast({
-      title: "Gestion",
-      description: `Gestion des participants pour la formation ${id}`,
-    });
-  };
-
   // Filtrer les formations en fonction des critères de recherche avec vérification pour les valeurs undefined
   const filteredTrainings = trainings
     .filter(training => 
       (training.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
       training.description?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      training.organization?.toLowerCase().includes(searchTerm.toLowerCase()) || 
       training.trainer?.toLowerCase().includes(searchTerm.toLowerCase())) ?? false
     )
     .filter(training => selectedDepartment === "all" || training.department === selectedDepartment)
@@ -145,9 +129,6 @@ const Formations = () => {
           ) : (
             <TrainingTable 
               trainings={filteredTrainings}
-              onDelete={handleDelete}
-              onModify={handleModify}
-              onManage={handleManage}
               onRefresh={refetch}
             />
           )}

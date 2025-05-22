@@ -21,6 +21,7 @@ export const trainingSchema = z.object({
     required_error: "La date de début est requise",
   }),
   endDate: z.date().optional(),
+  employees: z.array(z.string()).default([])
 });
 
 export type TrainingFormValues = z.infer<typeof trainingSchema>;

@@ -89,7 +89,7 @@ const EmployeeTrainings: React.FC<EmployeeTrainingsProps> = ({ employee }) => {
               <TableRow key={training.id}>
                 <TableCell>{training.title}</TableCell>
                 <TableCell>{training.type || 'Non spécifié'}</TableCell>
-                <TableCell>{training.trainer || 'Interne'}</TableCell>
+                <TableCell>{training.trainer || training.organization || 'Interne'}</TableCell>
                 <TableCell>
                   {training.startDate ? format(new Date(training.startDate), 'dd/MM/yyyy', { locale: fr }) : '–'}
                 </TableCell>

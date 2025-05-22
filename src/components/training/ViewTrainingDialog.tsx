@@ -89,7 +89,7 @@ const ViewTrainingDialog = ({
                 <User className="h-4 w-4 text-gray-500 mt-0.5" />
                 <div>
                   <p className="font-medium text-sm">Formateur</p>
-                  <p className="text-gray-600">{training.trainer || "Non spécifié"}</p>
+                  <p className="text-gray-600">{training.trainer || training.organization || "Non spécifié"}</p>
                 </div>
               </div>
 

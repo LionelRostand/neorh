@@ -31,7 +31,8 @@ export const EmployeesSection = ({
               onValueChange={(value) => {
                 const currentValues = field.value || [];
                 if (!currentValues.includes(value)) {
-                  field.onChange([...currentValues, value]);
+                  const newValues = [...currentValues, value];
+                  field.onChange(newValues);
                 }
               }}
             >

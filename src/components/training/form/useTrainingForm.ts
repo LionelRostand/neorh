@@ -22,6 +22,7 @@ export const useTrainingForm = (onSuccess?: () => void, onCancel?: () => void) =
       location: "",
       description: "",
       employees: [],
+      status: "planifiée",
     },
   });
 
@@ -40,8 +41,7 @@ export const useTrainingForm = (onSuccess?: () => void, onCancel?: () => void) =
           title: values.title,
           description: values.description || "",
           type: values.type,
-          trainer: values.organization || "Interne",
-          department: employees.find(e => e.id === employeeId)?.departmentId || "",
+          organization: values.organization || "Interne",
           location: values.location || "",
           status: "planifiée",
           startDate: values.startDate.toISOString(),
@@ -49,6 +49,8 @@ export const useTrainingForm = (onSuccess?: () => void, onCancel?: () => void) =
           employeeId: employeeId,
           participants: values.employees.length,
           employeeName: employeeName,
+          trainer: values.organization || "Interne",
+          department: employees.find(e => e.id === employeeId)?.departmentId || "",
         });
       }
       
