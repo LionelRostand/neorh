@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { X, FileDown, UserCircle } from "lucide-react";
 import { Employee } from '@/types/employee';
-import EmployeeAvatar from "@/components/common/EmployeeAvatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface EmployeeHeaderProps {
   employee: Employee;
@@ -63,15 +63,18 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           {employee.photoUrl ? (
-            <img 
-              src={employee.photoUrl} 
-              alt={`${firstName} ${lastName}`}
-              className="h-12 w-12 rounded-full object-cover"
-            />
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={employee.photoUrl} alt={`${firstName} ${lastName}`} />
+              <AvatarFallback>
+                {firstName.charAt(0)}{lastName.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
           ) : (
-            <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
-              <UserCircle className="h-8 w-8 text-gray-400" />
-            </div>
+            <Avatar className="h-12 w-12">
+              <AvatarFallback>
+                {firstName.charAt(0)}{lastName.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
           )}
           
           <div>

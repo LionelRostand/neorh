@@ -29,6 +29,16 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
   
   if (!employee) return null;
   
+  // Chercher le nom du département correspondant à l'ID du département de l'employé
+  let processedEmployee = { ...employee };
+  
+  if (employee.departmentId && departments?.length > 0) {
+    const department = departments.find(d => d.id === employee.departmentId);
+    if (department) {
+      processedEmployee.department = department.name;
+    }
+  }
+  
   const handleExportPDF = async () => {
     try {
       setIsExporting(true);
@@ -76,13 +86,13 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl p-0 overflow-hidden max-h-[90vh]">
         <EmployeeHeader 
-          employee={employee} 
+          employee={processedEmployee} 
           onClose={() => onOpenChange(false)} 
           onExportPDF={handleExportPDF}
           isExporting={isExporting}
         />
         <EmployeeTabs 
-          employee={employee}
+          employee={processedEmployee}
           activeTab={activeTab}
           onTabChange={setActiveTab}
           onRefresh={onRefresh}
