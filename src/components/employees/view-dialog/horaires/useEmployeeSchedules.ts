@@ -11,7 +11,7 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   
-  const schedulesCollection = useFirestore<WorkSchedule>("hr_schedules");
+  const schedulesCollection = useFirestore<WorkSchedule>("hr_work_schedules");
   
   // Fetch employee schedules
   useEffect(() => {
@@ -51,6 +51,7 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
   
   // Handle adding a new schedule
   const handleAddSchedule = () => {
+    console.log("Adding new schedule");
     setEditedSchedules(prev => [
       ...prev,
       {
@@ -65,11 +66,13 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
   
   // Handle removing a schedule
   const handleRemoveSchedule = (index: number) => {
+    console.log("Removing schedule at index:", index);
     setEditedSchedules(prev => prev.filter((_, i) => i !== index));
   };
   
   // Handle changing a schedule
   const handleScheduleChange = (index: number, field: keyof WorkSchedule, value: any) => {
+    console.log(`Changing schedule at index ${index}, field: ${field}, value: ${value}`);
     setEditedSchedules(prev => {
       const updated = [...prev];
       updated[index] = {
@@ -87,6 +90,8 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
     setIsLoading(true);
     
     try {
+      console.log("Saving schedules:", editedSchedules);
+      
       // Delete existing schedules
       const deletePromises = schedules.map(schedule => 
         schedule.id ? schedulesCollection.remove(schedule.id) : Promise.resolve()

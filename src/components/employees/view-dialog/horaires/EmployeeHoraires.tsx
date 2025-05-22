@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Edit, Save, Plus } from "lucide-react";
-import { useEmployeeSchedules } from '@/hooks/presence/useEmployeeSchedules';
+import { useEmployeeSchedules } from './useEmployeeSchedules';
 import ScheduleForm from './ScheduleForm';
 import ScheduleTable from './ScheduleTable';
 import { EmployeeHorairesProps } from './types';
@@ -65,7 +65,11 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
           </Button>
         </>
       ) : (
-        <ScheduleTable schedules={schedules} isLoading={isLoading} />
+        <ScheduleTable 
+          schedules={schedules} 
+          isLoading={isLoading} 
+          onAddSchedule={() => setIsEditing(true)}
+        />
       )}
     </div>
   );
