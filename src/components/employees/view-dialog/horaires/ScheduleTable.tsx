@@ -17,25 +17,27 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules, onAddSchedule 
   
   if (!hasSchedules) {
     return (
-      <Card className="p-8 text-center border bg-gray-50">
+      <div className="p-8 text-center border bg-gray-50 rounded-md">
         <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
         <h3 className="mt-2 text-sm font-medium text-gray-900">Aucun horaire défini</h3>
         <p className="mt-1 text-sm text-gray-500">
           Cliquez sur le bouton ci-dessous pour ajouter des horaires de travail pour cet employé.
         </p>
-        <Button 
-          variant="outline" 
-          className="mt-4 flex items-center justify-center" 
-          onClick={onAddSchedule}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Ajouter un horaire
-        </Button>
-      </Card>
+        {onAddSchedule && (
+          <Button 
+            variant="outline" 
+            className="mt-4 flex items-center justify-center" 
+            onClick={onAddSchedule}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Ajouter un horaire
+          </Button>
+        )}
+      </div>
     );
   }
 
-  // Utiliser une copie triée des horaires pour l'affichage
+  // S'assurer que les horaires sont triés par jour
   const sortedSchedules = [...schedules].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
 
   return (
@@ -43,8 +45,8 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules, onAddSchedule 
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Jour</TableHead>
-            <TableHead>Horaires</TableHead>
+            <TableHead className="w-1/3">Jour</TableHead>
+            <TableHead className="w-2/3">Horaires</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -67,14 +69,16 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules, onAddSchedule 
         </TableBody>
       </Table>
       
-      <Button 
-        variant="outline" 
-        className="w-full flex items-center justify-center p-4" 
-        onClick={onAddSchedule}
-      >
-        <Plus className="mr-2 h-4 w-4" />
-        Ajouter un horaire
-      </Button>
+      {onAddSchedule && (
+        <Button 
+          variant="outline" 
+          className="w-full flex items-center justify-center p-4" 
+          onClick={onAddSchedule}
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Ajouter un horaire
+        </Button>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Employee } from "@/types/employee";
 import { WorkSchedule } from './types';
 import { useFirestore } from '@/hooks/firestore';
@@ -10,22 +10,22 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
   const [editedSchedules, setEditedSchedules] = useState<WorkSchedule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const fetchedRef = useRef(false);
   
   const schedulesCollection = useFirestore<WorkSchedule>("hr_work_schedules");
   
   // Fetch employee schedules
   useEffect(() => {
+    // Éviter les requêtes multiples avec useRef
+    if (fetchedRef.current || !employee.id) return;
+    
     const fetchSchedules = async () => {
-      if (!employee.id) {
-        console.log("[useEmployeeSchedules] No employee ID provided");
-        setIsLoading(false);
-        return;
-      }
-      
       setIsLoading(true);
       
       try {
         console.log(`[useEmployeeSchedules] Fetching schedules for employee ID: ${employee.id}`);
+        fetchedRef.current = true;
+        
         const result = await schedulesCollection.search({
           field: 'employeeId',
           value: employee.id
@@ -57,7 +57,6 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
     };
     
     fetchSchedules();
-    // Important: DO NOT include fetchSchedules in the dependency array
   }, [employee.id, schedulesCollection]);
   
   // Handle adding a new schedule
@@ -132,6 +131,7 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
         .sort((a, b) => a.dayOfWeek - b.dayOfWeek);
       
       setSchedules(newSortedSchedules);
+      fetchedRef.current = false; // Permettre une nouvelle requête après sauvegarde
       console.log("[useEmployeeSchedules] Local state updated with new schedules");
       
       toast({
@@ -156,6 +156,11 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
       setIsLoading(false);
     }
   };
+
+  // Reset le fetch lorsque l'employé change
+  useEffect(() => {
+    fetchedRef.current = false;
+  }, [employee.id]);
   
   return {
     schedules,

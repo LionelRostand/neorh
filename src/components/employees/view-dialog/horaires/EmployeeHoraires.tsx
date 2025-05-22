@@ -7,6 +7,7 @@ import ScheduleForm from './ScheduleForm';
 import ScheduleTable from './ScheduleTable';
 import { EmployeeHorairesProps } from './types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from "@/components/ui/card";
 
 const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh }) => {
   const {
@@ -25,8 +26,6 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
   // Fonction pour activer directement le mode édition et ajouter un horaire
   const handleAddScheduleFromTable = () => {
     setIsEditing(true);
-    // Ajouter un nouvel horaire après un court délai pour s'assurer que le mode édition est activé
-    setTimeout(handleAddSchedule, 50);
   };
 
   // Afficher un état de chargement pendant la récupération des données
@@ -47,7 +46,7 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
   }
 
   return (
-    <div className="space-y-6">
+    <Card className="border p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-xl font-semibold">Horaires de travail</h3>
         <div className="space-x-2">
@@ -95,7 +94,7 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
           onAddSchedule={handleAddScheduleFromTable}
         />
       )}
-    </div>
+    </Card>
   );
 };
 
