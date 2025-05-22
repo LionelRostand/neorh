@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Edit, Save, Plus } from "lucide-react";
 import { useEmployeeSchedules } from './useEmployeeSchedules';
@@ -21,6 +21,15 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
     handleSaveSchedules
   } = useEmployeeSchedules(employee, onRefresh);
   
+  // Fonction pour activer directement le mode édition et ajouter un horaire
+  const handleAddScheduleFromTable = () => {
+    setIsEditing(true);
+    // Délai court pour s'assurer que le state est mis à jour avant d'ajouter un horaire
+    setTimeout(() => {
+      handleAddSchedule();
+    }, 50);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -68,7 +77,7 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
         <ScheduleTable 
           schedules={schedules} 
           isLoading={isLoading} 
-          onAddSchedule={() => setIsEditing(true)}
+          onAddSchedule={handleAddScheduleFromTable}
         />
       )}
     </div>

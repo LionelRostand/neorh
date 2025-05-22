@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import { WorkSchedule, daysOfWeek } from './types';
@@ -47,7 +46,7 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({
                   value={schedule.dayOfWeek}
                   onChange={(e) => handleScheduleChange(index, 'dayOfWeek', parseInt(e.target.value))}
                 >
-                  {daysOfWeek.map((day, idx) => (
+                  {Object.entries(daysOfWeek).map(([idx, day]) => (
                     <option key={idx} value={idx}>{day}</option>
                   ))}
                 </select>

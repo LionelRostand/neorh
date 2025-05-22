@@ -27,8 +27,9 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
         });
         
         if (result.docs && result.docs.length > 0) {
-          setSchedules(result.docs);
-          setEditedSchedules(result.docs);
+          const sortedSchedules = [...result.docs].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
+          setSchedules(sortedSchedules);
+          setEditedSchedules(sortedSchedules);
         } else {
           // If no schedules found, set to empty arrays
           setSchedules([]);
@@ -52,16 +53,15 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
   // Handle adding a new schedule
   const handleAddSchedule = () => {
     console.log("Adding new schedule");
-    setEditedSchedules(prev => [
-      ...prev,
-      {
-        employeeId: employee.id!,
-        dayOfWeek: 1, // Default to Monday
-        startTime: "09:00",
-        endTime: "17:00",
-        isActive: true
-      }
-    ]);
+    const newSchedule: WorkSchedule = {
+      employeeId: employee.id!,
+      dayOfWeek: 1, // Default to Monday
+      startTime: "09:00",
+      endTime: "17:00",
+      isActive: true
+    };
+    
+    setEditedSchedules(prev => [...prev, newSchedule]);
   };
   
   // Handle removing a schedule
@@ -109,14 +109,16 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
       
       await Promise.all(createPromises);
       
-      // Update local state
+      // Update local state with the newly saved schedules
       const result = await schedulesCollection.search({
         field: 'employeeId',
         value: employee.id
       });
       
       if (result.docs) {
-        setSchedules(result.docs);
+        const sortedSchedules = [...result.docs].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
+        setSchedules(sortedSchedules);
+        setEditedSchedules(sortedSchedules);
       }
       
       toast({
