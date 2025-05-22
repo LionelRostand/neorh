@@ -38,6 +38,7 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
       departmentId: '',
       salary: '',
       status: 'pending_signature',
+      conventionCollective: ''
     },
   });
   
@@ -61,7 +62,8 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         salary: data.salary,
         status: 'pending_signature',
         signedByEmployee: false,
-        signedByEmployer: false
+        signedByEmployer: false,
+        conventionCollective: data.conventionCollective
       };
       
       // Only add endDate if it exists
