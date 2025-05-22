@@ -123,3 +123,11 @@
 .children-container {
   @apply transition-all duration-300 ease-in-out;
 }
+
+/* Hide Lovable badge */
+.gptengineer-container,
+.gptengineer-badge {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
