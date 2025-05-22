@@ -18,11 +18,9 @@ export const generateCDIContent = (
   // Article 1 - Engagement
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
-  doc.setTextColor(0, 51, 102); // Bleu foncé pour les titres
   doc.text('Article 1 - Engagement', margin, yPosition);
   yPosition += 7;
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(0, 0, 0); // Noir pour le texte
   doc.text(`Le salarié est engagé en qualité de ${contractData.position} au sein du département ${contractData.departmentName || ''}.`, margin, yPosition);
   yPosition += 7;
   doc.text('Ce contrat est conclu pour une durée indéterminée. Il prendra effet le ' + 
@@ -31,11 +29,9 @@ export const generateCDIContent = (
   // Article 2 - Période d'essai
   yPosition += 12;
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0, 51, 102);
   doc.text('Article 2 - Période d\'essai', margin, yPosition);
   yPosition += 7;
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(0, 0, 0);
   doc.text(`Le présent contrat est soumis à une période d'essai de trois mois renouvelable une fois.`, margin, yPosition);
   yPosition += 7;
   doc.text(`Durant cette période, chacune des parties pourra rompre le contrat sans indemnité ni préavis.`, margin, yPosition);
@@ -43,11 +39,9 @@ export const generateCDIContent = (
   // Article 3 - Fonctions
   yPosition += 12;
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0, 51, 102);
   doc.text('Article 3 - Fonctions', margin, yPosition);
   yPosition += 7;
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(0, 0, 0);
   doc.text(`Le salarié exercera les fonctions de ${contractData.position}.`, margin, yPosition);
   yPosition += 7;
   doc.text(`Ces fonctions sont susceptibles d'évoluer en fonction des besoins de l'entreprise.`, margin, yPosition);
@@ -55,28 +49,12 @@ export const generateCDIContent = (
   // Article 4 - Rémunération
   yPosition += 12;
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0, 51, 102);
   doc.text('Article 4 - Rémunération', margin, yPosition);
   yPosition += 7;
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(0, 0, 0);
-  doc.text(`En contrepartie de son travail, le/la Salarié(e) percevra une rémunération brute annuelle`, margin, yPosition);
-  yPosition += 7;
-  doc.text(`de ${contractData.salary} euros, incluant d'éventuelles primes supplémentaires.`, margin, yPosition);
+  doc.text(`La rémunération brute annuelle du salarié est fixée à ${contractData.salary} euros.`, margin, yPosition);
   yPosition += 7;
   doc.text(`Cette rémunération sera versée sur 12 mois, à la fin de chaque mois.`, margin, yPosition);
-  
-  // Article 5 - Lieu de travail
-  yPosition += 12;
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0, 51, 102);
-  doc.text('Article 5 - Lieu de travail', margin, yPosition);
-  yPosition += 7;
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(0, 0, 0);
-  doc.text(`Le/La Salarié(e) exercera ses fonctions à l'adresse du lieu de travail.`, margin, yPosition);
-  yPosition += 7;
-  doc.text(`Toutefois, compte tenu de la nature des activités de la société et des nécessités du poste, le lieu de travail pourra évoluer.`, margin, yPosition);
   
   return yPosition + 10;
 };

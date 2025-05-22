@@ -88,9 +88,8 @@ export const generateContractPdf = (contractData: ContractData, company?: Compan
   // Add standard additional articles
   yPosition = addAdditionalArticles(doc, margin, yPosition);
   
-  // Add signature section - Convert the city parameter to string if it's a number
-  // This is the fix for the type error - converting yPosition to string if needed
-  const city = 'Paris'; // Default city value as string
+  // Add signature section
+  const city = company?.city || 'Paris'; 
   yPosition = addSignatureSection(doc, city, margin, yPosition);
   
   // Add page footers with legal mentions and page numbers

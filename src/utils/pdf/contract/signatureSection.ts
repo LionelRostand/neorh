@@ -42,12 +42,5 @@ export const addSignatureSection = (
   doc.text('Précédée de la mention « Lu et approuvé »', margin, yPosition);
   doc.text('Précédée de la mention « Lu et approuvé »', middleX + 10, yPosition);
   
-  // Legal disclaimer
-  yPosition += 30;
-  doc.setFontSize(8);
-  doc.setTextColor(100, 100, 100);
-  doc.text('Ce document est strictement confidentiel et établi conformément au droit du travail français. Il ne constitue pas un conseil juridique.',
-    doc.internal.pageSize.width / 2, yPosition, { align: 'center' });
-  
   return yPosition + 40;
 };

@@ -9,7 +9,8 @@ import { useDepartmentsData } from '@/hooks/useDepartmentsData';
 import { useEmployeeData } from '@/hooks/useEmployeeData';
 import { useCompaniesData } from '@/hooks/useCompaniesData';
 import { Contract } from '@/lib/constants';
-import { generateContractPdf, saveContractAsDocument, ContractData } from '@/utils/pdf';
+import { generateContractPdf, saveContractAsDocument } from '@/utils/pdf';
+import { ContractData } from '@/utils/pdf/types/contractTypes';
 
 interface UseContractFormProps {
   onSuccess?: () => void;
