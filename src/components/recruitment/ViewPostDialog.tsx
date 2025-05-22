@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,10 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { RecruitmentPost } from "@/types/recruitment";
 import { useDepartmentsData } from "@/hooks/useDepartmentsData";
-import useRecruitmentFirebaseData from "@/hooks/useRecruitmentFirebaseData";
-import { toast } from "@/components/ui/use-toast";
 
-// Import our new components
+// Import our components
 import PostHeader from "./dialog/PostHeader";
 import PostDetailsCard from "./dialog/PostDetailsCard";
 import CandidateCard from "./dialog/CandidateCard";
@@ -36,15 +34,7 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
   onConvertToEmployee,
   isConverting
 }) => {
-  const [description, setDescription] = useState<string>("");
   const { departments } = useDepartmentsData();
-  const { updatePostDescription } = useRecruitmentFirebaseData();
-
-  useEffect(() => {
-    if (post) {
-      setDescription(post.description || "");
-    }
-  }, [post]);
 
   if (!post) return null;
 
@@ -54,24 +44,6 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
 
   const handleConvertToEmployee = () => {
     onConvertToEmployee(post);
-  };
-
-  const handleDescriptionSave = async (newDescription: string) => {
-    if (!post) return;
-
-    try {
-      const success = await updatePostDescription(post.id, newDescription);
-      
-      if (success) {
-        toast({
-          title: "Description mise à jour",
-          description: "La description a été enregistrée avec succès"
-        });
-      }
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour de la description:", error);
-      throw error;
-    }
   };
 
   return (
@@ -88,9 +60,8 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2 space-y-4">
             <PostDetailsCard 
-              description={description}
+              description={post.description || ""}
               requirements={post.requirements}
-              onDescriptionSave={handleDescriptionSave}
             />
 
             {post.candidateName && (
