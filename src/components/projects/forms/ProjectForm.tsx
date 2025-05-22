@@ -28,7 +28,11 @@ const projectFormSchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   status: z.enum(["active", "pending", "completed", "canceled"]).default("pending"),
-  budget: z.string().optional().transform((val) => val ? parseFloat(val) : undefined),
+  budget: z.preprocess(
+    // Convert empty string to undefined, otherwise parse as number
+    (val) => val === "" ? undefined : Number(val),
+    z.number().optional()
+  ),
 });
 
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
@@ -52,15 +56,20 @@ export function ProjectForm({ onSuccess, onCancel, initialData }: ProjectFormPro
       startDate: initialData?.startDate || "",
       endDate: initialData?.endDate || "",
       status: initialData?.status || "pending",
-      budget: initialData?.budget ? String(initialData.budget) : "",
+      budget: initialData?.budget,
     },
   });
 
   const onSubmit = async (data: ProjectFormValues) => {
     try {
-      // Ajouter les dates de création/modification
-      const projectData = {
-        ...data,
+      // Ensure name is always provided (satisfying the Project type requirement)
+      const projectData: Omit<Project, "id"> = {
+        name: data.name, // This is required by the Project type
+        description: data.description,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        status: data.status,
+        budget: data.budget,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
