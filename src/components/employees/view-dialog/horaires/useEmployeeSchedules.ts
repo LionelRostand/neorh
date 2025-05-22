@@ -61,8 +61,12 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
       isActive: true
     };
     
-    setEditedSchedules(prev => [...prev, newSchedule]);
-    console.log("Schedule added, new length:", editedSchedules.length + 1);
+    // Copier complètement l'état actuel et ajouter le nouvel horaire
+    setEditedSchedules(currentSchedules => {
+      const newSchedules = [...currentSchedules, newSchedule];
+      console.log("New schedules array:", newSchedules);
+      return newSchedules;
+    });
   };
   
   // Handle removing a schedule

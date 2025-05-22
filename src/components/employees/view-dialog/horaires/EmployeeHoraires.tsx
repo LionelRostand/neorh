@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Edit, Save, Plus } from "lucide-react";
 import { useEmployeeSchedules } from './useEmployeeSchedules';
@@ -23,14 +23,11 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
   
   // Fonction pour activer directement le mode édition et ajouter un horaire
   const handleAddScheduleFromTable = () => {
-    // D'abord activer le mode édition
+    // D'abord activer le mode édition et attendre que le state soit mis à jour
     setIsEditing(true);
     
-    // Utiliser un délai pour s'assurer que le state a eu le temps de se mettre à jour
-    setTimeout(() => {
-      // Puis ajouter un horaire
-      handleAddSchedule();
-    }, 100);
+    // Retirer le timeout qui cause le problème d'apparition/disparition
+    handleAddSchedule();
   };
 
   return (
