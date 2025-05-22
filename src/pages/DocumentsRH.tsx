@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -111,8 +112,8 @@ const DocumentsRH = () => {
   });
 
   return (
-    <div className="w-full h-full p-4 md:p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="w-full h-full p-0 m-0">
+      <div className="flex justify-between items-center p-4 md:p-6">
         <div>
           <h1 className="text-2xl font-bold">Gestion des documents</h1>
           <p className="text-muted-foreground">Consultez et gérez tous les documents RH</p>
@@ -123,14 +124,16 @@ const DocumentsRH = () => {
       </div>
 
       {/* Contract Status Cards */}
-      <ContractStatusCards
-        total={contractStats.total}
-        active={contractStats.active}
-        pending={contractStats.pending}
-        expired={contractStats.expired}
-      />
+      <div className="px-4 md:px-6">
+        <ContractStatusCards
+          total={contractStats.total}
+          active={contractStats.active}
+          pending={contractStats.pending}
+          expired={contractStats.expired}
+        />
+      </div>
 
-      <div className="bg-white border rounded-lg p-4 w-full">
+      <div className="bg-white border rounded-lg m-4 md:m-6 p-4 w-auto">
         <DocumentFilter 
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
