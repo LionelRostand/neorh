@@ -17,7 +17,8 @@ const PayslipForm: React.FC = () => {
     salaryValue,
     employeesLoading,
     companiesLoading,
-    contractsLoading
+    contractsLoading,
+    isGenerating
   } = usePayslipForm();
 
   return (
@@ -44,7 +45,7 @@ const PayslipForm: React.FC = () => {
         <OvertimeFields form={form} />
 
         {/* Submit Button */}
-        <SubmitButton />
+        <SubmitButton isLoading={isGenerating} />
       </form>
     </Form>
   );

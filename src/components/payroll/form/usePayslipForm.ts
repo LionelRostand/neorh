@@ -8,11 +8,13 @@ import { useCompaniesData } from "@/hooks/useCompaniesData";
 import useContractsList from "@/hooks/contracts/useContractsList";
 import { toast } from "@/components/ui/use-toast";
 import { payslipFormSchema } from "./schema";
+import { generatePayslipPdf } from "@/utils/pdf/generatePayslipPdf";
 
 export type PayslipFormValues = z.infer<typeof payslipFormSchema>;
 
 export const usePayslipForm = () => {
   const [salaryValue, setSalaryValue] = useState<string>("");
+  const [isGenerating, setIsGenerating] = useState(false);
   
   // Data loading hooks
   const { employees, isLoading: employeesLoading } = useEmployeeData();
@@ -79,15 +81,56 @@ export const usePayslipForm = () => {
   const periods = generateMonthlyPeriods();
 
   // Form submission handler
-  const onSubmit = (data: PayslipFormValues) => {
-    // Get full names for the toast display
-    const employeeName = employees.find(e => e.id === data.employee)?.name || data.employee;
-    const periodLabel = periods.find(p => p.id === data.period)?.label || data.period;
-    
-    toast({
-      title: "Fiche de paie générée",
-      description: `Fiche de paie pour ${employeeName} - Période: ${periodLabel}`,
-    });
+  const onSubmit = async (data: PayslipFormValues) => {
+    try {
+      setIsGenerating(true);
+      
+      // Get full employee and company data
+      const employee = employees.find(e => e.id === data.employee);
+      const company = companies.find(c => c.id === data.company);
+      
+      if (!employee || !company) {
+        toast({
+          title: "Erreur",
+          description: "Employé ou entreprise non trouvé(e)",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Get period label for display
+      const periodLabel = periods.find(p => p.id === data.period)?.label || data.period;
+      
+      // Generate PDF
+      const payslipPdf = generatePayslipPdf({
+        employee,
+        company,
+        period: periodLabel,
+        annualSalary: data.annualSalary,
+        overtimeHours: data.overtimeHours,
+        overtimeRate: data.overtimeRate,
+        date: new Date(),
+      });
+      
+      // Save the PDF
+      payslipPdf.saveToFile();
+      
+      // Show success toast
+      toast({
+        title: "Fiche de paie générée",
+        description: `Fiche de paie pour ${employee.name} - Période: ${periodLabel}`,
+      });
+      
+    } catch (error) {
+      console.error("Erreur lors de la génération du PDF:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de générer la fiche de paie",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return {
@@ -99,6 +142,7 @@ export const usePayslipForm = () => {
     salaryValue,
     employeesLoading,
     companiesLoading,
-    contractsLoading
+    contractsLoading,
+    isGenerating
   };
 };
