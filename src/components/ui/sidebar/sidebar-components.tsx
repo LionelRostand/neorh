@@ -1,5 +1,5 @@
-
 import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -284,7 +284,7 @@ export const SidebarGroupLabel = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & { asChild?: boolean }
 >(({ className, asChild = false, ...props }, ref) => {
-  const Comp = asChild ? React.Slot : "div"
+  const Comp = asChild ? Slot : "div"
 
   return (
     <Comp
@@ -305,7 +305,7 @@ export const SidebarGroupAction = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button"> & { asChild?: boolean }
 >(({ className, asChild = false, ...props }, ref) => {
-  const Comp = asChild ? React.Slot : "button"
+  const Comp = asChild ? Slot : "button"
 
   return (
     <Comp
