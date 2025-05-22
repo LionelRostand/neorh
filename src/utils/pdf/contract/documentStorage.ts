@@ -1,5 +1,6 @@
 
-import { firestore } from 'firebase/app';
+import { addDoc, collection } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { ContractData, PdfResult } from '../types/contractTypes';
 import { toast } from '@/components/ui/use-toast';
 
