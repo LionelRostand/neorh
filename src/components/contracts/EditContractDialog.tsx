@@ -34,7 +34,7 @@ export default function EditContractDialog({
     }
 
     try {
-      // Format dates
+      // Format the data for Firestore
       const updatedContract: Partial<Contract> = {
         ...data,
         startDate: data.startDate,
