@@ -102,6 +102,7 @@ export type Contract = {
   departmentName?: string;
   signedByEmployee?: boolean;
   signedByEmployer?: boolean;
+  salary?: string | number; // Added salary property
 }
 
 export type Document = {

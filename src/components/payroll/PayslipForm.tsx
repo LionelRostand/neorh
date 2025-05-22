@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,7 +65,9 @@ const PayslipForm: React.FC = () => {
       );
       
       if (employeeContract && employeeContract.salary) {
-        const formattedSalary = `${employeeContract.salary} €`;
+        const formattedSalary = typeof employeeContract.salary === 'number' 
+          ? `${employeeContract.salary} €` 
+          : `${employeeContract.salary}`;
         setSalaryValue(formattedSalary);
         form.setValue("annualSalary", formattedSalary);
       } else {

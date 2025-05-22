@@ -26,7 +26,10 @@ export const useContractsList = () => {
           type: doc.type || 'CDI',
           startDate: doc.startDate || '',
           endDate: doc.endDate || '',
-          status: doc.status || 'draft'
+          status: doc.status || 'draft',
+          salary: doc.salary || '', // Make sure salary is included
+          departmentId: doc.departmentId || '',
+          departmentName: doc.departmentName || ''
         } as Contract));
         
         setContracts(typedContracts);
