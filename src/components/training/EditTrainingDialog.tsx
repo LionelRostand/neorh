@@ -15,9 +15,9 @@ import { toast } from "@/components/ui/use-toast";
 import { Training } from "@/hooks/useTrainingData";
 import { useFirestore } from "@/hooks/firestore";
 import { trainingSchema } from "./form/trainingSchema";
-import BasicInfoSection from "./form/sections/BasicInfoSection";
-import DateSection from "./form/sections/DateSection";
-import DescriptionSection from "./form/sections/DescriptionSection";
+import { BasicInfoSection } from "./form/sections/BasicInfoSection";
+import { DateSection } from "./form/sections/DateSection";
+import { DescriptionSection } from "./form/sections/DescriptionSection";
 
 interface EditTrainingDialogProps {
   open: boolean;
@@ -39,10 +39,9 @@ const EditTrainingDialog = ({
     defaultValues: {
       title: training.title,
       description: training.description || "",
-      trainer: training.trainer || "",
-      department: training.department || "",
       type: training.type || "",
       location: training.location || "",
+      organization: training.organization || "",
       status: training.status,
       startDate: training.startDate ? new Date(training.startDate) : undefined,
       endDate: training.endDate ? new Date(training.endDate) : undefined,

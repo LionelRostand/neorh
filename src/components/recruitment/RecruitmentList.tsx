@@ -9,10 +9,11 @@ import { useDepartmentsData } from "@/hooks/useDepartmentsData";
 
 interface RecruitmentListProps {
   posts: RecruitmentPost[];
+  loading?: boolean; // Add the loading prop as optional
   onPostClick: (postId: string) => void;
 }
 
-const RecruitmentList: React.FC<RecruitmentListProps> = ({ posts, onPostClick }) => {
+const RecruitmentList: React.FC<RecruitmentListProps> = ({ posts, loading, onPostClick }) => {
   const { departments } = useDepartmentsData();
   
   // Fonction pour obtenir le nom du département à partir de son ID
