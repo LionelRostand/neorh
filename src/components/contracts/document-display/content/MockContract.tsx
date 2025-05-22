@@ -5,7 +5,7 @@ import MockContractPage from "./MockContractPage";
 
 const MockContract: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 2; // Par défaut, nous supposons qu'il y a 2 pages comme dans l'exemple
+  const totalPages = 2; // Nous avons 2 pages pour ce contrat
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
