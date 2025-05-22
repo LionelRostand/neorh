@@ -1,11 +1,12 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Edit, Save, Plus } from "lucide-react";
+import { Edit, Save, Plus, Clock } from "lucide-react";
 import { useEmployeeSchedules } from './useEmployeeSchedules';
 import ScheduleForm from './ScheduleForm';
 import ScheduleTable from './ScheduleTable';
 import { EmployeeHorairesProps } from './types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh }) => {
   const {
@@ -23,12 +24,29 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
   
   // Fonction pour activer directement le mode édition et ajouter un horaire
   const handleAddScheduleFromTable = () => {
-    // D'abord activer le mode édition et attendre que le state soit mis à jour
+    // D'abord activer le mode édition 
     setIsEditing(true);
-    
-    // Retirer le timeout qui cause le problème d'apparition/disparition
-    handleAddSchedule();
+    // Ajouter un nouvel horaire après le changement de mode
+    setTimeout(() => handleAddSchedule(), 100);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-8 w-56" />
+          <Skeleton className="h-10 w-24" />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

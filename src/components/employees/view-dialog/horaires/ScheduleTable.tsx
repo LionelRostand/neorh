@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { Calendar, Clock, Plus } from "lucide-react";
+import { Calendar, Clock, Plus, AlertCircle } from "lucide-react";
 import { WorkSchedule, daysOfWeek } from './types';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Card } from '@/components/ui/card';
 
 interface ScheduleTableProps {
   schedules: WorkSchedule[];
@@ -21,10 +22,10 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules, isLoading = fa
     );
   }
   
-  if (schedules.length === 0) {
+  if (!schedules || schedules.length === 0) {
     return (
-      <div className="p-8 text-center border rounded-lg bg-gray-50">
-        <Clock className="mx-auto h-12 w-12 text-gray-400" />
+      <Card className="p-8 text-center border bg-gray-50">
+        <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
         <h3 className="mt-2 text-sm font-medium text-gray-900">Aucun horaire défini</h3>
         <p className="mt-1 text-sm text-gray-500">
           Cliquez sur le bouton ci-dessous pour ajouter des horaires de travail pour cet employé.
@@ -37,7 +38,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules, isLoading = fa
           <Plus className="mr-2 h-4 w-4" />
           Ajouter un horaire
         </Button>
-      </div>
+      </Card>
     );
   }
 

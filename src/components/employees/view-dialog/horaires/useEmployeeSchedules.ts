@@ -21,22 +21,25 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
       setIsLoading(true);
       
       try {
+        console.log(`[useEmployeeSchedules] Fetching schedules for employee ID: ${employee.id}`);
         const result = await schedulesCollection.search({
           field: 'employeeId',
           value: employee.id
         });
         
         if (result.docs && result.docs.length > 0) {
+          console.log(`[useEmployeeSchedules] Found ${result.docs.length} schedules`);
           const sortedSchedules = [...result.docs].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
           setSchedules(sortedSchedules);
           setEditedSchedules([...sortedSchedules]);
         } else {
+          console.log("[useEmployeeSchedules] No schedules found for this employee");
           // If no schedules found, set to empty arrays
           setSchedules([]);
           setEditedSchedules([]);
         }
       } catch (error) {
-        console.error("Error fetching schedules:", error);
+        console.error("[useEmployeeSchedules] Error fetching schedules:", error);
         toast({
           title: "Erreur",
           description: "Impossible de charger les horaires",
@@ -52,7 +55,7 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
   
   // Handle adding a new schedule
   const handleAddSchedule = () => {
-    console.log("Adding new schedule");
+    console.log("[useEmployeeSchedules] Adding new schedule");
     const newSchedule: WorkSchedule = {
       employeeId: employee.id!,
       dayOfWeek: 1, // Default to Monday
@@ -64,20 +67,20 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
     // Copier complètement l'état actuel et ajouter le nouvel horaire
     setEditedSchedules(currentSchedules => {
       const newSchedules = [...currentSchedules, newSchedule];
-      console.log("New schedules array:", newSchedules);
+      console.log("[useEmployeeSchedules] New schedules array:", newSchedules);
       return newSchedules;
     });
   };
   
   // Handle removing a schedule
   const handleRemoveSchedule = (index: number) => {
-    console.log("Removing schedule at index:", index);
+    console.log("[useEmployeeSchedules] Removing schedule at index:", index);
     setEditedSchedules(prev => prev.filter((_, i) => i !== index));
   };
   
   // Handle changing a schedule
   const handleScheduleChange = (index: number, field: keyof WorkSchedule, value: any) => {
-    console.log(`Changing schedule at index ${index}, field: ${field}, value: ${value}`);
+    console.log(`[useEmployeeSchedules] Changing schedule at index ${index}, field: ${field}, value: ${value}`);
     setEditedSchedules(prev => {
       const updated = [...prev];
       updated[index] = {
@@ -95,7 +98,7 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
     setIsLoading(true);
     
     try {
-      console.log("Saving schedules:", editedSchedules);
+      console.log("[useEmployeeSchedules] Saving schedules:", editedSchedules);
       
       // Delete existing schedules
       const deletePromises = schedules.map(schedule => 
@@ -138,7 +141,7 @@ export const useEmployeeSchedules = (employee: Employee, onRefresh?: () => void)
       if (onRefresh) onRefresh();
       
     } catch (error) {
-      console.error("Error saving schedules:", error);
+      console.error("[useEmployeeSchedules] Error saving schedules:", error);
       toast({
         title: "Erreur",
         description: "Impossible d'enregistrer les horaires",
