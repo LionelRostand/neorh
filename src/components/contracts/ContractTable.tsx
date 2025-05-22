@@ -11,9 +11,10 @@ interface ContractTableProps {
   loading: boolean;
   onDetails: (id: string) => void;
   onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-const ContractTable = ({ contracts, loading, onDetails, onEdit }: ContractTableProps) => {
+const ContractTable = ({ contracts, loading, onDetails, onEdit, onDelete }: ContractTableProps) => {
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -58,6 +59,7 @@ const ContractTable = ({ contracts, loading, onDetails, onEdit }: ContractTableP
                     contractId={contract.id || ''} 
                     onDetails={onDetails}
                     onEdit={onEdit}
+                    onDelete={onDelete}
                   />
                 </TableCell>
               </TableRow>
@@ -85,6 +87,7 @@ const ContractTable = ({ contracts, loading, onDetails, onEdit }: ContractTableP
                     contractId="example1" 
                     onDetails={onDetails}
                     onEdit={onEdit}
+                    onDelete={onDelete}
                   />
                 </TableCell>
               </TableRow>
@@ -107,6 +110,7 @@ const ContractTable = ({ contracts, loading, onDetails, onEdit }: ContractTableP
                     contractId="example2" 
                     onDetails={onDetails}
                     onEdit={onEdit}
+                    onDelete={onDelete}
                   />
                 </TableCell>
               </TableRow>

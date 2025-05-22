@@ -1,15 +1,16 @@
 
 import React, { useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { FileText, Edit } from "lucide-react";
+import { FileText, Edit, Trash2 } from "lucide-react";
 
 interface ContractActionsProps {
   contractId: string;
   onDetails: (id: string) => void;
   onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-const ContractActions = ({ contractId, onDetails, onEdit }: ContractActionsProps) => {
+const ContractActions = ({ contractId, onDetails, onEdit, onDelete }: ContractActionsProps) => {
   // Utilisation de useCallback pour éviter les re-renders inutiles
   const handleDetails = useCallback(() => {
     onDetails(contractId);
@@ -18,6 +19,10 @@ const ContractActions = ({ contractId, onDetails, onEdit }: ContractActionsProps
   const handleEdit = useCallback(() => {
     onEdit(contractId);
   }, [contractId, onEdit]);
+  
+  const handleDelete = useCallback(() => {
+    onDelete(contractId);
+  }, [contractId, onDelete]);
 
   return (
     <div className="flex justify-end gap-2">
@@ -36,6 +41,14 @@ const ContractActions = ({ contractId, onDetails, onEdit }: ContractActionsProps
         onClick={handleEdit}
       >
         <Edit className="h-4 w-4 mr-1" /> Modifier
+      </Button>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="h-8 px-2"
+        onClick={handleDelete}
+      >
+        <Trash2 className="h-4 w-4 mr-1 text-red-500" /> Supprimer
       </Button>
     </div>
   );

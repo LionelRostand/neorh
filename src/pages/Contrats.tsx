@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { 
   Card, 
@@ -12,6 +13,7 @@ import ContractSearch from "@/components/contracts/ContractSearch";
 import ContractTable from "@/components/contracts/ContractTable";
 import NewContractDialog from "@/components/contracts/NewContractDialog";
 import ViewContractDialog from "@/components/contracts/ViewContractDialog";
+import DeleteContractDialog from "@/components/contracts/DeleteContractDialog";
 import useFirestore from "@/hooks/useFirestore";
 
 const Contrats = () => {
@@ -21,6 +23,8 @@ const Contrats = () => {
   const [newContractDialogOpen, setNewContractDialogOpen] = useState(false);
   const [viewContractId, setViewContractId] = useState<string | null>(null);
   const [editContractId, setEditContractId] = useState<string | null>(null);
+  const [deleteContractId, setDeleteContractId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const firestore = useFirestore<Contract>('hr_contracts');
 
   // Fonction pour récupérer les contrats
@@ -85,6 +89,34 @@ const Contrats = () => {
     });
   };
 
+  // Nouvelle fonction pour gérer la demande de suppression
+  const handleDeleteRequest = (id: string) => {
+    setDeleteContractId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  // Fonction pour supprimer effectivement le contrat
+  const handleDeleteConfirm = async () => {
+    if (!deleteContractId) return;
+    
+    try {
+      await firestore.remove(deleteContractId);
+      toast({
+        title: "Suppression réussie",
+        description: "Le contrat a été supprimé avec succès"
+      });
+      // Rafraîchir la liste des contrats
+      fetchContracts();
+    } catch (error) {
+      console.error("Erreur lors de la suppression du contrat:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer le contrat"
+      });
+    }
+  };
+
   // Rafraîchir les contrats manuellement
   const handleRefresh = () => {
     fetchContracts();
@@ -143,6 +175,7 @@ const Contrats = () => {
               loading={loading}
               onDetails={handleDetails}
               onEdit={handleEdit}
+              onDelete={handleDeleteRequest}
             />
           </div>
         </CardContent>
@@ -158,6 +191,13 @@ const Contrats = () => {
         open={!!viewContractId}
         onClose={() => setViewContractId(null)}
         contractId={viewContractId}
+      />
+
+      <DeleteContractDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        contractId={deleteContractId}
       />
     </div>
   );
