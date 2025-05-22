@@ -1,6 +1,7 @@
 
 import { Document } from '@/lib/constants';
 
+// Make sure we're clearly exporting the ContractData interface
 export interface ContractData {
   id: string;
   employeeId: string;
@@ -12,7 +13,7 @@ export interface ContractData {
   startDate: Date;
   endDate?: Date;
   salary: string;
-  status: 'draft' | 'pending_signature' | 'active' | 'signed';
+  status: 'draft' | 'pending_signature' | 'active' | 'signed' | 'expired';
   signedByEmployee: boolean;
   signedByEmployer: boolean;
   conventionCollective?: string;

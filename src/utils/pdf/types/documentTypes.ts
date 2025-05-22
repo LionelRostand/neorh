@@ -34,5 +34,5 @@ export interface PdfResult {
   blob: Blob;
 }
 
-// Fix for TypeScript 'isolatedModules': use 'export type' for re-exporting types
+// Explicitly re-export types from contractTypes.ts using 'export type'
 export type { ContractData, PdfResult as ContractPdfResult } from './contractTypes';
