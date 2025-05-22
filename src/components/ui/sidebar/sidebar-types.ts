@@ -1,8 +1,7 @@
 
-import { VariantProps } from "class-variance-authority"
-import { sidebarMenuButtonVariants } from "./sidebar-menu"
-import { ReactNode } from "react"
 import { TooltipContent } from "../tooltip"
+import { VariantProps } from "class-variance-authority"
+import { sidebarMenuButtonVariants } from "./sidebar-menu/sidebar-menu-button"
 
 export type SidebarContext = {
   state: "expanded" | "collapsed"
