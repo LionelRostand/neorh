@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Edit, Save, Plus, Clock } from "lucide-react";
+import { Edit, Save, Plus } from "lucide-react";
 import { useEmployeeSchedules } from './useEmployeeSchedules';
 import ScheduleForm from './ScheduleForm';
 import ScheduleTable from './ScheduleTable';
@@ -24,10 +24,9 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
   
   // Fonction pour activer directement le mode édition et ajouter un horaire
   const handleAddScheduleFromTable = () => {
-    // D'abord activer le mode édition 
     setIsEditing(true);
-    // Ajouter un nouvel horaire après le changement de mode
-    setTimeout(() => handleAddSchedule(), 100);
+    // Ajouter un nouvel horaire après un court délai pour s'assurer que le mode édition est activé
+    setTimeout(handleAddSchedule, 50);
   };
 
   // Afficher un état de chargement pendant la récupération des données
@@ -39,8 +38,6 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
           <Skeleton className="h-10 w-24" />
         </div>
         <div className="space-y-4">
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
           <Skeleton className="h-12 w-full" />
@@ -95,7 +92,6 @@ const EmployeeHoraires: React.FC<EmployeeHorairesProps> = ({ employee, onRefresh
       ) : (
         <ScheduleTable 
           schedules={schedules} 
-          isLoading={false} 
           onAddSchedule={handleAddScheduleFromTable}
         />
       )}

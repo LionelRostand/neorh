@@ -8,21 +8,14 @@ import { Card } from '@/components/ui/card';
 
 interface ScheduleTableProps {
   schedules: WorkSchedule[];
-  isLoading?: boolean;
   onAddSchedule?: () => void;
 }
 
-const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules, isLoading = false, onAddSchedule }) => {
-  if (isLoading) {
-    return (
-      <div className="p-8 text-center border rounded-lg bg-gray-50">
-        <Clock className="mx-auto h-12 w-12 text-blue-400 animate-pulse" />
-        <h3 className="mt-2 text-sm font-medium text-gray-900">Chargement des horaires...</h3>
-      </div>
-    );
-  }
+const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules, onAddSchedule }) => {
+  // Vérifier si le tableau de schedules est vide ou non défini
+  const hasSchedules = Array.isArray(schedules) && schedules.length > 0;
   
-  if (!schedules || schedules.length === 0) {
+  if (!hasSchedules) {
     return (
       <Card className="p-8 text-center border bg-gray-50">
         <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
@@ -42,8 +35,8 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules, isLoading = fa
     );
   }
 
-  // Assurons-nous que schedules est un tableau avant de l'utiliser
-  const validSchedules = Array.isArray(schedules) ? schedules : [];
+  // Utiliser une copie triée des horaires pour l'affichage
+  const sortedSchedules = [...schedules].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
 
   return (
     <div className="space-y-4">
@@ -55,10 +48,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedules, isLoading = fa
           </TableRow>
         </TableHeader>
         <TableBody>
-          {validSchedules
-            .slice() // Créer une copie pour éviter la mutation
-            .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
-            .map((schedule, index) => (
+          {sortedSchedules.map((schedule, index) => (
             <TableRow key={schedule.id || index}>
               <TableCell>
                 <div className="flex items-center">

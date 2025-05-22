@@ -1,2 +1,4 @@
 
-export { default } from './EmployeeHoraires';
+import EmployeeHoraires from './EmployeeHoraires';
+
+export default EmployeeHoraires;
