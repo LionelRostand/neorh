@@ -11,7 +11,7 @@ import useRecruitmentFirebaseData from "@/hooks/useRecruitmentFirebaseData";
 import useRecruitmentToEmployee from "@/hooks/useRecruitmentToEmployee";
 
 const Recrutement = () => {
-  const { posts, loading, error, updatePostStatus, createNewPost } = useRecruitmentFirebaseData();
+  const { posts, loading, error, updatePostStatus, updatePostDescription, createNewPost } = useRecruitmentFirebaseData();
   const { converting, convertToEmployee } = useRecruitmentToEmployee();
 
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');

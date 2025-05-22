@@ -33,7 +33,7 @@ const DepartmentField = () => {
             onValueChange={(value) => {
               field.onChange(value);
               // Mettre à jour le nom affiché
-              const deptName = departments.find(dept => dept.id === value)?.name;
+              const deptName = departments?.find(dept => dept.id === value)?.name;
               if (deptName) {
                 setSelectedDepartmentName(deptName);
               }

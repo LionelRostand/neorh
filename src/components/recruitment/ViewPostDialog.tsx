@@ -23,8 +23,7 @@ import { fr } from 'date-fns/locale';
 import { RecruitmentPost } from "@/types/recruitment";
 import { Textarea } from "@/components/ui/textarea";
 import { useDepartmentsData } from "@/hooks/useDepartmentsData";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import useRecruitmentFirebaseData from "@/hooks/useRecruitmentFirebaseData";
 import { toast } from "@/components/ui/use-toast";
 
 interface ViewPostDialogProps {
@@ -48,6 +47,7 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
   const [description, setDescription] = useState<string>("");
   const [isUpdatingDescription, setIsUpdatingDescription] = useState(false);
   const { departments } = useDepartmentsData();
+  const { updatePostDescription } = useRecruitmentFirebaseData();
 
   useEffect(() => {
     if (post) {
@@ -78,15 +78,14 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
 
     try {
       setIsUpdatingDescription(true);
-      const postRef = doc(db, 'hr_recruitment', post.id);
-      await updateDoc(postRef, {
-        description: description
-      });
+      const success = await updatePostDescription(post.id, description);
       
-      toast({
-        title: "Description mise à jour",
-        description: "La description a été enregistrée avec succès"
-      });
+      if (success) {
+        toast({
+          title: "Description mise à jour",
+          description: "La description a été enregistrée avec succès"
+        });
+      }
     } catch (error) {
       console.error("Erreur lors de la mise à jour de la description:", error);
       toast({
@@ -100,7 +99,7 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
   };
 
   // Récupérer le nom du département à partir de son ID
-  const departmentName = departments.find(dept => dept.id === post.department)?.name || post.department;
+  const departmentName = departments?.find(dept => dept.id === post.department)?.name || "Département inconnu";
 
   const statusOptions = [
     { value: 'ouverte', label: 'Ouverte', color: 'bg-blue-100 text-blue-800' },
