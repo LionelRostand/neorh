@@ -43,46 +43,53 @@ export const useEmployeeLeaves = (employeeId: string) => {
     return () => {
       isMountedRef.current = false;
       dataLoadedRef.current = false;
+      lastFetchedIdRef.current = "";
     };
   }, []);
 
-  // Contrôle des appels pour éviter les boucles infinies
+  // Fix pour éviter les boucles infinies - Ne charger que si nécessaire
   useEffect(() => {
-    if (!employeeId || !isMountedRef.current || employeeId === lastFetchedIdRef.current) {
+    // Éviter les appels multiples pour le même employé ou si l'ID est vide
+    if (!employeeId || employeeId === lastFetchedIdRef.current || !isMountedRef.current || dataLoadedRef.current) {
       return;
     }
 
-    console.log(`[useEmployeeLeaves] Fetching data for employee: ${employeeId}`);
+    // Journalisation pour débogage
+    console.log(`[useEmployeeLeaves] Chargement initial des données pour l'employé: ${employeeId}`);
+    
+    // Marquer comme déjà chargé pour éviter les appels répétés
     lastFetchedIdRef.current = employeeId;
     dataLoadedRef.current = true;
     
-    // Load leaves and allocations in parallel
+    // Charger les congés et allocations en parallèle
     Promise.all([
       fetchLeaves(),
       fetchAllocation()
     ]).catch(err => {
-      console.error(`[useEmployeeLeaves] Error during fetch:`, err);
+      console.error(`[useEmployeeLeaves] Erreur lors du chargement:`, err);
+      // En cas d'erreur, réinitialiser pour permettre une nouvelle tentative
+      dataLoadedRef.current = false;
     });
   }, [employeeId, fetchLeaves, fetchAllocation]);
 
-  // Use useCallback for refetch function to avoid unnecessary rerenders
+  // Fonction pour recharger manuellement les données (uniquement sur demande explicite)
   const refetch = useCallback(() => {
     if (!employeeId || !isMountedRef.current) {
       return;
     }
     
-    console.log(`[useEmployeeLeaves] Manual refetch for employee: ${employeeId}`);
+    console.log(`[useEmployeeLeaves] Rechargement manuel pour l'employé: ${employeeId}`);
     
-    // Load leaves and allocations in parallel
+    // Charger les congés et allocations en parallèle
     Promise.all([
       fetchLeaves(),
       fetchAllocation()
     ]).catch(err => {
-      console.error(`[useEmployeeLeaves] Error during refetch:`, err);
+      console.error(`[useEmployeeLeaves] Erreur lors du rechargement:`, err);
     });
   }, [employeeId, fetchLeaves, fetchAllocation]);
 
-  // Memoize derived values to prevent unnecessary re-renders
+  // Valeurs dérivées mémorisées pour éviter les re-rendus inutiles
   const paidLeavesRemaining = useMemo(() => {
     return allocation ? allocation.paidLeavesTotal - allocation.paidLeavesUsed : 0;
   }, [allocation]);

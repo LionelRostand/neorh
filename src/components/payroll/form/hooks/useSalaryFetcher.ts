@@ -13,25 +13,30 @@ export const useSalaryFetcher = (
   const [salaryValue, setSalaryValue] = useState<string>("");
   const previousEmployeeId = useRef<string>("");
   const isFetchingRef = useRef(false);
+  const fetchAttemptedRef = useRef(false);
   
-  // Update salary when employee selection changes
+  // Effectuer une seule tentative de récupération du salaire par employé
   useEffect(() => {
     const employeeId = form.getValues("employee");
     
-    // Éviter les appels répétés pour le même employé
-    if (!employeeId || employeeId === previousEmployeeId.current || isFetchingRef.current) {
+    // Éviter les appels répétés pour le même employé ou si déjà en cours de récupération
+    if (!employeeId || 
+        employeeId === previousEmployeeId.current || 
+        isFetchingRef.current ||
+        (employeeId === previousEmployeeId.current && fetchAttemptedRef.current)) {
       return;
     }
     
-    // Show loading state
+    // Indiquer le chargement
     setSalaryValue("Chargement du salaire...");
     isFetchingRef.current = true;
     previousEmployeeId.current = employeeId;
+    fetchAttemptedRef.current = true;
     
-    // Find active contract for the selected employee
+    // Chercher le contrat actif pour l'employé sélectionné
     const fetchEmployeeSalary = async () => {
       try {
-        // First try to find the salary in the loaded contracts
+        // D'abord essayer de trouver le salaire dans les contrats chargés
         if (contracts && contracts.length > 0) {
           const employeeContract = contracts.find(
             (contract) => contract.employeeId === employeeId && contract.status === "active"

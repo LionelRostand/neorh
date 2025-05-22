@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEmployeeData } from "@/hooks/useEmployeeData";
@@ -20,8 +20,10 @@ export { type PayslipFormValues } from "./types";
 export const usePayslipForm = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   
+  // Référence pour suivre les changements d'employé
+  const employeeChangeRef = useRef(false);
+  
   // Data loading hooks
-  // Utiliser { skipAutoFetch: true } pour éviter les appels automatiques
   const { employees, isLoading: employeesLoading } = useEmployeeData();
   const { companies, isLoading: companiesLoading } = useCompaniesData();
   const { contracts, loading: contractsLoading } = useContractsList();
@@ -43,12 +45,14 @@ export const usePayslipForm = () => {
     },
   });
 
-  // Watch for employee changes to fetch leave allocation
-  // Utilisation de useEffect avec dépendances correctes
+  // Observer les changements d'employé de manière contrôlée
   const employeeId = form.watch("employee");
   
+  // Utiliser useEffect avec une référence pour éviter les boucles
   useEffect(() => {
-    if (employeeId !== selectedEmployeeId) {
+    if (employeeId !== selectedEmployeeId && employeeId) {
+      console.log(`[usePayslipForm] Changement d'employé détecté: ${employeeId}`);
+      employeeChangeRef.current = true;
       setSelectedEmployeeId(employeeId);
     }
   }, [employeeId, selectedEmployeeId]);
