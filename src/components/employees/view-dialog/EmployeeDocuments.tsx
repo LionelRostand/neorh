@@ -1,16 +1,11 @@
 
-import React, { useEffect, useState, useRef } from 'react';
-import { Document } from '@/lib/constants';
+import React from 'react';
 import { Employee } from '@/types/employee';
-import { Button } from '@/components/ui/button';
-import { Plus, FileText } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from '@/components/ui/use-toast';
-import useFirestore from '@/hooks/useFirestore';
-import DocumentCard from '@/components/documents/EmployeeDocumentCard';
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
-import { db } from '@/lib/firebase';
-import { HR } from '@/lib/constants/collections';
+import { useEmployeeDocuments } from '@/hooks/useEmployeeDocuments';
+import DocumentsHeader from './document-components/DocumentsHeader';
+import DocumentsLoadingSkeleton from './document-components/DocumentsLoadingSkeleton';
+import EmptyDocumentsState from './document-components/EmptyDocumentsState';
+import DocumentsGrid from './document-components/DocumentsGrid';
 
 interface EmployeeDocumentsProps {
   employee: Employee;
@@ -18,187 +13,36 @@ interface EmployeeDocumentsProps {
 }
 
 const EmployeeDocuments: React.FC<EmployeeDocumentsProps> = ({ employee, onRefresh }) => {
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [fetchCompleted, setFetchCompleted] = useState(false);
-  const documentsCollection = useFirestore<Document>("hr_documents");
-  
-  // Références pour éviter les appels multiples
-  const fetchInProgress = useRef(false);
-  const lastFetchedEmployeeId = useRef<string | null>(null);
+  const { 
+    documents, 
+    loading, 
+    handleRefresh 
+  } = useEmployeeDocuments(employee);
 
-  const fetchEmployeeDocuments = async () => {
-    if (!employee?.id) return;
-    
-    // Vérifier si une requête est déjà en cours pour le même employé
-    if (fetchInProgress.current) {
-      console.log("Requête de documents employé déjà en cours, annulation du doublon");
-      return;
-    }
-    
-    // Si les documents ont déjà été chargés pour cet employé, ne pas recharger
-    if (lastFetchedEmployeeId.current === employee.id && documents.length > 0 && !loading) {
-      console.log("Documents déjà chargés pour cet employé");
-      return;
-    }
-    
-    try {
-      fetchInProgress.current = true;
-      setLoading(true);
-      setFetchCompleted(false);
-      
-      console.log(`Fetching documents for employee: ${employee.id}`);
-      
-      // Deux façons de récupérer les documents: 
-      // 1. Avec useFirestore
-      const result = await documentsCollection.search({
-        field: "employeeId",
-        operator: "==", 
-        value: employee.id
-      });
-      
-      let fetchedDocs: Document[] = [];
-      
-      if (result.docs) {
-        fetchedDocs = result.docs.map(doc => ({
-          id: doc.id || '',
-          title: doc.title || 'Document sans nom',
-          category: doc.category || 'other',
-          fileUrl: doc.fileUrl || '',
-          fileType: doc.fileType || 'application/pdf',
-          uploadDate: doc.uploadDate || new Date().toISOString(),
-          status: doc.status || 'active',
-          employeeId: doc.employeeId,
-          employeeName: doc.employeeName,
-          contractId: doc.contractId,
-          description: doc.description,
-          signedByEmployee: doc.signedByEmployee || false,
-          signedByEmployer: doc.signedByEmployer || false
-        }));
-      }
-      
-      // 2. Récupérer directement les fiches de paie de l'employé
-      const payslipsQuery = query(
-        collection(db, HR.PAYSLIPS),
-        where("employeeId", "==", employee.id),
-        orderBy("createdAt", "desc")
-      );
-      
-      const payslipsSnapshot = await getDocs(payslipsQuery);
-      const payslipsDocs: Document[] = [];
-      
-      payslipsSnapshot.forEach((doc) => {
-        const data = doc.data();
-        payslipsDocs.push({
-          id: doc.id,
-          title: `Fiche de paie - ${data.period}`,
-          category: 'paystubs',
-          fileUrl: data.fileUrl || '',
-          fileType: 'application/pdf',
-          uploadDate: data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
-          status: 'active',
-          employeeId: data.employeeId,
-          employeeName: data.employeeName,
-          description: `Fiche de paie pour la période ${data.period}`
-        });
-      });
-      
-      // Combiner les résultats
-      const allDocs = [...fetchedDocs, ...payslipsDocs];
-      
-      console.log(`Found ${allDocs.length} documents for employee ${employee.id}`);
-      setDocuments(allDocs);
-      lastFetchedEmployeeId.current = employee.id;
-      
-    } catch (error) {
-      console.error('Error fetching employee documents:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de récupérer les documents de l'employé",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-      setFetchCompleted(true);
-      fetchInProgress.current = false;
-    }
-  };
-
-  useEffect(() => {
-    // Ne charger les documents que si l'ID de l'employé change
-    if (employee.id && lastFetchedEmployeeId.current !== employee.id) {
-      fetchEmployeeDocuments();
-    }
-  }, [employee.id]);
-
-  // Fonction de rafraîchissement pour être appelée après la suppression d'un document
-  const handleRefresh = () => {
-    lastFetchedEmployeeId.current = null; // Réinitialiser l'ID pour forcer le rechargement
-    fetchEmployeeDocuments();
+  // Handle refresh including callback to parent
+  const refreshDocuments = () => {
+    handleRefresh();
     if (onRefresh) {
       onRefresh();
     }
   };
 
-  // Rendu du contenu selon l'état
+  // Render content based on state
   const renderContent = () => {
     if (loading) {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[1, 2].map((_, index) => (
-            <div key={index} className="border rounded-lg p-4 space-y-3">
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-4 w-2/3" />
-              <div className="flex justify-between mt-4 pt-4 border-t">
-                <Skeleton className="h-8 w-24" />
-                <Skeleton className="h-8 w-24" />
-              </div>
-            </div>
-          ))}
-        </div>
-      );
+      return <DocumentsLoadingSkeleton />;
     }
 
     if (documents.length === 0) {
-      return (
-        <div className="text-center py-10 border rounded-lg">
-          <FileText className="mx-auto h-12 w-12 text-gray-300" />
-          <h3 className="mt-2 text-sm font-semibold text-gray-900">Aucun document</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Cet employé n'a aucun document associé.
-          </p>
-        </div>
-      );
+      return <EmptyDocumentsState />;
     }
 
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {documents.map((document) => (
-          <DocumentCard
-            key={document.id}
-            document={document}
-            onRefresh={handleRefresh}
-          />
-        ))}
-      </div>
-    );
+    return <DocumentsGrid documents={documents} onRefresh={refreshDocuments} />;
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-semibold">Documents</h3>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex items-center gap-1 bg-white border-emerald-600 text-emerald-600 hover:bg-emerald-50"
-        >
-          <Plus className="h-4 w-4" />
-          Ajouter un document
-        </Button>
-      </div>
-      
+      <DocumentsHeader />
       {renderContent()}
     </div>
   );
