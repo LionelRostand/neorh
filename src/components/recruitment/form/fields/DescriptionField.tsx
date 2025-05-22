@@ -17,8 +17,8 @@ const DescriptionField = () => {
           <FormLabel>Description</FormLabel>
           <FormControl>
             <Textarea
-              placeholder="Description du poste et responsabilités"
-              className="min-h-[100px]"
+              placeholder="Description détaillée du poste et responsabilités"
+              className="min-h-[150px]"
               {...field}
             />
           </FormControl>

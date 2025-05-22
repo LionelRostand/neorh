@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,11 @@ import { Calendar, MapPin, Users, Briefcase, Clock } from "lucide-react";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { RecruitmentPost } from "@/types/recruitment";
+import { Textarea } from "@/components/ui/textarea";
+import { useDepartmentsData } from "@/hooks/useDepartmentsData";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { toast } from "@/components/ui/use-toast";
 
 interface ViewPostDialogProps {
   open: boolean;
@@ -40,6 +45,15 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
   isConverting
 }) => {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [description, setDescription] = useState<string>("");
+  const [isUpdatingDescription, setIsUpdatingDescription] = useState(false);
+  const { departments } = useDepartmentsData();
+
+  useEffect(() => {
+    if (post) {
+      setDescription(post.description || "");
+    }
+  }, [post]);
 
   if (!post) return null;
 
@@ -54,6 +68,39 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
   const handleConvertToEmployee = () => {
     onConvertToEmployee(post);
   };
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDescription(e.target.value);
+  };
+
+  const handleDescriptionSave = async () => {
+    if (!post) return;
+
+    try {
+      setIsUpdatingDescription(true);
+      const postRef = doc(db, 'hr_recruitment', post.id);
+      await updateDoc(postRef, {
+        description: description
+      });
+      
+      toast({
+        title: "Description mise à jour",
+        description: "La description a été enregistrée avec succès"
+      });
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour de la description:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour la description"
+      });
+    } finally {
+      setIsUpdatingDescription(false);
+    }
+  };
+
+  // Récupérer le nom du département à partir de son ID
+  const departmentName = departments.find(dept => dept.id === post.department)?.name || post.department;
 
   const statusOptions = [
     { value: 'ouverte', label: 'Ouverte', color: 'bg-blue-100 text-blue-800' },
@@ -88,7 +135,21 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
               <CardContent className="space-y-4">
                 <div>
                   <h3 className="text-sm font-medium mb-2">Description</h3>
-                  <p className="text-sm text-gray-600">{post.description || "Aucune description disponible."}</p>
+                  <Textarea 
+                    value={description} 
+                    onChange={handleDescriptionChange}
+                    className="w-full min-h-[100px]"
+                    placeholder="Ajoutez une description pour ce poste..."
+                  />
+                  <div className="flex justify-end mt-2">
+                    <Button 
+                      size="sm" 
+                      onClick={handleDescriptionSave}
+                      disabled={isUpdatingDescription}
+                    >
+                      {isUpdatingDescription ? "Enregistrement..." : "Enregistrer"}
+                    </Button>
+                  </div>
                 </div>
 
                 {post.requirements && post.requirements.length > 0 && (
@@ -139,7 +200,7 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
                   <li className="flex items-center gap-2 text-sm">
                     <Briefcase className="h-4 w-4 text-gray-500" />
                     <span className="text-gray-500">Département:</span>
-                    <span>{post.department}</span>
+                    <span>{departmentName}</span>
                   </li>
                   {post.location && (
                     <li className="flex items-center gap-2 text-sm">

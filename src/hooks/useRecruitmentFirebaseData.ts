@@ -72,6 +72,33 @@ export const useRecruitmentFirebaseData = () => {
     }
   };
 
+  const updatePostDescription = async (postId: string, description: string) => {
+    try {
+      const postRef = doc(db, 'hr_recruitment', postId);
+      await updateDoc(postRef, {
+        description,
+        updatedAt: new Date().toISOString()
+      });
+      
+      toast({
+        title: "Description mise à jour",
+        description: "La description de l'offre a été mise à jour avec succès"
+      });
+      
+      return true;
+    } catch (err) {
+      console.error('Error updating post description:', err);
+      
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de mettre à jour la description de l'offre"
+      });
+      
+      return false;
+    }
+  };
+
   const createNewPost = async (postData: Omit<RecruitmentPost, 'id' | 'createdAt'>) => {
     try {
       const recruitmentRef = collection(db, 'hr_recruitment');
@@ -107,6 +134,7 @@ export const useRecruitmentFirebaseData = () => {
     loading,
     error,
     updatePostStatus,
+    updatePostDescription,
     createNewPost
   };
 };
