@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -112,7 +111,7 @@ const DocumentsRH = () => {
   });
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="w-full h-full p-4 md:p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">Gestion des documents</h1>
@@ -131,7 +130,7 @@ const DocumentsRH = () => {
         expired={contractStats.expired}
       />
 
-      <div className="bg-white border rounded-lg p-4">
+      <div className="bg-white border rounded-lg p-4 w-full">
         <DocumentFilter 
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
