@@ -1,4 +1,3 @@
-
 // Define the mapping between routes and Firestore collections
 export const ROUTE_TO_COLLECTION_MAP = {
   '/employes': 'hr_employees',
@@ -102,7 +101,8 @@ export type Contract = {
   departmentName?: string;
   signedByEmployee?: boolean;
   signedByEmployer?: boolean;
-  salary?: string | number; // Added salary property
+  salary?: string | number;
+  conventionCollective?: string; // Ajout de la propriété conventionCollective
 }
 
 export type Document = {
