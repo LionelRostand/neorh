@@ -37,5 +37,30 @@ export const employeeService = {
       console.error('Erreur lors de la récupération des informations de l\'employé:', error);
       return { employee: null, managerId: undefined };
     }
+  },
+
+  /**
+   * Récupérer le nom d'un département à partir de son ID
+   */
+  fetchDepartmentName: async (departmentId: string): Promise<string> => {
+    try {
+      if (!departmentId) {
+        return 'Non spécifié';
+      }
+      
+      // Récupérer le département
+      const deptRef = doc(db, HR.DEPARTMENTS, departmentId);
+      const deptSnap = await getDoc(deptRef);
+      
+      if (!deptSnap.exists()) {
+        return 'Département inconnu';
+      }
+      
+      const deptData = deptSnap.data();
+      return deptData.name || 'Sans nom';
+    } catch (error) {
+      console.error('Erreur lors de la récupération du nom du département:', error);
+      return 'Erreur de chargement';
+    }
   }
 };
