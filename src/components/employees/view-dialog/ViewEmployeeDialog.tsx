@@ -25,17 +25,24 @@ const ViewEmployeeDialog: React.FC<ViewEmployeeDialogProps> = ({
   const [activeTab, setActiveTab] = useState("informations");
   const [isExporting, setIsExporting] = useState(false);
   const { companies } = useCompaniesData();
-  const { departments } = useDepartmentsData();
+  const { departments, isLoading: departmentsLoading } = useDepartmentsData();
   
   if (!employee) return null;
   
-  // Chercher le nom du département correspondant à l'ID du département de l'employé
+  // Create a processed copy of employee data with proper department name
   let processedEmployee = { ...employee };
   
-  if (employee.departmentId && departments?.length > 0) {
+  // Make sure we have departments data and a department ID to look up
+  if (employee.departmentId && departments && departments.length > 0) {
+    // Find the department by ID
     const department = departments.find(d => d.id === employee.departmentId);
-    if (department) {
+    
+    if (department && department.name) {
+      // Set the department name in our processed employee object
       processedEmployee.department = department.name;
+      console.log("Found department name:", department.name);
+    } else {
+      console.log("Department not found for ID:", employee.departmentId);
     }
   }
   

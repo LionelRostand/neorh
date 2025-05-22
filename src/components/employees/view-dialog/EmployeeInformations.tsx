@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Employee } from '@/types/employee';
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,8 +13,12 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
   const [companyName, setCompanyName] = useState<string>('Non spécifié');
 
   useEffect(() => {
-    // Gestion du département
-    if (employee.departmentId) {
+    // Update department name if it's already provided in the employee object
+    if (employee.department) {
+      setDepartmentName(employee.department);
+    } 
+    // Otherwise, fetch from Firestore if we have departmentId
+    else if (employee.departmentId) {
       const fetchDepartmentName = async () => {
         try {
           const deptRef = doc(db, 'hr_departments', employee.departmentId);
@@ -24,6 +27,9 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
           if (deptSnap.exists()) {
             const deptData = deptSnap.data();
             setDepartmentName(deptData.name || 'Non spécifié');
+            console.log("Fetched department name:", deptData.name);
+          } else {
+            console.log("Department document does not exist for ID:", employee.departmentId);
           }
         } catch (error) {
           console.error("Erreur lors de la récupération du département:", error);
@@ -51,7 +57,7 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
       
       fetchCompanyName();
     }
-  }, [employee.departmentId, employee.companyId]);
+  }, [employee.departmentId, employee.companyId, employee.department]);
 
   return (
     <div className="space-y-6">

@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, FileDown, UserCircle } from "lucide-react";
+import { X, FileDown } from "lucide-react";
 import { Employee } from '@/types/employee';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
