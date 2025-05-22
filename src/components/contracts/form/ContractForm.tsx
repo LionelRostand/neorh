@@ -2,8 +2,15 @@
 import React from 'react';
 import { Form } from '@/components/ui/form';
 import { useContractForm } from './hooks/useContractForm';
-import FormFields from './components/FormFields';
 import FormFooter from './components/FormFooter';
+import EmployeeNameField from './fields/EmployeeNameField';
+import PositionField from './fields/PositionField';
+import ContractTypeField from './fields/ContractTypeField';
+import DateFields from './fields/DateFields';
+import DepartmentField from './fields/DepartmentField';
+import SalaryField from './fields/SalaryField';
+import ConventionCollectiveField from './fields/ConventionCollectiveField';
+import StatusField from './fields/StatusField';
 
 interface ContractFormProps {
   onCancel?: () => void;
@@ -19,14 +26,19 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <FormFields 
-          control={form.control}
-          setValue={form.setValue}
-          watch={form.watch}
-          employees={employees}
-          departments={departments}
-          employeeName={form.watch('employeeName')}
-        />
+        <div className="space-y-4">
+          <EmployeeNameField control={form.control} />
+          <PositionField control={form.control} />
+          <ContractTypeField control={form.control} />
+          <DateFields control={form.control} />
+          <DepartmentField 
+            control={form.control} 
+            departments={departments} 
+          />
+          <SalaryField control={form.control} />
+          <ConventionCollectiveField control={form.control} />
+          <StatusField control={form.control} />
+        </div>
         
         <FormFooter
           onCancel={onCancel}
