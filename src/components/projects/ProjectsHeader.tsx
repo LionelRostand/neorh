@@ -9,7 +9,7 @@ interface ProjectsHeaderProps {
 
 const ProjectsHeader: React.FC<ProjectsHeaderProps> = ({ onNewProject }) => {
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center p-4">
       <h1 className="text-2xl font-bold">Gestion des projets</h1>
       <Button onClick={onNewProject}>
         <Plus className="h-4 w-4 mr-2" />

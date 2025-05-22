@@ -11,24 +11,32 @@ export const useDepartmentsData = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const isMounted = useRef(true);
-  const hasRun = useRef(false);
 
   const fetchDepartments = useCallback(async () => {
-    // Nous allons toujours exécuter la requête pour s'assurer que les données sont chargées
+    console.log('Starting to fetch departments');
     setIsLoading(true);
     setError(null);
     
     try {
-      console.log('Fetching departments from Firestore');
+      console.log('Fetching departments from Firestore...');
       const departmentsCollection = collection(db, 'hr_departments');
       const departmentsSnapshot = await getDocs(departmentsCollection);
       
       // Check if component is still mounted
-      if (!isMounted.current) return;
+      if (!isMounted.current) {
+        console.log('Component unmounted, skipping state update');
+        return;
+      }
       
       if (departmentsSnapshot.empty) {
         console.log('No departments found in Firestore');
         setDepartments([]);
+        
+        toast({
+          title: "Information",
+          description: "Aucun département trouvé dans la base de données.",
+          variant: "default"
+        });
       } else {
         const departmentsData = departmentsSnapshot.docs.map(doc => ({
           id: doc.id,
@@ -45,9 +53,6 @@ export const useDepartmentsData = () => {
         console.log(`Retrieved ${departmentsData.length} departments`);
         setDepartments(departmentsData);
       }
-      
-      // Mark that we've run the fetch
-      hasRun.current = true;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
       console.error('Error fetching departments:', errorMessage);
@@ -64,19 +69,23 @@ export const useDepartmentsData = () => {
     } finally {
       if (isMounted.current) {
         setIsLoading(false);
+        console.log('Finished fetching departments');
       }
     }
   }, []);
   
   // Manual refetch that bypasses the hasRun check
   const refetch = useCallback(async () => {
+    console.log('Manually refetching departments');
     await fetchDepartments();
   }, [fetchDepartments]);
 
   useEffect(() => {
+    console.log('Department data hook initialized');
     fetchDepartments();
     
     return () => {
+      console.log('Department data hook cleanup');
       isMounted.current = false;
     };
   }, [fetchDepartments]);

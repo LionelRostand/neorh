@@ -7,7 +7,7 @@ interface DepartmentsDebugInfoProps {
 
 const DepartmentsDebugInfo: React.FC<DepartmentsDebugInfoProps> = ({ count }) => {
   return (
-    <div className="text-xs text-gray-500 mt-4">
+    <div className="text-xs text-gray-500 text-center pt-4 border-t">
       Nombre de départements: {count}
     </div>
   );
