@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { type UseFormReturn } from "react-hook-form";
-import { type PayslipFormValues } from "./usePayslipForm";
+import { type PayslipFormValues } from "./types";
 
 interface PeriodSalaryFieldsProps {
   form: UseFormReturn<PayslipFormValues>;
