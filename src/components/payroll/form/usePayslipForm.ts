@@ -7,7 +7,8 @@ import { useCompaniesData } from "@/hooks/useCompaniesData";
 import useContractsList from "@/hooks/contracts/useContractsList";
 import { toast } from "@/components/ui/use-toast";
 import { payslipFormSchema } from "./schema";
-import { generatePayslipPdf } from "@/utils/pdf/generatePayslipPdf";
+import { generatePayslip } from "@/utils/pdf/payslip";
+import { PayslipData } from "@/utils/pdf/payslip/types";
 import { PayslipFormValues } from "./types";
 import { useSalaryFetcher } from "./hooks/useSalaryFetcher";
 import { generateMonthlyPeriods } from "./utils/periodUtils";
@@ -80,7 +81,7 @@ export const usePayslipForm = () => {
       const periodLabel = periods.find(p => p.id === data.period)?.label || data.period;
       
       // Generate PDF with leave allocation data
-      const payslipPdf = generatePayslipPdf({
+      const payslipData: PayslipData = {
         employee,
         company,
         period: periodLabel,
@@ -89,7 +90,9 @@ export const usePayslipForm = () => {
         overtimeRate: data.overtimeRate,
         date: new Date(),
         leaveAllocation: allocation,
-      });
+      };
+      
+      const payslipPdf = generatePayslip(payslipData);
       
       // Save to Firestore
       await savePayslipToFirestore(
