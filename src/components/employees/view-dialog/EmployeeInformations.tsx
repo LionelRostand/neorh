@@ -1,8 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { Employee } from '@/types/employee';
 import { Card, CardContent } from "@/components/ui/card";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { HR } from "@/lib/constants/collections";
 
 interface EmployeeInformationsProps {
   employee: Employee;
@@ -21,7 +23,7 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
     else if (employee.departmentId) {
       const fetchDepartmentName = async () => {
         try {
-          const deptRef = doc(db, 'hr_departments', employee.departmentId);
+          const deptRef = doc(db, HR.DEPARTMENTS, employee.departmentId);
           const deptSnap = await getDoc(deptRef);
           
           if (deptSnap.exists()) {

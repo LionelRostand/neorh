@@ -3,6 +3,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Employee } from '@/types/employee';
 import { employeeService } from '@/hooks/leaves/form/utils/employeeService';
+import { HR } from '@/lib/constants/collections';
 
 /**
  * Génère la section informations
@@ -73,19 +74,17 @@ export const generateInformationsTab = async (doc: jsPDF, employee: Employee) =>
   doc.setFont('helvetica', 'bold');
   doc.text('Informations professionnelles', 14, tableEndY);
 
-  // Utiliser le nom du département s'il est déjà fourni dans employee.department
+  // Utiliser le nom du département directement s'il est déjà fourni dans employee.department
   let departmentName = employee.department || 'Non spécifié';
   
-  // Si departmentId est présent et semble être un ID (non un nom lisible), récupérer le nom
-  if (employee.departmentId && !departmentName && 
-      (employee.departmentId.includes('@') || 
-       employee.departmentId.includes('-') || 
-       employee.departmentId.length > 25)) {
+  // Si departmentId est présent et que department n'est pas défini, récupérer le nom
+  if (employee.departmentId && !departmentName) {
     try {
-      // Limiter à une seule requête par département
+      // Tenter de récupérer le nom du département à partir de son ID
       departmentName = await employeeService.fetchDepartmentName(employee.departmentId);
     } catch (error) {
       console.error("Erreur lors de la récupération du nom du département:", error);
+      departmentName = 'Non spécifié';
     }
   }
   
