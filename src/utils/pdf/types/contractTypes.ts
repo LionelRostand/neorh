@@ -1,7 +1,9 @@
 
 import { Document } from '@/lib/constants';
 
-// Make sure we're clearly exporting the ContractData interface
+/**
+ * Interface définissant la structure des données d'un contrat
+ */
 export interface ContractData {
   id: string;
   employeeId: string;
@@ -20,10 +22,16 @@ export interface ContractData {
   additionalClauses?: string;
 }
 
+/**
+ * Résultat de la génération PDF
+ */
 export interface PdfResult {
   fileName: string;
   pdfData: Blob;
   pdfBase64: string;
 }
 
+/**
+ * Types de contrats disponibles
+ */
 export type ContractType = 'CDI' | 'CDD' | 'Interim' | 'Stage' | 'Apprentissage' | 'Freelance';

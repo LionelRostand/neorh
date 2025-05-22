@@ -1,53 +1,51 @@
 
+import { firestore } from 'firebase/app';
 import { ContractData, PdfResult } from '../types/contractTypes';
-import { Document } from '@/lib/constants';
+import { toast } from '@/components/ui/use-toast';
 
 /**
- * Saves the contract as a document in Firestore
+ * Sauvegarde le contrat en tant que document dans la base de données
  */
 export const saveContractAsDocument = async (
   contractData: ContractData,
-  pdfData: PdfResult,
-  firestore: any
-): Promise<Document> => {
+  pdfResult: PdfResult,
+  documentsCollection: any
+) => {
   try {
-    // Vérifier que les données nécessaires sont présentes
-    if (!contractData || !contractData.id) {
-      throw new Error('Données de contrat invalides');
-    }
+    console.log("Saving contract as document:", contractData.id);
     
-    if (!pdfData || !pdfData.pdfBase64) {
-      throw new Error('Données PDF invalides');
-    }
-    
-    // Create document object for hr_documents collection
-    const document: Document = {
-      id: contractData.id || Date.now().toString(),
-      title: `Contrat ${contractData.type} - ${contractData.employeeName}`,
-      category: 'contracts',
-      fileUrl: pdfData.pdfBase64,
-      fileType: 'application/pdf',
-      uploadDate: new Date().toISOString(),
-      status: contractData.status || 'pending_signature',
+    // Créer l'objet document
+    const document = {
+      name: `Contrat ${contractData.type} - ${contractData.employeeName}`,
+      description: `Contrat de travail ${contractData.type} pour ${contractData.employeeName}`,
       employeeId: contractData.employeeId,
-      employeeName: contractData.employeeName,
       contractId: contractData.id,
-      description: `Contrat de travail ${contractData.type} pour ${contractData.position}`,
-      signedByEmployee: false,
-      signedByEmployer: false,
+      departmentId: contractData.departmentId,
+      fileType: 'pdf',
+      category: 'contracts',
+      file: {
+        name: pdfResult.fileName,
+        base64: pdfResult.pdfBase64,
+        type: 'application/pdf'
+      },
+      uploadDate: new Date().toISOString(),
+      status: 'active',
+      tags: ['contrat', contractData.type.toLowerCase()]
     };
     
-    // Vérifier que firestore est disponible
-    if (!firestore || typeof firestore.add !== 'function') {
-      throw new Error('Firestore non disponible');
-    }
+    // Ajouter à la collection documents
+    const result = await documentsCollection.add(document);
     
-    // Save the document
-    await firestore.add(document);
+    console.log("Document saved with ID:", result.id);
     
-    return document;
+    return result;
   } catch (error) {
-    console.error('Erreur lors de la sauvegarde du document de contrat:', error);
+    console.error("Error saving contract as document:", error);
+    toast({
+      title: "Erreur",
+      description: "Impossible de sauvegarder le contrat en tant que document",
+      variant: "destructive"
+    });
     throw error;
   }
 };

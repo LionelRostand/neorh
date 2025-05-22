@@ -24,6 +24,15 @@ export const addSignatureSection = (
   // Signature lines
   const middleX = doc.internal.pageSize.width / 2;
   
+  // Draw signature boxes
+  // Employer signature box
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.1);
+  doc.rect(margin, yPosition - 25, 80, 35);
+  
+  // Employee signature box
+  doc.rect(middleX + 10, yPosition - 25, 80, 35);
+  
   // Draw signature lines
   doc.line(margin, yPosition, margin + 80, yPosition);
   doc.line(middleX + 10, yPosition, middleX + 90, yPosition);
@@ -42,5 +51,12 @@ export const addSignatureSection = (
   doc.text('Précédée de la mention « Lu et approuvé »', margin, yPosition);
   doc.text('Précédée de la mention « Lu et approuvé »', middleX + 10, yPosition);
   
-  return yPosition + 40;
+  // Add footer with confidentiality notice
+  yPosition += 40;
+  doc.setFontSize(7);
+  doc.setTextColor(100, 100, 100);
+  doc.text('Ce document est strictement confidentiel et établi conformément au droit du travail français. Il ne constitue pas un conseil juridique.',
+    doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+  
+  return yPosition;
 };

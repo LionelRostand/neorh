@@ -57,6 +57,8 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         position: data.position,
         startDate: data.startDate,
         departmentId: data.departmentId,
+        departmentName: department?.name || '',
+        salary: data.salary,
         status: 'pending_signature',
         signedByEmployee: false,
         signedByEmployer: false
@@ -65,10 +67,6 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
       // Only add endDate if it exists
       if (data.endDate) {
         contract.endDate = data.endDate;
-      }
-      
-      if (department?.name) {
-        contract.departmentName = department.name;
       }
       
       console.log("Création du contrat:", contract);
@@ -111,7 +109,8 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         salary: data.salary,
         status: 'pending_signature',
         signedByEmployee: false,
-        signedByEmployer: false
+        signedByEmployer: false,
+        conventionCollective: data.conventionCollective || 'Convention collective nationale applicable'
       };
       
       // Add endDate only if it exists

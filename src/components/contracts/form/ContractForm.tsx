@@ -10,6 +10,7 @@ import DepartmentField from './fields/DepartmentField';
 import SalaryField from './fields/SalaryField';
 import StatusField from './fields/StatusField';
 import EmployeeField from './fields/EmployeeField';
+import ConventionCollectiveField from './fields/ConventionCollectiveField';
 
 interface ContractFormProps {
   onCancel?: () => void;
@@ -47,6 +48,7 @@ const ContractForm: React.FC<ContractFormProps> = ({ onSuccess, onCancel }) => {
             departments={departments} 
           />
           <SalaryField control={form.control} />
+          <ConventionCollectiveField control={form.control} />
           <StatusField control={form.control} />
         </div>
         

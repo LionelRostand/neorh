@@ -34,5 +34,5 @@ export interface PdfResult {
   blob: Blob;
 }
 
-// Explicitly re-export types from contractTypes.ts using 'export type'
+// Explicitement ré-exporter les types depuis contractTypes.ts
 export type { ContractData, PdfResult as ContractPdfResult } from './contractTypes';
