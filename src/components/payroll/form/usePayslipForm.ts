@@ -12,6 +12,7 @@ import { PayslipFormValues } from "./types";
 import { useSalaryFetcher } from "./hooks/useSalaryFetcher";
 import { generateMonthlyPeriods } from "./utils/periodUtils";
 import { savePayslipToFirestore } from "./services/payslipService";
+import { useEmployeeLeaves } from "@/hooks/useEmployeeLeaves";
 
 export { type PayslipFormValues } from "./types";
 
@@ -22,6 +23,10 @@ export const usePayslipForm = () => {
   const { employees, isLoading: employeesLoading } = useEmployeeData();
   const { companies, isLoading: companiesLoading } = useCompaniesData();
   const { contracts, loading: contractsLoading } = useContractsList();
+
+  // Employee leave allocation state
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+  const { allocation } = useEmployeeLeaves(selectedEmployeeId);
 
   // Initialize form with zod resolver
   const form = useForm<PayslipFormValues>({
@@ -35,6 +40,12 @@ export const usePayslipForm = () => {
       overtimeRate: "25",
     },
   });
+
+  // Watch for employee changes to fetch leave allocation
+  const employeeId = form.watch("employee");
+  if (employeeId !== selectedEmployeeId) {
+    setSelectedEmployeeId(employeeId);
+  }
 
   // Get the periods for the dropdown
   const periods = generateMonthlyPeriods();
@@ -63,7 +74,7 @@ export const usePayslipForm = () => {
       // Get period label for display
       const periodLabel = periods.find(p => p.id === data.period)?.label || data.period;
       
-      // Generate PDF
+      // Generate PDF with leave allocation data
       const payslipPdf = generatePayslipPdf({
         employee,
         company,
@@ -72,6 +83,7 @@ export const usePayslipForm = () => {
         overtimeHours: data.overtimeHours,
         overtimeRate: data.overtimeRate,
         date: new Date(),
+        leaveAllocation: allocation,
       });
       
       // Save to Firestore (we would normally upload the PDF to storage first, but we'll skip that for now)

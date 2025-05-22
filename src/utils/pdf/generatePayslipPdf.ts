@@ -5,6 +5,7 @@ import { Employee } from '@/types/employee';
 import { formatDate } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { setupDocument, addPageFooter } from './documentSetup';
+import { LeaveAllocation } from '@/hooks/leaves/types';
 
 // Types pour les données de la fiche de paie
 export interface PayslipData {
@@ -15,6 +16,15 @@ export interface PayslipData {
   overtimeHours?: string;
   overtimeRate?: string;
   date?: Date;
+  leaveAllocation?: LeaveAllocation;
+}
+
+// Données des cotisations sociales
+interface SocialContribution {
+  name: string;
+  base: number;
+  rate: number;
+  amount: number;
 }
 
 /**
@@ -130,56 +140,33 @@ export const generatePayslipPdf = (data: PayslipData) => {
   
   doc.setFont('helvetica', 'normal');
   
-  // Sécurité sociale - Maladie
-  doc.text('Sécurité sociale - Maladie', 16, tableY + 5);
-  doc.text(`${totalBrut.toFixed(2)}`, 100, tableY + 5);
-  doc.text('0.75%', 125, tableY + 5);
-  const maladieAmount = totalBrut * 0.0075;
-  doc.text(`${maladieAmount.toFixed(2)} €`, 170, tableY + 5);
-  tableY += 8;
+  // Liste complète des cotisations sociales selon la réglementation française
+  const contributions: SocialContribution[] = [
+    { name: 'Sécurité sociale - Maladie', base: totalBrut, rate: 0.0075, amount: 0 },
+    { name: 'Sécurité sociale - Vieillesse plafonnée', base: totalBrut, rate: 0.069, amount: 0 },
+    { name: 'Sécurité sociale - Vieillesse déplafonnée', base: totalBrut, rate: 0.004, amount: 0 },
+    { name: 'Contribution autonomie solidaire', base: totalBrut, rate: 0.003, amount: 0 },
+    { name: 'Assurance chômage', base: totalBrut, rate: 0.024, amount: 0 },
+    { name: 'Retraite complémentaire (AGIRC-ARRCO)', base: totalBrut, rate: 0.0315, amount: 0 },
+    { name: 'CEG (AGIRC-ARRCO)', base: totalBrut, rate: 0.0086, amount: 0 },
+    { name: 'CSG déductible', base: totalBrut * 0.9825, rate: 0.068, amount: 0 },
+    { name: 'CSG/CRDS non déductible', base: totalBrut * 0.9825, rate: 0.029, amount: 0 },
+  ];
   
-  // Sécurité sociale - Vieillesse plafonnée
-  doc.text('Sécurité sociale - Vieillesse plafonnée', 16, tableY + 5);
-  doc.text(`${totalBrut.toFixed(2)}`, 100, tableY + 5);
-  doc.text('6.90%', 125, tableY + 5);
-  const vieillesseAmount = totalBrut * 0.069;
-  doc.text(`${vieillesseAmount.toFixed(2)} €`, 170, tableY + 5);
-  tableY += 8;
-  
-  // Assurance chômage
-  doc.text('Assurance chômage', 16, tableY + 5);
-  doc.text(`${totalBrut.toFixed(2)}`, 100, tableY + 5);
-  doc.text('2.40%', 125, tableY + 5);
-  const chomageAmount = totalBrut * 0.024;
-  doc.text(`${chomageAmount.toFixed(2)} €`, 170, tableY + 5);
-  tableY += 8;
-  
-  // Retraite complémentaire
-  doc.text('Retraite complémentaire', 16, tableY + 5);
-  doc.text(`${totalBrut.toFixed(2)}`, 100, tableY + 5);
-  doc.text('3.15%', 125, tableY + 5);
-  const retraiteAmount = totalBrut * 0.0315;
-  doc.text(`${retraiteAmount.toFixed(2)} €`, 170, tableY + 5);
-  tableY += 8;
-  
-  // CSG déductible
-  doc.text('CSG déductible', 16, tableY + 5);
-  doc.text(`${totalBrut.toFixed(2)}`, 100, tableY + 5);
-  doc.text('6.80%', 125, tableY + 5);
-  const csgAmount = totalBrut * 0.068;
-  doc.text(`${csgAmount.toFixed(2)} €`, 170, tableY + 5);
-  tableY += 8;
-  
-  // CSG non déductible et CRDS
-  doc.text('CSG/CRDS non déductible', 16, tableY + 5);
-  doc.text(`${totalBrut.toFixed(2)}`, 100, tableY + 5);
-  doc.text('2.90%', 125, tableY + 5);
-  const crdsAmount = totalBrut * 0.029;
-  doc.text(`${crdsAmount.toFixed(2)} €`, 170, tableY + 5);
-  tableY += 12;
+  // Calculer le montant de chaque cotisation
+  let totalCotisations = 0;
+  contributions.forEach(contribution => {
+    contribution.amount = contribution.base * contribution.rate;
+    totalCotisations += contribution.amount;
+    
+    doc.text(contribution.name, 16, tableY + 5);
+    doc.text(`${contribution.base.toFixed(2)}`, 100, tableY + 5);
+    doc.text(`${(contribution.rate * 100).toFixed(2)}%`, 125, tableY + 5);
+    doc.text(`${contribution.amount.toFixed(2)} €`, 170, tableY + 5);
+    tableY += 8;
+  });
   
   // Total cotisations
-  const totalCotisations = maladieAmount + vieillesseAmount + chomageAmount + retraiteAmount + csgAmount + crdsAmount;
   doc.setFont('helvetica', 'bold');
   doc.setFillColor(240, 240, 240);
   doc.rect(14, tableY, 182, 8, 'F');
@@ -202,17 +189,19 @@ export const generatePayslipPdf = (data: PayslipData) => {
   doc.text('SOLDES DES CONGÉS ET RTT', 14, tableY);
   tableY += 8;
   
-  // Supposons qu'on récupère ces informations du formulaire ou des données
+  // Récupérer les informations de congés et RTT depuis l'allocation si disponible
   const congesPayes = {
-    acquis: 25,
-    pris: 10,
-    restant: 15
+    acquis: data.leaveAllocation ? data.leaveAllocation.paidLeavesTotal : 25,
+    pris: data.leaveAllocation ? data.leaveAllocation.paidLeavesUsed : 0,
+    restant: data.leaveAllocation ? 
+      data.leaveAllocation.paidLeavesTotal - data.leaveAllocation.paidLeavesUsed : 25
   };
   
   const rtt = {
-    acquis: 12, 
-    pris: 5,
-    restant: 7
+    acquis: data.leaveAllocation ? data.leaveAllocation.rttTotal : 12, 
+    pris: data.leaveAllocation ? data.leaveAllocation.rttUsed : 0,
+    restant: data.leaveAllocation ? 
+      data.leaveAllocation.rttTotal - data.leaveAllocation.rttUsed : 12
   };
   
   doc.setFontSize(10);
@@ -227,6 +216,24 @@ export const generatePayslipPdf = (data: PayslipData) => {
   doc.text(`Acquis: ${rtt.acquis}`, 60, tableY);
   doc.text(`Pris: ${rtt.pris}`, 100, tableY);
   doc.text(`Solde: ${rtt.restant}`, 140, tableY);
+  tableY += 16;
+  
+  // Net imposable (pour la déclaration d'impôt)
+  const netImposable = totalBrut - (totalCotisations - contributions[7].amount - contributions[8].amount);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('CUMULS', 14, tableY);
+  tableY += 8;
+  doc.setFont('helvetica', 'normal');
+  doc.text('Net imposable', 14, tableY);
+  doc.text(`${netImposable.toFixed(2)} €`, 170, tableY);
+  tableY += 8;
+  
+  // Cumul annuel brut (fictif pour l'exemple)
+  const mois = new Date().getMonth() + 1;
+  const cumulBrut = totalBrut * mois;
+  doc.text('Cumul brut annuel', 14, tableY);
+  doc.text(`${cumulBrut.toFixed(2)} €`, 170, tableY);
   tableY += 16;
   
   // Mentions légales
