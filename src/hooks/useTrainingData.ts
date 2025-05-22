@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -18,6 +18,7 @@ export interface Training {
   participants?: number;
   trainer?: string;
   department?: string;
+  employees?: string[];
 }
 
 export const useTrainingData = () => {
