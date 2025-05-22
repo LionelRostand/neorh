@@ -28,57 +28,25 @@ export const useBadges = () => {
   }, []);
 
   const fetchBadges = async () => {
+    setLoading(true);
     try {
       const result = await badgesCollection.getAll();
       const data = result.docs || [];
       
-      if (data.length === 0) {
-        // Si aucun badge n'existe encore, utilisons des données fictives
-        const mockBadges: Badge[] = [
-          {
-            id: "1",
-            number: "B2023-001",
-            employeeId: "1",
-            employeeName: "Thomas Dubois",
-            type: "standard",
-            status: "active" as "active",
-            issueDate: "15/03/2021",
-            expiryDate: "15/03/2023"
-          },
-          {
-            id: "2",
-            number: "B2023-002",
-            employeeId: "2",
-            employeeName: "Sophie Martin",
-            type: "admin",
-            status: "pending" as "pending",
-            issueDate: "02/05/2022",
-            expiryDate: "02/05/2024"
-          },
-          {
-            id: "3",
-            number: "B2023-003",
-            employeeId: "3",
-            employeeName: "Jean Bernard",
-            type: "standard",
-            status: "inactive" as "inactive",
-            issueDate: "10/11/2019",
-            expiryDate: "10/11/2021"
-          }
-        ];
-        setBadges(mockBadges);
-        calculateStats(mockBadges);
-      } else {
-        setBadges(data as Badge[]);
-        calculateStats(data as Badge[]);
-      }
+      console.log("Badges récupérés depuis Firebase:", data);
+      setBadges(data as Badge[]);
+      calculateStats(data as Badge[]);
+      
     } catch (error) {
       console.error("Erreur lors du chargement des badges:", error);
       toast({
         title: "Erreur",
-        description: "Impossible de charger les badges",
+        description: "Impossible de charger les badges depuis Firebase",
         variant: "destructive"
       });
+      // En cas d'erreur, initialiser avec un tableau vide
+      setBadges([]);
+      calculateStats([]);
     } finally {
       setLoading(false);
     }
@@ -87,37 +55,16 @@ export const useBadges = () => {
   const fetchEmployees = async () => {
     try {
       const result = await employeesFirestore.getAll();
-      if (result.docs && result.docs.length > 0) {
+      if (result.docs) {
+        console.log("Employés récupérés depuis Firebase:", result.docs);
         setEmployees(result.docs);
       } else {
-        // Données fictives si aucun employé n'existe
-        setEmployees([
-          {
-            id: "1",
-            firstName: "Thomas",
-            lastName: "Dubois",
-            email: "thomas.dubois@example.com",
-            phone: "0123456789",
-            department: "IT",
-            position: "Développeur",
-            status: "active" as "active",
-            hireDate: "10/01/2020"
-          },
-          {
-            id: "2",
-            firstName: "Sophie",
-            lastName: "Martin",
-            email: "sophie.martin@example.com",
-            phone: "0123456790",
-            department: "RH",
-            position: "Responsable RH",
-            status: "active" as "active",
-            hireDate: "05/03/2019"
-          }
-        ]);
+        console.log("Aucun employé trouvé dans Firebase");
+        setEmployees([]);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des employés:", error);
+      setEmployees([]);
     }
   };
 
@@ -126,8 +73,8 @@ export const useBadges = () => {
     const pending = badgeData.filter(b => b.status === 'pending').length;
     const inactive = badgeData.filter(b => b.status === 'inactive' || b.status === 'lost').length;
     
-    // Simulons un calcul de couverture (dans un cas réel, il faudrait comparer avec le nombre total d'employés)
-    const coverage = badgeData.length > 0 ? Math.round((active / (employees.length || 2)) * 100) : 0;
+    // Calcul de couverture basé sur les employés actifs
+    const coverage = employees.length > 0 ? Math.round((active / employees.length) * 100) : 0;
     
     setBadgeStats({
       active,
