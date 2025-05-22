@@ -1,7 +1,7 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { HR } from "@/lib/constants/collections";
 import { PayslipFormValues } from "../types";
@@ -11,18 +11,22 @@ export const useSalaryFetcher = (
   contracts: any[] | undefined
 ) => {
   const [salaryValue, setSalaryValue] = useState<string>("");
+  const previousEmployeeId = useRef<string>("");
+  const isFetchingRef = useRef(false);
   
   // Update salary when employee selection changes
   useEffect(() => {
     const employeeId = form.getValues("employee");
-    if (!employeeId) {
-      setSalaryValue("");
-      form.setValue("annualSalary", "");
+    
+    // Éviter les appels répétés pour le même employé
+    if (!employeeId || employeeId === previousEmployeeId.current || isFetchingRef.current) {
       return;
     }
     
     // Show loading state
     setSalaryValue("Chargement du salaire...");
+    isFetchingRef.current = true;
+    previousEmployeeId.current = employeeId;
     
     // Find active contract for the selected employee
     const fetchEmployeeSalary = async () => {
@@ -39,15 +43,17 @@ export const useSalaryFetcher = (
               : employeeContract.salary.includes('€') ? employeeContract.salary : `${employeeContract.salary} €`;
             setSalaryValue(formattedSalary);
             form.setValue("annualSalary", formattedSalary);
+            isFetchingRef.current = false;
             return;
           }
         }
         
-        // If not found in loaded contracts, query the database directly
+        // Si nécessaire, chercher dans Firestore mais de façon optimisée
         const contractsQuery = query(
           collection(db, HR.CONTRACTS),
           where("employeeId", "==", employeeId),
-          where("status", "==", "active")
+          where("status", "==", "active"),
+          limit(1) // Limiter à un seul résultat
         );
         
         const querySnapshot = await getDocs(contractsQuery);
@@ -73,6 +79,8 @@ export const useSalaryFetcher = (
         console.error("Erreur lors de la récupération du salaire:", error);
         setSalaryValue("Erreur lors de la récupération du salaire");
         form.setValue("annualSalary", "");
+      } finally {
+        isFetchingRef.current = false;
       }
     };
     

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEmployeeData } from "@/hooks/useEmployeeData";
@@ -20,11 +20,12 @@ export const usePayslipForm = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   
   // Data loading hooks
+  // Utiliser { skipAutoFetch: true } pour éviter les appels automatiques
   const { employees, isLoading: employeesLoading } = useEmployeeData();
   const { companies, isLoading: companiesLoading } = useCompaniesData();
   const { contracts, loading: contractsLoading } = useContractsList();
 
-  // Employee leave allocation state
+  // Employee leave allocation state with reference stability
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const { allocation } = useEmployeeLeaves(selectedEmployeeId);
 
@@ -42,10 +43,14 @@ export const usePayslipForm = () => {
   });
 
   // Watch for employee changes to fetch leave allocation
+  // Utilisation de useEffect avec dépendances correctes
   const employeeId = form.watch("employee");
-  if (employeeId !== selectedEmployeeId) {
-    setSelectedEmployeeId(employeeId);
-  }
+  
+  useEffect(() => {
+    if (employeeId !== selectedEmployeeId) {
+      setSelectedEmployeeId(employeeId);
+    }
+  }, [employeeId, selectedEmployeeId]);
 
   // Get the periods for the dropdown
   const periods = generateMonthlyPeriods();
@@ -86,7 +91,7 @@ export const usePayslipForm = () => {
         leaveAllocation: allocation,
       });
       
-      // Save to Firestore (we would normally upload the PDF to storage first, but we'll skip that for now)
+      // Save to Firestore
       await savePayslipToFirestore(
         employee,
         company,

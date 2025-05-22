@@ -11,6 +11,8 @@ export const useEmployeeLeaves = (employeeId: string) => {
   const isMountedRef = useRef(true);
   // Reference to control data loading state
   const dataLoadedRef = useRef(false);
+  // Reference to prevent multiple fetches for the same employee ID
+  const lastFetchedIdRef = useRef<string>("");
 
   // Use our smaller hooks with stabilized inputs
   const { 
@@ -40,17 +42,36 @@ export const useEmployeeLeaves = (employeeId: string) => {
     // Cleanup on unmount
     return () => {
       isMountedRef.current = false;
+      dataLoadedRef.current = false;
     };
   }, []);
 
+  // Contrôle des appels pour éviter les boucles infinies
+  useEffect(() => {
+    if (!employeeId || !isMountedRef.current || employeeId === lastFetchedIdRef.current) {
+      return;
+    }
+
+    console.log(`[useEmployeeLeaves] Fetching data for employee: ${employeeId}`);
+    lastFetchedIdRef.current = employeeId;
+    dataLoadedRef.current = true;
+    
+    // Load leaves and allocations in parallel
+    Promise.all([
+      fetchLeaves(),
+      fetchAllocation()
+    ]).catch(err => {
+      console.error(`[useEmployeeLeaves] Error during fetch:`, err);
+    });
+  }, [employeeId, fetchLeaves, fetchAllocation]);
+
   // Use useCallback for refetch function to avoid unnecessary rerenders
   const refetch = useCallback(() => {
-    if (!employeeId || !isMountedRef.current || dataLoadedRef.current) {
+    if (!employeeId || !isMountedRef.current) {
       return;
     }
     
     console.log(`[useEmployeeLeaves] Manual refetch for employee: ${employeeId}`);
-    dataLoadedRef.current = true;
     
     // Load leaves and allocations in parallel
     Promise.all([
