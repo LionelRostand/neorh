@@ -15,17 +15,17 @@ export const setupContractHeader = (
   let yPosition = margin;
   
   // Nom de l'entreprise à gauche
-  doc.setFontSize(14);
+  doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.text(company?.name || 'ENTREPRISE', margin, yPosition);
+  doc.text(company?.name?.toUpperCase() || 'ENTREPRISE', margin, yPosition);
   
-  yPosition += 7;
-  doc.setFontSize(10);
+  yPosition += 6;
+  doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   
   if (company?.address) {
     doc.text(company.address, margin, yPosition);
-    yPosition += 5;
+    yPosition += 4;
   }
   
   const locationParts = [];
@@ -33,17 +33,17 @@ export const setupContractHeader = (
   if (company?.city) locationParts.push(company.city);
   if (locationParts.length > 0) {
     doc.text(locationParts.join(' '), margin, yPosition);
-    yPosition += 5;
+    yPosition += 4;
   }
   
   if (company?.phone) {
     doc.text(`Tél: ${company.phone}`, margin, yPosition);
-    yPosition += 5;
+    yPosition += 4;
   }
   
   if (company?.email) {
     doc.text(`Email: ${company.email}`, margin, yPosition);
-    yPosition += 5;
+    yPosition += 8;
   }
   
   // Logo de l'entreprise à droite
@@ -89,7 +89,7 @@ export const addContractTitle = (
 ): number => {
   // Titre du contrat
   let yPosition = 65;
-  doc.setFontSize(18);
+  doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   
   let contractTitle = 'CONTRAT DE TRAVAIL';
@@ -119,8 +119,8 @@ export const addContractTitle = (
   const titleX = (doc.internal.pageSize.width - titleWidth) / 2;
   doc.text(contractTitle, titleX, yPosition);
   
-  yPosition += 20;
-  doc.setFontSize(11);
+  yPosition += 15;
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   
   // Date du contrat
@@ -142,26 +142,32 @@ export const addPartiesSection = (
 ): number => {
   let yPosition = startY;
   
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
   doc.text('ENTRE LES SOUSSIGNÉS :', margin, yPosition);
   yPosition += 10;
   
+  doc.setFont('helvetica', 'normal');
   doc.text(`La société ${company?.name || 'ENTREPRISE'}, ${company?.type || ''} ${company?.industry ? `dans le secteur ${company.industry}` : ''}`, margin, yPosition);
-  yPosition += 7;
+  yPosition += 6;
   doc.text(`Siège social : ${company?.address || ''}, ${company?.postalCode || ''} ${company?.city || ''}`, margin, yPosition);
-  yPosition += 7;
+  yPosition += 6;
   doc.text(`Représentée par son dirigeant légal,`, margin, yPosition);
-  yPosition += 7;
+  yPosition += 6;
+  doc.setFont('helvetica', 'bold');
   doc.text(`Ci-après dénommée "L'EMPLOYEUR"`, margin, yPosition);
   
   yPosition += 12;
   doc.text(`ET`, margin, yPosition);
   
   yPosition += 12;
+  doc.setFont('helvetica', 'normal');
   doc.text(`${employeeName}`, margin, yPosition);
-  yPosition += 7;
+  yPosition += 6;
+  doc.setFont('helvetica', 'bold');
   doc.text(`Ci-après dénommé(e) "LE SALARIÉ"`, margin, yPosition);
   
-  yPosition += 12;
+  yPosition += 15;
   doc.text(`IL A ÉTÉ CONVENU CE QUI SUIT :`, margin, yPosition);
   
   return yPosition + 15;
@@ -180,9 +186,12 @@ export const addCollectiveAgreement = (
   
   if (conventionCollective) {
     doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(0, 51, 102); // Bleu foncé pour le titre
     doc.text('Convention collective applicable', margin, yPosition);
     yPosition += 7;
     doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0); // Noir pour le texte
     doc.text(`Le présent contrat est soumis à la convention collective ${conventionCollective}.`, margin, yPosition);
     yPosition += 10;
   }
@@ -196,6 +205,7 @@ export const addCollectiveAgreement = (
 export const addPageFooter = (doc: jsPDF): void => {
   // Pied de page avec mention légale
   doc.setFontSize(8);
+  doc.setTextColor(100, 100, 100);
   doc.text('Ce document est strictement confidentiel et établi conformément au droit du travail français. Il ne constitue pas un conseil juridique.',
     doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
   

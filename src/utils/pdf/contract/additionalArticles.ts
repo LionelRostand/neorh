@@ -15,8 +15,8 @@ export const addAdditionalArticles = (
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 51, 102); // Bleu foncé pour les titres d'article
-  doc.text("Article 5 - Horaires de travail", margin, yPosition);
-  yPosition += 10;
+  doc.text("Article 6 - Horaires de travail", margin, yPosition);
+  yPosition += 7;
   
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(0, 0, 0);
@@ -24,13 +24,13 @@ export const addAdditionalArticles = (
   yPosition += 7;
   doc.text("- Du lundi au vendredi : de 9h00 à 17h00, avec une pause déjeuner d'une heure.", margin, yPosition);
   
-  yPosition += 15;
+  yPosition += 12;
   
   // Article - Congés payés
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 51, 102);
-  doc.text("Article 6 - Congés payés", margin, yPosition);
-  yPosition += 10;
+  doc.text("Article 7 - Congés payés", margin, yPosition);
+  yPosition += 7;
   
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(0, 0, 0);
@@ -38,20 +38,20 @@ export const addAdditionalArticles = (
   yPosition += 7;
   doc.text("ouvrables par mois de travail effectif.", margin, yPosition);
   
-  yPosition += 15;
+  yPosition += 12;
   
   // Article - Obligations professionnelles
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 51, 102);
-  doc.text("Article 7 - Obligations professionnelles", margin, yPosition);
-  yPosition += 10;
+  doc.text("Article 8 - Obligations professionnelles", margin, yPosition);
+  yPosition += 7;
   
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(0, 0, 0);
   doc.text("Le/La Salarié(e) s'engage à respecter les directives et instructions émanant de la Direction et à se conformer aux règles", margin, yPosition);
   yPosition += 7;
   doc.text("en vigueur au sein de l'entreprise.", margin, yPosition);
-  yPosition += 10;
+  yPosition += 7;
   
   doc.text("Le/La Salarié(e) s'engage à informer l'Employeur, sans délai, de tout changement qui interviendrait dans les situations", margin, yPosition);
   yPosition += 7;
@@ -60,5 +60,5 @@ export const addAdditionalArticles = (
   // Reset text color for subsequent content
   doc.setTextColor(0, 0, 0);
   
-  return yPosition + 15;
+  return yPosition + 12;
 };
