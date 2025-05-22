@@ -114,13 +114,9 @@ export const useContractForm = ({ onSuccess, onCancel }: UseContractFormProps) =
         signedByEmployer: false
       };
       
-      // Add endDate and conventionCollective only if they exist
+      // Add endDate only if it exists
       if (data.endDate) {
         contractData.endDate = new Date(data.endDate);
-      }
-      
-      if (data.conventionCollective) {
-        contractData.conventionCollective = data.conventionCollective;
       }
       
       // Generate PDF

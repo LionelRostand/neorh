@@ -21,26 +21,27 @@ import { ContractFormValues } from "../schema";
 interface EmployeeFieldProps {
   control: Control<ContractFormValues>;
   employees: Employee[];
-  employeeName?: string;
   setValue: (id: string, name: string) => void;
 }
 
-export default function EmployeeField({ control, employees, setValue, employeeName }: EmployeeFieldProps) {
+export default function EmployeeField({ control, employees, setValue }: EmployeeFieldProps) {
   return (
     <FormField
       control={control}
       name="employeeId"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>Employé</FormLabel>
-          <Select onValueChange={(value) => {
+          <FormLabel>Nom de l'employé</FormLabel>
+          <Select 
+            onValueChange={(value) => {
               const employee = employees.find(e => e.id === value);
               if (employee) {
                 setValue(value, employee.name);
               }
               field.onChange(value);
             }} 
-            defaultValue={field.value}>
+            defaultValue={field.value}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner un employé" />

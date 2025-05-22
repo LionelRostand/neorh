@@ -10,7 +10,6 @@ export const schema = z.object({
   salary: z.string().regex(/^\d+$/, { message: "Le salaire doit être un nombre" }),
   startDate: z.string({ required_error: "Veuillez sélectionner une date de début" }),
   endDate: z.string().optional(),
-  conventionCollective: z.string().optional(),
   status: z.enum(["draft", "pending", "active", "expired", "pending_signature"], { 
     required_error: "Veuillez sélectionner un statut"
   }).default("pending_signature"),
