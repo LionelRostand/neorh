@@ -5,6 +5,7 @@ import {
   FormItem,
   FormLabel,
   FormControl,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
@@ -49,6 +50,7 @@ const PeriodSalaryFields: React.FC<PeriodSalaryFieldsProps> = ({
                 ))}
               </SelectContent>
             </Select>
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -61,12 +63,23 @@ const PeriodSalaryFields: React.FC<PeriodSalaryFieldsProps> = ({
             <FormLabel>Salaire brut annuel</FormLabel>
             <FormControl>
               <Input 
-                placeholder={contractsLoading ? "Chargement..." : "Salaire brut annuel récupéré depuis le contrat"} 
+                placeholder={
+                  contractsLoading 
+                    ? "Chargement..." 
+                    : salaryValue || "Sélectionnez un employé pour afficher le salaire"
+                }
                 {...field}
                 value={salaryValue}
                 disabled
+                className={salaryValue === "Aucun contrat actif trouvé" || salaryValue === "Erreur lors de la récupération du salaire" ? "text-red-500" : ""}
               />
             </FormControl>
+            {(salaryValue === "Aucun contrat actif trouvé" || salaryValue === "Erreur lors de la récupération du salaire") && (
+              <p className="text-xs text-red-500 mt-1">
+                Aucun salaire trouvé pour cet employé. Vérifiez son contrat actif.
+              </p>
+            )}
+            <FormMessage />
           </FormItem>
         )}
       />

@@ -9,7 +9,7 @@ import useContractsList from "@/hooks/contracts/useContractsList";
 import { toast } from "@/components/ui/use-toast";
 import { payslipFormSchema } from "./schema";
 import { generatePayslipPdf } from "@/utils/pdf/generatePayslipPdf";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { HR } from "@/lib/constants/collections";
 
@@ -40,26 +40,68 @@ export const usePayslipForm = () => {
   // Update salary when employee selection changes
   useEffect(() => {
     const employeeId = form.getValues("employee");
-    if (employeeId && contracts && contracts.length > 0) {
-      // Search for the active contract for the selected employee
-      const employeeContract = contracts.find(
-        (contract) => contract.employeeId === employeeId && contract.status === "active"
-      );
-      
-      if (employeeContract && employeeContract.salary) {
-        const formattedSalary = typeof employeeContract.salary === 'number' 
-          ? `${employeeContract.salary} €` 
-          : `${employeeContract.salary}`;
-        setSalaryValue(formattedSalary);
-        form.setValue("annualSalary", formattedSalary);
-      } else {
-        setSalaryValue("Aucun contrat actif trouvé");
-        form.setValue("annualSalary", "");
-      }
-    } else {
+    if (!employeeId) {
       setSalaryValue("");
       form.setValue("annualSalary", "");
+      return;
     }
+    
+    // Show loading state
+    setSalaryValue("Chargement du salaire...");
+    
+    // Find active contract for the selected employee
+    const fetchEmployeeSalary = async () => {
+      try {
+        // First try to find the salary in the loaded contracts
+        if (contracts && contracts.length > 0) {
+          const employeeContract = contracts.find(
+            (contract) => contract.employeeId === employeeId && contract.status === "active"
+          );
+          
+          if (employeeContract && employeeContract.salary) {
+            const formattedSalary = typeof employeeContract.salary === 'number' 
+              ? `${employeeContract.salary} €` 
+              : employeeContract.salary.includes('€') ? employeeContract.salary : `${employeeContract.salary} €`;
+            setSalaryValue(formattedSalary);
+            form.setValue("annualSalary", formattedSalary);
+            return;
+          }
+        }
+        
+        // If not found in loaded contracts, query the database directly
+        const contractsQuery = query(
+          collection(db, HR.CONTRACTS),
+          where("employeeId", "==", employeeId),
+          where("status", "==", "active")
+        );
+        
+        const querySnapshot = await getDocs(contractsQuery);
+        
+        if (!querySnapshot.empty) {
+          const contractData = querySnapshot.docs[0].data();
+          
+          if (contractData.salary) {
+            const formattedSalary = typeof contractData.salary === 'number' 
+              ? `${contractData.salary} €` 
+              : contractData.salary.includes('€') ? contractData.salary : `${contractData.salary} €`;
+            setSalaryValue(formattedSalary);
+            form.setValue("annualSalary", formattedSalary);
+          } else {
+            setSalaryValue("Salaire non spécifié dans le contrat");
+            form.setValue("annualSalary", "");
+          }
+        } else {
+          setSalaryValue("Aucun contrat actif trouvé");
+          form.setValue("annualSalary", "");
+        }
+      } catch (error) {
+        console.error("Erreur lors de la récupération du salaire:", error);
+        setSalaryValue("Erreur lors de la récupération du salaire");
+        form.setValue("annualSalary", "");
+      }
+    };
+    
+    fetchEmployeeSalary();
   }, [form.watch("employee"), contracts, form]);
 
   // Generate periods for the dropdown
