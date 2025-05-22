@@ -44,6 +44,15 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
   const firstName = nameParts[0] || '';
   const lastName = nameParts.slice(1).join(' ') || '';
 
+  const getStatusLabel = (status: string): string => {
+    switch (status) {
+      case "active": return "Actif";
+      case "inactive": return "Inactif";
+      case "onLeave": return "Congé";
+      default: return status;
+    }
+  };
+
   return (
     <DialogHeader className="sticky top-0 z-10 bg-white p-6 pb-4 shadow-sm">
       <div className="flex items-center justify-between">
@@ -67,7 +76,7 @@ const EmployeeHeader: React.FC<EmployeeHeaderProps> = ({
             
             <div className="flex items-center gap-2 mt-1">
               <Badge className={`${getStatusColor(employee.status)}`}>
-                {employee.status === "active" ? "Actif" : employee.status}
+                {getStatusLabel(employee.status)}
               </Badge>
               
               {employee.department && (

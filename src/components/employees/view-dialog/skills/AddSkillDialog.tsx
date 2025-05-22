@@ -121,6 +121,7 @@ const AddSkillDialog: React.FC<AddSkillDialogProps> = ({
                       step={1}
                       value={[field.value]}
                       onValueChange={(value) => field.onChange(value[0])}
+                      className="bg-blue-100"
                     />
                   </FormControl>
                   <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -150,7 +151,9 @@ const AddSkillDialog: React.FC<AddSkillDialogProps> = ({
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Annuler
               </Button>
-              <Button type="submit">Ajouter</Button>
+              <Button type="submit" className="bg-blue-500 hover:bg-blue-600">
+                Ajouter
+              </Button>
             </DialogFooter>
           </form>
         </Form>

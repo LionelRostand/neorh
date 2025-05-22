@@ -92,12 +92,12 @@ const EmployeeSkills: React.FC<EmployeeSkillsProps> = ({ employee, onRefresh }) 
   return (
     <>
       <div className="space-y-4">
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-semibold">Compétences</h3>
           <Button 
             onClick={() => setIsAddDialogOpen(true)}
             size="sm" 
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white"
           >
             <Plus className="h-4 w-4" />
             Ajouter une compétence
