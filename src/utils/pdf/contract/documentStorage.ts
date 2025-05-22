@@ -17,20 +17,19 @@ export const saveContractAsDocument = async (
     
     // Créer l'objet document
     const document = {
-      name: `Contrat ${contractData.type} - ${contractData.employeeName}`,
+      title: `Contrat ${contractData.type} - ${contractData.employeeName}`,
       description: `Contrat de travail ${contractData.type} pour ${contractData.employeeName}`,
       employeeId: contractData.employeeId,
+      employeeName: contractData.employeeName,
       contractId: contractData.id,
       departmentId: contractData.departmentId,
       fileType: 'pdf',
       category: 'contracts',
-      file: {
-        name: pdfResult.fileName,
-        base64: pdfResult.pdfBase64,
-        type: 'application/pdf'
-      },
+      fileUrl: pdfResult.pdfBase64,
       uploadDate: new Date().toISOString(),
-      status: 'active',
+      status: 'pending_signature',
+      signedByEmployee: false,
+      signedByEmployer: false,
       tags: ['contrat', contractData.type.toLowerCase()]
     };
     
