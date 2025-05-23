@@ -4,7 +4,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { BadgeFormValues } from "./FormSchema";
-import { InfoCircle } from "lucide-react";
+import { Info } from "lucide-react";
 
 interface BasicInfoSectionProps {
   form: UseFormReturn<BadgeFormValues>;
@@ -29,7 +29,7 @@ export function BasicInfoSection({ form }: BasicInfoSectionProps) {
               />
             </FormControl>
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 flex items-center">
-              <InfoCircle size={16} />
+              <Info size={16} />
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
