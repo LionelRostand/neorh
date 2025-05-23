@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { format, parse } from "date-fns";
 import { useFirestore } from "@/hooks/useFirestore";
@@ -14,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { AddBadgeForm } from "./form/AddBadgeForm";
 import { BadgeFormValues } from "./form/FormSchema";
+import { HR } from "@/lib/constants/collections";
 
 interface EditBadgeDialogProps {
   open: boolean;
@@ -32,7 +32,8 @@ export function EditBadgeDialog({
   onSuccess,
   isLoadingEmployees,
 }: EditBadgeDialogProps) {
-  const { update, isLoading } = useFirestore<Badge>("hr_badges");
+  // Using the HR.BADGES constant for collection name
+  const { update, isLoading } = useFirestore<Badge>(HR.BADGES);
 
   const handleSubmit = async (data: BadgeFormValues) => {
     if (!badge?.id) return;

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useCollection } from "@/hooks/useCollection";
-import { useFirestore } from "@/hooks/firestore";
+import { useFirestore } from "@/hooks/useFirestore";
 import { Badge, Employee } from "@/types/firebase";
 import { toast } from "@/components/ui/use-toast";
 
@@ -16,10 +16,10 @@ export const useBadges = () => {
     coverage: 0
   });
   
-  // Utilisation de notre hook pour accéder à la collection des badges
-  const badgesCollection = useCollection("badges");
+  // Using the correct import for the useFirestore hook
+  const badgesCollection = useCollection("hr_badges");
   
-  // Utilisation du hook Firestore pour récupérer les employés
+  // Also correct the collection name here
   const employeesFirestore = useFirestore<Employee>("employees");
 
   useEffect(() => {
@@ -33,20 +33,19 @@ export const useBadges = () => {
       const result = await badgesCollection.getAll();
       const data = result.docs || [];
       
-      console.log("Badges récupérés depuis Firebase:", data);
+      console.log("Badges retrieved from Firebase:", data);
       setBadges(data as Badge[]);
-      calculateStats(data as Badge[]);
+      calculateStats(data as Badge[], employees);
       
     } catch (error) {
-      console.error("Erreur lors du chargement des badges:", error);
+      console.error("Error loading badges:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les badges depuis Firebase",
+        title: "Error",
+        description: "Failed to load badges from Firebase",
         variant: "destructive"
       });
-      // En cas d'erreur, initialiser avec un tableau vide
       setBadges([]);
-      calculateStats([]);
+      calculateStats([], employees);
     } finally {
       setLoading(false);
     }
@@ -56,25 +55,29 @@ export const useBadges = () => {
     try {
       const result = await employeesFirestore.getAll();
       if (result.docs) {
-        console.log("Employés récupérés depuis Firebase:", result.docs);
+        console.log("Employees retrieved from Firebase:", result.docs);
         setEmployees(result.docs);
+        // Recalculate stats when we have the employees
+        if (badges.length > 0) {
+          calculateStats(badges, result.docs);
+        }
       } else {
-        console.log("Aucun employé trouvé dans Firebase");
+        console.log("No employees found in Firebase");
         setEmployees([]);
       }
     } catch (error) {
-      console.error("Erreur lors du chargement des employés:", error);
+      console.error("Error loading employees:", error);
       setEmployees([]);
     }
   };
 
-  const calculateStats = (badgeData: Badge[]) => {
+  const calculateStats = (badgeData: Badge[], employeeData: Employee[]) => {
     const active = badgeData.filter(b => b.status === 'active').length;
     const pending = badgeData.filter(b => b.status === 'pending').length;
     const inactive = badgeData.filter(b => b.status === 'inactive' || b.status === 'lost').length;
     
-    // Calcul de couverture basé sur les employés actifs
-    const coverage = employees.length > 0 ? Math.round((active / employees.length) * 100) : 0;
+    // Coverage calculation based on active employees
+    const coverage = employeeData.length > 0 ? Math.round((active / employeeData.length) * 100) : 0;
     
     setBadgeStats({
       active,
@@ -90,6 +93,6 @@ export const useBadges = () => {
     loading,
     badgeStats,
     fetchBadges,
-    employeesFirestore
+    fetchEmployees
   };
 };

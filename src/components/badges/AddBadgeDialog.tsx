@@ -5,6 +5,7 @@ import { useFirestore } from "@/hooks/useFirestore";
 import { Employee } from "@/types/employee";
 import { Badge } from "@/types/firebase";
 import { toast } from "@/components/ui/use-toast";
+import { HR } from "@/lib/constants/collections";
 import {
   Dialog,
   DialogContent,
@@ -14,8 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { AddBadgeForm } from "./form/AddBadgeForm";
 import { BadgeFormValues } from "./form/FormSchema";
-import { adaptAppEmployee } from "@/utils/employeeAdapter";
-import { HR } from "@/lib/constants/collections";
 
 interface AddBadgeDialogProps {
   open: boolean;
@@ -34,7 +33,7 @@ export function AddBadgeDialog({
 }: AddBadgeDialogProps) {
   const [generatedBadgeNumber, setGeneratedBadgeNumber] = useState("");
   
-  // Utilisation du hook Firestore pour la collection hr_badges
+  // Using the HR.BADGES constant for collection name
   const { add, isLoading, getAll } = useFirestore<Badge>(HR.BADGES);
 
   // Generate badge number when dialog opens
@@ -60,7 +59,7 @@ export function AddBadgeDialog({
       } while (existingNumbers.includes(newNumber));
       
       setGeneratedBadgeNumber(newNumber);
-      console.log("Numéro de badge généré:", newNumber);
+      console.log("Badge number generated:", newNumber);
     } catch (error) {
       console.error("Error generating badge number:", error);
       // Fallback to a timestamp-based number if there's an error
@@ -71,16 +70,16 @@ export function AddBadgeDialog({
 
   const handleSubmit = async (data: BadgeFormValues) => {
     try {
-      // Trouver l'employé sélectionné pour récupérer son nom
+      // Find selected employee to get their name
       const selectedEmployee = employees.find(
         (emp) => emp.id === data.employeeId
       );
       
-      const employeeName = selectedEmployee ? selectedEmployee.name : "Employé inconnu";
+      const employeeName = selectedEmployee ? selectedEmployee.name : "Unknown employee";
 
-      // Préparer l'objet badge à ajouter dans Firestore
+      // Prepare badge object to add to Firestore
       const badge: Partial<Badge> = {
-        number: generatedBadgeNumber, // Utiliser le numéro généré, pas celui du formulaire
+        number: generatedBadgeNumber, // Use the generated number, not the one from the form
         employeeId: data.employeeId,
         type: data.type,
         status: data.status as "active" | "inactive" | "lost" | "pending",
@@ -89,28 +88,28 @@ export function AddBadgeDialog({
         employeeName
       };
       
-      // Ajouter la date d'expiration uniquement si elle est définie et valide
+      // Add expiration date only if defined and valid
       if (data.expiryDate && data.expiryDate instanceof Date) {
         badge.expiryDate = format(data.expiryDate, "dd/MM/yyyy");
       }
 
-      console.log("Badge à créer:", badge);
+      console.log("Badge to create:", badge);
 
-      // Ajouter le document à Firestore
+      // Add document to Firestore
       await add(badge as Badge);
       toast({
-        title: "Badge créé",
-        description: `Le badge ${generatedBadgeNumber} a été créé avec succès pour ${employeeName}`,
+        title: "Badge created",
+        description: `Badge ${generatedBadgeNumber} has been successfully created for ${employeeName}`,
       });
       
-      // Fermer le dialogue et rafraîchir les données
+      // Close dialog and refresh data
       onOpenChange(false);
       onSuccess();
     } catch (error) {
-      console.error("Erreur lors de la création du badge:", error);
+      console.error("Error creating badge:", error);
       toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la création du badge",
+        title: "Error",
+        description: "An error occurred while creating the badge",
         variant: "destructive",
       });
     }
@@ -120,9 +119,9 @@ export function AddBadgeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Créer un nouveau badge</DialogTitle>
+          <DialogTitle>Create a new badge</DialogTitle>
           <DialogDescription>
-            Remplissez les informations pour créer un badge d'accès
+            Fill in the information to create an access badge
           </DialogDescription>
         </DialogHeader>
         <AddBadgeForm

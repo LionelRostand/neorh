@@ -3,6 +3,7 @@ import React from "react";
 import { useFirestore } from "@/hooks/useFirestore";
 import { Badge } from "@/types/firebase";
 import { toast } from "@/components/ui/use-toast";
+import { HR } from "@/lib/constants/collections";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,7 +28,8 @@ export function DeleteBadgeDialog({
   badge,
   onSuccess,
 }: DeleteBadgeDialogProps) {
-  const { remove, isLoading } = useFirestore<Badge>("hr_badges");
+  // Using the HR.BADGES constant for collection name
+  const { remove, isLoading } = useFirestore<Badge>(HR.BADGES);
 
   const handleDelete = async () => {
     if (!badge?.id) return;
