@@ -1,7 +1,6 @@
-
 import { toast } from "@/components/ui/use-toast";
 import { useFirestore } from '@/hooks/firestore';
-import { Project } from "../types";
+import { Project } from "../../types";
 
 export const useProjectService = () => {
   const projectsCollection = useFirestore('hr_projets');

@@ -1,8 +1,7 @@
-
 import { toast } from "@/components/ui/use-toast";
 import { useFirestore } from '@/hooks/firestore';
 import { Timesheet } from "@/lib/constants";
-import { WeeklyData } from "../types";
+import { WeeklyData } from "../../types";
 
 export const useTimesheetService = () => {
   const timesheetCollection = useFirestore<Timesheet>('hr_timesheet');

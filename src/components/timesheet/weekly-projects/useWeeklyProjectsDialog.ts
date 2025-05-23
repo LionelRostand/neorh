@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from "@/components/ui/use-toast";
 import { Timesheet } from "@/lib/constants";
-import { Project } from "./types";
+import { Project } from "../types";
 import { useProjectService } from './services/projectService';
 import { useTimesheetService } from './services/timesheetService';
 import { useWeeklyDataManager } from './hooks/useWeeklyDataManager';

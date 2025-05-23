@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { toast } from "@/components/ui/use-toast";
 import { Timesheet } from "@/lib/constants";
-import { WeeklyData } from "../types";
+import { WeeklyData } from "../../types";
 import { useTimesheetService } from '../services/timesheetService';
 
 export const useFormOperations = (

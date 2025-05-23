@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { format, addDays, parseISO, differenceInCalendarDays } from 'date-fns';
 import { toast } from "@/components/ui/use-toast";
 import { Timesheet } from "@/lib/constants";
 import { getWeekNumber } from '../../weekly-timesheet/utils/dateUtils';
-import { WeeklyData } from "../types";
+import { WeeklyData } from "../../types";
 
 export const useWeeklyDataManager = () => {
   const [weeklyData, setWeeklyData] = useState<WeeklyData[]>([]);
