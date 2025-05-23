@@ -105,7 +105,7 @@ export const useEmployeeData = () => {
           companyId: data.company || '', // Add company ID reference
           email: data.email || '',
           phone: data.phone || '',
-          photoUrl: data.photoUrl || '',
+          photoUrl: data.photoUrl || data.avatarUrl || '', // Map both photoUrl and avatarUrl fields
           startDate: data.hireDate || '',
           status: data.status || 'inactive',
           professionalEmail: data.professionalEmail || data.email || '',
