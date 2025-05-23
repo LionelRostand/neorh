@@ -38,17 +38,32 @@ export const useSalaryFetcher = (
         
         // Si le contenu est disponible et contient un texte
         if (content) {
-          // Rechercher l'Article 4 - Rémunération avec un format plus précis
-          // Amélioration: Adaptation pour capturer exactement le format "de 10000 euros"
-          const remunerationMatch = content.match(/Article 4 - R[ée]mun[ée]ration[\s\S]*?(?:de|:)\s*(\d[\d\s]*(?:\.|,)?\d*)[\s\S]*?(?:euros|€)/i);
+          // Format principal: "de XXXX euros" comme montré dans l'image
+          const primaryFormat = content.match(/Article 4 - R[ée]mun[ée]ration[\s\S]*?de\s+(\d[\d\s]*(?:\.|,)?\d*)\s*euros/i);
           
-          if (remunerationMatch && remunerationMatch[1]) {
+          if (primaryFormat && primaryFormat[1]) {
             // Nettoyer le texte trouvé pour obtenir le montant
-            const amount = remunerationMatch[1].replace(/\s/g, '');
+            const amount = primaryFormat[1].replace(/\s/g, '');
             return `${amount} €`;
           }
           
-          // Fallback à l'ancienne regex si la nouvelle ne trouve rien
+          // Format alternatif avec "de" et "€" au lieu de "euros"
+          const altFormat = content.match(/Article 4 - R[ée]mun[ée]ration[\s\S]*?de\s+(\d[\d\s]*(?:\.|,)?\d*)\s*€/i);
+          
+          if (altFormat && altFormat[1]) {
+            const amount = altFormat[1].replace(/\s/g, '');
+            return `${amount} €`;
+          }
+          
+          // Format avec ":" au lieu de "de"
+          const colonFormat = content.match(/Article 4 - R[ée]mun[ée]ration[\s\S]*?:\s*(\d[\d\s]*(?:\.|,)?\d*)\s*(?:euros|€)/i);
+          
+          if (colonFormat && colonFormat[1]) {
+            const amount = colonFormat[1].replace(/\s/g, '');
+            return `${amount} €`;
+          }
+          
+          // Dernier recours: recherche générique de nombres suivis de "euros" ou "€" dans l'Article 4
           const fallbackMatch = content.match(/Article 4 - R[ée]mun[ée]ration[\s\S]*?(\d[\d\s]*(?:\.|,)?\d+)[\s\S]*?(?:euros|€)/i);
           
           if (fallbackMatch && fallbackMatch[1]) {
