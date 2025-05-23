@@ -12,12 +12,14 @@ type ProjectFormProps = {
   onSuccess?: () => void;
   onCancel?: () => void;
   initialData?: Partial<Project>;
+  isEdit?: boolean;
 };
 
-export function ProjectForm({ onSuccess, onCancel, initialData }: ProjectFormProps) {
+export function ProjectForm({ onSuccess, onCancel, initialData, isEdit = false }: ProjectFormProps) {
   const { form, onSubmit, isSubmitting } = useProjectForm({
     initialData,
     onSuccess,
+    isEdit,
   });
 
   return (
@@ -26,7 +28,7 @@ export function ProjectForm({ onSuccess, onCancel, initialData }: ProjectFormPro
         <BasicInfoFields form={form} />
         <DateFields form={form} />
         <StatusAndBudgetFields form={form} />
-        <FormActions onCancel={onCancel} isSubmitting={isSubmitting} />
+        <FormActions onCancel={onCancel} isSubmitting={isSubmitting} isEdit={isEdit} />
       </form>
     </Form>
   );

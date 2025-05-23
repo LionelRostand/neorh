@@ -18,7 +18,12 @@ export const useProjectsPage = () => {
   const [error, setError] = useState<Error | null>(null);
   const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false);
   
-  // Utiliser la constante HR.PROJECTS pour la collection
+  // États pour les nouveaux dialogues
+  const [viewProjectDialogOpen, setViewProjectDialogOpen] = useState(false);
+  const [editProjectDialogOpen, setEditProjectDialogOpen] = useState(false);
+  const [deleteProjectDialogOpen, setDeleteProjectDialogOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  
   const projectsFirestore = useFirestore<Project>("hr_projets");
 
   // Load projects data
@@ -66,24 +71,27 @@ export const useProjectsPage = () => {
   };
 
   const handleEdit = (projectId: string) => {
-    toast({
-      title: "Fonction en développement",
-      description: `Édition du projet ${projectId} sera bientôt disponible.`
-    });
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      setSelectedProject(project);
+      setEditProjectDialogOpen(true);
+    }
   };
 
   const handleDelete = (projectId: string) => {
-    toast({
-      title: "Fonction en développement",
-      description: `Suppression du projet ${projectId} sera bientôt disponible.`
-    });
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      setSelectedProject(project);
+      setDeleteProjectDialogOpen(true);
+    }
   };
 
   const handleView = (projectId: string) => {
-    toast({
-      title: "Fonction en développement",
-      description: `Affichage du projet ${projectId} sera bientôt disponible.`
-    });
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      setSelectedProject(project);
+      setViewProjectDialogOpen(true);
+    }
   };
 
   return {
@@ -93,6 +101,13 @@ export const useProjectsPage = () => {
     stats,
     newProjectDialogOpen,
     setNewProjectDialogOpen,
+    viewProjectDialogOpen,
+    setViewProjectDialogOpen,
+    editProjectDialogOpen,
+    setEditProjectDialogOpen,
+    deleteProjectDialogOpen,
+    setDeleteProjectDialogOpen,
+    selectedProject,
     loadProjects,
     handleNewProject,
     handleEdit,

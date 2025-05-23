@@ -11,11 +11,11 @@ import { HR } from "@/lib/constants/collections";
 interface UseProjectFormProps {
   initialData?: Partial<Project>;
   onSuccess?: () => void;
+  isEdit?: boolean;
 }
 
-export const useProjectForm = ({ initialData, onSuccess }: UseProjectFormProps) => {
+export const useProjectForm = ({ initialData, onSuccess, isEdit = false }: UseProjectFormProps) => {
   const { toast } = useToast();
-  // Utiliser la constante HR.PROJECTS pour la collection
   const firestore = useFirestore<Project>(HR.PROJECTS);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -34,38 +34,46 @@ export const useProjectForm = ({ initialData, onSuccess }: UseProjectFormProps) 
   const onSubmit = async (data: ProjectFormValues) => {
     setIsSubmitting(true);
     try {
-      // Ensure name is always provided (satisfying the Project type requirement)
       const projectData: Omit<Project, "id"> = {
-        name: data.name, // This is required by the Project type
+        name: data.name,
         description: data.description,
         startDate: data.startDate,
         endDate: data.endDate,
         status: data.status,
         budget: data.budget,
-        createdAt: new Date().toISOString(),
+        createdAt: isEdit ? initialData?.createdAt : new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      // Ajouter le projet à Firestore
-      await firestore.add(projectData);
-      
-      toast({
-        title: "Succès",
-        description: "Le projet a été créé avec succès.",
-      });
+      if (isEdit && initialData?.id) {
+        // Mettre à jour le projet existant
+        await firestore.update(initialData.id, projectData);
+        toast({
+          title: "Succès",
+          description: "Le projet a été mis à jour avec succès.",
+        });
+      } else {
+        // Créer un nouveau projet
+        await firestore.add(projectData);
+        toast({
+          title: "Succès",
+          description: "Le projet a été créé avec succès.",
+        });
+      }
 
-      // Réinitialiser le formulaire
-      form.reset();
+      // Réinitialiser le formulaire seulement si ce n'est pas une édition
+      if (!isEdit) {
+        form.reset();
+      }
       
-      // Appeler la fonction de callback si fournie
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
-      console.error("Erreur lors de la création du projet:", error);
+      console.error("Erreur lors de la sauvegarde du projet:", error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la création du projet.",
+        description: `Une erreur est survenue lors de la ${isEdit ? 'mise à jour' : 'création'} du projet.`,
         variant: "destructive",
       });
     } finally {
