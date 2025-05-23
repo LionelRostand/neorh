@@ -16,13 +16,13 @@ const DepartmentCell = ({ departmentId, departmentName }: DepartmentCellProps) =
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    // If we already have a proper department name, use it
-    if (departmentName && departmentName.trim() !== '') {
+    // Si nous avons déjà un nom de département valide, utilisons-le
+    if (departmentName && departmentName.trim() !== '' && !departmentName.includes('psUKm')) {
       setDisplayName(departmentName);
       return;
     }
     
-    // Otherwise fetch the name from Firestore if we have an ID
+    // Sinon, récupérer le nom depuis Firestore si nous avons un ID
     const fetchDepartmentName = async () => {
       if (!departmentId) {
         setDisplayName('Département non assigné');
@@ -37,13 +37,13 @@ const DepartmentCell = ({ departmentId, departmentName }: DepartmentCellProps) =
         if (deptSnap.exists()) {
           const deptData = deptSnap.data();
           setDisplayName(deptData.name || 'Département inconnu');
-          console.log("Fetched department name:", deptData.name, "for ID:", departmentId);
+          console.log("Nom du département récupéré:", deptData.name, "pour l'ID:", departmentId);
         } else {
-          console.log("Department document not found for ID:", departmentId);
+          console.log("Document de département non trouvé pour l'ID:", departmentId);
           setDisplayName('Département inconnu');
         }
       } catch (err) {
-        console.error("Error fetching department name:", err);
+        console.error("Erreur lors de la récupération du nom du département:", err);
         setDisplayName('Erreur de chargement');
       } finally {
         setIsLoading(false);
