@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
@@ -46,6 +46,13 @@ export function AddBadgeForm({
     },
   });
 
+  // Synchroniser le numéro de badge généré avec le formulaire
+  useEffect(() => {
+    if (generatedBadgeNumber && !isEditMode) {
+      form.setValue("number", generatedBadgeNumber);
+    }
+  }, [generatedBadgeNumber, form, isEditMode]);
+
   // Assurer que le numéro de badge reste celui généré automatiquement
   const handleSubmit = (data: BadgeFormValues) => {
     onSubmit({
@@ -57,7 +64,7 @@ export function AddBadgeForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <BasicInfoSection form={form} />
+        <BasicInfoSection form={form} generatedBadgeNumber={generatedBadgeNumber} />
         <EmployeeSection form={form} employees={employees} isLoading={isLoading} />
         <TypeSection form={form} isLoading={isLoading} />
         <StatusSection form={form} isLoading={isLoading} />

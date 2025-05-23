@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
@@ -8,9 +8,17 @@ import { Info } from "lucide-react";
 
 interface BasicInfoSectionProps {
   form: UseFormReturn<BadgeFormValues>;
+  generatedBadgeNumber?: string;
 }
 
-export function BasicInfoSection({ form }: BasicInfoSectionProps) {
+export function BasicInfoSection({ form, generatedBadgeNumber }: BasicInfoSectionProps) {
+  // Synchroniser le numéro généré avec le formulaire
+  useEffect(() => {
+    if (generatedBadgeNumber) {
+      form.setValue("number", generatedBadgeNumber);
+    }
+  }, [generatedBadgeNumber, form]);
+
   return (
     <FormField
       control={form.control}
@@ -22,7 +30,8 @@ export function BasicInfoSection({ form }: BasicInfoSectionProps) {
             <FormControl>
               <Input 
                 placeholder="Ex: B-12345" 
-                {...field} 
+                {...field}
+                value={generatedBadgeNumber || field.value || ""}
                 className="bg-gray-50 pr-8"
                 readOnly
                 disabled
