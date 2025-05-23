@@ -5,10 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Document } from "@/lib/constants";
 import { FileText, Download, Check, X } from "lucide-react";
-import { format, isValid } from "date-fns";
-import { fr } from "date-fns/locale";
 import SignatureDialog from "../contracts/SignatureDialog";
 import { downloadDocument } from "@/utils/contracts/documentDownload";
+import { 
+  formatUploadDate,
+  getStatusColor,
+  getStatusLabel,
+  getCategoryLabel,
+  needsSignature
+} from "@/utils/documents/documentUtils";
 
 interface EmployeeDocumentCardProps {
   document: Document;
@@ -19,66 +24,12 @@ const EmployeeDocumentCard = ({ document, onRefresh }: EmployeeDocumentCardProps
   const [signDialogOpen, setSignDialogOpen] = useState(false);
   const [isEmployerSigning, setIsEmployerSigning] = useState(false);
   
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'contracts': return 'Contrat';
-      case 'paystubs': return 'Bulletin de paie';
-      case 'certificates': return 'Certificat';
-      default: return 'Document';
-    }
-  };
-  
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'pending':
-      case 'pending_signature': return 'bg-amber-100 text-amber-800';
-      case 'expired': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-  
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'active': return 'Actif';
-      case 'pending': return 'En attente';
-      case 'pending_signature': return 'En attente de signatures';
-      case 'expired': return 'Expiré';
-      default: return 'Non défini';
-    }
-  };
-  
-  const needsSignature = document.category === 'contracts' && 
-                         (document.status === 'pending_signature' || 
-                          document.status === 'pending');
-  
   const openSignatureDialog = (isEmployer: boolean) => {
     setIsEmployerSigning(isEmployer);
     setSignDialogOpen(true);
   };
   
-  // Fonction pour formater la date en toute sécurité
-  const formatUploadDate = () => {
-    try {
-      if (!document.uploadDate) return "Date inconnue";
-      
-      // Vérifier si la date est déjà un objet Date
-      const dateToFormat = typeof document.uploadDate === 'string' 
-        ? new Date(document.uploadDate)
-        : document.uploadDate;
-      
-      // Vérifier si la date est valide
-      if (!isValid(dateToFormat)) {
-        console.warn("Date invalide:", document.uploadDate);
-        return "Date invalide";
-      }
-      
-      return format(dateToFormat, 'dd MMMM yyyy', { locale: fr });
-    } catch (error) {
-      console.error("Erreur de formatage de date:", error, document.uploadDate);
-      return "Date non disponible";
-    }
-  };
+  const documentNeedsSignature = needsSignature(document);
   
   return (
     <Card className="h-full flex flex-col">
@@ -98,11 +49,11 @@ const EmployeeDocumentCard = ({ document, onRefresh }: EmployeeDocumentCardProps
             {document.description || getCategoryLabel(document.category || 'other')}
           </p>
           <p className="text-xs text-gray-500">
-            Ajouté le {formatUploadDate()}
+            Ajouté le {formatUploadDate(document.uploadDate)}
           </p>
         </div>
         
-        {needsSignature && (
+        {documentNeedsSignature && (
           <div className="mt-4 space-y-2">
             <div className="flex items-center text-sm">
               <div className="w-1/2">Signature employé:</div>
@@ -138,7 +89,7 @@ const EmployeeDocumentCard = ({ document, onRefresh }: EmployeeDocumentCardProps
         </Button>
         
         <div className="flex gap-2">
-          {needsSignature && !document.signedByEmployee && (
+          {documentNeedsSignature && !document.signedByEmployee && (
             <Button
               variant="outline"
               size="sm"
@@ -149,7 +100,7 @@ const EmployeeDocumentCard = ({ document, onRefresh }: EmployeeDocumentCardProps
             </Button>
           )}
           
-          {needsSignature && !document.signedByEmployer && (
+          {documentNeedsSignature && !document.signedByEmployer && (
             <Button
               variant="outline"
               size="sm"
