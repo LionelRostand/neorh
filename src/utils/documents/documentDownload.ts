@@ -47,7 +47,20 @@ export const handleDocumentDownload = (document: Document): void => {
         });
     } else {
       // Direct URL download
-      window.open(document.fileUrl, '_blank');
+      const a = window.document.createElement('a');
+      a.href = document.fileUrl;
+      a.target = '_blank';
+      a.download = document.title
+        ? document.title.replace(/\s+/g, '_').toLowerCase() + '.pdf'
+        : 'document.pdf';
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      
+      toast({
+        title: "Succès",
+        description: "Téléchargement démarré",
+      });
     }
   } catch (error) {
     console.error("Erreur lors du téléchargement:", error);
@@ -58,4 +71,3 @@ export const handleDocumentDownload = (document: Document): void => {
     });
   }
 };
-

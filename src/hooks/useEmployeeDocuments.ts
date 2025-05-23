@@ -89,7 +89,7 @@ export const useEmployeeDocuments = (employee: Employee) => {
           uploadDate: data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
           status: 'active',
           employeeId: data.employeeId,
-          employeeName: data.employeeName || employee.firstName + ' ' + employee.lastName,
+          employeeName: data.employeeName || employee.name, // Utilisation de 'name' au lieu de firstName + lastName
           description: `Fiche de paie pour la période ${data.period || 'non spécifiée'}`
         });
       });

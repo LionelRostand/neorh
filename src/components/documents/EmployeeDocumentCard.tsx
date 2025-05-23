@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Document } from "@/lib/constants";
-import { FileText, Download, Check, X } from "lucide-react";
+import { FileText, Download } from "lucide-react";
 import SignatureDialog from "../contracts/SignatureDialog";
 import { 
   formatUploadDate,
