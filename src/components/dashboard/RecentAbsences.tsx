@@ -1,54 +1,50 @@
-
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-interface Absence {
-  id: number;
-  employeeName: string;
-  type: string;
-  startDate: string;
-  endDate: string;
-  status: 'approved' | 'pending' | 'rejected';
-}
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCollection } from "@/hooks/useCollection";
+import { Leave } from "@/types/firebase";
+import { HR } from "@/lib/constants/collections";
+import { useEmployeeData } from "@/hooks/useEmployeeData";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 const RecentAbsences = () => {
-  // Données d'exemple pour les absences
-  const absences: Absence[] = [
-    {
-      id: 1,
-      employeeName: "Éric Martin",
-      type: "Congés payés",
-      startDate: "10 Mai 2025",
-      endDate: "17 Mai 2025",
-      status: "approved"
-    },
-    {
-      id: 2,
-      employeeName: "Camille Dubois",
-      type: "Maladie",
-      startDate: "12 Mai 2025",
-      endDate: "14 Mai 2025",
-      status: "approved"
-    },
-    {
-      id: 3,
-      employeeName: "Pierre Lefevre",
-      type: "RTT",
-      startDate: "15 Mai 2025",
-      endDate: "15 Mai 2025",
-      status: "pending"
-    },
-    {
-      id: 4,
-      employeeName: "Julie Moreau",
-      type: "Congés sans solde",
-      startDate: "20 Mai 2025",
-      endDate: "24 Mai 2025",
-      status: "rejected"
-    }
-  ];
+  const [recentLeaves, setRecentLeaves] = useState<Leave[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { getAll } = useCollection(HR.LEAVES);
+  const { employees } = useEmployeeData();
 
-  const getStatusBadge = (status: Absence['status']) => {
+  useEffect(() => {
+    const fetchRecentLeaves = async () => {
+      setIsLoading(true);
+      try {
+        const result = await getAll();
+        
+        if (result.docs) {
+          // Filter out allocations, sort by start date (newest first), and limit to 4
+          const leavesData = result.docs
+            .filter(leave => leave.type !== 'allocation')
+            .sort((a, b) => {
+              // If dates are not available, keep the original order
+              if (!a.startDate || !b.startDate) return 0;
+              return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+            })
+            .slice(0, 4);
+          
+          setRecentLeaves(leavesData);
+        }
+      } catch (error) {
+        console.error("Error fetching recent leaves:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRecentLeaves();
+  }, [getAll]);
+
+  const getStatusBadge = (status: Leave['status']) => {
     switch (status) {
       case 'approved':
         return <Badge className="bg-green-500">Approuvé</Badge>;
@@ -61,6 +57,57 @@ const RecentAbsences = () => {
     }
   };
 
+  const getEmployeeName = (employeeId: string) => {
+    if (!employees) return "Employé inconnu";
+    
+    const employee = employees.find(emp => emp.id === employeeId);
+    if (!employee) return "Employé inconnu";
+    
+    return `${employee.firstName} ${employee.lastName}`;
+  };
+
+  const getLeaveTypeLabel = (type: string): string => {
+    switch (type) {
+      case 'paid': return 'Congé payé';
+      case 'rtt': return 'RTT';
+      case 'sick': return 'Congé Maladie';
+      case 'family': return 'Congé Familial';
+      case 'maternity': return 'Congé Maternité';
+      case 'paternity': return 'Congé Paternité';
+      case 'other': return 'Autre congé';
+      default: return type;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return format(date, 'd MMM yyyy', { locale: fr });
+    } catch {
+      return dateString;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Absences récentes</CardTitle>
+          <CardDescription>Suivi des dernières absences des employés</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[1, 2, 3, 4].map(index => (
+              <div key={index} className="flex items-center justify-between border-b pb-3 last:border-0">
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -69,22 +116,28 @@ const RecentAbsences = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {absences.map(absence => (
-            <div key={absence.id} className="flex items-center justify-between border-b pb-3 last:border-0">
-              <div>
-                <p className="font-medium">{absence.employeeName}</p>
-                <p className="text-sm text-gray-500">{absence.type}</p>
-                <p className="text-xs mt-1">
-                  {absence.startDate === absence.endDate 
-                    ? absence.startDate 
-                    : `${absence.startDate} - ${absence.endDate}`}
-                </p>
+          {recentLeaves.length > 0 ? (
+            recentLeaves.map(leave => (
+              <div key={leave.id} className="flex items-center justify-between border-b pb-3 last:border-0">
+                <div>
+                  <p className="font-medium">{getEmployeeName(leave.employeeId)}</p>
+                  <p className="text-sm text-gray-500">{getLeaveTypeLabel(leave.type)}</p>
+                  <p className="text-xs mt-1">
+                    {leave.startDate === leave.endDate 
+                      ? formatDate(leave.startDate) 
+                      : `${formatDate(leave.startDate)} - ${formatDate(leave.endDate)}`}
+                  </p>
+                </div>
+                <div>
+                  {getStatusBadge(leave.status)}
+                </div>
               </div>
-              <div>
-                {getStatusBadge(absence.status)}
-              </div>
+            ))
+          ) : (
+            <div className="text-center py-4 text-gray-500">
+              Aucune absence récente
             </div>
-          ))}
+          )}
         </div>
       </CardContent>
     </Card>
