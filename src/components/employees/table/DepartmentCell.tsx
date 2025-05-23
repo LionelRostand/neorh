@@ -16,30 +16,44 @@ const DepartmentCell = ({ departmentId, departmentName }: DepartmentCellProps) =
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    // Si nous avons déjà un nom de département valide, utilisons-le
-    if (departmentName && departmentName.trim() !== '' && !departmentName.includes('psUKm')) {
+    // Si nous avons un nom de département qui ne ressemble pas à un ID, utilisons-le
+    if (departmentName && 
+        departmentName.trim() !== '' && 
+        !departmentName.includes('mbKdw') && 
+        !departmentName.includes('psUKm') &&
+        departmentName.length < 20) { // Les vrais noms de département sont généralement plus courts
       setDisplayName(departmentName);
       return;
     }
     
-    // Sinon, récupérer le nom depuis Firestore si nous avons un ID
+    // Déterminer quel ID utiliser pour récupérer le département
+    let idToFetch = '';
+    if (departmentId && departmentId.trim() !== '') {
+      idToFetch = departmentId;
+    } else if (departmentName && (departmentName.includes('mbKdw') || departmentName.includes('psUKm'))) {
+      // Le nom du département est en fait un ID
+      idToFetch = departmentName;
+    }
+    
+    if (!idToFetch) {
+      setDisplayName('Département non assigné');
+      return;
+    }
+    
+    // Récupérer le nom depuis Firestore
     const fetchDepartmentName = async () => {
-      if (!departmentId) {
-        setDisplayName('Département non assigné');
-        return;
-      }
-      
       setIsLoading(true);
       try {
-        const deptRef = doc(db, HR.DEPARTMENTS, departmentId);
+        const deptRef = doc(db, HR.DEPARTMENTS, idToFetch);
         const deptSnap = await getDoc(deptRef);
         
         if (deptSnap.exists()) {
           const deptData = deptSnap.data();
-          setDisplayName(deptData.name || 'Département inconnu');
-          console.log("Nom du département récupéré:", deptData.name, "pour l'ID:", departmentId);
+          const fetchedName = deptData.name || 'Département inconnu';
+          setDisplayName(fetchedName);
+          console.log("Nom du département récupéré:", fetchedName, "pour l'ID:", idToFetch);
         } else {
-          console.log("Document de département non trouvé pour l'ID:", departmentId);
+          console.log("Document de département non trouvé pour l'ID:", idToFetch);
           setDisplayName('Département inconnu');
         }
       } catch (err) {
