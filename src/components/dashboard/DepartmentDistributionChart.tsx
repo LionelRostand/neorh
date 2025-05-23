@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDepartmentsData } from "@/hooks/useDepartmentsData";
 import { useEmployeeData } from "@/hooks/useEmployeeData";
@@ -87,10 +87,13 @@ const DepartmentDistributionChart = () => {
                   dataKey="value" 
                   radius={[4, 4, 0, 0]} 
                   fill="#3b82f6"
-                  // Use department color if available
-                  stroke={(data) => data?.color || "#3b82f6"}
                   fillOpacity={0.8}
-                />
+                >
+                  {/* Use Cell components to apply custom colors for each bar */}
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color || "#3b82f6"} stroke={entry.color || "#3b82f6"} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           ) : (
