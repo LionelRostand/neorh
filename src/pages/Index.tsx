@@ -1,8 +1,10 @@
 
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { 
   Users, Clock, Calendar, Briefcase, Building2,
-  LineChart, GraduationCap, Wallet, UserPlus
+  LineChart, GraduationCap, Wallet, UserPlus,
+  Network, Key, FolderOpen, Projector
 } from "lucide-react";
 
 import StatCard from "@/components/dashboard/StatCard";
@@ -11,6 +13,7 @@ import RecentAbsences from "@/components/dashboard/RecentAbsences";
 import UpcomingEvents from "@/components/dashboard/UpcomingEvents";
 import EmployeeStatusChart from "@/components/dashboard/EmployeeStatusChart";
 import DepartmentDistributionChart from "@/components/dashboard/DepartmentDistributionChart";
+import DashboardModuleLinks from "@/components/dashboard/DashboardModuleLinks";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -83,10 +86,12 @@ const Index = () => {
         </div>
         <div className="mt-4 md:mt-0 flex space-x-2">
           <Button variant="outline" size="sm" onClick={handleExport}>Exporter</Button>
-          <Button size="sm" className="bg-hr hover:bg-hr-dark" onClick={handleNewEmployee}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Nouvel employé
-          </Button>
+          <Link to="/employes">
+            <Button size="sm" className="bg-hr hover:bg-hr-dark">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Nouvel employé
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -122,47 +127,13 @@ const Index = () => {
         <DepartmentDistributionChart />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <EmployeeAnniversaries />
         <RecentAbsences />
         <UpcomingEvents />
       </div>
 
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">ACCÈS RAPIDES</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="flex flex-col h-auto py-4 justify-center items-center">
-                <Users className="h-5 w-5 mb-1" />
-                <span className="text-xs">Employés</span>
-              </Button>
-              <Button variant="outline" className="flex flex-col h-auto py-4 justify-center items-center">
-                <Calendar className="h-5 w-5 mb-1" />
-                <span className="text-xs">Congés</span>
-              </Button>
-              <Button variant="outline" className="flex flex-col h-auto py-4 justify-center items-center">
-                <Briefcase className="h-5 w-5 mb-1" />
-                <span className="text-xs">Contrats</span>
-              </Button>
-              <Button variant="outline" className="flex flex-col h-auto py-4 justify-center items-center">
-                <Building2 className="h-5 w-5 mb-1" />
-                <span className="text-xs">Départements</span>
-              </Button>
-              <Button variant="outline" className="flex flex-col h-auto py-4 justify-center items-center">
-                <LineChart className="h-5 w-5 mb-1" />
-                <span className="text-xs">Évaluations</span>
-              </Button>
-              <Button variant="outline" className="flex flex-col h-auto py-4 justify-center items-center">
-                <GraduationCap className="h-5 w-5 mb-1" />
-                <span className="text-xs">Formations</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardModuleLinks />
     </div>
   );
 };
