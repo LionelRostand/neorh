@@ -67,54 +67,29 @@ const ContractTable = ({ contracts, loading, onDetails, onEdit, onDelete }: Cont
           )}
 
           {contracts.length === 0 && !loading && (
-            <>
-              <TableRow>
-                <TableCell>
-                  <EmployeeCell 
-                    employeeId="example1"
-                    employeeName="Lionel DJOSSA" 
-                  />
-                </TableCell>
-                <TableCell>PDG</TableCell>
-                <TableCell>CDI</TableCell>
-                <TableCell>03/05/2025</TableCell>
-                <TableCell>—</TableCell>
-                <TableCell>
-                  <ContractStatusBadge status="active" />
-                </TableCell>
-                <TableCell className="text-right">
-                  <ContractActions 
-                    contractId="example1" 
-                    onDetails={onDetails}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                  />
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <EmployeeCell 
-                    employeeId="example2"
-                    employeeName="Employé inconnu" 
-                  />
-                </TableCell>
-                <TableCell>Non spécifié</TableCell>
-                <TableCell>CDI</TableCell>
-                <TableCell>—</TableCell>
-                <TableCell>—</TableCell>
-                <TableCell>
-                  <ContractStatusBadge status="active" />
-                </TableCell>
-                <TableCell className="text-right">
-                  <ContractActions 
-                    contractId="example2" 
-                    onDetails={onDetails}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                  />
-                </TableCell>
-              </TableRow>
-            </>
+            <TableRow>
+              <TableCell>
+                <EmployeeCell 
+                  employeeId="lionel-djossa"
+                  employeeName="Lionel DJOSSA" 
+                />
+              </TableCell>
+              <TableCell>PDG • DIRECTION GENERALE</TableCell>
+              <TableCell>CDI</TableCell>
+              <TableCell>03/05/2025</TableCell>
+              <TableCell>—</TableCell>
+              <TableCell>
+                <ContractStatusBadge status="active" />
+              </TableCell>
+              <TableCell className="text-right">
+                <ContractActions 
+                  contractId="lionel-djossa" 
+                  onDetails={onDetails}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
+              </TableCell>
+            </TableRow>
           )}
         </TableBody>
       </Table>
