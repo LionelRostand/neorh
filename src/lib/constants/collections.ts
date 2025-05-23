@@ -20,6 +20,7 @@ export const HR = {
   MANAGERS: 'hr_managers',
   PAYSLIPS: 'hr_payslips',
   PERMISSIONS: 'hr_permissions',
+  PROJECTS: 'hr_projets',
   RECRUITMENT: 'hr_recruitment',
   SALARIES: 'hr_salaries',
   SETTINGS: 'hr_settings',
@@ -44,4 +45,5 @@ export const ROUTE_TO_COLLECTION_MAP = {
   '/documents': HR.DOCUMENTS,
   '/formations': HR.TRAININGS,
   '/salaires': HR.PAYSLIPS,
+  '/projets': HR.PROJECTS,
 };

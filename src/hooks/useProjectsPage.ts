@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFirestore } from "@/hooks/firestore";
 import { Project } from "@/types/project";
+import { HR } from "@/lib/constants/collections";
 
 export const useProjectsPage = () => {
   const { toast } = useToast();
@@ -17,7 +18,8 @@ export const useProjectsPage = () => {
   const [error, setError] = useState<Error | null>(null);
   const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false);
   
-  const projectsFirestore = useFirestore<Project>("hr_projects");
+  // Utiliser la constante HR.PROJECTS pour la collection
+  const projectsFirestore = useFirestore<Project>("hr_projets");
 
   // Load projects data
   const loadProjects = async () => {

@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useFirestore } from "@/hooks/firestore";
 import { projectFormSchema, ProjectFormValues } from "../schema";
 import { Project } from "@/types/project";
+import { HR } from "@/lib/constants/collections";
 
 interface UseProjectFormProps {
   initialData?: Partial<Project>;
@@ -14,7 +15,8 @@ interface UseProjectFormProps {
 
 export const useProjectForm = ({ initialData, onSuccess }: UseProjectFormProps) => {
   const { toast } = useToast();
-  const firestore = useFirestore<Project>("hr_projects");
+  // Utiliser la constante HR.PROJECTS pour la collection
+  const firestore = useFirestore<Project>(HR.PROJECTS);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ProjectFormValues>({
