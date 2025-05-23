@@ -21,7 +21,7 @@ const UpcomingEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { trainings, loading: loadingTrainings } = useTrainingData();
-  const { getAll: getEvaluations, loading: loadingEvaluations } = useCollection(HR.EVALUATIONS);
+  const { getAll: getEvaluations, isLoading: loadingEvaluations } = useCollection(HR.EVALUATIONS);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -34,21 +34,21 @@ const UpcomingEvents = () => {
         // Process evaluations
         if (evaluationsResult.docs) {
           const evaluationEvents = evaluationsResult.docs
-            .filter(eval => eval.status === "planifiée") // Only include planned evaluations
-            .filter(eval => {
+            .filter(evaluation => evaluation.status === "planifiée") // Only include planned evaluations
+            .filter(evaluation => {
               // Filter for upcoming evaluations (happening in the future)
               try {
-                return isAfter(new Date(eval.date), new Date());
+                return isAfter(new Date(evaluation.date), new Date());
               } catch (e) {
                 return false; // Skip invalid dates
               }
             })
-            .map(eval => ({
-              id: eval.id,
-              title: eval.title || "Évaluation",
-              date: formatDate(eval.date),
+            .map(evaluation => ({
+              id: evaluation.id,
+              title: evaluation.title || "Évaluation",
+              date: formatDate(evaluation.date),
               type: 'evaluation' as const,
-              description: `Évaluation de ${eval.employeeName || "employé"}`
+              description: `Évaluation de ${evaluation.employeeName || "employé"}`
             }));
           
           combinedEvents = [...combinedEvents, ...evaluationEvents];
