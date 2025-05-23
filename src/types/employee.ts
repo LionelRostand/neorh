@@ -17,4 +17,5 @@ export interface Employee {
   personalEmail?: string;
   birthDate?: string;
   address?: string;
+  salary?: number; // Added salary field to match usage in the code
 }

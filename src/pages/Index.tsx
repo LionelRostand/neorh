@@ -77,7 +77,7 @@ const Index = () => {
         
         // Récupérer le nombre d'heures travaillées (feuilles de temps)
         const timesheetsQuery = query(
-          collection(db, HR.TIMESHEETS || 'hr_timesheets'),
+          collection(db, HR.TIMESHEET || 'hr_timesheet'), // Fixed: TIMESHEETS -> TIMESHEET
           where('weekStartDate', '>=', new Date(currentDate.getFullYear(), currentDate.getMonth(), 1))
         );
         const timesheetsSnapshot = await getDocs(timesheetsQuery);
@@ -100,8 +100,10 @@ const Index = () => {
         
         if (employees && employees.length > 0) {
           for (const employee of employees) {
-            if (employee.salary && typeof employee.salary === 'number') {
-              totalSalary += employee.salary;
+            // Fixed: Check if the employee has a position property that might contain salary info
+            const employeeSalary = (employee as any).salary || 0;
+            if (employeeSalary && typeof employeeSalary === 'number') {
+              totalSalary += employeeSalary;
               employeesWithSalary++;
             }
           }
