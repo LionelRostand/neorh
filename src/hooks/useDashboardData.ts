@@ -18,6 +18,7 @@ interface ModuleStats {
   documents: number;
   contracts: number;
   leaves: number;
+  [key: string]: number; // Adding index signature to fix the TypeScript error
 }
 
 export const useDashboardData = (employees: Employee[] | undefined) => {
@@ -90,7 +91,7 @@ export const useDashboardData = (employees: Employee[] | undefined) => {
         
         if (employees && employees.length > 0) {
           for (const employee of employees) {
-            const employeeSalary = (employee as any).salary || 0;
+            const employeeSalary = employee.salary || 0;
             if (employeeSalary && typeof employeeSalary === 'number') {
               totalSalary += employeeSalary;
               employeesWithSalary++;
