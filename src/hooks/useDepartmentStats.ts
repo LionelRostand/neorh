@@ -2,13 +2,14 @@
 import { useState, useEffect } from 'react';
 import { useFirestore } from './firestore';
 import { toast } from '@/components/ui/use-toast';
+import { HR } from '@/lib/constants/collections';
 
 export const useDepartmentStats = () => {
   const [departmentData, setDepartmentData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   
-  const { getAll } = useFirestore('hr_departments');
+  const { getAll } = useFirestore(HR.DEPARTMENTS);
   
   useEffect(() => {
     const fetchData = async () => {

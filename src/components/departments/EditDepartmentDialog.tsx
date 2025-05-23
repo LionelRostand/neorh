@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Department } from '@/types/firebase';
 import { useFirestore } from '@/hooks/useFirestore';
 import { toast } from '@/components/ui/use-toast';
+import { HR } from '@/lib/constants/collections';
 import DepartmentInformationTab, { DepartmentFormValues } from './tabs/DepartmentInformationTab';
 import DepartmentEmployeesTab from './tabs/DepartmentEmployeesTab';
 
@@ -26,7 +27,7 @@ const EditDepartmentDialog: React.FC<EditDepartmentDialogProps> = ({
   department,
   onSuccess
 }) => {
-  const { update, isLoading } = useFirestore<Department>('hr_departments');
+  const { update, isLoading } = useFirestore<Department>(HR.DEPARTMENTS);
   const [activeTab, setActiveTab] = useState("informations");
   
   const handleSubmit = async (values: DepartmentFormValues) => {

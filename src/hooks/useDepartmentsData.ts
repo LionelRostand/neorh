@@ -5,6 +5,7 @@ import { db } from '@/lib/firebase';
 import { toast } from '@/components/ui/use-toast';
 import { Department } from '@/types/firebase';
 import { DEPARTMENT_COLORS } from '@/components/departments/tabs/schema/departmentSchema';
+import { HR } from '@/lib/constants/collections';
 
 export const useDepartmentsData = () => {
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -19,7 +20,7 @@ export const useDepartmentsData = () => {
     
     try {
       console.log('Fetching departments from Firestore...');
-      const departmentsCollection = collection(db, 'hr_departments');
+      const departmentsCollection = collection(db, HR.DEPARTMENTS);
       const departmentsSnapshot = await getDocs(departmentsCollection);
       
       // Check if component is still mounted

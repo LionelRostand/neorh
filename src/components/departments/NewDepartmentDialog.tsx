@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useManagersData } from "@/hooks/useManagersData";
 import { useCompaniesData } from "@/hooks/useCompaniesData";
 import { useDepartmentsData } from "@/hooks/useDepartmentsData";
+import { HR } from "@/lib/constants/collections";
 
 // Schema for the department form
 const formSchema = z.object({
@@ -57,7 +57,7 @@ const COLORS = [
 
 const NewDepartmentDialog = ({ open, onOpenChange, onSuccess }: NewDepartmentDialogProps) => {
   const { toast } = useToast();
-  const { add } = useFirestore<Department>("hr_departments");
+  const { add } = useFirestore<Department>(HR.DEPARTMENTS);
   const { managers, isLoading: isLoadingManagers } = useManagersData();
   const { companies, isLoading: isLoadingCompanies } = useCompaniesData();
   const { departments, isLoading: isLoadingDepartments } = useDepartmentsData();

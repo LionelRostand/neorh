@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useFirestore } from '@/hooks/useFirestore';
 import { Department } from '@/types/firebase';
+import { HR } from '@/lib/constants/collections';
 
 interface DeleteDepartmentConfirmDialogProps {
   open: boolean;
@@ -26,7 +27,7 @@ const DeleteDepartmentConfirmDialog: React.FC<DeleteDepartmentConfirmDialogProps
   department,
   onSuccess
 }) => {
-  const { remove, isLoading } = useFirestore<Department>('hr_departments');
+  const { remove, isLoading } = useFirestore<Department>(HR.DEPARTMENTS);
 
   const handleDelete = async () => {
     if (!department?.id) return;
