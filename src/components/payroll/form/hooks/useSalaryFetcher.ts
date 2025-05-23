@@ -38,12 +38,21 @@ export const useSalaryFetcher = (
         
         // Si le contenu est disponible et contient un texte
         if (content) {
-          // Rechercher l'Article 4 - Rémunération
-          const remunerationMatch = content.match(/Article 4 - R[ée]mun[ée]ration[\s\S]*?(\d[\d\s]*(?:\.|,)\d+)[\s\S]*?(?:euros|€)/i);
+          // Rechercher l'Article 4 - Rémunération avec un format plus précis
+          // Amélioration: Adaptation pour capturer exactement le format "de 10000 euros"
+          const remunerationMatch = content.match(/Article 4 - R[ée]mun[ée]ration[\s\S]*?(?:de|:)\s*(\d[\d\s]*(?:\.|,)?\d*)[\s\S]*?(?:euros|€)/i);
           
           if (remunerationMatch && remunerationMatch[1]) {
             // Nettoyer le texte trouvé pour obtenir le montant
             const amount = remunerationMatch[1].replace(/\s/g, '');
+            return `${amount} €`;
+          }
+          
+          // Fallback à l'ancienne regex si la nouvelle ne trouve rien
+          const fallbackMatch = content.match(/Article 4 - R[ée]mun[ée]ration[\s\S]*?(\d[\d\s]*(?:\.|,)?\d+)[\s\S]*?(?:euros|€)/i);
+          
+          if (fallbackMatch && fallbackMatch[1]) {
+            const amount = fallbackMatch[1].replace(/\s/g, '');
             return `${amount} €`;
           }
         }
