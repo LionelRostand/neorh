@@ -19,10 +19,10 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
         <SelectTrigger className="w-full md:w-[280px]">
           <SelectValue placeholder="Sélectionner un projet" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-white z-50">
           {projects.length === 0 ? (
             <SelectItem value="no-projects" disabled>
-              Aucun projet disponible
+              Aucun projet disponible - Créez des projets dans le menu Projets
             </SelectItem>
           ) : (
             projects.map(project => (
@@ -35,7 +35,8 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
       </Select>
       <Button 
         onClick={onAddProject}
-        disabled={!selectedProject || selectedProject === 'no-projects'}
+        disabled={!selectedProject || selectedProject === 'no-projects' || projects.length === 0}
+        className="bg-blue-600 hover:bg-blue-700"
       >
         Ajouter le projet
       </Button>
