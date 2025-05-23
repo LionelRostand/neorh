@@ -15,6 +15,7 @@ import {
 import { AddBadgeForm } from "./form/AddBadgeForm";
 import { BadgeFormValues } from "./form/FormSchema";
 import { adaptAppEmployee } from "@/utils/employeeAdapter";
+import { HR } from "@/lib/constants/collections";
 
 interface AddBadgeDialogProps {
   open: boolean;
@@ -34,7 +35,7 @@ export function AddBadgeDialog({
   const [generatedBadgeNumber, setGeneratedBadgeNumber] = useState("");
   
   // Utilisation du hook Firestore pour la collection hr_badges
-  const { add, isLoading, getAll } = useFirestore<Badge>("hr_badges");
+  const { add, isLoading, getAll } = useFirestore<Badge>(HR.BADGES);
 
   // Generate badge number when dialog opens
   useEffect(() => {
@@ -59,6 +60,7 @@ export function AddBadgeDialog({
       } while (existingNumbers.includes(newNumber));
       
       setGeneratedBadgeNumber(newNumber);
+      console.log("Numéro de badge généré:", newNumber);
     } catch (error) {
       console.error("Error generating badge number:", error);
       // Fallback to a timestamp-based number if there's an error
@@ -78,7 +80,7 @@ export function AddBadgeDialog({
 
       // Préparer l'objet badge à ajouter dans Firestore
       const badge: Partial<Badge> = {
-        number: data.number || generatedBadgeNumber,
+        number: generatedBadgeNumber, // Utiliser le numéro généré, pas celui du formulaire
         employeeId: data.employeeId,
         type: data.type,
         status: data.status as "active" | "inactive" | "lost" | "pending",
@@ -98,7 +100,7 @@ export function AddBadgeDialog({
       await add(badge as Badge);
       toast({
         title: "Badge créé",
-        description: "Le badge a été créé avec succès",
+        description: `Le badge ${generatedBadgeNumber} a été créé avec succès pour ${employeeName}`,
       });
       
       // Fermer le dialogue et rafraîchir les données

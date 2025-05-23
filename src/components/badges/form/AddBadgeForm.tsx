@@ -46,10 +46,11 @@ export function AddBadgeForm({
     },
   });
 
+  // Assurer que le numéro de badge reste celui généré automatiquement
   const handleSubmit = (data: BadgeFormValues) => {
     onSubmit({
       ...data,
-      number: generatedBadgeNumber, // Assurer que le numéro reste celui généré
+      number: generatedBadgeNumber,
     });
   };
 
