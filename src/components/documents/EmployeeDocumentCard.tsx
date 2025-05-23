@@ -1,92 +1,30 @@
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Document } from "@/lib/constants";
-import { FileText, Download, Check, X, Trash2 } from "lucide-react";
-import { format } from "date-fns";
+import { FileText, Download, Check, X } from "lucide-react";
+import { format, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
 import SignatureDialog from "../contracts/SignatureDialog";
-import DeleteDocumentDialog from "./DeleteDocumentDialog";
-import { toast } from "@/components/ui/use-toast";
-import useFirestore from "@/hooks/useFirestore";
+import { downloadDocument } from "@/utils/contracts/documentDownload";
 
-interface DocumentCardProps {
+interface EmployeeDocumentCardProps {
   document: Document;
   onRefresh?: () => void;
 }
 
-const DocumentCard = ({ document, onRefresh }: DocumentCardProps) => {
+const EmployeeDocumentCard = ({ document, onRefresh }: EmployeeDocumentCardProps) => {
   const [signDialogOpen, setSignDialogOpen] = useState(false);
   const [isEmployerSigning, setIsEmployerSigning] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
-  // Firestore hook pour la suppression de documents
-  const documentCollection = useFirestore<Document>("hr_documents");
-  
-  const handleDownload = () => {
-    if (!document.fileUrl) return;
-    
-    // Convert base64 to blob
-    if (document.fileUrl.startsWith('data:')) {
-      const base64Response = fetch(document.fileUrl);
-      base64Response.then(res => res.blob())
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob);
-          const a = window.document.createElement('a');
-          a.href = url;
-          a.download = document.title
-            .replace(/\s+/g, '_')
-            .toLowerCase() + '.pdf';
-          window.document.body.appendChild(a);
-          a.click();
-          window.document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
-        });
-    } else {
-      window.open(document.fileUrl, '_blank');
-    }
-  };
-  
-  const handleDelete = async () => {
-    if (!document.id) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de supprimer ce document car il n'a pas d'identifiant valide.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      await documentCollection.remove(document.id);
-      toast({
-        title: "Succès",
-        description: "Document supprimé avec succès",
-      });
-      // Rafraîchir la liste des documents
-      if (onRefresh) {
-        onRefresh();
-      }
-    } catch (error) {
-      console.error("Erreur lors de la suppression du document:", error);
-      toast({
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de la suppression du document.",
-        variant: "destructive"
-      });
-    }
-  };
-  
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'active': return 'Actif';
-      case 'pending': return 'En attente';
-      case 'pending_signature': return 'En attente de signatures';
-      case 'expired': return 'Expiré';
-      case 'draft': return 'Brouillon';
-      default: return 'Non défini';
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'contracts': return 'Contrat';
+      case 'paystubs': return 'Bulletin de paie';
+      case 'certificates': return 'Certificat';
+      default: return 'Document';
     }
   };
   
@@ -100,6 +38,16 @@ const DocumentCard = ({ document, onRefresh }: DocumentCardProps) => {
     }
   };
   
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'active': return 'Actif';
+      case 'pending': return 'En attente';
+      case 'pending_signature': return 'En attente de signatures';
+      case 'expired': return 'Expiré';
+      default: return 'Non défini';
+    }
+  };
+  
   const needsSignature = document.category === 'contracts' && 
                          (document.status === 'pending_signature' || 
                           document.status === 'pending');
@@ -109,122 +57,109 @@ const DocumentCard = ({ document, onRefresh }: DocumentCardProps) => {
     setSignDialogOpen(true);
   };
   
-  const formatDate = (dateString: string) => {
+  // Fonction pour formater la date en toute sécurité
+  const formatUploadDate = () => {
     try {
-      return format(new Date(dateString), 'dd MMMM yyyy', { locale: fr });
-    } catch {
-      return 'Date inconnue';
+      if (!document.uploadDate) return "Date inconnue";
+      
+      // Vérifier si la date est déjà un objet Date
+      const dateToFormat = typeof document.uploadDate === 'string' 
+        ? new Date(document.uploadDate)
+        : document.uploadDate;
+      
+      // Vérifier si la date est valide
+      if (!isValid(dateToFormat)) {
+        console.warn("Date invalide:", document.uploadDate);
+        return "Date invalide";
+      }
+      
+      return format(dateToFormat, 'dd MMMM yyyy', { locale: fr });
+    } catch (error) {
+      console.error("Erreur de formatage de date:", error, document.uploadDate);
+      return "Date non disponible";
     }
   };
   
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
-      <CardContent className="p-0">
-        <div className="p-4 pb-2">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="p-1.5 bg-gray-100 rounded">
-                <FileText className="h-5 w-5 text-gray-600" />
-              </div>
-              <h3 className="font-medium">{document.title}</h3>
-            </div>
-            <Badge className={getStatusColor(document.status || 'pending')}>
-              {getStatusLabel(document.status || 'pending')}
-            </Badge>
+    <Card className="h-full flex flex-col">
+      <CardContent className="pt-6 flex-grow">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <FileText className="h-5 w-5 text-emerald-600" />
+            <h3 className="font-medium truncate">{document.title}</h3>
           </div>
-          
-          <div className="mt-4 text-sm text-gray-500">
-            <p>{document.description || 'Contrat de travail'}</p>
-            <p className="text-xs mt-1">
-              Ajouté le {formatDate(document.uploadDate)}
-            </p>
-          </div>
+          <Badge className={getStatusColor(document.status || 'pending')}>
+            {getStatusLabel(document.status || 'pending')}
+          </Badge>
+        </div>
+        
+        <div className="space-y-2">
+          <p className="text-sm text-gray-500">
+            {document.description || getCategoryLabel(document.category || 'other')}
+          </p>
+          <p className="text-xs text-gray-500">
+            Ajouté le {formatUploadDate()}
+          </p>
         </div>
         
         {needsSignature && (
-          <div className="bg-gray-50 p-4 border-t border-b">
-            <h4 className="text-sm font-medium mb-2">Signatures</h4>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Signature employé</span>
-                <div className="flex items-center">
-                  {document.signedByEmployee ? (
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
-                      <Check className="h-3 w-3" /> Signé
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 flex items-center gap-1">
-                      <X className="h-3 w-3" /> Non signé
-                    </Badge>
-                  )}
-                </div>
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center text-sm">
+              <div className="w-1/2">Signature employé:</div>
+              <div className="w-1/2 flex">
+                {document.signedByEmployee ? 
+                  <Check className="h-4 w-4 text-green-600" /> : 
+                  <X className="h-4 w-4 text-red-600" />
+                }
               </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm">Signature employeur</span>
-                <div className="flex items-center">
-                  {document.signedByEmployer ? (
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
-                      <Check className="h-3 w-3" /> Signé
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 flex items-center gap-1">
-                      <X className="h-3 w-3" /> Non signé
-                    </Badge>
-                  )}
-                </div>
+            </div>
+            <div className="flex items-center text-sm">
+              <div className="w-1/2">Signature employeur:</div>
+              <div className="w-1/2 flex">
+                {document.signedByEmployer ? 
+                  <Check className="h-4 w-4 text-green-600" /> : 
+                  <X className="h-4 w-4 text-red-600" />
+                }
               </div>
             </div>
           </div>
         )}
       </CardContent>
       
-      <CardFooter className="border-t bg-gray-50 p-3 flex flex-wrap gap-2 justify-between">
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex items-center gap-1 text-xs bg-white"
-            onClick={handleDownload}
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span>Télécharger</span>
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-1 text-xs border-red-500 text-red-600 hover:bg-red-50 bg-white"
-            onClick={() => setDeleteDialogOpen(true)}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            <span>Supprimer</span>
-          </Button>
-        </div>
+      <CardFooter className="border-t pt-4 pb-4 flex flex-wrap gap-2 justify-between">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-1"
+          onClick={() => downloadDocument(document)}
+        >
+          <Download className="h-3.5 w-3.5" />
+          <span>Télécharger</span>
+        </Button>
         
-        {needsSignature && (
-          <div className="flex gap-2">
-            {!document.signedByEmployee && (
-              <Button
-                size="sm"
-                onClick={() => openSignatureDialog(false)}
-                className="bg-blue-600 hover:bg-blue-700 text-xs"
-              >
-                Signer (employé)
-              </Button>
-            )}
-            
-            {!document.signedByEmployer && (
-              <Button
-                size="sm"
-                onClick={() => openSignatureDialog(true)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-xs"
-              >
-                Signer (employeur)
-              </Button>
-            )}
-          </div>
-        )}
+        <div className="flex gap-2">
+          {needsSignature && !document.signedByEmployee && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => openSignatureDialog(false)}
+              className="border-blue-500 text-blue-600 hover:bg-blue-50"
+            >
+              Signer (employé)
+            </Button>
+          )}
+          
+          {needsSignature && !document.signedByEmployer && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => openSignatureDialog(true)}
+              className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+            >
+              Signer (employeur)
+            </Button>
+          )}
+        </div>
       </CardFooter>
       
       <SignatureDialog
@@ -234,15 +169,8 @@ const DocumentCard = ({ document, onRefresh }: DocumentCardProps) => {
         onSuccess={onRefresh}
         isEmployer={isEmployerSigning}
       />
-      
-      <DeleteDocumentDialog
-        documentId={document.id || null}
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        onConfirm={handleDelete}
-      />
     </Card>
   );
 };
 
-export default DocumentCard;
+export default EmployeeDocumentCard;

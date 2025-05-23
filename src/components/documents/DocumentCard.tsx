@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Document } from "@/lib/constants";
 import { FileText, Download, Check, X, Trash2 } from "lucide-react";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
 import SignatureDialog from "../contracts/SignatureDialog";
 import DeleteDocumentDialog from "./DeleteDocumentDialog";
@@ -118,6 +118,29 @@ const DocumentCard = ({ document, onRefresh }: DocumentCardProps) => {
     setSignDialogOpen(true);
   };
   
+  // Fonction pour formater la date en toute sécurité
+  const formatUploadDate = () => {
+    try {
+      if (!document.uploadDate) return "Date inconnue";
+      
+      // Vérifier si la date est déjà un objet Date
+      const dateToFormat = typeof document.uploadDate === 'string' 
+        ? new Date(document.uploadDate)
+        : document.uploadDate;
+      
+      // Vérifier si la date est valide
+      if (!isValid(dateToFormat)) {
+        console.warn("Date invalide:", document.uploadDate);
+        return "Date invalide";
+      }
+      
+      return format(dateToFormat, 'dd MMMM yyyy', { locale: fr });
+    } catch (error) {
+      console.error("Erreur de formatage de date:", error, document.uploadDate);
+      return "Date non disponible";
+    }
+  };
+  
   return (
     <Card className="h-full flex flex-col">
       <CardContent className="pt-6 flex-grow">
@@ -136,7 +159,7 @@ const DocumentCard = ({ document, onRefresh }: DocumentCardProps) => {
             {document.description || getCategoryLabel(document.category || 'other')}
           </p>
           <p className="text-xs text-gray-500">
-            Ajouté le {format(new Date(document.uploadDate), 'dd MMMM yyyy', { locale: fr })}
+            Ajouté le {formatUploadDate()}
           </p>
         </div>
         
