@@ -10,6 +10,9 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
   setSelectedProject, 
   onAddProject 
 }) => {
+  console.log("ProjectSelector - Projects received:", projects);
+  console.log("ProjectSelector - Selected project:", selectedProject);
+
   return (
     <div className="flex flex-col md:flex-row mb-4 gap-4">
       <Select value={selectedProject} onValueChange={setSelectedProject}>
@@ -17,14 +20,25 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
           <SelectValue placeholder="Sélectionner un projet" />
         </SelectTrigger>
         <SelectContent>
-          {projects.map(project => (
-            <SelectItem key={project.id} value={project.id}>
-              {project.name} ({project.id})
+          {projects.length === 0 ? (
+            <SelectItem value="no-projects" disabled>
+              Aucun projet disponible
             </SelectItem>
-          ))}
+          ) : (
+            projects.map(project => (
+              <SelectItem key={project.id} value={project.id}>
+                {project.name}
+              </SelectItem>
+            ))
+          )}
         </SelectContent>
       </Select>
-      <Button onClick={onAddProject}>Ajouter le projet</Button>
+      <Button 
+        onClick={onAddProject}
+        disabled={!selectedProject || selectedProject === 'no-projects'}
+      >
+        Ajouter le projet
+      </Button>
     </div>
   );
 };

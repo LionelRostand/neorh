@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format, addDays, parseISO, differenceInCalendarDays } from 'date-fns';
 import { toast } from "@/components/ui/use-toast";
@@ -47,24 +46,47 @@ export const useWeeklyProjectsDialog = (open: boolean, timesheetId: string, onSu
       console.log("Loading projects from Firestore...");
       const result = await projectsCollection.getAll();
       
+      console.log("Raw projects result:", result);
+      
       if (result.docs && result.docs.length > 0) {
         // Transform the projects to match our Project interface
         const projectsData = result.docs
-          .filter(project => project.status === 'active') // Only show active projects
+          .filter(project => {
+            console.log("Project status:", project.status);
+            return project.status === 'active';
+          })
           .map(project => ({
             id: project.id || '',
             name: project.name || 'Projet sans nom'
           }));
         
-        console.log("Projects loaded:", projectsData);
+        console.log("Filtered active projects:", projectsData);
         setProjects(projectsData);
+        
+        if (projectsData.length === 0) {
+          console.warn("No active projects found");
+          toast({
+            title: "Information",
+            description: "Aucun projet actif trouvé. Veuillez créer des projets dans le menu Projets.",
+            variant: "default"
+          });
+        }
       } else {
-        console.log("No projects found");
+        console.log("No projects found in database");
         setProjects([]);
+        toast({
+          title: "Information",
+          description: "Aucun projet trouvé. Veuillez créer des projets dans le menu Projets.",
+          variant: "default"
+        });
       }
     } catch (err) {
       console.error("Error loading projects:", err);
-      // In case of error, set empty array to avoid infinite loading
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les projets depuis la base de données",
+        variant: "destructive"
+      });
       setProjects([]);
     }
   };
@@ -82,51 +104,49 @@ export const useWeeklyProjectsDialog = (open: boolean, timesheetId: string, onSu
       setError(null);
       console.log("Fetching timesheet with ID:", timesheetId);
       
-      // Load projects and timesheet in parallel
-      await Promise.all([
-        loadProjects(),
-        (async () => {
-          const result = await timesheetCollection.getById(timesheetId);
+      // Load projects first
+      await loadProjects();
+      
+      // Then load timesheet data
+      const result = await timesheetCollection.getById(timesheetId);
+      
+      if (!result.docs || result.docs.length === 0) {
+        throw new Error("Feuille de temps non trouvée");
+      }
+      
+      const timesheetData = result.docs[0];
+      console.log("Timesheet data received:", timesheetData);
+      setTimesheet(timesheetData);
+      
+      // Generate weekly data based on the timesheet period
+      if (timesheetData.weekStartDate && timesheetData.weekEndDate) {
+        const start = parseISO(timesheetData.weekStartDate);
+        const end = parseISO(timesheetData.weekEndDate);
+        const daysInPeriod = differenceInCalendarDays(end, start) + 1;
+        const numberOfWeeks = Math.ceil(daysInPeriod / 7);
+        
+        console.log(`Period spans ${daysInPeriod} days and ${numberOfWeeks} weeks`);
+        
+        const weeks: WeeklyData[] = [];
+        for (let i = 0; i < numberOfWeeks; i++) {
+          const weekStartDate = addDays(start, i * 7);
+          const weekEndDate = i === numberOfWeeks - 1 ? end : addDays(weekStartDate, 6);
           
-          if (!result.docs || result.docs.length === 0) {
-            throw new Error("Feuille de temps non trouvée");
-          }
-          
-          const timesheetData = result.docs[0];
-          console.log("Timesheet data received:", timesheetData);
-          setTimesheet(timesheetData);
-          
-          // Generate weekly data based on the timesheet period
-          if (timesheetData.weekStartDate && timesheetData.weekEndDate) {
-            const start = parseISO(timesheetData.weekStartDate);
-            const end = parseISO(timesheetData.weekEndDate);
-            const daysInPeriod = differenceInCalendarDays(end, start) + 1;
-            const numberOfWeeks = Math.ceil(daysInPeriod / 7);
-            
-            console.log(`Period spans ${daysInPeriod} days and ${numberOfWeeks} weeks`);
-            
-            const weeks: WeeklyData[] = [];
-            for (let i = 0; i < numberOfWeeks; i++) {
-              const weekStartDate = addDays(start, i * 7);
-              const weekEndDate = i === numberOfWeeks - 1 ? end : addDays(weekStartDate, 6);
-              
-              weeks.push({
-                week: getWeekNumber(weekStartDate),
-                startDate: format(weekStartDate, 'yyyy-MM-dd'),
-                endDate: format(weekEndDate, 'yyyy-MM-dd'),
-                projects: timesheetData.weeklyProjects && timesheetData.weeklyProjects[i] 
-                  ? timesheetData.weeklyProjects[i].projects 
-                  : []
-              });
-            }
-            
-            setWeeklyData(weeks);
-            if (weeks.length > 0) {
-              setActiveTab(weeks[0].week.toString());
-            }
-          }
-        })()
-      ]);
+          weeks.push({
+            week: getWeekNumber(weekStartDate),
+            startDate: format(weekStartDate, 'yyyy-MM-dd'),
+            endDate: format(weekEndDate, 'yyyy-MM-dd'),
+            projects: timesheetData.weeklyProjects && timesheetData.weeklyProjects[i] 
+              ? timesheetData.weeklyProjects[i].projects 
+              : []
+          });
+        }
+        
+        setWeeklyData(weeks);
+        if (weeks.length > 0) {
+          setActiveTab(weeks[0].week.toString());
+        }
+      }
     } catch (err) {
       console.error("Error fetching timesheet:", err);
       setError(err instanceof Error ? err : new Error("Erreur lors du chargement des données"));
