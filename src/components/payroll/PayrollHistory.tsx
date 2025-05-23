@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { collection, query, orderBy, getDocs, DocumentData } from "firebase/firestore";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { HR } from "@/lib/constants/collections";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
+import { Document } from "@/lib/constants";
+import { handleDocumentDownload } from "@/utils/documents/documentDownload";
 
 interface Payslip {
   id: string;
@@ -22,6 +24,22 @@ interface Payslip {
   fileUrl: string;
   status: string;
 }
+
+// Convert Payslip to Document format for consistent handling
+const payslipToDocument = (payslip: Payslip): Document => {
+  return {
+    id: payslip.id,
+    title: `Fiche de paie - ${payslip.period}`,
+    category: 'paystubs',
+    fileUrl: payslip.fileUrl || '',
+    fileType: 'application/pdf',
+    uploadDate: payslip.createdAt ? payslip.createdAt.toISOString() : new Date().toISOString(),
+    status: 'active',
+    employeeId: payslip.employeeId,
+    employeeName: payslip.employeeName,
+    description: `Fiche de paie pour la période ${payslip.period}`
+  };
+};
 
 const PayrollHistory: React.FC = () => {
   const [payslips, setPayslips] = useState<Payslip[]>([]);
@@ -142,12 +160,7 @@ const PayrollHistory: React.FC = () => {
                 <button
                   className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-full transition-colors"
                   title="Télécharger"
-                  onClick={() => {
-                    toast({
-                      title: "Information",
-                      description: "Le téléchargement des fiches de paie archivées sera disponible ultérieurement."
-                    });
-                  }}
+                  onClick={() => handleDocumentDownload(payslipToDocument(payslip))}
                 >
                   <Download className="h-5 w-5" />
                 </button>

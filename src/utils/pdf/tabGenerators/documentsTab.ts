@@ -3,6 +3,7 @@ import jsPDF from 'jspdf';
 import { Document } from '@/lib/constants';
 import autoTable from 'jspdf-autotable';
 import { Employee } from '@/types/employee';
+import { getCategoryLabel } from '@/utils/documents/documentUtils';
 
 /**
  * Génère la section documents
@@ -50,19 +51,33 @@ export const generateDocumentsTab = async (doc: jsPDF, employee: Employee, docum
       } else {
         status = 'En attente de signature';
       }
+    } else if (doc.category === 'paystubs') {
+      status = 'Généré';
     } else {
       status = doc.status || 'Actif';
     }
     
-    const date = doc.uploadDate ? new Date(doc.uploadDate).toLocaleDateString() : 'N/A';
-    
-    return [
-      doc.title || 'Sans titre',
-      doc.category === 'contracts' ? 'Contrat' : doc.category || 'Autre',
-      doc.fileType || 'PDF',
-      date,
-      status
-    ];
+    try {
+      const date = doc.uploadDate ? new Date(doc.uploadDate).toLocaleDateString() : 'N/A';
+      const category = getCategoryLabel(doc.category || 'other');
+      
+      return [
+        doc.title || 'Sans titre',
+        category,
+        doc.fileType || 'PDF',
+        date,
+        status
+      ];
+    } catch (err) {
+      console.error("Error formatting document for PDF:", err);
+      return [
+        doc.title || 'Sans titre',
+        doc.category === 'paystubs' ? 'Fiche de paie' : (doc.category || 'Autre'),
+        'PDF',
+        'N/A',
+        status
+      ];
+    }
   });
   
   // Generate table with documents

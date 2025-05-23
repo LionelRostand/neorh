@@ -4,7 +4,7 @@ import { Document } from '@/lib/constants';
 import { Employee } from '@/types/employee';
 import useFirestore from '@/hooks/useFirestore';
 import { toast } from '@/components/ui/use-toast';
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import { collection, query, where, orderBy, getDocs, limit } from "firebase/firestore";
 import { db } from '@/lib/firebase';
 import { HR } from '@/lib/constants/collections';
 
@@ -82,22 +82,22 @@ export const useEmployeeDocuments = (employee: Employee) => {
         const data = doc.data();
         payslipsDocs.push({
           id: doc.id,
-          title: `Fiche de paie - ${data.period}`,
+          title: `Fiche de paie - ${data.period || 'Période non spécifiée'}`,
           category: 'paystubs',
           fileUrl: data.fileUrl || '',
           fileType: 'application/pdf',
           uploadDate: data.createdAt ? data.createdAt.toDate().toISOString() : new Date().toISOString(),
           status: 'active',
           employeeId: data.employeeId,
-          employeeName: data.employeeName,
-          description: `Fiche de paie pour la période ${data.period}`
+          employeeName: data.employeeName || employee.firstName + ' ' + employee.lastName,
+          description: `Fiche de paie pour la période ${data.period || 'non spécifiée'}`
         });
       });
       
       // Combine results
       const allDocs = [...fetchedDocs, ...payslipsDocs];
       
-      console.log(`Found ${allDocs.length} documents for employee ${employee.id}`);
+      console.log(`Found ${allDocs.length} documents for employee ${employee.id}, including ${payslipsDocs.length} payslips`);
       setDocuments(allDocs);
       lastFetchedEmployeeId.current = employee.id;
       

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Document } from "@/lib/constants";
 import { FileText, Download, Check, X } from "lucide-react";
 import SignatureDialog from "../contracts/SignatureDialog";
-import { downloadDocument } from "@/utils/contracts/documentDownload";
 import { 
   formatUploadDate,
   getStatusColor,
@@ -14,6 +13,8 @@ import {
   getCategoryLabel,
   needsSignature
 } from "@/utils/documents/documentUtils";
+import { handleDocumentDownload } from "@/utils/documents/documentDownload";
+import DocumentSignatureStatus from "./DocumentSignatureStatus";
 
 interface EmployeeDocumentCardProps {
   document: Document;
@@ -53,28 +54,7 @@ const EmployeeDocumentCard = ({ document, onRefresh }: EmployeeDocumentCardProps
           </p>
         </div>
         
-        {documentNeedsSignature && (
-          <div className="mt-4 space-y-2">
-            <div className="flex items-center text-sm">
-              <div className="w-1/2">Signature employé:</div>
-              <div className="w-1/2 flex">
-                {document.signedByEmployee ? 
-                  <Check className="h-4 w-4 text-green-600" /> : 
-                  <X className="h-4 w-4 text-red-600" />
-                }
-              </div>
-            </div>
-            <div className="flex items-center text-sm">
-              <div className="w-1/2">Signature employeur:</div>
-              <div className="w-1/2 flex">
-                {document.signedByEmployer ? 
-                  <Check className="h-4 w-4 text-green-600" /> : 
-                  <X className="h-4 w-4 text-red-600" />
-                }
-              </div>
-            </div>
-          </div>
-        )}
+        <DocumentSignatureStatus document={document} />
       </CardContent>
       
       <CardFooter className="border-t pt-4 pb-4 flex flex-wrap gap-2 justify-between">
@@ -82,7 +62,7 @@ const EmployeeDocumentCard = ({ document, onRefresh }: EmployeeDocumentCardProps
           variant="outline" 
           size="sm" 
           className="flex items-center gap-1"
-          onClick={() => downloadDocument(document)}
+          onClick={() => handleDocumentDownload(document)}
         >
           <Download className="h-3.5 w-3.5" />
           <span>Télécharger</span>
