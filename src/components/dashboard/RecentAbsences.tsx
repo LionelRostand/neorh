@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -63,7 +64,8 @@ const RecentAbsences = () => {
     const employee = employees.find(emp => emp.id === employeeId);
     if (!employee) return "Employé inconnu";
     
-    return `${employee.firstName} ${employee.lastName}`;
+    // Use the 'name' property instead of firstName and lastName
+    return employee.name;
   };
 
   const getLeaveTypeLabel = (type: string): string => {
