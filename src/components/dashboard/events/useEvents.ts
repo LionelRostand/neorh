@@ -10,12 +10,18 @@ import { formatDate } from "./eventDateUtils";
 export const useEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasAttemptedFetch, setHasAttemptedFetch] = useState(false);
   const { trainings, loading: loadingTrainings } = useTrainingData();
   const { getAll: getEvaluations, isLoading: loadingEvaluations } = useCollection(HR.EVALUATIONS);
 
   useEffect(() => {
     const fetchEvents = async () => {
+      // Éviter les appels multiples
+      if (hasAttemptedFetch) return;
+      
       setIsLoading(true);
+      setHasAttemptedFetch(true);
+      
       try {
         // Get evaluations
         const evaluationsResult = await getEvaluations();
@@ -73,25 +79,49 @@ export const useEvents = () => {
         
         // Sort by date (closest first)
         combinedEvents.sort((a, b) => {
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
-          
-          return dateA.getTime() - dateB.getTime();
+          try {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            
+            return dateA.getTime() - dateB.getTime();
+          } catch (e) {
+            return 0; // En cas d'erreur, ne pas modifier l'ordre
+          }
         });
         
         // Limit to the first 4 events
         setEvents(combinedEvents.slice(0, 4));
       } catch (error) {
         console.error("Error fetching events:", error);
+        // Si une erreur se produit, définir les événements statiques pour éviter un état vide
+        setEvents(getStaticMeetings());
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (!loadingTrainings && !loadingEvaluations) {
+    // Exécuter la requête seulement quand les dépendances sont prêtes et qu'on n'a pas déjà essayé
+    if (!loadingTrainings && !loadingEvaluations && !hasAttemptedFetch) {
       fetchEvents();
+    } else if (!loadingTrainings && !loadingEvaluations && hasAttemptedFetch && isLoading) {
+      // Si tout est chargé mais qu'on est toujours en état de chargement, forcer la fin du chargement
+      setIsLoading(false);
     }
-  }, [trainings, getEvaluations, loadingTrainings, loadingEvaluations]);
+  }, [trainings, getEvaluations, loadingTrainings, loadingEvaluations, hasAttemptedFetch, isLoading]);
+
+  // Ajout d'un timeout pour éviter les chargements infinis
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        console.warn("Timeout dépassé pour le chargement des événements");
+        setIsLoading(false);
+        // En cas de timeout, afficher au moins les réunions statiques
+        setEvents(getStaticMeetings());
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   return { events, isLoading };
 };

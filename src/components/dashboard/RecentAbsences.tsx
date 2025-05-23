@@ -17,7 +17,6 @@ const RecentAbsences = () => {
 
   useEffect(() => {
     const fetchRecentLeaves = async () => {
-      setIsLoading(true);
       try {
         const result = await getAll();
         
@@ -33,16 +32,25 @@ const RecentAbsences = () => {
             .slice(0, 4);
           
           setRecentLeaves(leavesData);
+        } else {
+          // Pas de données trouvées, définir un tableau vide
+          setRecentLeaves([]);
         }
       } catch (error) {
         console.error("Error fetching recent leaves:", error);
+        // En cas d'erreur, définir un tableau vide pour éviter les chargements infinis
+        setRecentLeaves([]);
       } finally {
+        // Toujours terminer le chargement, même en cas d'erreur
         setIsLoading(false);
       }
     };
 
-    fetchRecentLeaves();
-  }, [getAll]);
+    // Exécuter seulement une fois, ne pas dépendre de getAll qui pourrait changer
+    if (isLoading) {
+      fetchRecentLeaves();
+    }
+  }, [getAll, isLoading]);
 
   const getStatusBadge = (status: Leave['status']) => {
     switch (status) {
@@ -88,6 +96,19 @@ const RecentAbsences = () => {
       return dateString;
     }
   };
+
+  // Définir un timeout pour le chargement - ne pas attendre indéfiniment
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Si après 5 secondes, on est toujours en chargement, forcer la fin du chargement
+      if (isLoading) {
+        console.warn("Timeout dépassé pour le chargement des absences récentes");
+        setIsLoading(false);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   if (isLoading) {
     return (
