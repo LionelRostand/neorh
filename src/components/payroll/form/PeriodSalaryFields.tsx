@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { type UseFormReturn } from "react-hook-form";
 import { type PayslipFormValues } from "./types";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { InfoIcon } from "lucide-react";
 
 interface PeriodSalaryFieldsProps {
   form: UseFormReturn<PayslipFormValues>;
@@ -25,6 +27,10 @@ const PeriodSalaryFields: React.FC<PeriodSalaryFieldsProps> = ({
   salaryValue,
   contractsLoading
 }) => {
+  // Vérifier si le salaire provient de l'Article 4 du contrat
+  const isSalaryFromContract = salaryValue && 
+    !["Chargement du salaire...", "Aucun contrat actif trouvé", "Erreur lors de la récupération du salaire", "Salaire non spécifié dans le contrat"].includes(salaryValue);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <FormField
@@ -60,7 +66,21 @@ const PeriodSalaryFields: React.FC<PeriodSalaryFieldsProps> = ({
         name="annualSalary"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Salaire brut annuel</FormLabel>
+            <FormLabel className="flex items-center gap-2">
+              Salaire brut annuel
+              {isSalaryFromContract && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <InfoIcon className="h-4 w-4 text-blue-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Récupéré de l'Article 4 - Rémunération du contrat</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </FormLabel>
             <FormControl>
               <Input 
                 placeholder={
@@ -71,7 +91,7 @@ const PeriodSalaryFields: React.FC<PeriodSalaryFieldsProps> = ({
                 {...field}
                 value={salaryValue}
                 disabled
-                className={salaryValue === "Aucun contrat actif trouvé" || salaryValue === "Erreur lors de la récupération du salaire" ? "text-red-500" : ""}
+                className={salaryValue === "Aucun contrat actif trouvé" || salaryValue === "Erreur lors de la récupération du salaire" ? "text-red-500" : isSalaryFromContract ? "text-green-700 font-medium" : ""}
               />
             </FormControl>
             {(salaryValue === "Aucun contrat actif trouvé" || salaryValue === "Erreur lors de la récupération du salaire") && (

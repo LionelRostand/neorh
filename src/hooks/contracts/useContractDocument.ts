@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Document } from "@/lib/constants";
 import useFirestore from "@/hooks/useFirestore";
 import { toast } from "@/components/ui/use-toast";
+import { HR } from "@/lib/constants/collections";
 
 /**
  * Hook to fetch a contract document
@@ -11,7 +12,7 @@ export const useContractDocument = (contractId: string | null, isOpen: boolean) 
   const [document, setDocument] = useState<Document | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const documentsCollection = useFirestore<Document>("hr_documents");
+  const documentsCollection = useFirestore<Document>(HR.DOCUMENTS);
   
   // Utilisation d'un ref pour le flag de fetching plutôt qu'un state pour éviter les re-renders
   const isFetchingRef = useRef(false);
