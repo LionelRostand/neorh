@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useFirestore } from './firestore';
+import { useFirestore } from './useFirestore';
 import { toast } from '@/components/ui/use-toast';
 import { Employee } from '@/types/employee';
 import { useMemo } from 'react';

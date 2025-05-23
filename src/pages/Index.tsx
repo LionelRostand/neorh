@@ -19,6 +19,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useFirestore } from "@/hooks/useFirestore";
 import { useToast } from "@/hooks/use-toast";
+import { useEmployeeData } from "@/hooks/useEmployeeData";
+import { useEmployeeStatusStats } from "@/hooks/useEmployeeStats";
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { HR } from "@/lib/constants/collections";
 
 const Index = () => {
   const [filter, setFilter] = useState("tous");
@@ -30,22 +35,86 @@ const Index = () => {
   });
   const { toast } = useToast();
   
-  // Utilisation du hook useFirestore pour accéder aux collections
-  const employeesCollection = useFirestore('employees');
-  const departmentsCollection = useFirestore('departments');
+  // Utiliser les hooks pour récupérer les données réelles
+  const { employees, isLoading: isLoadingEmployees } = useEmployeeData();
+  const employeeStats = useEmployeeStatusStats(employees);
+  const employeesCollection = useFirestore('hr_employees');
+  
+  // State pour les autres modules
+  const [documentsCount, setDocumentsCount] = useState(0);
+  const [contractsCount, setContractsCount] = useState(0);
+  const [leavesCount, setLeavesCount] = useState(0);
+  const [timesheetsCount, setTimesheetsCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Récupération des données des employés
-        const employees = await employeesCollection.getAll();
+        setIsLoading(true);
         
-        // Calcul des statistiques de base (données fictives pour l'instant)
+        // Récupérer le nombre de documents
+        const documentsQuery = query(collection(db, HR.DOCUMENTS || 'hr_documents'));
+        const documentsSnapshot = await getDocs(documentsQuery);
+        setDocumentsCount(documentsSnapshot.size);
+        
+        // Récupérer le nombre de contrats
+        const contractsQuery = query(collection(db, HR.CONTRACTS || 'hr_contracts'));
+        const contractsSnapshot = await getDocs(contractsQuery);
+        setContractsCount(contractsSnapshot.size);
+        
+        // Récupérer le nombre de congés ce mois-ci
+        const currentDate = new Date();
+        const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        
+        const leavesQuery = query(
+          collection(db, HR.LEAVES || 'hr_leaves'),
+          where('startDate', '>=', firstDayOfMonth),
+          where('startDate', '<=', lastDayOfMonth)
+        );
+        const leavesSnapshot = await getDocs(leavesQuery);
+        setLeavesCount(leavesSnapshot.size);
+        
+        // Récupérer le nombre d'heures travaillées (feuilles de temps)
+        const timesheetsQuery = query(
+          collection(db, HR.TIMESHEETS || 'hr_timesheets'),
+          where('weekStartDate', '>=', new Date(currentDate.getFullYear(), currentDate.getMonth(), 1))
+        );
+        const timesheetsSnapshot = await getDocs(timesheetsQuery);
+        let totalHours = 0;
+        timesheetsSnapshot.forEach(doc => {
+          const data = doc.data();
+          // Calculer le total des heures si la structure des données le permet
+          if (data.days) {
+            Object.values(data.days).forEach((day: any) => {
+              if (typeof day.hours === 'number') {
+                totalHours += day.hours;
+              }
+            });
+          }
+        });
+        
+        // Calculer le salaire moyen
+        let totalSalary = 0;
+        let employeesWithSalary = 0;
+        
+        if (employees && employees.length > 0) {
+          for (const employee of employees) {
+            if (employee.salary && typeof employee.salary === 'number') {
+              totalSalary += employee.salary;
+              employeesWithSalary++;
+            }
+          }
+        }
+        
+        const averageSalary = employeesWithSalary > 0 ? Math.round(totalSalary / employeesWithSalary) : 0;
+        
+        // Mettre à jour les statistiques avec les données réelles
         setStats({
-          totalEmployees: employees.docs.length || 126,
-          absencesThisMonth: 24,
-          hoursWorked: 1845,
-          averageSalary: 3256
+          totalEmployees: employees?.length || 0,
+          absencesThisMonth: leavesCount,
+          hoursWorked: Math.round(totalHours),
+          averageSalary: averageSalary || 3256 // Valeur par défaut si pas de données
         });
         
       } catch (error) {
@@ -55,11 +124,15 @@ const Index = () => {
           description: "Impossible de charger les données du tableau de bord",
           variant: "destructive"
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchDashboardData();
-  }, []);
+    if (employees && employees.length > 0) {
+      fetchDashboardData();
+    }
+  }, [employees, toast]);
 
   const handleNewEmployee = () => {
     // Cette fonction sera implémentée plus tard pour ajouter un nouvel employé
@@ -98,25 +171,25 @@ const Index = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard 
           title="Total employés" 
-          value={stats.totalEmployees.toString()} 
+          value={isLoading ? "..." : stats.totalEmployees.toString()} 
           icon={<Users size={18} />} 
           trend={{ value: 4.2, positive: true }}
         />
         <StatCard 
           title="Absences ce mois" 
-          value={stats.absencesThisMonth.toString()} 
+          value={isLoading ? "..." : stats.absencesThisMonth.toString()} 
           icon={<Calendar size={18} />} 
           trend={{ value: 1.8, positive: false }}
         />
         <StatCard 
           title="Heures travaillées" 
-          value={stats.hoursWorked.toLocaleString()} 
+          value={isLoading ? "..." : stats.hoursWorked.toLocaleString()} 
           icon={<Clock size={18} />}
           trend={{ value: 2.1, positive: true }}
         />
         <StatCard 
           title="Coût salarial moyen" 
-          value={`${stats.averageSalary.toLocaleString()} €`} 
+          value={isLoading ? "..." : `${stats.averageSalary.toLocaleString()} €`} 
           icon={<Wallet size={18} />}
           trend={{ value: 0.8, positive: true }}
         />
@@ -128,12 +201,17 @@ const Index = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        <EmployeeAnniversaries />
+        <EmployeeAnniversaries employees={employees} isLoading={isLoadingEmployees} />
         <RecentAbsences />
         <UpcomingEvents />
       </div>
 
-      <DashboardModuleLinks />
+      <DashboardModuleLinks stats={{
+        employees: stats.totalEmployees,
+        documents: documentsCount,
+        contracts: contractsCount,
+        leaves: leavesCount
+      }} />
     </div>
   );
 };
