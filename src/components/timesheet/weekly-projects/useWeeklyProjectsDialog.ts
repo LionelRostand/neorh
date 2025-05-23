@@ -51,7 +51,7 @@ export const useWeeklyProjectsDialog = (
           }
           return prev;
         });
-      }, 500);
+      }, 200);
 
       return () => clearInterval(interval);
     } else {
@@ -79,18 +79,16 @@ export const useWeeklyProjectsDialog = (
 
       console.log("Loading timesheet and projects data...");
 
-      // Load projects and timesheet in parallel
-      const [projectsData, timesheetData] = await Promise.all([
-        loadProjects(),
-        fetchTimesheetById(timesheetId)
-      ]);
-
-      setLoadingProgress(70);
-
-      console.log("Projects loaded:", projectsData);
-      console.log("Timesheet loaded:", timesheetData);
-
+      // Load projects first
+      setLoadingProgress(30);
+      const projectsData = await loadProjects();
+      console.log("Projects loaded for dialog:", projectsData);
       setProjects(projectsData);
+
+      // Load timesheet
+      setLoadingProgress(60);
+      const timesheetData = await fetchTimesheetById(timesheetId);
+      console.log("Timesheet loaded:", timesheetData);
       setTimesheet(timesheetData);
 
       if (timesheetData) {
@@ -103,18 +101,47 @@ export const useWeeklyProjectsDialog = (
       }
 
       setLoadingProgress(100);
+      
+      // Show success message if projects were loaded
+      if (projectsData.length > 0) {
+        toast({
+          title: "Données chargées",
+          description: `${projectsData.length} projet(s) disponible(s) pour sélection`,
+          variant: "default"
+        });
+      }
+      
     } catch (err) {
       console.error("Error loading data:", err);
       setError(err instanceof Error ? err : new Error("Erreur lors du chargement des données"));
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les données. Vérifiez votre connexion.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleAddProject = (weekIndex: number) => {
+    if (!selectedProject) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez sélectionner un projet",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const success = addProject(weekIndex, selectedProject);
     if (success) {
       setSelectedProject('');
+      toast({
+        title: "Projet ajouté",
+        description: "Le projet a été ajouté avec succès",
+        variant: "default"
+      });
     }
   };
 

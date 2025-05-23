@@ -19,15 +19,19 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
         <SelectTrigger className="w-full md:w-[280px]">
           <SelectValue placeholder="Sélectionner un projet" />
         </SelectTrigger>
-        <SelectContent className="bg-white z-50">
+        <SelectContent className="bg-white z-50 max-h-60 overflow-y-auto">
           {projects.length === 0 ? (
-            <SelectItem value="no-projects" disabled>
-              Aucun projet disponible - Créez des projets dans le menu Projets
-            </SelectItem>
+            <div className="p-4 text-center text-gray-500">
+              <p className="text-sm">Aucun projet disponible</p>
+              <p className="text-xs mt-1">Créez des projets dans le menu Projets</p>
+            </div>
           ) : (
             projects.map(project => (
-              <SelectItem key={project.id} value={project.id}>
-                {project.name}
+              <SelectItem key={project.id} value={project.id || ''}>
+                <div className="flex flex-col">
+                  <span className="font-medium">{project.name}</span>
+                  <span className="text-xs text-gray-500">ID: {project.id}</span>
+                </div>
               </SelectItem>
             ))
           )}

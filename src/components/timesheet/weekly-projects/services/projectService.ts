@@ -14,26 +14,19 @@ export const useProjectService = () => {
       console.log("Raw projects result:", result);
       
       if (result.docs && result.docs.length > 0) {
-        // Filter active projects and map to the correct format
-        const projectsData = result.docs
-          .filter(project => {
-            console.log("Project data:", project);
-            console.log("Project status:", project.status);
-            // Include both 'active' status and projects without status (for backward compatibility)
-            return project.status === 'active' || !project.status;
-          })
-          .map(project => ({
-            id: project.id || '',
-            name: project.name || 'Projet sans nom'
-          }));
+        // Map all projects (not just active ones) for timesheet selection
+        const projectsData = result.docs.map(project => ({
+          id: project.id || '',
+          name: project.name || 'Projet sans nom'
+        }));
         
-        console.log("Filtered projects for timesheet:", projectsData);
+        console.log("All projects for timesheet:", projectsData);
         
         if (projectsData.length === 0) {
-          console.warn("No active projects found for timesheet");
+          console.warn("No projects found for timesheet");
           toast({
             title: "Information",
-            description: "Aucun projet actif trouvé. Veuillez créer des projets dans le menu Projets.",
+            description: "Aucun projet trouvé. Veuillez créer des projets dans le menu Projets.",
             variant: "default"
           });
         } else {
