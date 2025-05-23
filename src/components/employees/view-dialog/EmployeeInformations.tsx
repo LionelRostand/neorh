@@ -13,15 +13,17 @@ interface EmployeeInformationsProps {
 const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee }) => {
   const [departmentName, setDepartmentName] = useState<string>(employee.department || 'Non spécifié');
   const [companyName, setCompanyName] = useState<string>('Non spécifié');
+  const [isLoadingDepartment, setIsLoadingDepartment] = useState(false);
 
   useEffect(() => {
-    // Update department name if it's already provided in the employee object
-    if (employee.department) {
+    // Si nous avons déjà un nom de département valide, utilisons-le
+    if (employee.department && employee.department.trim() !== '' && !employee.department.includes('mbKdw') && !employee.department.includes('psUKm')) {
       setDepartmentName(employee.department);
     } 
-    // Otherwise, fetch from Firestore if we have departmentId
+    // Sinon, récupérer le nom depuis Firestore si nous avons un departmentId
     else if (employee.departmentId) {
       const fetchDepartmentName = async () => {
+        setIsLoadingDepartment(true);
         try {
           const deptRef = doc(db, HR.DEPARTMENTS, employee.departmentId);
           const deptSnap = await getDoc(deptRef);
@@ -29,12 +31,42 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
           if (deptSnap.exists()) {
             const deptData = deptSnap.data();
             setDepartmentName(deptData.name || 'Non spécifié');
-            console.log("Fetched department name:", deptData.name);
+            console.log("Nom du département récupéré:", deptData.name);
           } else {
-            console.log("Department document does not exist for ID:", employee.departmentId);
+            console.log("Document de département non trouvé pour l'ID:", employee.departmentId);
+            setDepartmentName('Département inconnu');
           }
         } catch (error) {
           console.error("Erreur lors de la récupération du département:", error);
+          setDepartmentName('Erreur de chargement');
+        } finally {
+          setIsLoadingDepartment(false);
+        }
+      };
+      
+      fetchDepartmentName();
+    }
+    // Si department contient un ID (comme mbKdw4422paUKmRtjqbL), essayer de le récupérer
+    else if (employee.department && (employee.department.includes('mbKdw') || employee.department.includes('psUKm'))) {
+      const fetchDepartmentName = async () => {
+        setIsLoadingDepartment(true);
+        try {
+          const deptRef = doc(db, HR.DEPARTMENTS, employee.department);
+          const deptSnap = await getDoc(deptRef);
+          
+          if (deptSnap.exists()) {
+            const deptData = deptSnap.data();
+            setDepartmentName(deptData.name || 'Non spécifié');
+            console.log("Nom du département récupéré depuis l'ID department:", deptData.name);
+          } else {
+            console.log("Document de département non trouvé pour l'ID department:", employee.department);
+            setDepartmentName('Département inconnu');
+          }
+        } catch (error) {
+          console.error("Erreur lors de la récupération du département:", error);
+          setDepartmentName('Erreur de chargement');
+        } finally {
+          setIsLoadingDepartment(false);
         }
       };
       
@@ -99,7 +131,9 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
             </div>
             <div>
               <p className="text-sm text-gray-500">Département</p>
-              <p className="font-medium">{departmentName}</p>
+              <p className="font-medium">
+                {isLoadingDepartment ? 'Chargement...' : departmentName}
+              </p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Entreprise</p>
