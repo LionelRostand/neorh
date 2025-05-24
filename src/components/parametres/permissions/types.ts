@@ -1,5 +1,6 @@
 
 import { Employee } from "@/types/firebase";
+import { navItems } from "@/components/sidebar/NavItems";
 
 export type Permission = {
   id?: string;
@@ -11,22 +12,7 @@ export type Permission = {
   employeeId: string;
 };
 
-export const MENU_ITEMS = [
-  "Tableau de bord",
-  "Employés",
-  "Badges et accès",
-  "Hiérarchie",
-  "Présences",
-  "Feuilles de temps",
-  "Congés",
-  "Contrats",
-  "Documents RH",
-  "Départements",
-  "Projets",
-  "Évaluations",
-  "Formations",
-  "Salaires",
-  "Recrutement",
-  "Entreprises",
-  "Rapports"
-];
+// Utilise directement les menus de la sidebar, en excluant les paramètres
+export const MENU_ITEMS = navItems
+  .filter(item => item.title !== "Paramètres")
+  .map(item => item.title);
