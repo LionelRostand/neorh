@@ -89,6 +89,24 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
     return 'Non spécifié';
   };
 
+  // Get photo URL - prioritize photoBase64 from database, then fallback to photoUrl
+  const getPhotoUrl = () => {
+    // Check if we have base64 photo data from database
+    if ((employee as any).photoBase64) {
+      // If it already includes the data URL prefix, use as is
+      if ((employee as any).photoBase64.startsWith('data:')) {
+        return (employee as any).photoBase64;
+      }
+      // Otherwise, add the data URL prefix
+      return `data:image/jpeg;base64,${(employee as any).photoBase64}`;
+    }
+    
+    // Fallback to regular photoUrl
+    return employee.photoUrl;
+  };
+
+  const photoUrl = getPhotoUrl();
+
   return (
     <div className="space-y-6 p-6">
       {/* Section Informations personnelles */}
@@ -100,9 +118,9 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Photo de profil */}
             <div className="flex flex-col items-center space-y-4">
-              {employee.photoUrl ? (
+              {photoUrl ? (
                 <Avatar className="h-32 w-32">
-                  <AvatarImage src={employee.photoUrl} alt={`${firstName} ${lastName}`} />
+                  <AvatarImage src={photoUrl} alt={`${firstName} ${lastName}`} />
                   <AvatarFallback className="text-2xl">
                     {firstName.charAt(0)}{lastName.charAt(0)}
                   </AvatarFallback>
