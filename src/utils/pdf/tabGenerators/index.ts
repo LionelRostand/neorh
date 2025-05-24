@@ -1,3 +1,4 @@
+
 import { generateInformationsTab } from './informationsTab';
 import { generateDocumentsTab } from './documentsTab';
 import { generateCompetencesTab } from './competencesTab';
@@ -5,6 +6,7 @@ import { generateHorairesTab } from './horairesTab';
 import { generateCongesTab } from './congesTab';
 import { generateEvaluationsTab } from './evaluationsTab';
 import { generateFeuillesDeTempsTab } from './feuillesDeTempsTab';
+import { generateFormationsTab } from './formationsTab';
 
 // Exporter tous les générateurs de tabs pour les PDF
 export {
@@ -14,5 +16,6 @@ export {
   generateHorairesTab,
   generateCongesTab,
   generateFeuillesDeTempsTab,
-  generateEvaluationsTab
+  generateEvaluationsTab,
+  generateFormationsTab
 };
