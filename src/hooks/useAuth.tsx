@@ -148,14 +148,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           
           const employeeCheck = await verifyAndCreateEmployeeLogin(email, password);
           
-          if (employeeCheck.success && employeeCheck.isNewAccount) {
+          if (employeeCheck.success && 'isNewAccount' in employeeCheck && employeeCheck.isNewAccount) {
             // Le compte a été créé, essayer de se connecter maintenant
             console.log('🔄 Account created, attempting login...');
             const result = await signInWithEmailAndPassword(auth, email, password);
             console.log('✅ Sign in successful after account creation:', result.user.email);
             setError(`Compte créé avec succès. Vous êtes maintenant connecté.`);
             return;
-          } else if (employeeCheck.success && !employeeCheck.isNewAccount) {
+          } else if (employeeCheck.success && 'isNewAccount' in employeeCheck && !employeeCheck.isNewAccount) {
             // Le compte existe mais le mot de passe est incorrect
             throw authError;
           } else {
