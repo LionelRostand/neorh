@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { RecruitmentStatus } from "@/types/recruitment";
 
 interface StatusOption {
@@ -32,12 +33,26 @@ const StatusChangeCard: React.FC<StatusChangeCardProps> = ({
     { value: 'fermée', label: 'Fermée', color: 'bg-gray-100 text-gray-800' }
   ];
 
+  const getCurrentStatusOption = () => {
+    return statusOptions.find(option => option.value === currentStatus);
+  };
+
+  const currentStatusOption = getCurrentStatusOption();
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Changer le statut</CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="mb-4 p-3 bg-gray-50 rounded-md">
+          <div className="text-sm text-gray-600 mb-2">Statut actuel :</div>
+          {currentStatusOption && (
+            <Badge variant="outline" className={currentStatusOption.color}>
+              {currentStatusOption.label}
+            </Badge>
+          )}
+        </div>
         <div className="flex flex-col gap-2">
           {statusOptions.map((option) => (
             <Button
