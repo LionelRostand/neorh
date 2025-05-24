@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import ChangePasswordForm from "./ChangePasswordForm";
 import AccountSettings from "./account/AccountSettings";
 import EmployeePasswordManager from "./account/EmployeePasswordManager";
+import RoleManager from "./account/RoleManager";
 
 const ParametresCompte = () => {
   const { user } = useAuth();
@@ -11,6 +12,8 @@ const ParametresCompte = () => {
   return (
     <div className="space-y-6">
       <AccountSettings />
+      
+      <RoleManager />
       
       <ChangePasswordForm />
 
