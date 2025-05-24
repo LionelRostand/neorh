@@ -18,6 +18,20 @@ export const useEmployeeDocuments = (employee: Employee) => {
   const fetchInProgress = useRef(false);
   const lastFetchedEmployeeId = useRef<string | null>(null);
 
+  // Helper function to remove duplicates based on title and period
+  const removeDuplicates = (docs: Document[]): Document[] => {
+    const seen = new Set<string>();
+    return docs.filter(doc => {
+      // Create a unique key based on title and category
+      const key = `${doc.title}-${doc.category}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  };
+
   const fetchEmployeeDocuments = async () => {
     if (!employee?.id) return;
     
@@ -93,14 +107,14 @@ export const useEmployeeDocuments = (employee: Employee) => {
         });
       });
       
-      // Combine results and sort manually by upload date (most recent first)
-      const allDocs = [...fetchedDocs, ...payslipsDocs].sort((a, b) => {
+      // Combine results, remove duplicates, and sort manually by upload date (most recent first)
+      const allDocs = removeDuplicates([...fetchedDocs, ...payslipsDocs]).sort((a, b) => {
         const dateA = new Date(a.uploadDate || 0).getTime();
         const dateB = new Date(b.uploadDate || 0).getTime();
         return dateB - dateA; // Most recent first
       });
       
-      console.log(`Found ${allDocs.length} documents for employee ${employee.id}, including ${payslipsDocs.length} payslips`);
+      console.log(`Found ${allDocs.length} unique documents for employee ${employee.id}, including ${payslipsDocs.length} payslips`);
       setDocuments(allDocs);
       lastFetchedEmployeeId.current = employee.id;
       
