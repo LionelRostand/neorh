@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Employee } from "@/types/firebase";
+import { Employee } from "@/types/employee";
 import { UserCog } from "lucide-react";
 
 interface EmployeeSelectorProps {
@@ -33,7 +33,7 @@ const EmployeeSelector = ({
         <SelectContent>
           {employees.map((employee) => (
             <SelectItem key={employee.id} value={employee.id || "employee-unknown"}>
-              {employee.firstName} {employee.lastName} - {employee.position || "Sans poste"}
+              {employee.name} - {employee.position || "Sans poste"}
             </SelectItem>
           ))}
         </SelectContent>

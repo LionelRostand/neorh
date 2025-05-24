@@ -4,41 +4,24 @@ import { useFirestore } from "@/hooks/firestore";
 import { Employee } from "@/types/firebase";
 import { Permission, MENU_ITEMS } from "./types";
 import { toast } from "@/components/ui/use-toast";
+import { useEmployeeData } from "@/hooks/useEmployeeData";
 
 export const usePermissionsManager = () => {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
-  const [employees, setEmployees] = useState<Employee[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   
   const { getAll, add, update, search } = useFirestore<Permission>('permissions');
-  const employeesFirestore = useFirestore<Employee>('employees');
   
-  // Load employees
+  // Use the same hook as the Employees menu to get consistent data
+  const { employees, isLoading: employeesLoading } = useEmployeeData();
+  
+  // Set initial employee when employees are loaded
   useEffect(() => {
-    const loadEmployees = async () => {
-      try {
-        setIsLoading(true);
-        const employeesResult = await employeesFirestore.getAll();
-        setEmployees(employeesResult.docs);
-        
-        if (employeesResult.docs.length > 0) {
-          setSelectedEmployeeId(employeesResult.docs[0].id || "");
-        }
-      } catch (error) {
-        console.error("Erreur lors du chargement des employés:", error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger la liste des employés",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadEmployees();
-  }, []);
+    if (employees && employees.length > 0 && !selectedEmployeeId) {
+      setSelectedEmployeeId(employees[0].id || "");
+    }
+  }, [employees, selectedEmployeeId]);
 
   // Load permissions when employee is selected
   useEffect(() => {
@@ -147,15 +130,15 @@ export const usePermissionsManager = () => {
   };
 
   const getEmployeeName = (id: string) => {
-    const employee = employees.find(emp => emp.id === id);
-    return employee ? `${employee.firstName} ${employee.lastName}` : "Employé inconnu";
+    const employee = employees?.find(emp => emp.id === id);
+    return employee ? employee.name : "Employé inconnu";
   };
 
   return {
     selectedEmployeeId,
-    employees,
+    employees: employees || [],
     permissions,
-    isLoading,
+    isLoading: isLoading || employeesLoading,
     handleEmployeeChange,
     handlePermissionChange,
     savePermissions,
