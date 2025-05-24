@@ -121,7 +121,7 @@ export const enrichUserData = async (user: ExtendedUser): Promise<ExtendedUser> 
         
         if (!emailSnapshot.empty) {
           const employeeDoc = emailSnapshot.docs[0];
-          const employeeData = emailSnapshot.data();
+          const employeeData = employeeDoc.data();
           user.isEmployee = true;
           user.role = 'employee';
           user.employeeId = employeeDoc.id;
