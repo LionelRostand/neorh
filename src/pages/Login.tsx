@@ -5,13 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Navigate } from "react-router-dom";
-import { Mail, Lock, ArrowRight, User, Shield } from "lucide-react";
+import { Mail, Lock, ArrowRight } from "lucide-react";
 import { showErrorToast } from "@/utils/toastUtils";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const loginSchema = z.object({
   email: z.string().email("Email invalide").min(1, "L'email est requis"),
@@ -26,15 +25,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const adminForm = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "admin@neotech-consulting.com",
-      password: "Admin@123",
-    },
-  });
-
-  const employeeForm = useForm<LoginFormValues>({
+  const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -78,160 +69,76 @@ const Login = () => {
           <CardHeader className="pb-2 text-center">
             <CardTitle className="text-2xl font-bold">Connexion</CardTitle>
             <CardDescription>
-              Choisissez votre type de compte
+              Connectez-vous à votre compte
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="admin" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="admin" className="flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  Administrateur
-                </TabsTrigger>
-                <TabsTrigger value="employee" className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Employé
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="admin">
-                <Form {...adminForm}>
-                  <form onSubmit={adminForm.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={adminForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email administrateur</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                              <Input
-                                {...field}
-                                type="email"
-                                className="pl-10"
-                                placeholder="admin@neotech-consulting.com"
-                                autoComplete="email"
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={adminForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Mot de passe</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                              <Input
-                                {...field}
-                                type={showPassword ? "text" : "password"}
-                                className="pl-10"
-                                placeholder="Votre mot de passe"
-                                autoComplete="current-password"
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    {error && <p className="text-sm font-medium text-destructive">{error}</p>}
-                    
-                    <Button
-                      type="submit"
-                      className="w-full bg-[#2ECC71] hover:bg-[#27AE60] text-white font-medium flex items-center justify-center py-2"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        "Connexion en cours..."
-                      ) : (
-                        <>
-                          Se connecter
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </>
-                      )}
-                    </Button>
-                  </form>
-                </Form>
-              </TabsContent>
-              
-              <TabsContent value="employee">
-                <Form {...employeeForm}>
-                  <form onSubmit={employeeForm.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={employeeForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email professionnel</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                              <Input
-                                {...field}
-                                type="email"
-                                className="pl-10"
-                                placeholder="votre.email@entreprise.com"
-                                autoComplete="email"
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={employeeForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Mot de passe</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                              <Input
-                                {...field}
-                                type={showPassword ? "text" : "password"}
-                                className="pl-10"
-                                placeholder="Votre mot de passe"
-                                autoComplete="current-password"
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    {error && <p className="text-sm font-medium text-destructive">{error}</p>}
-                    
-                    <Button
-                      type="submit"
-                      className="w-full bg-[#2ECC71] hover:bg-[#27AE60] text-white font-medium flex items-center justify-center py-2"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        "Connexion en cours..."
-                      ) : (
-                        <>
-                          Se connecter
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </>
-                      )}
-                    </Button>
-                  </form>
-                </Form>
-              </TabsContent>
-            </Tabs>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email professionnel</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input
+                            {...field}
+                            type="email"
+                            className="pl-10"
+                            placeholder="votre.email@entreprise.com"
+                            autoComplete="email"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mot de passe</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input
+                            {...field}
+                            type={showPassword ? "text" : "password"}
+                            className="pl-10"
+                            placeholder="Votre mot de passe"
+                            autoComplete="current-password"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                {error && <p className="text-sm font-medium text-destructive">{error}</p>}
+                
+                <Button
+                  type="submit"
+                  className="w-full bg-[#2ECC71] hover:bg-[#27AE60] text-white font-medium flex items-center justify-center py-2"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    "Connexion en cours..."
+                  ) : (
+                    <>
+                      Se connecter
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </form>
+            </Form>
           </CardContent>
         </Card>
       </div>
