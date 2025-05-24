@@ -1,15 +1,19 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Employee } from '@/types/employee';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { User } from 'lucide-react';
+import { useCompaniesData } from '@/hooks/useCompaniesData';
+import { useDepartmentsData } from '@/hooks/useDepartmentsData';
 
 interface EmployeeInformationsProps {
   employee: Employee;
 }
 
 const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee }) => {
+  const { companies } = useCompaniesData();
+  const { departments } = useDepartmentsData();
+
   // Extract first and last name from the employee name property
   const nameParts = employee.name ? employee.name.split(' ') : ['', ''];
   const firstName = nameParts[0] || '';
@@ -36,6 +40,28 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
       case "congé": return "Congé";
       default: return status;
     }
+  };
+
+  // Get company name from ID
+  const getCompanyName = () => {
+    if (!employee.companyId) return 'Non spécifié';
+    
+    const company = companies.find(c => c.id === employee.companyId);
+    return company?.name || employee.companyId;
+  };
+
+  // Get department name from ID or use the department name if already resolved
+  const getDepartmentName = () => {
+    // If department name is already resolved, use it
+    if (employee.department && !employee.department.includes('-')) {
+      return employee.department;
+    }
+    
+    // Otherwise try to resolve from departmentId
+    if (!employee.departmentId) return 'Non spécifié';
+    
+    const department = departments.find(d => d.id === employee.departmentId);
+    return department?.name || employee.departmentId;
   };
 
   return (
@@ -109,12 +135,12 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
 
             <div>
               <label className="text-sm font-medium text-gray-500">Département</label>
-              <p className="mt-1 text-sm">{employee.department || 'Non spécifié'}</p>
+              <p className="mt-1 text-sm">{getDepartmentName()}</p>
             </div>
 
             <div>
               <label className="text-sm font-medium text-gray-500">Entreprise</label>
-              <p className="mt-1 text-sm">{employee.companyId || 'Non spécifié'}</p>
+              <p className="mt-1 text-sm">{getCompanyName()}</p>
             </div>
 
             <div>
