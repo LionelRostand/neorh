@@ -8,7 +8,7 @@ import {
   signOut as firebaseSignOut,
   updatePassword
 } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 // Extend the Firebase User type with our custom properties
@@ -42,20 +42,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const extendedUser = user as ExtendedUser | null;
       
       if (extendedUser) {
+        console.log('User authenticated:', extendedUser.email);
+        
         // Check if this is the admin email
         if (extendedUser.email === 'admin@neotech-consulting.com') {
           extendedUser.isAdmin = true;
           extendedUser.role = 'admin';
+          console.log('Admin user identified');
         } else {
-          // Check if this is an employee
+          // Check if this is an employee by looking for their authId in hr_employees collection
           try {
-            const employeesRef = doc(db, 'hr_employees', extendedUser.uid);
-            const employeeDoc = await getDoc(employeesRef);
+            const employeesQuery = query(
+              collection(db, 'hr_employees'), 
+              where('authId', '==', extendedUser.uid)
+            );
+            const employeeSnapshot = await getDocs(employeesQuery);
             
-            if (employeeDoc.exists()) {
+            if (!employeeSnapshot.empty) {
+              const employeeDoc = employeeSnapshot.docs[0];
               extendedUser.isEmployee = true;
               extendedUser.role = 'employee';
               extendedUser.employeeId = employeeDoc.id;
+              console.log('Employee user identified:', employeeDoc.id);
+            } else {
+              // Fallback: check by email
+              const emailQuery = query(
+                collection(db, 'hr_employees'), 
+                where('email', '==', extendedUser.email)
+              );
+              const emailSnapshot = await getDocs(emailQuery);
+              
+              if (!emailSnapshot.empty) {
+                const employeeDoc = emailSnapshot.docs[0];
+                extendedUser.isEmployee = true;
+                extendedUser.role = 'employee';
+                extendedUser.employeeId = employeeDoc.id;
+                console.log('Employee found by email:', employeeDoc.id);
+                
+                // Update the employee record with authId
+                await updateDoc(doc(db, 'hr_employees', employeeDoc.id), {
+                  authId: extendedUser.uid,
+                  updatedAt: new Date().toISOString()
+                });
+              }
             }
           } catch (err) {
             console.error('Error checking employee status:', err);
@@ -73,11 +102,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     setError(null);
     try {
+      console.log('Attempting sign in with:', email);
       const auth = getAuth();
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (err) {
+      console.log('Sign in successful');
+    } catch (err: any) {
       console.error('Error signing in:', err);
-      setError('Email ou mot de passe incorrect.');
+      let errorMessage = 'Email ou mot de passe incorrect.';
+      
+      if (err.code === 'auth/user-not-found') {
+        errorMessage = 'Aucun compte trouvé avec cette adresse email.';
+      } else if (err.code === 'auth/wrong-password') {
+        errorMessage = 'Mot de passe incorrect.';
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = 'Adresse email invalide.';
+      } else if (err.code === 'auth/user-disabled') {
+        errorMessage = 'Ce compte a été désactivé.';
+      }
+      
+      setError(errorMessage);
       throw err;
     }
   };

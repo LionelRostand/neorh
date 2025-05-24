@@ -12,6 +12,7 @@ export interface EmployeePasswordData {
 
 export const createEmployeeAccount = async (employeeData: EmployeePasswordData) => {
   try {
+    console.log('Creating employee account for:', employeeData.email);
     const auth = getAuth();
     
     // Créer le compte Firebase Auth
@@ -20,6 +21,8 @@ export const createEmployeeAccount = async (employeeData: EmployeePasswordData) 
       employeeData.email, 
       employeeData.password
     );
+    
+    console.log('Firebase Auth account created:', userCredential.user.uid);
     
     // Mettre à jour l'employé dans Firestore avec les informations d'authentification
     const employeeRef = doc(db, 'hr_employees', employeeData.employeeId);
@@ -31,6 +34,8 @@ export const createEmployeeAccount = async (employeeData: EmployeePasswordData) 
       updatedAt: new Date().toISOString()
     });
 
+    console.log('Employee record updated with authId');
+
     // Créer un document de profil utilisateur
     const userProfileRef = doc(db, 'user_profiles', userCredential.user.uid);
     await setDoc(userProfileRef, {
@@ -40,6 +45,8 @@ export const createEmployeeAccount = async (employeeData: EmployeePasswordData) 
       isEmployee: true,
       createdAt: new Date().toISOString()
     });
+
+    console.log('User profile created');
 
     return {
       success: true,
@@ -54,7 +61,7 @@ export const createEmployeeAccount = async (employeeData: EmployeePasswordData) 
     if (error.code === 'auth/email-already-in-use') {
       errorMessage = 'Cette adresse email est déjà utilisée';
     } else if (error.code === 'auth/weak-password') {
-      errorMessage = 'Le mot de passe est trop faible';
+      errorMessage = 'Le mot de passe est trop faible (minimum 6 caractères)';
     } else if (error.code === 'auth/invalid-email') {
       errorMessage = 'Adresse email invalide';
     }
