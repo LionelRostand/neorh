@@ -4,7 +4,7 @@ import { Document } from '@/lib/constants';
 import { Employee } from '@/types/employee';
 import useFirestore from '@/hooks/useFirestore';
 import { toast } from '@/components/ui/use-toast';
-import { collection, query, where, orderBy, getDocs, limit } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from '@/lib/firebase';
 import { HR } from '@/lib/constants/collections';
 
@@ -68,11 +68,10 @@ export const useEmployeeDocuments = (employee: Employee) => {
         }));
       }
       
-      // 2. Directly retrieve the employee's payslips
+      // 2. Directly retrieve the employee's payslips - REMOVED orderBy to fix index error
       const payslipsQuery = query(
         collection(db, HR.PAYSLIPS),
-        where("employeeId", "==", employee.id),
-        orderBy("createdAt", "desc")
+        where("employeeId", "==", employee.id)
       );
       
       const payslipsSnapshot = await getDocs(payslipsQuery);
@@ -94,8 +93,12 @@ export const useEmployeeDocuments = (employee: Employee) => {
         });
       });
       
-      // Combine results
-      const allDocs = [...fetchedDocs, ...payslipsDocs];
+      // Combine results and sort manually by upload date (most recent first)
+      const allDocs = [...fetchedDocs, ...payslipsDocs].sort((a, b) => {
+        const dateA = new Date(a.uploadDate || 0).getTime();
+        const dateB = new Date(b.uploadDate || 0).getTime();
+        return dateB - dateA; // Most recent first
+      });
       
       console.log(`Found ${allDocs.length} documents for employee ${employee.id}, including ${payslipsDocs.length} payslips`);
       setDocuments(allDocs);
