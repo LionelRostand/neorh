@@ -5,7 +5,6 @@ import ParametresTabs from "@/components/parametres/ParametresTabs";
 import ParametresGeneral from "@/components/parametres/ParametresGeneral";
 import ParametresNotifications from "@/components/parametres/ParametresNotifications";
 import ParametresSecurite from "@/components/parametres/ParametresSecurite";
-import ParametresPermissions from "@/components/parametres/ParametresPermissions";
 import ParametresCompte from "@/components/parametres/ParametresCompte";
 import ParametresFirebase from "@/components/parametres/ParametresFirebase";
 
@@ -30,10 +29,6 @@ const Parametres = () => {
 
         <TabsContent value="security" className="space-y-4">
           <ParametresSecurite />
-        </TabsContent>
-
-        <TabsContent value="permissions" className="space-y-4">
-          <ParametresPermissions />
         </TabsContent>
 
         <TabsContent value="account" className="space-y-4">
