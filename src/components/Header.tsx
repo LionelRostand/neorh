@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Bell, User, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,11 +37,6 @@ const Header = () => {
       // First try to find by employeeId
       if (user.employeeId) {
         employee = employees.find(emp => emp.id === user.employeeId);
-      }
-      
-      // If not found, try to find by Firebase Auth UID
-      if (!employee && user.uid) {
-        employee = employees.find(emp => emp.authId === user.uid);
       }
       
       // If still not found, try to find by email
