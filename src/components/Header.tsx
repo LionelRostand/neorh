@@ -31,12 +31,32 @@ const Header = () => {
   };
 
   const handleProfileClick = () => {
-    if (user?.isEmployee && user?.employeeId && employees) {
-      // Find the employee record
-      const employee = employees.find(emp => emp.id === user.employeeId);
+    if (user?.isEmployee && employees) {
+      // Find the employee record by different methods
+      let employee = null;
+      
+      // First try to find by employeeId
+      if (user.employeeId) {
+        employee = employees.find(emp => emp.id === user.employeeId);
+      }
+      
+      // If not found, try to find by Firebase Auth UID
+      if (!employee && user.uid) {
+        employee = employees.find(emp => emp.authId === user.uid);
+      }
+      
+      // If still not found, try to find by email
+      if (!employee && user.email) {
+        employee = employees.find(emp => emp.email === user.email);
+      }
+      
       if (employee) {
         // Navigate to employees page and trigger view dialog
         navigate(`/employes?viewEmployee=${employee.id}`);
+      } else {
+        console.log("Employee not found in records");
+        // Fallback to settings for now
+        navigate("/parametres");
       }
     } else if (user?.isAdmin) {
       // For admin, navigate to settings
