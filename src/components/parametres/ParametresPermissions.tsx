@@ -8,6 +8,7 @@ import { Eye, Plus, Edit, Trash2, User, Save } from "lucide-react";
 import { navItems } from "@/components/sidebar/NavItems";
 import { usePermissionsManager } from "./permissions/usePermissionsManager";
 import EmptyStateMessage from "./permissions/EmptyStateMessage";
+import EmployeeRolePermissions from "./permissions/EmployeeRolePermissions";
 
 const ParametresPermissions = () => {
   const {
@@ -27,11 +28,15 @@ const ParametresPermissions = () => {
 
   return (
     <div className="space-y-6">
+      {/* Gestion des rôles employés */}
+      <EmployeeRolePermissions />
+
+      {/* Gestion des permissions par module */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Gestion des permissions employés
+            Gestion des permissions par module
           </CardTitle>
           <CardDescription>
             Configurez les droits d'accès pour chaque employé sur les différents modules de l'application
@@ -105,7 +110,7 @@ const ParametresPermissions = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {navItems
-                      .filter(item => item.title !== "Paramètres") // Exclure les paramètres
+                      .filter(item => item.title !== "Paramètres")
                       .map((navItem, index) => {
                         const permission = permissions.find(p => p.menuName === navItem.title);
                         const permissionIndex = permissions.findIndex(p => p.menuName === navItem.title);
