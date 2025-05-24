@@ -1,6 +1,6 @@
+
 import React from 'react';
 import { Employee } from '@/types/employee';
-import EmployeeRoleManager from '../EmployeeRoleManager';
 import PasswordField from '../../parametres/account/PasswordField';
 import { useState } from 'react';
 import { createEmployeeAccount } from '@/services/employeeAuthService';
@@ -113,14 +113,6 @@ const EmployeeRolesAndAuth: React.FC<EmployeeRolesAndAuthProps> = ({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium mb-4">Gestion des rôles</h3>
-        <EmployeeRoleManager 
-          employee={employee} 
-          onRoleUpdate={onRefresh}
-        />
-      </div>
-
       <div>
         <h3 className="text-lg font-medium mb-4">Gestion du mot de passe</h3>
         <div className="p-3 bg-green-50 border border-green-200 rounded-lg mb-4">
