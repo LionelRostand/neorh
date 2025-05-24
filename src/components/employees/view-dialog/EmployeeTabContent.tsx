@@ -1,32 +1,60 @@
 
 import React from 'react';
+import { TabsContent } from '@/components/ui/tabs';
 import { Employee } from '@/types/employee';
-import EmployeeLeaves from './EmployeeLeaves';
+import EmployeeInformations from './EmployeeInformations';
+import EmployeeDocuments from './EmployeeDocuments';
 import EmployeeTimesheets from './EmployeeTimesheets';
-import EmployeeHoraires from './horaires';
+import EmployeeLeaves from './EmployeeLeaves';
 import EmployeeEvaluations from './EmployeeEvaluations';
 import EmployeeTrainings from './EmployeeTrainings';
+import EmployeeSkills from './EmployeeSkills';
+import EmployeeRolesAndAuth from './EmployeeRolesAndAuth';
 
-// Autres composants
-export { default as InformationsTab } from './EmployeeInformations';
-export { default as DocumentsTab } from './EmployeeDocuments';
-export { default as CompetencesTab } from './EmployeeSkills';
-export { default as EvaluationsTab } from './EmployeeEvaluations';
-export { default as FormationsTab } from './EmployeeTrainings';
+interface EmployeeTabContentProps {
+  employee: Employee;
+  onRefresh?: () => void;
+}
 
-export const HorairesTab: React.FC<{ employee: Employee; onRefresh?: () => void }> = ({ 
-  employee,
-  onRefresh
+const EmployeeTabContent: React.FC<EmployeeTabContentProps> = ({ 
+  employee, 
+  onRefresh 
 }) => {
-  return <EmployeeHoraires employee={employee} onRefresh={onRefresh} />;
+  return (
+    <>
+      <TabsContent value="informations" className="space-y-4">
+        <EmployeeInformations employee={employee} />
+      </TabsContent>
+
+      <TabsContent value="documents" className="space-y-4">
+        <EmployeeDocuments employee={employee} />
+      </TabsContent>
+
+      <TabsContent value="timesheets" className="space-y-4">
+        <EmployeeTimesheets employee={employee} />
+      </TabsContent>
+
+      <TabsContent value="leaves" className="space-y-4">
+        <EmployeeLeaves employee={employee} />
+      </TabsContent>
+
+      <TabsContent value="evaluations" className="space-y-4">
+        <EmployeeEvaluations employee={employee} />
+      </TabsContent>
+
+      <TabsContent value="trainings" className="space-y-4">
+        <EmployeeTrainings employee={employee} />
+      </TabsContent>
+
+      <TabsContent value="skills" className="space-y-4">
+        <EmployeeSkills employee={employee} onRefresh={onRefresh} />
+      </TabsContent>
+
+      <TabsContent value="roles" className="space-y-4">
+        <EmployeeRolesAndAuth employee={employee} onRefresh={onRefresh} />
+      </TabsContent>
+    </>
+  );
 };
 
-export const FeuillesDeTempsTab: React.FC<{ employee: Employee }> = ({ employee }) => {
-  return <EmployeeTimesheets employeeId={employee.id || ''} />;
-};
-
-export const CongesTab: React.FC<{ employee: Employee }> = ({ employee }) => {
-  return <EmployeeLeaves employeeId={employee.id || ''} />;
-};
-
-// No need to define EvaluationsTab here since we're exporting it directly above
+export default EmployeeTabContent;
