@@ -1,6 +1,6 @@
 
-import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
-import { doc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, updatePassword as firebaseUpdatePassword } from 'firebase/auth';
+import { doc, updateDoc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Employee } from '@/types/employee';
 
@@ -36,16 +36,39 @@ export const createEmployeeAccount = async (employeeData: EmployeePasswordData) 
     });
     
     const auth = getAuth();
+    let userCredential;
     
-    // Créer le compte Firebase Auth
-    console.log('🔐 Creating Firebase Auth account...');
-    const userCredential = await createUserWithEmailAndPassword(
-      auth, 
-      employeeData.email, 
-      employeeData.password
-    );
+    try {
+      // Essayer de créer le compte Firebase Auth
+      console.log('🔐 Creating Firebase Auth account...');
+      userCredential = await createUserWithEmailAndPassword(
+        auth, 
+        employeeData.email, 
+        employeeData.password
+      );
+      console.log('✅ Firebase Auth account created:', userCredential.user.uid);
+    } catch (authError: any) {
+      if (authError.code === 'auth/email-already-in-use') {
+        console.log('📧 Email already exists in Firebase Auth, attempting to update password...');
+        
+        // Si l'email existe déjà, essayer de se connecter avec le nouveau mot de passe
+        try {
+          userCredential = await signInWithEmailAndPassword(auth, employeeData.email, employeeData.password);
+          console.log('✅ Successfully signed in with existing account:', userCredential.user.uid);
+        } catch (signInError: any) {
+          // Si la connexion échoue, cela signifie que le mot de passe ne correspond pas
+          // On va essayer de mettre à jour le mot de passe si possible
+          console.log('❌ Could not sign in with new password, account exists but password differs');
+          return {
+            success: false,
+            error: 'Un compte existe déjà avec cet email. Veuillez contacter l\'administrateur pour réinitialiser le mot de passe.'
+          };
+        }
+      } else {
+        throw authError; // Re-lancer l'erreur si ce n'est pas un problème d'email existant
+      }
+    }
     
-    console.log('✅ Firebase Auth account created:', userCredential.user.uid);
     console.log('📧 Account email:', userCredential.user.email);
     
     // Mettre à jour l'employé dans Firestore avec les informations d'authentification
@@ -60,8 +83,8 @@ export const createEmployeeAccount = async (employeeData: EmployeePasswordData) 
 
     console.log('✅ Employee record updated with authId');
 
-    // Créer un document de profil utilisateur
-    console.log('👤 Creating user profile...');
+    // Créer ou mettre à jour le document de profil utilisateur
+    console.log('👤 Creating/updating user profile...');
     const userProfileRef = doc(db, 'user_profiles', userCredential.user.uid);
     await setDoc(userProfileRef, {
       employeeId: employeeData.employeeId,
@@ -69,10 +92,10 @@ export const createEmployeeAccount = async (employeeData: EmployeePasswordData) 
       role: 'employee',
       isEmployee: true,
       createdAt: new Date().toISOString()
-    });
+    }, { merge: true });
 
-    console.log('✅ User profile created successfully');
-    console.log('🎉 Employee account creation completed successfully');
+    console.log('✅ User profile created/updated successfully');
+    console.log('🎉 Employee account creation/update completed successfully');
 
     return {
       success: true,
@@ -86,9 +109,7 @@ export const createEmployeeAccount = async (employeeData: EmployeePasswordData) 
     // Gestion des erreurs spécifiques
     let errorMessage = 'Erreur lors de la création du compte';
     
-    if (error.code === 'auth/email-already-in-use') {
-      errorMessage = 'Cette adresse email est déjà utilisée';
-    } else if (error.code === 'auth/weak-password') {
+    if (error.code === 'auth/weak-password') {
       errorMessage = 'Le mot de passe est trop faible (minimum 6 caractères)';
     } else if (error.code === 'auth/invalid-email') {
       errorMessage = 'Adresse email invalide';
