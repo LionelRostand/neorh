@@ -83,8 +83,10 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
               </p>
             )}
           </div>
-          {employee.email && (
-            <p className="text-sm text-blue-600 mt-1">{employee.email}</p>
+          {(employee.professionalEmail || employee.email) && (
+            <p className="text-sm text-blue-600 mt-1">
+              {employee.professionalEmail || employee.email}
+            </p>
           )}
         </div>
       </div>
