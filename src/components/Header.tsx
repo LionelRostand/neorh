@@ -13,10 +13,12 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { showSuccessToast } from "@/utils/toastUtils";
+import { useEmployeeData } from "@/hooks/useEmployeeData";
 
 const Header = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { employees } = useEmployeeData();
   
   const handleSignOut = async () => {
     try {
@@ -25,6 +27,20 @@ const Header = () => {
       navigate("/login");
     } catch (error) {
       console.error("Error signing out:", error);
+    }
+  };
+
+  const handleProfileClick = () => {
+    if (user?.isEmployee && user?.employeeId && employees) {
+      // Find the employee record
+      const employee = employees.find(emp => emp.id === user.employeeId);
+      if (employee) {
+        // Navigate to employees page and trigger view dialog
+        navigate(`/employes?viewEmployee=${employee.id}`);
+      }
+    } else if (user?.isAdmin) {
+      // For admin, navigate to settings
+      navigate("/parametres");
     }
   };
   
@@ -58,11 +74,11 @@ const Header = () => {
               </DropdownMenuLabel>
             )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleProfileClick}>
               <User className="mr-2 h-4 w-4" />
               <span>Profil</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/parametres")}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Paramètres</span>
             </DropdownMenuItem>

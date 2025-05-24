@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { useEmployeeFilters } from '@/hooks/useEmployeeFilters';
 import { Employee } from '@/types/employee';
@@ -11,6 +11,7 @@ import EmployeeTableSkeleton from './EmployeeTableSkeleton';
 import EditEmployeeDialog from './EditEmployeeDialog';
 import DeleteEmployeeConfirmDialog from './DeleteEmployeeConfirmDialog';
 import ViewEmployeeDialog from './view-dialog/ViewEmployeeDialog';
+import { useSearchParams } from 'react-router-dom';
 
 interface EmployeesProfilesProps {
   employees: Employee[] | undefined;
@@ -27,6 +28,7 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const {
     searchTerm,
@@ -41,6 +43,20 @@ const EmployeesProfiles: React.FC<EmployeesProfilesProps> = ({
     handleSort,
     handlePageChange
   } = useEmployeeFilters(employees);
+
+  // Handle viewEmployee query parameter
+  useEffect(() => {
+    const viewEmployeeId = searchParams.get('viewEmployee');
+    if (viewEmployeeId && employees && employees.length > 0) {
+      const employee = employees.find(emp => emp.id === viewEmployeeId);
+      if (employee) {
+        setSelectedEmployee(employee);
+        setViewDialogOpen(true);
+        // Remove the query parameter
+        setSearchParams({});
+      }
+    }
+  }, [searchParams, employees, setSearchParams]);
 
   const handleEdit = (employeeId: string) => {
     const employee = employees.find(emp => emp.id === employeeId);
