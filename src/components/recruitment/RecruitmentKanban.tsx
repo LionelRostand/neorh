@@ -1,4 +1,3 @@
-
 import React from "react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
@@ -47,7 +46,7 @@ const RecruitmentKanban: React.FC<RecruitmentKanbanProps> = ({
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 5 }
+      activationConstraint: { distance: 8 }
     }),
     useSensor(KeyboardSensor)
   );
@@ -58,11 +57,12 @@ const RecruitmentKanban: React.FC<RecruitmentKanbanProps> = ({
     if (!over) return;
     
     const postId = active.id.toString();
-    const newStatus = over.id.toString();
+    const newStatus = over.id.toString() as RecruitmentStatus;
     
     // Only update if the status changed
     const post = posts.find(p => p.id === postId);
     if (post && post.status !== newStatus) {
+      console.log(`Déplacement de l'offre ${postId} vers ${newStatus}`);
       onStatusChange(postId, newStatus);
     }
   };
@@ -142,7 +142,6 @@ const RecruitmentKanban: React.FC<RecruitmentKanbanProps> = ({
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
-        modifiers={[restrictToVerticalAxis]}
       >
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {columns.map(column => (
