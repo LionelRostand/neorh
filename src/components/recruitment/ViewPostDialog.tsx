@@ -58,7 +58,7 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
           />
         </DialogHeader>
 
-        <ScrollArea className="flex-1 pr-2">
+        <ScrollArea className="flex-1 pr-2 max-h-[calc(90vh-200px)]">
           <div className="py-4 space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">

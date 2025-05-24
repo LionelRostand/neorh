@@ -54,8 +54,9 @@ const PostInfoCard: React.FC<PostInfoCardProps> = ({
       return departmentByName.name;
     }
     
+    // Si aucun département trouvé, afficher l'ID comme nom temporaire
     console.log('PostInfoCard - no department found, using ID as fallback');
-    return departmentId;
+    return departmentId || "Département non défini";
   };
   
   const departmentName = getDepartmentName();
