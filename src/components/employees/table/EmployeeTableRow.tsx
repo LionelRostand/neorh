@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,17 +23,35 @@ const getInitials = (name: string) => {
     .slice(0, 2);
 };
 
+// Get photo URL - prioritize photoBase64 from database, then fallback to photoUrl
+const getPhotoUrl = (employee: Employee) => {
+  // Check if we have base64 photo data from database
+  if ((employee as any).photoBase64) {
+    // If it already includes the data URL prefix, use as is
+    if ((employee as any).photoBase64.startsWith('data:')) {
+      return (employee as any).photoBase64;
+    }
+    // Otherwise, add the data URL prefix
+    return `data:image/jpeg;base64,${(employee as any).photoBase64}`;
+  }
+  
+  // Fallback to regular photoUrl
+  return employee.photoUrl;
+};
+
 const EmployeeTableRow: React.FC<EmployeeTableRowProps> = ({
   employee,
   handleEdit,
   handleDelete,
   handleView
 }) => {
+  const photoUrl = getPhotoUrl(employee);
+
   return (
     <TableRow key={employee.id}>
       <TableCell>
         <Avatar>
-          <AvatarImage src={employee.photoUrl} />
+          <AvatarImage src={photoUrl} />
           <AvatarFallback>{getInitials(employee.name || '')}</AvatarFallback>
         </Avatar>
       </TableCell>
@@ -47,7 +64,7 @@ const EmployeeTableRow: React.FC<EmployeeTableRowProps> = ({
       <TableCell>
         <div className="flex items-center">
           <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-          {employee.email}
+          {employee.professionalEmail || employee.email}
         </div>
         <div className="md:hidden flex items-center mt-1">
           <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
