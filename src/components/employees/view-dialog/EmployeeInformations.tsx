@@ -52,16 +52,41 @@ const EmployeeInformations: React.FC<EmployeeInformationsProps> = ({ employee })
 
   // Get department name from ID or use the department name if already resolved
   const getDepartmentName = () => {
-    // If department name is already resolved, use it
-    if (employee.department && !employee.department.includes('-')) {
-      return employee.department;
+    console.log('EmployeeInformations - employee.department:', employee.department);
+    console.log('EmployeeInformations - employee.departmentId:', employee.departmentId);
+    console.log('EmployeeInformations - departments:', departments);
+    
+    // If departments are still loading, show loading state
+    if (!departments || departments.length === 0) {
+      return 'Chargement...';
     }
     
-    // Otherwise try to resolve from departmentId
-    if (!employee.departmentId) return 'Non spécifié';
+    // Try to find department by departmentId first
+    if (employee.departmentId) {
+      const department = departments.find(d => d.id === employee.departmentId);
+      if (department?.name) {
+        console.log('EmployeeInformations - found by departmentId:', department);
+        return department.name;
+      }
+    }
     
-    const department = departments.find(d => d.id === employee.departmentId);
-    return department?.name || employee.departmentId;
+    // Try to find department by department field (in case it contains an ID)
+    if (employee.department) {
+      // First check if it's already a readable name (not an ID)
+      if (!employee.department.includes('-') && employee.department.length < 20) {
+        return employee.department;
+      }
+      
+      // Otherwise try to find it as an ID
+      const departmentByField = departments.find(d => d.id === employee.department);
+      if (departmentByField?.name) {
+        console.log('EmployeeInformations - found by department field:', departmentByField);
+        return departmentByField.name;
+      }
+    }
+    
+    console.log('EmployeeInformations - no department found, returning fallback');
+    return 'Non spécifié';
   };
 
   return (
