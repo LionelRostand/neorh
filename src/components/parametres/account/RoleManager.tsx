@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { User, Shield, Users, Save, Loader2 } from "lucide-react";
+import { User, Shield, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface RoleManagerProps {
@@ -18,7 +18,6 @@ const RoleManager: React.FC<RoleManagerProps> = ({ userId, userEmail }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isEmployee, setIsEmployee] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -35,7 +34,6 @@ const RoleManager: React.FC<RoleManagerProps> = ({ userId, userEmail }) => {
         // Vérifier si c'est l'admin par email
         if (targetUserEmail === 'admin@neotech-consulting.com') {
           setIsAdmin(true);
-          setIsEmployee(false);
         } else {
           // Vérifier dans le profil utilisateur
           const userProfileRef = doc(db, 'user_profiles', targetUserId);
@@ -44,12 +42,8 @@ const RoleManager: React.FC<RoleManagerProps> = ({ userId, userEmail }) => {
           if (userProfileSnap.exists()) {
             const profileData = userProfileSnap.data();
             setIsAdmin(profileData.isAdmin || false);
-            setIsEmployee(profileData.isEmployee || false);
           } else {
-            // Vérifier dans la collection hr_employees par authId
-            // Cette logique sera implémentée si nécessaire
             setIsAdmin(false);
-            setIsEmployee(false);
           }
         }
       } catch (error) {
@@ -87,8 +81,7 @@ const RoleManager: React.FC<RoleManagerProps> = ({ userId, userEmail }) => {
       const userProfileRef = doc(db, 'user_profiles', targetUserId);
       await updateDoc(userProfileRef, {
         isAdmin,
-        isEmployee,
-        role: isAdmin && isEmployee ? 'admin-employee' : isAdmin ? 'admin' : isEmployee ? 'employee' : 'user',
+        role: isAdmin ? 'admin' : 'user',
         updatedAt: new Date().toISOString()
       });
 
@@ -153,7 +146,7 @@ const RoleManager: React.FC<RoleManagerProps> = ({ userId, userEmail }) => {
             />
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-blue-600" />
+                <Shield className="h-4 w-4 text-blue-600" />
                 <label htmlFor="admin-role" className="font-medium cursor-pointer">
                   Administrateur
                 </label>
@@ -164,21 +157,21 @@ const RoleManager: React.FC<RoleManagerProps> = ({ userId, userEmail }) => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-4 border rounded-lg">
+          <div className="flex items-center space-x-3 p-4 border rounded-lg bg-gray-50">
             <Checkbox
-              id="employee-role"
-              checked={isEmployee}
-              onCheckedChange={(checked) => setIsEmployee(checked as boolean)}
+              id="user-role"
+              checked={!isAdmin}
+              disabled={true}
             />
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-green-600" />
-                <label htmlFor="employee-role" className="font-medium cursor-pointer">
-                  Employé
+                <User className="h-4 w-4 text-green-600" />
+                <label htmlFor="user-role" className="font-medium">
+                  Utilisateur
                 </label>
               </div>
               <p className="text-sm text-gray-500 mt-1">
-                Accès aux fonctionnalités employé (feuilles de temps, congés, etc.)
+                Accès standard aux fonctionnalités selon les permissions attribuées
               </p>
             </div>
           </div>
@@ -191,6 +184,12 @@ const RoleManager: React.FC<RoleManagerProps> = ({ userId, userEmail }) => {
             </p>
           </div>
         )}
+
+        <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-sm text-green-700">
+            <strong>Info:</strong> Les employés peuvent se connecter avec leur mot de passe par défaut généré dans la section "Gestion des mots de passe employés" ci-dessous.
+          </p>
+        </div>
 
         <div className="flex justify-end">
           <Button 
