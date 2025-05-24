@@ -49,8 +49,8 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[80vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] flex flex-col">
+        <DialogHeader className="pb-4 border-b">
           <PostHeader 
             title={post.title} 
             status={post.status} 
@@ -58,42 +58,44 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
           />
         </DialogHeader>
 
-        <ScrollArea className="flex-1 pr-6 min-h-[400px] max-h-[60vh] overflow-y-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4">
-            <div className="md:col-span-2 space-y-4">
-              <PostDetailsCard 
-                description={post.description || ""}
-                requirements={post.requirements}
-              />
-
-              {post.candidateName && (
-                <CandidateCard 
-                  post={post} 
-                  isConverting={isConverting}
-                  onConvertToEmployee={handleConvertToEmployee}
+        <ScrollArea className="flex-1 pr-2">
+          <div className="py-4 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <PostDetailsCard 
+                  description={post.description || ""}
+                  requirements={post.requirements}
                 />
-              )}
-            </div>
 
-            <div className="space-y-4">
-              <PostInfoCard 
-                title={post.title}
-                location={post.location}
-                createdAt={post.createdAt}
-                applications={post.applications}
-                departmentId={post.department}
-                departments={departments}
-              />
+                {post.candidateName && (
+                  <CandidateCard 
+                    post={post} 
+                    isConverting={isConverting}
+                    onConvertToEmployee={handleConvertToEmployee}
+                  />
+                )}
+              </div>
 
-              <StatusChangeCard 
-                currentStatus={post.status}
-                onStatusChange={handleStatusChange}
-              />
+              <div className="space-y-4">
+                <PostInfoCard 
+                  title={post.title}
+                  location={post.location}
+                  createdAt={post.createdAt}
+                  applications={post.applications}
+                  departmentId={post.department}
+                  departments={departments}
+                />
+
+                <StatusChangeCard 
+                  currentStatus={post.status}
+                  onStatusChange={handleStatusChange}
+                />
+              </div>
             </div>
           </div>
         </ScrollArea>
 
-        <DialogFooter>
+        <DialogFooter className="pt-4 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Fermer
           </Button>

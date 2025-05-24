@@ -34,12 +34,32 @@ const PostInfoCard: React.FC<PostInfoCardProps> = ({
   console.log('PostInfoCard - departmentId:', departmentId);
   console.log('PostInfoCard - departments:', departments);
 
-  // Récupérer le nom du département à partir de son ID
-  const department = departments?.find(dept => dept.id === departmentId);
-  const departmentName = department?.name || departmentId || "Département inconnu";
+  // Amélioration de la logique de récupération du nom du département
+  const getDepartmentName = () => {
+    if (!departmentId || !departments || departments.length === 0) {
+      return "Département non défini";
+    }
+    
+    // Recherche exacte par ID
+    const department = departments.find(dept => dept.id === departmentId);
+    if (department && department.name) {
+      console.log('PostInfoCard - found exact match:', department);
+      return department.name;
+    }
+    
+    // Recherche par nom si l'ID ne correspond pas (fallback)
+    const departmentByName = departments.find(dept => dept.name === departmentId);
+    if (departmentByName) {
+      console.log('PostInfoCard - found by name:', departmentByName);
+      return departmentByName.name;
+    }
+    
+    console.log('PostInfoCard - no department found, using ID as fallback');
+    return departmentId;
+  };
   
-  console.log('PostInfoCard - found department:', department);
-  console.log('PostInfoCard - departmentName:', departmentName);
+  const departmentName = getDepartmentName();
+  console.log('PostInfoCard - final departmentName:', departmentName);
 
   return (
     <Card>
@@ -51,7 +71,7 @@ const PostInfoCard: React.FC<PostInfoCardProps> = ({
           <li className="flex items-center gap-2 text-sm">
             <Briefcase className="h-4 w-4 text-gray-500" />
             <span className="text-gray-500">Département:</span>
-            <span>{departmentName}</span>
+            <span className="font-medium">{departmentName}</span>
           </li>
           {location && (
             <li className="flex items-center gap-2 text-sm">
