@@ -32,8 +32,16 @@ const EmployeeDocumentCard = ({ document, onRefresh }: EmployeeDocumentCardProps
   
   const documentNeedsSignature = needsSignature(document);
   
-  const handleDownload = () => {
-    console.log("Downloading document:", document.title);
+  const handleDownload = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Download button clicked for document:", document.title);
+    
+    if (!document.fileUrl) {
+      console.error("No fileUrl found for document:", document);
+      return;
+    }
+    
     handleDocumentDownload(document);
   };
   
@@ -68,6 +76,7 @@ const EmployeeDocumentCard = ({ document, onRefresh }: EmployeeDocumentCardProps
           size="sm" 
           className="flex items-center gap-1"
           onClick={handleDownload}
+          disabled={!document.fileUrl}
         >
           <Download className="h-3.5 w-3.5" />
           <span>Télécharger</span>

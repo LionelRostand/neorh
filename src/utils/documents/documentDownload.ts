@@ -16,20 +16,27 @@ export const handleDocumentDownload = (document: Document): void => {
   }
   
   try {
-    // Convert base64 to blob
+    console.log("Starting download for document:", document.title, "URL:", document.fileUrl);
+    
+    // Generate filename
+    const filename = document.title
+      ? document.title.replace(/\s+/g, '_').toLowerCase() + '.pdf'
+      : 'document.pdf';
+    
+    // Convert base64 to blob if needed
     if (document.fileUrl.startsWith('data:')) {
-      const base64Response = fetch(document.fileUrl);
-      base64Response.then(res => res.blob())
+      console.log("Processing base64 document");
+      fetch(document.fileUrl)
+        .then(res => res.blob())
         .then(blob => {
           const url = window.URL.createObjectURL(blob);
-          const a = window.document.createElement('a');
+          const a = document.createElement('a');
           a.href = url;
-          a.download = document.title
-            ? document.title.replace(/\s+/g, '_').toLowerCase() + '.pdf'
-            : 'document.pdf';
-          window.document.body.appendChild(a);
+          a.download = filename;
+          a.style.display = 'none';
+          document.body.appendChild(a);
           a.click();
-          window.document.body.removeChild(a);
+          document.body.removeChild(a);
           window.URL.revokeObjectURL(url);
           
           toast({
@@ -38,7 +45,7 @@ export const handleDocumentDownload = (document: Document): void => {
           });
         })
         .catch(error => {
-          console.error("Erreur lors du téléchargement:", error);
+          console.error("Erreur lors du téléchargement base64:", error);
           toast({
             title: "Erreur",
             description: "Impossible de télécharger ce document.",
@@ -47,16 +54,16 @@ export const handleDocumentDownload = (document: Document): void => {
         });
     } else {
       // Direct URL download
-      const a = window.document.createElement('a');
+      console.log("Processing direct URL download");
+      const a = document.createElement('a');
       a.href = document.fileUrl;
+      a.download = filename;
       a.target = '_blank';
-      a.download = document.title
-        ? document.title.replace(/\s+/g, '_').toLowerCase() + '.pdf'
-        : 'document.pdf';
       a.rel = 'noopener noreferrer';
-      window.document.body.appendChild(a);
+      a.style.display = 'none';
+      document.body.appendChild(a);
       a.click();
-      window.document.body.removeChild(a);
+      document.body.removeChild(a);
       
       toast({
         title: "Succès",
