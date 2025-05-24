@@ -1,6 +1,6 @@
 
 import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
-import { doc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Employee } from '@/types/employee';
 
@@ -12,20 +12,44 @@ export interface EmployeePasswordData {
 
 export const createEmployeeAccount = async (employeeData: EmployeePasswordData) => {
   try {
-    console.log('Creating employee account for:', employeeData.email);
+    console.log('🔧 Creating employee account for:', employeeData.email);
+    console.log('👤 Employee ID:', employeeData.employeeId);
+    
+    // Vérifier d'abord si l'employé existe dans Firestore
+    const employeeRef = doc(db, 'hr_employees', employeeData.employeeId);
+    const employeeDoc = await getDoc(employeeRef);
+    
+    if (!employeeDoc.exists()) {
+      console.error('❌ Employee not found in Firestore:', employeeData.employeeId);
+      return {
+        success: false,
+        error: 'Employé non trouvé dans la base de données'
+      };
+    }
+    
+    const employeeInfo = employeeDoc.data();
+    console.log('📋 Employee info from Firestore:', {
+      firstName: employeeInfo.firstName,
+      lastName: employeeInfo.lastName,
+      email: employeeInfo.email,
+      hasAuthId: !!employeeInfo.authId
+    });
+    
     const auth = getAuth();
     
     // Créer le compte Firebase Auth
+    console.log('🔐 Creating Firebase Auth account...');
     const userCredential = await createUserWithEmailAndPassword(
       auth, 
       employeeData.email, 
       employeeData.password
     );
     
-    console.log('Firebase Auth account created:', userCredential.user.uid);
+    console.log('✅ Firebase Auth account created:', userCredential.user.uid);
+    console.log('📧 Account email:', userCredential.user.email);
     
     // Mettre à jour l'employé dans Firestore avec les informations d'authentification
-    const employeeRef = doc(db, 'hr_employees', employeeData.employeeId);
+    console.log('🔄 Updating employee record in Firestore...');
     await updateDoc(employeeRef, {
       authId: userCredential.user.uid,
       hasDefaultPassword: true,
@@ -34,9 +58,10 @@ export const createEmployeeAccount = async (employeeData: EmployeePasswordData) 
       updatedAt: new Date().toISOString()
     });
 
-    console.log('Employee record updated with authId');
+    console.log('✅ Employee record updated with authId');
 
     // Créer un document de profil utilisateur
+    console.log('👤 Creating user profile...');
     const userProfileRef = doc(db, 'user_profiles', userCredential.user.uid);
     await setDoc(userProfileRef, {
       employeeId: employeeData.employeeId,
@@ -46,14 +71,17 @@ export const createEmployeeAccount = async (employeeData: EmployeePasswordData) 
       createdAt: new Date().toISOString()
     });
 
-    console.log('User profile created');
+    console.log('✅ User profile created successfully');
+    console.log('🎉 Employee account creation completed successfully');
 
     return {
       success: true,
       userId: userCredential.user.uid
     };
   } catch (error: any) {
-    console.error('Error creating employee account:', error);
+    console.error('❌ Error creating employee account:', error);
+    console.error('❌ Error code:', error.code);
+    console.error('❌ Error message:', error.message);
     
     // Gestion des erreurs spécifiques
     let errorMessage = 'Erreur lors de la création du compte';
