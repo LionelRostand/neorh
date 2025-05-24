@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -79,7 +78,8 @@ const TimesheetsTable = ({
   };
 
   const handleEditTimesheet = (timesheetId: string) => {
-    navigate(`/feuilles-de-temps/edit/${timesheetId}`);
+    // Use the existing route instead of the non-existent edit route
+    navigate(`/feuilles-de-temps/${timesheetId}`);
   };
 
   const handleApproveTimesheet = (timesheetId: string) => {
