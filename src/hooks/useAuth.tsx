@@ -10,6 +10,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { verifyAndCreateEmployeeLogin } from '@/services/employeeAuthService';
 
 // Extend the Firebase User type with our custom properties
 export interface ExtendedUser extends User {
@@ -133,9 +134,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       console.log('🚀 Attempting sign in with:', email);
       const auth = getAuth();
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      console.log('✅ Sign in successful for:', result.user.email);
-      console.log('🆔 User UID:', result.user.uid);
+      
+      try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        console.log('✅ Sign in successful for:', result.user.email);
+        console.log('🆔 User UID:', result.user.uid);
+      } catch (authError: any) {
+        console.log('❌ Initial sign in failed:', authError.code);
+        
+        // Si c'est un employé qui n'a pas encore de compte, essayer de le créer
+        if (authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential') {
+          console.log('🔍 Checking if this is an employee without account...');
+          
+          const employeeCheck = await verifyAndCreateEmployeeLogin(email, password);
+          
+          if (employeeCheck.success && employeeCheck.isNewAccount) {
+            // Le compte a été créé, essayer de se connecter maintenant
+            console.log('🔄 Account created, attempting login...');
+            const result = await signInWithEmailAndPassword(auth, email, password);
+            console.log('✅ Sign in successful after account creation:', result.user.email);
+            setError(`Compte créé avec succès. Vous êtes maintenant connecté.`);
+            return;
+          } else if (employeeCheck.success && !employeeCheck.isNewAccount) {
+            // Le compte existe mais le mot de passe est incorrect
+            throw authError;
+          } else {
+            // Pas un employé ou erreur lors de la création
+            throw authError;
+          }
+        } else {
+          throw authError;
+        }
+      }
     } catch (err: any) {
       console.error('❌ Error signing in:', err);
       console.error('❌ Error code:', err.code);
