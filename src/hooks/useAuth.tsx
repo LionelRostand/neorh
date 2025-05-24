@@ -5,13 +5,18 @@ import {
   onAuthStateChanged, 
   User, 
   signInWithEmailAndPassword,
-  signOut as firebaseSignOut
+  signOut as firebaseSignOut,
+  updatePassword
 } from 'firebase/auth';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 // Extend the Firebase User type with our custom properties
 export interface ExtendedUser extends User {
   isAdmin?: boolean;
   role?: string;
+  employeeId?: string;
+  isEmployee?: boolean;
 }
 
 interface AuthContextType {
@@ -20,6 +25,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  changePassword: (newPassword: string) => Promise<void>;
   error: string | null;
 }
 
@@ -32,14 +38,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      // Cast the user to our extended type
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       const extendedUser = user as ExtendedUser | null;
       
-      // If this is the admin email, set isAdmin to true
-      if (extendedUser && extendedUser.email === 'admin@neotech-consulting.com') {
-        extendedUser.isAdmin = true;
-        extendedUser.role = 'admin';
+      if (extendedUser) {
+        // Check if this is the admin email
+        if (extendedUser.email === 'admin@neotech-consulting.com') {
+          extendedUser.isAdmin = true;
+          extendedUser.role = 'admin';
+        } else {
+          // Check if this is an employee
+          try {
+            const employeesRef = doc(db, 'hr_employees', extendedUser.uid);
+            const employeeDoc = await getDoc(employeesRef);
+            
+            if (employeeDoc.exists()) {
+              extendedUser.isEmployee = true;
+              extendedUser.role = 'employee';
+              extendedUser.employeeId = employeeDoc.id;
+            }
+          } catch (err) {
+            console.error('Error checking employee status:', err);
+          }
+        }
       }
       
       setUser(extendedUser);
@@ -73,8 +94,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const changePassword = async (newPassword: string) => {
+    setError(null);
+    try {
+      const auth = getAuth();
+      if (auth.currentUser) {
+        await updatePassword(auth.currentUser, newPassword);
+        
+        // Update employee record to remove default password flag
+        if (user?.employeeId) {
+          const employeeRef = doc(db, 'hr_employees', user.employeeId);
+          await updateDoc(employeeRef, {
+            hasDefaultPassword: false,
+            lastPasswordChange: new Date().toISOString()
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Error changing password:', err);
+      setError('Erreur lors du changement de mot de passe.');
+      throw err;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, isAuthenticated: !!user, signIn, signOut, error }}>
+    <AuthContext.Provider value={{ user, loading, isAuthenticated: !!user, signIn, signOut, changePassword, error }}>
       {children}
     </AuthContext.Provider>
   );
