@@ -58,8 +58,8 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
           />
         </DialogHeader>
 
-        <ScrollArea className="flex-1 pr-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <ScrollArea className="flex-1 pr-6 min-h-[400px] max-h-[60vh] overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4">
             <div className="md:col-span-2 space-y-4">
               <PostDetailsCard 
                 description={post.description || ""}
