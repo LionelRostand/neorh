@@ -31,8 +31,15 @@ const PostInfoCard: React.FC<PostInfoCardProps> = ({
   const createdDate = new Date(createdAt);
   const formattedDate = format(createdDate, 'dd MMMM yyyy', { locale: fr });
 
+  console.log('PostInfoCard - departmentId:', departmentId);
+  console.log('PostInfoCard - departments:', departments);
+
   // Récupérer le nom du département à partir de son ID
-  const departmentName = departments?.find(dept => dept.id === departmentId)?.name || "Département inconnu";
+  const department = departments?.find(dept => dept.id === departmentId);
+  const departmentName = department?.name || departmentId || "Département inconnu";
+  
+  console.log('PostInfoCard - found department:', department);
+  console.log('PostInfoCard - departmentName:', departmentName);
 
   return (
     <Card>
