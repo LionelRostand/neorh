@@ -30,13 +30,13 @@ export const handleDocumentDownload = (document: Document): void => {
         .then(res => res.blob())
         .then(blob => {
           const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
+          const a = window.document.createElement('a');
           a.href = url;
           a.download = filename;
           a.style.display = 'none';
-          document.body.appendChild(a);
+          window.document.body.appendChild(a);
           a.click();
-          document.body.removeChild(a);
+          window.document.body.removeChild(a);
           window.URL.revokeObjectURL(url);
           
           toast({
@@ -55,15 +55,15 @@ export const handleDocumentDownload = (document: Document): void => {
     } else {
       // Direct URL download
       console.log("Processing direct URL download");
-      const a = document.createElement('a');
+      const a = window.document.createElement('a');
       a.href = document.fileUrl;
       a.download = filename;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
       a.style.display = 'none';
-      document.body.appendChild(a);
+      window.document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
+      window.document.body.removeChild(a);
       
       toast({
         title: "Succès",
