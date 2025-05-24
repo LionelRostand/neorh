@@ -7,9 +7,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Calendar, MapPin, Users, Briefcase, Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Department } from "@/types/firebase";
+import { RecruitmentStatus } from "@/types/recruitment";
 
 interface PostInfoCardProps {
   title: string;
@@ -18,6 +20,7 @@ interface PostInfoCardProps {
   applications?: number;
   departmentId: string;
   departments?: Department[];
+  status: RecruitmentStatus;
 }
 
 const PostInfoCard: React.FC<PostInfoCardProps> = ({
@@ -27,6 +30,7 @@ const PostInfoCard: React.FC<PostInfoCardProps> = ({
   applications = 0,
   departmentId,
   departments = [],
+  status,
 }) => {
   const createdDate = new Date(createdAt);
   const formattedDate = format(createdDate, 'dd MMMM yyyy', { locale: fr });
@@ -63,6 +67,40 @@ const PostInfoCard: React.FC<PostInfoCardProps> = ({
     console.log('PostInfoCard - no department found, using ID as fallback:', departmentId);
     return departmentId;
   };
+
+  const getStatusLabel = (status: RecruitmentStatus) => {
+    switch (status) {
+      case 'ouverte':
+        return 'Ouverte';
+      case 'en_cours':
+        return 'En cours';
+      case 'entretiens':
+        return 'Entretiens';
+      case 'offre':
+        return 'Offre';
+      case 'fermée':
+        return 'Fermée';
+      default:
+        return status;
+    }
+  };
+
+  const getStatusColor = (status: RecruitmentStatus) => {
+    switch (status) {
+      case 'ouverte':
+        return 'bg-blue-100 text-blue-800';
+      case 'en_cours':
+        return 'bg-amber-100 text-amber-800';
+      case 'entretiens':
+        return 'bg-purple-100 text-purple-800';
+      case 'offre':
+        return 'bg-green-100 text-green-800';
+      case 'fermée':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
   
   const departmentName = getDepartmentName();
   console.log('PostInfoCard - final departmentName:', departmentName);
@@ -90,6 +128,13 @@ const PostInfoCard: React.FC<PostInfoCardProps> = ({
             <Calendar className="h-4 w-4 text-gray-500" />
             <span className="text-gray-500">Créé le:</span>
             <span>{formattedDate}</span>
+          </li>
+          <li className="flex items-center gap-2 text-sm">
+            <Clock className="h-4 w-4 text-gray-500" />
+            <span className="text-gray-500">Statut:</span>
+            <Badge variant="outline" className={getStatusColor(status)}>
+              {getStatusLabel(status)}
+            </Badge>
           </li>
           <li className="flex items-center gap-2 text-sm">
             <Users className="h-4 w-4 text-gray-500" />

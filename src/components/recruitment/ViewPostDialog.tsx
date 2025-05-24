@@ -84,6 +84,7 @@ const ViewPostDialog: React.FC<ViewPostDialogProps> = ({
                   applications={post.applications}
                   departmentId={post.department}
                   departments={departments}
+                  status={post.status}
                 />
 
                 <StatusChangeCard 
