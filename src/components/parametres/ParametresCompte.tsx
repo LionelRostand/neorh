@@ -6,16 +6,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEmployeeData } from "@/hooks/useEmployeeData";
 import { Employee } from "@/types/employee";
-import { Save, Eye, EyeOff, User } from "lucide-react";
+import { Save, Eye, EyeOff, User, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import ChangePasswordForm from "./ChangePasswordForm";
+import { createEmployeeAccount, updateEmployeePassword } from "@/services/employeeAuthService";
 
 const ParametresCompte = () => {
   const { employees, isLoading } = useEmployeeData();
   const { user } = useAuth();
   const [passwords, setPasswords] = useState<Record<string, string>>({});
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
+  const [savingPasswords, setSavingPasswords] = useState<Record<string, boolean>>({});
 
   const handlePasswordChange = (employeeId: string, password: string) => {
     setPasswords(prev => ({
@@ -31,7 +33,7 @@ const ParametresCompte = () => {
     }));
   };
 
-  const savePassword = (employee: Employee) => {
+  const savePassword = async (employee: Employee) => {
     const password = passwords[employee.id];
     if (!password) {
       toast({
@@ -42,20 +44,69 @@ const ParametresCompte = () => {
       return;
     }
 
-    // Ici vous pourriez implémenter la logique de sauvegarde du mot de passe
-    // Par exemple, envoyer vers une API ou stocker dans Firebase
-    console.log(`Mot de passe défini pour ${employee.name}: ${password}`);
-    
-    toast({
-      title: "Succès",
-      description: `Mot de passe défini pour ${employee.name}`,
-    });
+    if (password.length < 6) {
+      toast({
+        title: "Erreur",
+        description: "Le mot de passe doit contenir au moins 6 caractères",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!employee.email) {
+      toast({
+        title: "Erreur",
+        description: "L'employé doit avoir une adresse email",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSavingPasswords(prev => ({ ...prev, [employee.id]: true }));
+
+    try {
+      // Créer le compte employé avec le mot de passe par défaut
+      const result = await createEmployeeAccount({
+        employeeId: employee.id,
+        email: employee.email,
+        password: password
+      });
+
+      if (result.success) {
+        toast({
+          title: "Succès",
+          description: `Mot de passe défini pour ${employee.name}`,
+        });
+
+        // Effacer le mot de passe du formulaire après sauvegarde
+        setPasswords(prev => {
+          const newPasswords = { ...prev };
+          delete newPasswords[employee.id];
+          return newPasswords;
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: result.error || "Erreur lors de la création du compte",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error saving password:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la sauvegarde",
+        variant: "destructive"
+      });
+    } finally {
+      setSavingPasswords(prev => ({ ...prev, [employee.id]: false }));
+    }
   };
 
   const generateRandomPassword = (employeeId: string) => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
     let password = "";
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 10; i++) {
       password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     handlePasswordChange(employeeId, password);
@@ -131,6 +182,9 @@ const ParametresCompte = () => {
                         <p className="text-sm text-gray-500">
                           {employee.position} - {employee.department}
                         </p>
+                        {employee.email && (
+                          <p className="text-sm text-blue-600">{employee.email}</p>
+                        )}
                       </div>
                     </div>
                     
@@ -146,6 +200,7 @@ const ParametresCompte = () => {
                             value={passwords[employee.id] || ""}
                             onChange={(e) => handlePasswordChange(employee.id, e.target.value)}
                             placeholder="Saisir un mot de passe"
+                            disabled={savingPasswords[employee.id]}
                           />
                           <Button
                             type="button"
@@ -153,6 +208,7 @@ const ParametresCompte = () => {
                             size="sm"
                             className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
                             onClick={() => togglePasswordVisibility(employee.id)}
+                            disabled={savingPasswords[employee.id]}
                           >
                             {showPasswords[employee.id] ? (
                               <EyeOff className="h-4 w-4" />
@@ -168,16 +224,22 @@ const ParametresCompte = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => generateRandomPassword(employee.id)}
+                          disabled={savingPasswords[employee.id]}
                         >
                           Générer
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => savePassword(employee)}
+                          disabled={savingPasswords[employee.id] || !passwords[employee.id]}
                           className="flex items-center gap-1"
                         >
-                          <Save className="h-4 w-4" />
-                          Sauvegarder
+                          {savingPasswords[employee.id] ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Save className="h-4 w-4" />
+                          )}
+                          {savingPasswords[employee.id] ? "Sauvegarde..." : "Sauvegarder"}
                         </Button>
                       </div>
                     </div>
