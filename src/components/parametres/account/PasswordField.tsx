@@ -32,11 +32,14 @@ const PasswordField: React.FC<PasswordFieldProps> = ({
       <div className="flex items-center justify-between mb-3">
         <div>
           <h4 className="font-medium">{employee.name}</h4>
-          <p className="text-sm text-gray-500">
-            {employee.position} - {employee.department}
-          </p>
+          <div className="text-sm text-gray-500 space-y-1">
+            <p>{employee.position}</p>
+            {employee.department && (
+              <p className="font-medium text-blue-600">{employee.department}</p>
+            )}
+          </div>
           {employee.email && (
-            <p className="text-sm text-blue-600">{employee.email}</p>
+            <p className="text-sm text-blue-600 mt-1">{employee.email}</p>
           )}
         </div>
       </div>
