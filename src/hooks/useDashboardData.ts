@@ -85,28 +85,12 @@ export const useDashboardData = (employees: Employee[] | undefined) => {
           }
         });
         
-        // Calculer le salaire moyen
-        let totalSalary = 0;
-        let employeesWithSalary = 0;
-        
-        if (employees && employees.length > 0) {
-          for (const employee of employees) {
-            const employeeSalary = employee.salary || 0;
-            if (employeeSalary && typeof employeeSalary === 'number') {
-              totalSalary += employeeSalary;
-              employeesWithSalary++;
-            }
-          }
-        }
-        
-        const averageSalary = employeesWithSalary > 0 ? Math.round(totalSalary / employeesWithSalary) : 0;
-        
         // Mettre à jour les statistiques avec les données réelles
         setStats({
           totalEmployees: employees?.length || 0,
           absencesThisMonth: leavesCount,
           hoursWorked: Math.round(totalHours),
-          averageSalary: averageSalary || 3256 // Valeur par défaut si pas de données
+          averageSalary: 0 // Retiré le calcul du salaire moyen
         });
         
         setModuleStats({

@@ -16,7 +16,6 @@ const DEFAULT_WIDGETS: Widget[] = [
   { id: "total-employees", title: "Nombre d'employés", type: "stat", enabled: true },
   { id: "absences-month", title: "Absences ce mois", type: "stat", enabled: true },
   { id: "hours-worked", title: "Heures travaillées", type: "stat", enabled: true },
-  { id: "average-salary", title: "Coût salarial moyen", type: "stat", enabled: true },
   { id: "employee-status-chart", title: "Répartition par statut", type: "chart", enabled: true },
   { id: "department-distribution-chart", title: "Répartition par département", type: "chart", enabled: true },
   { id: "employee-anniversaries", title: "Anniversaires d'embauche", type: "info", enabled: true },

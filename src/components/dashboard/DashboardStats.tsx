@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Users, Clock, Calendar, Wallet } from "lucide-react";
+import { Users, Clock, Calendar } from "lucide-react";
 import StatCard from "@/components/dashboard/StatCard";
 import { Widget } from "./DashboardWidgetManager";
 
@@ -24,15 +24,11 @@ const DashboardStats = ({ stats, isLoading, widgets = [] }: DashboardStatsProps)
   
   const shouldShowHoursWorked = !widgets.length || 
     widgets.find(w => w.id === "hours-worked")?.enabled !== false;
-  
-  const shouldShowAverageSalary = !widgets.length || 
-    widgets.find(w => w.id === "average-salary")?.enabled !== false;
 
   const visibleWidgetsCount = [
     shouldShowTotalEmployees,
     shouldShowAbsences,
-    shouldShowHoursWorked,
-    shouldShowAverageSalary
+    shouldShowHoursWorked
   ].filter(Boolean).length;
 
   if (visibleWidgetsCount === 0) {
@@ -44,7 +40,6 @@ const DashboardStats = ({ stats, isLoading, widgets = [] }: DashboardStatsProps)
       ${visibleWidgetsCount === 1 ? 'md:grid-cols-1' : ''} 
       ${visibleWidgetsCount === 2 ? 'md:grid-cols-2' : ''} 
       ${visibleWidgetsCount === 3 ? 'md:grid-cols-3' : ''} 
-      ${visibleWidgetsCount === 4 ? 'md:grid-cols-4' : ''} 
       gap-4 mb-6`}
     >
       {shouldShowTotalEmployees && (
@@ -71,15 +66,6 @@ const DashboardStats = ({ stats, isLoading, widgets = [] }: DashboardStatsProps)
           value={isLoading ? "..." : stats.hoursWorked.toLocaleString()} 
           icon={<Clock size={18} />}
           trend={{ value: 2.1, positive: true }}
-        />
-      )}
-      
-      {shouldShowAverageSalary && (
-        <StatCard 
-          title="Coût salarial moyen" 
-          value={isLoading ? "..." : `${stats.averageSalary.toLocaleString()} €`} 
-          icon={<Wallet size={18} />}
-          trend={{ value: 0.8, positive: true }}
         />
       )}
     </div>
