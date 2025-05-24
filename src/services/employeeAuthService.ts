@@ -1,5 +1,5 @@
 
-import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, updatePassword as firebaseUpdatePassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, updatePassword as firebaseUpdatePassword, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, updateDoc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Employee } from '@/types/employee';
@@ -49,19 +49,23 @@ export const createEmployeeAccount = async (employeeData: EmployeePasswordData) 
       console.log('✅ Firebase Auth account created:', userCredential.user.uid);
     } catch (authError: any) {
       if (authError.code === 'auth/email-already-in-use') {
-        console.log('📧 Email already exists in Firebase Auth, attempting to update password...');
+        console.log('📧 Email already exists in Firebase Auth');
         
-        // Si l'email existe déjà, essayer de se connecter avec le nouveau mot de passe
+        // Envoyer un email de réinitialisation de mot de passe
         try {
-          userCredential = await signInWithEmailAndPassword(auth, employeeData.email, employeeData.password);
-          console.log('✅ Successfully signed in with existing account:', userCredential.user.uid);
-        } catch (signInError: any) {
-          // Si la connexion échoue, cela signifie que le mot de passe ne correspond pas
-          // On va essayer de mettre à jour le mot de passe si possible
-          console.log('❌ Could not sign in with new password, account exists but password differs');
+          console.log('📬 Sending password reset email...');
+          await sendPasswordResetEmail(auth, employeeData.email);
+          console.log('✅ Password reset email sent');
+          
           return {
             success: false,
-            error: 'Un compte existe déjà avec cet email. Veuillez contacter l\'administrateur pour réinitialiser le mot de passe.'
+            error: `Un compte existe déjà avec cet email. Un email de réinitialisation de mot de passe a été envoyé à ${employeeData.email}. Veuillez vérifier votre boîte email et suivre les instructions pour définir votre nouveau mot de passe.`
+          };
+        } catch (resetError: any) {
+          console.error('❌ Error sending password reset email:', resetError);
+          return {
+            success: false,
+            error: 'Un compte existe déjà avec cet email. Veuillez contacter l\'administrateur pour réinitialiser votre mot de passe.'
           };
         }
       } else {
