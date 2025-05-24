@@ -32,6 +32,11 @@ const EmployeeDocumentCard = ({ document, onRefresh }: EmployeeDocumentCardProps
   
   const documentNeedsSignature = needsSignature(document);
   
+  const handleDownload = () => {
+    console.log("Downloading document:", document.title);
+    handleDocumentDownload(document);
+  };
+  
   return (
     <Card className="h-full flex flex-col">
       <CardContent className="pt-6 flex-grow">
@@ -62,7 +67,7 @@ const EmployeeDocumentCard = ({ document, onRefresh }: EmployeeDocumentCardProps
           variant="outline" 
           size="sm" 
           className="flex items-center gap-1"
-          onClick={() => handleDocumentDownload(document)}
+          onClick={handleDownload}
         >
           <Download className="h-3.5 w-3.5" />
           <span>Télécharger</span>

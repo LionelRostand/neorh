@@ -53,6 +53,7 @@ export const handleDocumentDownload = (document: Document): void => {
       a.download = document.title
         ? document.title.replace(/\s+/g, '_').toLowerCase() + '.pdf'
         : 'document.pdf';
+      a.rel = 'noopener noreferrer';
       window.document.body.appendChild(a);
       a.click();
       window.document.body.removeChild(a);
