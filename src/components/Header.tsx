@@ -31,16 +31,30 @@ const Header = () => {
   };
 
   const handleProfileClick = () => {
-    if (user?.isEmployee && user?.employeeId && employees) {
-      // Find the employee record
-      const employee = employees.find(emp => emp.id === user.employeeId);
+    if (user?.isEmployee && employees) {
+      // Find employee by user ID or email
+      const employee = employees.find(emp => 
+        emp.id === user.uid || 
+        emp.id === user.employeeId ||
+        emp.email === user.email ||
+        emp.professionalEmail === user.email
+      );
+      
       if (employee) {
+        console.log("Found employee for profile:", employee);
         // Navigate to employees page and trigger view dialog
         navigate(`/employes?viewEmployee=${employee.id}`);
+      } else {
+        console.log("Employee not found for user:", user);
+        // Fallback to employees page
+        navigate("/employes");
       }
     } else if (user?.isAdmin) {
       // For admin, navigate to settings
       navigate("/parametres");
+    } else {
+      // Fallback for other cases
+      navigate("/employes");
     }
   };
   
