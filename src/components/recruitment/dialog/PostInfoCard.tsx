@@ -34,29 +34,34 @@ const PostInfoCard: React.FC<PostInfoCardProps> = ({
   console.log('PostInfoCard - departmentId:', departmentId);
   console.log('PostInfoCard - departments:', departments);
 
-  // Amélioration de la logique de récupération du nom du département
+  // Logique améliorée de récupération du nom du département
   const getDepartmentName = () => {
-    if (!departmentId || !departments || departments.length === 0) {
+    if (!departmentId) {
       return "Département non défini";
+    }
+    
+    if (!departments || departments.length === 0) {
+      console.log('PostInfoCard - no departments loaded yet');
+      return "Chargement...";
     }
     
     // Recherche exacte par ID
     const department = departments.find(dept => dept.id === departmentId);
-    if (department && department.name) {
+    if (department?.name) {
       console.log('PostInfoCard - found exact match:', department);
       return department.name;
     }
     
     // Recherche par nom si l'ID ne correspond pas (fallback)
     const departmentByName = departments.find(dept => dept.name === departmentId);
-    if (departmentByName) {
+    if (departmentByName?.name) {
       console.log('PostInfoCard - found by name:', departmentByName);
       return departmentByName.name;
     }
     
     // Si aucun département trouvé, afficher l'ID comme nom temporaire
-    console.log('PostInfoCard - no department found, using ID as fallback');
-    return departmentId || "Département non défini";
+    console.log('PostInfoCard - no department found, using ID as fallback:', departmentId);
+    return departmentId;
   };
   
   const departmentName = getDepartmentName();

@@ -4,10 +4,11 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { RecruitmentPost, RecruitmentStatus, KanbanColumn as KanbanColumnType } from "@/types/recruitment";
 import KanbanColumn from "./KanbanColumn";
+import AddCandidateDialog from "./AddCandidateDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "@/components/ui/use-toast";
 import { db } from "@/lib/firebase";
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 
 interface RecruitmentKanbanProps {
   posts: RecruitmentPost[];
@@ -32,6 +33,9 @@ const RecruitmentKanban: React.FC<RecruitmentKanbanProps> = ({
   
   const [postToDelete, setPostToDelete] = React.useState<string | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [candidateDialogOpen, setCandidateDialogOpen] = React.useState(false);
+  const [selectedPostForCandidate, setSelectedPostForCandidate] = React.useState<string | null>(null);
+  const [isAddingCandidate, setIsAddingCandidate] = React.useState(false);
   
   // Distribute posts to their respective columns
   posts.forEach(post => {
@@ -65,6 +69,42 @@ const RecruitmentKanban: React.FC<RecruitmentKanbanProps> = ({
 
   const handleDeletePost = (postId: string) => {
     setPostToDelete(postId);
+  };
+
+  const handleAddCandidate = (postId: string) => {
+    setSelectedPostForCandidate(postId);
+    setCandidateDialogOpen(true);
+  };
+
+  const handleCandidateSubmit = async (data: { candidateName: string; nextStep?: string }) => {
+    if (!selectedPostForCandidate) return;
+    
+    setIsAddingCandidate(true);
+    try {
+      const postRef = doc(db, 'hr_recruitment', selectedPostForCandidate);
+      await updateDoc(postRef, {
+        candidateName: data.candidateName,
+        nextStep: data.nextStep || '',
+        updatedAt: new Date().toISOString()
+      });
+      
+      toast({
+        title: "Candidat ajouté",
+        description: "Le candidat a été ajouté avec succès à l'offre"
+      });
+      
+      setCandidateDialogOpen(false);
+      setSelectedPostForCandidate(null);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout du candidat:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'ajouter le candidat"
+      });
+    } finally {
+      setIsAddingCandidate(false);
+    }
   };
 
   const confirmDelete = async () => {
@@ -113,10 +153,18 @@ const RecruitmentKanban: React.FC<RecruitmentKanbanProps> = ({
               items={column.items}
               onPostClick={onPostClick}
               onDeletePost={handleDeletePost}
+              onAddCandidate={handleAddCandidate}
             />
           ))}
         </div>
       </DndContext>
+      
+      <AddCandidateDialog
+        open={candidateDialogOpen}
+        onOpenChange={setCandidateDialogOpen}
+        onSubmit={handleCandidateSubmit}
+        isLoading={isAddingCandidate}
+      />
       
       <AlertDialog open={!!postToDelete} onOpenChange={(open) => !open && setPostToDelete(null)}>
         <AlertDialogContent>

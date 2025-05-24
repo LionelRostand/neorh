@@ -3,7 +3,7 @@ import React from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { RecruitmentPost } from "@/types/recruitment";
 import RecruitmentCard from "./RecruitmentCard";
-import { Trash2 } from "lucide-react";
+import { Trash2, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface KanbanColumnProps {
@@ -12,6 +12,7 @@ interface KanbanColumnProps {
   items: RecruitmentPost[];
   onPostClick: (postId: string) => void;
   onDeletePost?: (postId: string) => void;
+  onAddCandidate?: (postId: string) => void;
 }
 
 const KanbanColumn: React.FC<KanbanColumnProps> = ({ 
@@ -19,7 +20,8 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
   title, 
   items, 
   onPostClick,
-  onDeletePost 
+  onDeletePost,
+  onAddCandidate 
 }) => {
   const { setNodeRef } = useDroppable({
     id: id
@@ -43,19 +45,36 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
               post={item}
               onClick={() => onPostClick(item.id)}
             />
-            {onDeletePost && (
-              <Button
-                variant="outline"
-                size="icon"
-                className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 bg-white text-red-500 hover:text-red-700 hover:bg-red-50 h-6 w-6 p-1 transition-opacity"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeletePost(item.id);
-                }}
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            )}
+            <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+              {id === 'en_cours' && !item.candidateName && onAddCandidate && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="bg-white text-green-600 hover:text-green-700 hover:bg-green-50 h-6 w-6 p-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddCandidate(item.id);
+                  }}
+                  title="Ajouter un candidat"
+                >
+                  <UserPlus className="h-3 w-3" />
+                </Button>
+              )}
+              {onDeletePost && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="bg-white text-red-500 hover:text-red-700 hover:bg-red-50 h-6 w-6 p-1"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeletePost(item.id);
+                  }}
+                  title="Supprimer l'offre"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
           </div>
         ))}
         {items.length === 0 && (
