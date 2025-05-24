@@ -23,10 +23,6 @@ const NewPostDialog: React.FC<NewPostDialogProps> = ({
   onSubmit, 
   isLoading 
 }) => {
-  const handleCancel = () => {
-    onOpenChange(false);
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
@@ -38,7 +34,6 @@ const NewPostDialog: React.FC<NewPostDialogProps> = ({
         </DialogHeader>
         <RecruitmentForm
           onSubmit={onSubmit}
-          onCancel={handleCancel}
           isLoading={isLoading}
         />
       </DialogContent>
