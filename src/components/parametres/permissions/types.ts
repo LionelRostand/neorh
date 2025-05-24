@@ -22,11 +22,11 @@ export const MENU_ITEMS = [
   "Contrats",
   "Documents RH",
   "Départements",
+  "Projets",
   "Évaluations",
   "Formations",
   "Salaires",
   "Recrutement",
   "Entreprises",
-  "Rapports",
-  "Paramètres"
+  "Rapports"
 ];
