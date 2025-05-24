@@ -7,7 +7,7 @@ import AddCandidateDialog from "./AddCandidateDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "@/components/ui/use-toast";
 import { db } from "@/lib/firebase";
-import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc, increment } from "firebase/firestore";
 
 interface RecruitmentKanbanProps {
   posts: RecruitmentPost[];
@@ -82,15 +82,21 @@ const RecruitmentKanban: React.FC<RecruitmentKanbanProps> = ({
     setIsAddingCandidate(true);
     try {
       const postRef = doc(db, 'hr_recruitment', selectedPostForCandidate);
+      
+      // Obtenir le post actuel pour vérifier le nombre de candidatures
+      const currentPost = posts.find(p => p.id === selectedPostForCandidate);
+      const currentApplications = currentPost?.applications || 0;
+      
       await updateDoc(postRef, {
         candidateName: data.candidateName,
         nextStep: data.nextStep || '',
+        applications: currentApplications + 1, // Incrémenter le nombre de candidatures
         updatedAt: new Date().toISOString()
       });
       
       toast({
         title: "Candidat ajouté",
-        description: "Le candidat a été ajouté avec succès à l'offre"
+        description: "Le candidat a été ajouté avec succès à l'offre et le nombre de candidatures a été mis à jour"
       });
       
       setCandidateDialogOpen(false);
