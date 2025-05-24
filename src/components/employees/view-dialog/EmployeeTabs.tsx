@@ -11,13 +11,22 @@ import {
   Star,
   Shield
 } from 'lucide-react';
+import { Employee } from '@/types/employee';
+import EmployeeTabContent from './EmployeeTabContent';
 
 interface EmployeeTabsProps {
+  employee: Employee;
   activeTab: string;
   onTabChange: (value: string) => void;
+  onRefresh?: () => void;
 }
 
-const EmployeeTabs: React.FC<EmployeeTabsProps> = ({ activeTab, onTabChange }) => {
+const EmployeeTabs: React.FC<EmployeeTabsProps> = ({ 
+  employee, 
+  activeTab, 
+  onTabChange, 
+  onRefresh 
+}) => {
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className="grid w-full grid-cols-8">
@@ -54,6 +63,8 @@ const EmployeeTabs: React.FC<EmployeeTabsProps> = ({ activeTab, onTabChange }) =
           Rôles
         </TabsTrigger>
       </TabsList>
+      
+      <EmployeeTabContent employee={employee} onRefresh={onRefresh} />
     </Tabs>
   );
 };

@@ -31,11 +31,11 @@ const EmployeeTabContent: React.FC<EmployeeTabContentProps> = ({
       </TabsContent>
 
       <TabsContent value="timesheets" className="space-y-4">
-        <EmployeeTimesheets employee={employee} />
+        <EmployeeTimesheets employeeId={employee.id} />
       </TabsContent>
 
       <TabsContent value="leaves" className="space-y-4">
-        <EmployeeLeaves employee={employee} />
+        <EmployeeLeaves employeeId={employee.id} />
       </TabsContent>
 
       <TabsContent value="evaluations" className="space-y-4">
