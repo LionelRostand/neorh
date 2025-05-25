@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Bell, User, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -61,9 +62,7 @@ const Header = () => {
   return (
     <header className="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-10 h-16">
       <div className="flex items-center">
-        <h1 className="text-2xl font-bold text-hr-text">
-          <span className="text-hr">HR</span>
-        </h1>
+        {/* Removed HR title */}
       </div>
       
       <div className="flex items-center space-x-3">
