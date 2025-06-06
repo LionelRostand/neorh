@@ -35,30 +35,27 @@ RUN npx vite build
 # Étape 2: Image finale optimisée
 FROM node:18.20.7-alpine
 
+# Installer serve globalement
+RUN npm install -g serve
+
 # Créer un utilisateur non-root
 RUN getent group node || addgroup -g 1000 node
 RUN adduser -u 1000 -G node -s /bin/sh -D node || echo "User node already exists"
 
+# Passer en utilisateur sécurisé
+USER node
+
 # Définir le répertoire de travail
 WORKDIR /neorh
 
-# Installer Express localement
-RUN npm init -y && npm install express
-
-# Copier les fichiers buildés et le serveur
+# Copier uniquement les fichiers nécessaires pour exécuter l'application
 COPY --from=builder /neorh/dist ./dist
-COPY --from=builder /neorh/src/server.js ./src/
-
-# Changer la propriété des fichiers pour l'utilisateur node
-USER root
-RUN chown -R node:node /neorh
-USER node
 
 # Définir les variables d'environnement
 ENV NODE_ENV=production
 
-# Exposer le port HTTPS
+# Exposer le port
 EXPOSE 3008
 
-# Commande pour démarrer le serveur HTTPS
-CMD ["node", "src/server.js"]
+# Commande pour démarrer l'application
+CMD ["serve", "-s", "dist", "-l", "3008"]

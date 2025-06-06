@@ -45,7 +45,7 @@ function App() {
           <Route path="contrats" element={<Contrats />} />
           <Route path="hierarchie" element={<Hierarchie />} />
           <Route path="feuilles-de-temps" element={<FeuillesDeTemps />} />
-          <Route path="feuilles-de-temps/:timesheetId" element={<WeeklyProjectsTimesheet />} />
+          <Route path="feuilles-de-temps/:id" element={<WeeklyProjectsTimesheet />} />
           <Route path="projets" element={<Projets />} />
           <Route path="presences" element={<Presences />} />
           <Route path="conges" element={<Conges />} />
@@ -58,8 +58,8 @@ function App() {
           <Route path="departements" element={<Departements />} />
           <Route path="salaires" element={<Salaires />} />
           <Route path="recrutement" element={<Recrutement />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
-        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
