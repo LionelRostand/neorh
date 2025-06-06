@@ -58,8 +58,8 @@ function App() {
           <Route path="departements" element={<Departements />} />
           <Route path="salaires" element={<Salaires />} />
           <Route path="recrutement" element={<Recrutement />} />
-          <Route path="*" element={<NotFound />} />
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
