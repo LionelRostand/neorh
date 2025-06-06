@@ -35,15 +35,15 @@ RUN npx vite build
 # Étape 2: Image finale optimisée
 FROM node:18.20.7-alpine
 
-# Installer Express pour le serveur HTTPS
-RUN npm install -g express
-
 # Créer un utilisateur non-root
 RUN getent group node || addgroup -g 1000 node
 RUN adduser -u 1000 -G node -s /bin/sh -D node || echo "User node already exists"
 
 # Définir le répertoire de travail
 WORKDIR /neorh
+
+# Installer Express localement
+RUN npm init -y && npm install express
 
 # Copier les fichiers buildés et le serveur
 COPY --from=builder /neorh/dist ./dist
