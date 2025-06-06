@@ -15,8 +15,8 @@ app.get('*', (req, res) => {
 });
 
 const options = {
-  key: fs.readFileSync('/etc/ssl/tls.key'),
-  cert: fs.readFileSync('/etc/ssl/tls.crt')
+  key: fs.readFileSync('/etc/tls/tls.key'),
+  cert: fs.readFileSync('/etc/tls/tls.crt')
 };
 
 https.createServer(options, app).listen(3008, () => {
