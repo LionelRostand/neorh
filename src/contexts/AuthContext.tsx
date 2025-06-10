@@ -3,6 +3,7 @@ import { useState, useEffect, createContext, ReactNode } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { ExtendedUser, AuthContextType } from '@/types/auth';
 import { signInUser, signOutUser, changeUserPassword, enrichUserData, getAuthErrorMessage } from '@/services/authService';
+import { sessionManager } from '@/services/auth/sessionService';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -18,16 +19,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const extendedUser = user as ExtendedUser | null;
       
       if (extendedUser) {
-        const enrichedUser = await enrichUserData(extendedUser);
-        setUser(enrichedUser);
+        // Créer une session unique pour cet utilisateur
+        const sessionCreated = await sessionManager.createSession(extendedUser.uid);
+        
+        if (sessionCreated) {
+          const enrichedUser = await enrichUserData(extendedUser);
+          setUser(enrichedUser);
+          
+          // Mettre à jour l'activité périodiquement
+          const activityInterval = setInterval(() => {
+            sessionManager.updateActivity();
+          }, 30000); // Toutes les 30 secondes
+
+          // Nettoyer l'intervalle quand l'utilisateur se déconnecte
+          return () => clearInterval(activityInterval);
+        } else {
+          // Échec de création de session - déconnecter
+          await signOutUser();
+          setUser(null);
+        }
       } else {
+        // Détruire la session lors de la déconnexion
+        await sessionManager.destroySession();
         setUser(null);
       }
       
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    // Nettoyer la session au déchargement de la page
+    const handleBeforeUnload = () => {
+      sessionManager.destroySession();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -51,6 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     setError(null);
     try {
+      await sessionManager.destroySession();
       await signOutUser();
     } catch (err) {
       console.error('Error signing out:', err);
